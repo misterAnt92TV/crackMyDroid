@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">CrackMyDroid</string>
+    <string name="loading">Analysing apps…</string>
+    <string name="no_apps_found">No apps found</string>
+    <string name="summary_format">%1$d apps scanned · %2$d HIGH risk · %3$d MEDIUM risk</string>
+    <string name="risk_score_format">Risk: %1$d/100</string>
+    <string name="risk_score_detail_format">Risk Score: %1$d / 100 — %2$s</string>
+    <string name="version_format">Version: %1$s (%2$d)</string>
+    <string name="min_sdk_format">Min SDK: %1$d</string>
+    <string name="system_app_format">System app: %1$s</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="security_findings">Security Findings</string>
+    <string name="app_icon_desc">App icon</string>
+    <string name="error_loading_report">Could not load security report for this app.</string>
+    <string name="action_search">Search</string>
+    <string name="action_refresh">Refresh</string>
+    <string name="action_toggle_system_apps">Include system apps</string>
+</resources>

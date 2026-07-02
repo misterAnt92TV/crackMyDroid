@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Primary brand colour -->
+    <color name="purple_200">#FFBB86FC</color>
+    <color name="purple_500">#FF6200EE</color>
+    <color name="purple_700">#FF3700B3</color>
+    <color name="teal_200">#FF03DAC5</color>
+    <color name="teal_700">#FF018786</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <!-- Risk level backgrounds -->
+    <color name="risk_high_bg">#FFEF9A9A</color>
+    <color name="risk_medium_bg">#FFFFF59D</color>
+    <color name="risk_low_bg">#FFA5D6A7</color>
+
+    <!-- Risk level text colours -->
+    <color name="risk_high_text">#FFB71C1C</color>
+    <color name="risk_medium_text">#FFF57F17</color>
+    <color name="risk_low_text">#FF1B5E20</color>
+</resources>
