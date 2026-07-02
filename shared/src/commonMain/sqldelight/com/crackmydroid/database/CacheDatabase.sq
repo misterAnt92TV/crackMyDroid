@@ -1,0 +1,83 @@
+-- Activities cache
+CREATE TABLE activities_cache (
+    packageName TEXT NOT NULL,
+    appLabel TEXT NOT NULL,
+    activityName TEXT NOT NULL,
+    label TEXT NOT NULL,
+    PRIMARY KEY(packageName, activityName)
+);
+
+selectAllActivities:
+SELECT * FROM activities_cache;
+
+selectActivitiesByPackage:
+SELECT * FROM activities_cache WHERE packageName = ?;
+
+clearActivities:
+DELETE FROM activities_cache;
+
+insertActivity:
+INSERT OR REPLACE INTO activities_cache(packageName, appLabel, activityName, label)
+VALUES (?, ?, ?, ?);
+
+-- Permissions cache
+CREATE TABLE permissions_cache (
+    packageName TEXT NOT NULL,
+    appLabel TEXT NOT NULL,
+    permission TEXT NOT NULL,
+    PRIMARY KEY(packageName, permission)
+);
+
+selectAllPermissions:
+SELECT * FROM permissions_cache;
+
+selectPermissionsByPackage:
+SELECT * FROM permissions_cache WHERE packageName = ?;
+
+clearPermissions:
+DELETE FROM permissions_cache;
+
+insertPermission:
+INSERT OR REPLACE INTO permissions_cache(packageName, appLabel, permission)
+VALUES (?, ?, ?);
+
+-- Installed apps cache
+CREATE TABLE installed_apps_cache (
+    packageName TEXT NOT NULL PRIMARY KEY,
+    appLabel TEXT NOT NULL,
+    sourcePath TEXT NOT NULL
+);
+
+selectAllInstalled:
+SELECT * FROM installed_apps_cache;
+
+clearInstalled:
+DELETE FROM installed_apps_cache;
+
+insertInstalled:
+INSERT OR REPLACE INTO installed_apps_cache(packageName, appLabel, sourcePath)
+VALUES (?, ?, ?);
+
+-- Device info cache (single row as JSON string)
+CREATE TABLE device_info_cache (
+    key TEXT NOT NULL PRIMARY KEY,
+    value TEXT NOT NULL
+);
+
+getDeviceInfo:
+SELECT value FROM device_info_cache WHERE key = 'device_info' LIMIT 1;
+
+setDeviceInfo:
+INSERT OR REPLACE INTO device_info_cache(key, value) VALUES ('device_info', ?);
+
+clearDeviceInfo:
+DELETE FROM device_info_cache WHERE key = 'device_info';
+
+setInfoField:
+INSERT OR REPLACE INTO device_info_cache(key, value) VALUES (?, ?);
+
+getInfoField:
+SELECT value FROM device_info_cache WHERE key = ? LIMIT 1;
+
+getAllInfo:
+SELECT * FROM device_info_cache;

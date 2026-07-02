@@ -1,34 +1,108 @@
-# Gradle files
+# ============================================================
+# Gradle
+# ============================================================
 .gradle/
+.gradle-local/
 build/
+**/build/
+!gradle/wrapper/gradle-wrapper.jar
 
-# Local configuration file (sdk path, etc)
+# Local configuration (SDK path, signing, ecc.)
 local.properties
+*.properties.local
 
-# Log/OS Files
-*.log
-
-# Android Studio generated files and folders
+# ============================================================
+# Android
+# ============================================================
 captures/
 .externalNativeBuild/
 .cxx/
 *.aab
 *.apk
+*.ap_
 output-metadata.json
 
-# IntelliJ
-*.iml
-.idea/
-misc.xml
-deploymentTargetDropDown.xml
-render.experimental.xml
-
-# Keystore files
+# Keystore
 *.jks
 *.keystore
 
-# Google Services (e.g. APIs or Firebase)
+# Google Services / Firebase
 google-services.json
+google-services-*.json
+GoogleService-Info.plist
 
 # Android Profiling
 *.hprof
+
+# ============================================================
+# iOS / Xcode
+# ============================================================
+iosApp/.build/
+iosApp/Pods/
+iosApp/*.xcworkspace/xcuserdata/
+iosApp/*.xcodeproj/xcuserdata/
+iosApp/DerivedData/
+*.xcuserstate
+*.xcscheme
+xcuserdata/
+DerivedData/
+
+# CocoaPods
+Podfile.lock
+
+# Swift Package Manager
+.swiftpm/
+Package.resolved
+
+# ============================================================
+# Kotlin Multiplatform / Kotlin Native
+# ============================================================
+.kotlin/
+kotlin-js-store/
+*.klib
+**/.konan/
+
+# ============================================================
+# IDE — IntelliJ / Android Studio
+# ============================================================
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# File generati da AS che non vanno in VCS
+misc.xml
+deploymentTargetDropDown.xml
+render.experimental.xml
+deploymentTargetSelector.xml
+
+# ============================================================
+# macOS
+# ============================================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+.AppleDouble
+.LSOverride
+
+# ============================================================
+# Log e file temporanei
+# ============================================================
+*.log
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# ============================================================
+# Secrets / CI
+# ============================================================
+*.env
+.env.*
+secrets.properties
+signing.properties
+release-keystore.jks
+service-account.json
