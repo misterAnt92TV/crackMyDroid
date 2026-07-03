@@ -72,6 +72,15 @@ class TrickViewModel(
         }
     }
 
+    fun notifyUnsupportedCommand(command: ShellCommand) {
+        _state.update {
+            it.copy(
+                interactionHint = command.unsupportedReason
+                    ?: "\"${command.title}\" non disponibile sul device selezionato."
+            )
+        }
+    }
+
     fun clearInteractionHint() {
         _state.update { it.copy(interactionHint = null) }
     }

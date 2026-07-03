@@ -20,6 +20,7 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class ActivityListViewModelTest {
@@ -95,6 +96,49 @@ class ActivityListViewModelTest {
         advanceUntilIdle()
 
         assertEquals("sec", vm.state.value.topQuery)
+        vm.onCleared()
+    }
+
+    @Test
+    fun launchWithIntentPassesGuidedArgumentsToUseCase() = runTest(dispatcher) {
+        val get = mockk<GetActivitiesUseCase>()
+        val launch = mockk<LaunchActivityUseCase>()
+        val format = mockk<GetExportFormatUseCase>()
+        val entry = ActivityEntry(
+            label = "DeepLink",
+            appLabel = "Demo App",
+            packageName = "com.demo.app",
+            activityName = "com.demo.app.DeepLinkActivity",
+            launchableViaShell = false,
+            launchIntentAction = "android.intent.action.VIEW",
+            launchIntentData = "demo://host/details"
+        )
+        coEvery { get() } returns listOf(entry)
+        coEvery {
+            launch(
+                entry,
+                "android.intent.action.VIEW",
+                "demo://host/details",
+                null
+            )
+        } returns Result.success(Unit)
+        coEvery { format() } returns ExportFormat.TXT
+        val vm = ActivityListViewModel(get, launch, format)
+
+        vm.refresh()
+        advanceUntilIdle()
+        vm.launchWithIntent(entry, "android.intent.action.VIEW", "demo://host/details", null)
+        advanceUntilIdle()
+
+        assertNull(vm.state.value.error)
+        coVerify {
+            launch(
+                entry,
+                "android.intent.action.VIEW",
+                "demo://host/details",
+                null
+            )
+        }
         vm.onCleared()
     }
 }

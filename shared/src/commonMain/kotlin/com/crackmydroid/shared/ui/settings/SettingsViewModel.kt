@@ -21,7 +21,6 @@ import com.crackmydroid.shared.domain.usecase.GetIntroSeenUseCase
 import com.crackmydroid.shared.domain.usecase.SetIntroSeenUseCase
 import com.crackmydroid.shared.presentation.BaseViewModel
 import com.crackmydroid.shared.domain.model.ExportFormat
-import java.util.concurrent.atomic.AtomicBoolean
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -49,7 +48,7 @@ class SettingsViewModel(
 ) : BaseViewModel() {
     private val _state = MutableStateFlow(SettingsState())
     val state: StateFlow<SettingsState> = _state
-    private val savingFormat = AtomicBoolean(false)
+    private var savingFormat = false
 
     fun load() {
         scope.launch {
@@ -154,12 +153,13 @@ class SettingsViewModel(
 
     fun setExportFormat(format: ExportFormat) {
         if (_state.value.exportFormat == format) return
-        if (!savingFormat.compareAndSet(false, true)) return
+        if (savingFormat) return
+        savingFormat = true
         scope.launch {
             runCatching { setExportFormat(format) }
                 .onSuccess { _state.update { it.copy(exportFormat = format, error = null) } }
                 .onFailure { err -> _state.update { it.copy(error = err.message) } }
-            savingFormat.set(false)
+            savingFormat = false
         }
     }
 }

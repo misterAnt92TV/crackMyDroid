@@ -2,6 +2,7 @@ import org.jetbrains.compose.ExperimentalComposeLibrary
 
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
+    alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.android.library)
     alias(libs.plugins.compose.mpp)
     alias(libs.plugins.sqldelight)
@@ -10,6 +11,7 @@ plugins {
 kotlin {
     jvmToolchain(17)
     androidTarget()
+    jvm("desktop")
     iosX64()
     iosArm64()
     iosSimulatorArm64()
@@ -27,11 +29,19 @@ kotlin {
                 implementation(libs.koin.compose)
                 implementation(libs.sqldelight.runtime)
                 implementation(libs.sqldelight.coroutines)
+                implementation(libs.kotlinx.serialization.json)
             }
         }
         val commonTest by getting {
             dependencies {
                 implementation(kotlin("test"))
+                implementation(libs.coroutines.test)
+            }
+        }
+        val jvmCommonTest by creating {
+            dependsOn(commonTest)
+            dependencies {
+                implementation(libs.mockk)
                 implementation(libs.coroutines.test)
             }
         }
@@ -51,9 +61,22 @@ kotlin {
             }
         }
         val androidUnitTest by getting {
+            dependsOn(jvmCommonTest)
             dependencies {
                 implementation(libs.mockk)
                 implementation(libs.junit4)
+                implementation(libs.coroutines.test)
+            }
+        }
+        val desktopMain by getting {
+            dependencies {
+                implementation(libs.coroutines.swing)
+            }
+        }
+        val desktopTest by getting {
+            dependsOn(jvmCommonTest)
+            dependencies {
+                implementation(kotlin("test"))
                 implementation(libs.coroutines.test)
             }
         }
