@@ -10,6 +10,7 @@ plugins {
 kotlin {
     jvmToolchain(17)
     androidTarget()
+    jvm("desktop")
     iosX64()
     iosArm64()
     iosSimulatorArm64()
@@ -35,6 +36,13 @@ kotlin {
                 implementation(libs.coroutines.test)
             }
         }
+        val jvmCommonTest by creating {
+            dependsOn(commonTest)
+            dependencies {
+                implementation(libs.mockk)
+                implementation(libs.coroutines.test)
+            }
+        }
         val androidMain by getting {
             dependencies {
                 implementation(libs.core.ktx)
@@ -51,9 +59,22 @@ kotlin {
             }
         }
         val androidUnitTest by getting {
+            dependsOn(jvmCommonTest)
             dependencies {
                 implementation(libs.mockk)
                 implementation(libs.junit4)
+                implementation(libs.coroutines.test)
+            }
+        }
+        val desktopMain by getting {
+            dependencies {
+                implementation(libs.coroutines.swing)
+            }
+        }
+        val desktopTest by getting {
+            dependsOn(jvmCommonTest)
+            dependencies {
+                implementation(kotlin("test"))
                 implementation(libs.coroutines.test)
             }
         }
