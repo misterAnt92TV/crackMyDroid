@@ -28,3 +28,4 @@ rootProject.name = "CrackMyDroid"
 include(":androidApp")
 include(":shared")
 include(":iosApp")
+include(":desktopApp")

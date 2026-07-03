@@ -23,6 +23,7 @@ class SettingsRepositoryAndroid(private val context: Context) : SettingsReposito
     private val largeTextKey = booleanPreferencesKey("large_text")
     private val suggestionsKey = booleanPreferencesKey("suggestions_enabled")
     private val featureHintsKey = booleanPreferencesKey("feature_hints_enabled")
+    private val adbPathKey = stringPreferencesKey("adb_path")
 
     override suspend fun getTheme(): AppTheme {
         val prefs = context.settingsDataStore.data.first()
@@ -121,6 +122,17 @@ class SettingsRepositoryAndroid(private val context: Context) : SettingsReposito
     override suspend fun setFeatureHintsEnabled(enabled: Boolean) {
         context.settingsDataStore.edit { prefs ->
             prefs[featureHintsKey] = enabled
+        }
+    }
+
+    override suspend fun getAdbPath(): String {
+        val prefs = context.settingsDataStore.data.first()
+        return prefs[adbPathKey] ?: ""
+    }
+
+    override suspend fun setAdbPath(path: String) {
+        context.settingsDataStore.edit { prefs ->
+            prefs[adbPathKey] = path
         }
     }
 }

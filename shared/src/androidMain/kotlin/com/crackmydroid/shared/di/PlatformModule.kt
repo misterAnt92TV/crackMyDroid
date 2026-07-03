@@ -9,6 +9,7 @@ import com.crackmydroid.shared.data.shell.ShellCommandRepositoryAndroid
 import com.crackmydroid.shared.data.log.LogRepositoryAndroid
 import com.crackmydroid.shared.data.permissions.PermissionsRepositoryAndroid
 import com.crackmydroid.shared.data.apps.InstalledAppsRepositoryAndroid
+import com.crackmydroid.shared.data.snapshot.AndroidDeviceSnapshotCoordinator
 import com.crackmydroid.database.CacheDatabase
 import com.crackmydroid.shared.domain.repository.ActivityRepository
 import com.crackmydroid.shared.domain.repository.DeviceInfoRepository
@@ -34,4 +35,5 @@ actual fun platformModule(): Module = module {
     single<LogRepository> { LogRepositoryAndroid(androidContext()) }
     single<PermissionsRepository> { PermissionsRepositoryAndroid(androidContext(), get()) }
     single<InstalledAppsRepository> { InstalledAppsRepositoryAndroid(androidContext(), get()) }
+    single { AndroidDeviceSnapshotCoordinator(androidContext(), get(), get(), get(), get(), get(), get(), get()) }
 }

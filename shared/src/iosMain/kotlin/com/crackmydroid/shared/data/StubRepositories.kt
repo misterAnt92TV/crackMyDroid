@@ -19,7 +19,12 @@ import com.crackmydroid.shared.domain.repository.PermissionsRepository
 
 class ActivityRepositoryIos : ActivityRepository {
     override suspend fun getActivities(): List<ActivityEntry> = emptyList()
-    override suspend fun launch(entry: ActivityEntry): Result<Unit> =
+    override suspend fun launch(
+        entry: ActivityEntry,
+        action: String?,
+        dataUri: String?,
+        mimeType: String?
+    ): Result<Unit> =
         Result.failure(UnsupportedOperationException("Non supportato su iOS"))
 }
 
@@ -79,6 +84,7 @@ class SettingsRepositoryIos : SettingsRepository {
     private var largeText = false
     private var suggestionsEnabled = true
     private var featureHintsEnabled = true
+    private var adbPath = ""
     override suspend fun getTheme(): AppTheme = theme
     override suspend fun setTheme(theme: AppTheme) { this.theme = theme }
     override suspend fun isVerboseLog(): Boolean = verbose
@@ -97,6 +103,8 @@ class SettingsRepositoryIos : SettingsRepository {
     override suspend fun setSuggestionsEnabled(enabled: Boolean) { suggestionsEnabled = enabled }
     override suspend fun isFeatureHintsEnabled(): Boolean = featureHintsEnabled
     override suspend fun setFeatureHintsEnabled(enabled: Boolean) { featureHintsEnabled = enabled }
+    override suspend fun getAdbPath(): String = adbPath
+    override suspend fun setAdbPath(path: String) { adbPath = path }
 }
 
 class LogRepositoryIos : LogRepository {

@@ -20,11 +20,15 @@ import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -43,6 +47,7 @@ import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
+import com.crackmydroid.shared.domain.model.ActivityEntry
 import com.crackmydroid.shared.i18n.LocalStrings
 import com.crackmydroid.shared.presentation.components.AppAccordion
 import com.crackmydroid.shared.presentation.components.AppButton
@@ -75,6 +80,7 @@ fun ActivityListScreen(
     val favoriteQueries = remember(state.favorites) { state.favorites.toList().sorted() }
     val listState = rememberLazyListState()
     var searchToolsExpanded by remember { mutableStateOf(true) }
+    var guidedLaunchTarget by remember { mutableStateOf<ActivityEntry?>(null) }
     val showScrollTop by remember {
         derivedStateOf { listState.firstVisibleItemIndex > 1 || listState.firstVisibleItemScrollOffset > 240 }
     }
@@ -260,17 +266,42 @@ fun ActivityListScreen(
                 ) {
                     group.activities.forEach { activity ->
                         val favKey = activity.packageName + activity.activityName
+                        val activityMeta = when {
+                            !activity.launchableViaShell && activity.launchContextHint != null -> "intent required"
+                            !activity.launchableViaShell -> "dump only"
+                            activity.launchContextHint != null -> "am start + action"
+                            else -> "am start"
+                        }
                         AppListItem(
                             title = activity.label,
-                            subtitle = activity.activityName,
-                            onClick = { viewModel.launch(activity) },
+                            subtitle = when {
+                                activity.launchabilityReason != null -> "${activity.activityName} • ${activity.launchabilityReason}"
+                                activity.launchContextHint != null -> "${activity.activityName} • ${activity.launchContextHint}"
+                                else -> activity.activityName
+                            },
+                            meta = activityMeta,
+                            onClick = when {
+                                activity.launchableViaShell -> ({ viewModel.launch(activity) })
+                                activity.supportsGuidedLaunch() -> ({ guidedLaunchTarget = activity })
+                                else -> null
+                            },
                             trailing = {
-                                IconButton(onClick = { viewModel.toggleFavorite(activity) }) {
-                                    Icon(
-                                        imageVector = if (state.favorites.contains(favKey)) Icons.Filled.Star else Icons.Filled.StarBorder,
-                                        contentDescription = "Preferito",
-                                        tint = if (state.favorites.contains(favKey)) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    if (!activity.launchableViaShell) {
+                                        Icon(
+                                            imageVector = Icons.Filled.Warning,
+                                            contentDescription = "Non avviabile via shell",
+                                            tint = MaterialTheme.colorScheme.error,
+                                            modifier = Modifier.padding(end = 4.dp)
+                                        )
+                                    }
+                                    IconButton(onClick = { viewModel.toggleFavorite(activity) }) {
+                                        Icon(
+                                            imageVector = if (state.favorites.contains(favKey)) Icons.Filled.Star else Icons.Filled.StarBorder,
+                                            contentDescription = "Preferito",
+                                            tint = if (state.favorites.contains(favKey)) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
                                 }
                             }
                         )
@@ -299,4 +330,93 @@ fun ActivityListScreen(
     state.error?.let {
         ErrorDialog(message = it, onDismiss = viewModel::clearError)
     }
+
+    guidedLaunchTarget?.let { activity ->
+        GuidedActivityLaunchDialog(
+            entry = activity,
+            onDismiss = { guidedLaunchTarget = null },
+            onLaunch = { action, dataUri, mimeType ->
+                viewModel.launchWithIntent(activity, action, dataUri, mimeType)
+            }
+        )
+    }
+}
+
+private fun ActivityEntry.supportsGuidedLaunch(): Boolean =
+    !launchIntentAction.isNullOrBlank() ||
+        !launchIntentData.isNullOrBlank() ||
+        !launchIntentMimeType.isNullOrBlank()
+
+@Composable
+private fun GuidedActivityLaunchDialog(
+    entry: ActivityEntry,
+    onDismiss: () -> Unit,
+    onLaunch: (String?, String?, String?) -> Unit
+) {
+    var action by remember(entry.activityName) { mutableStateOf(entry.launchIntentAction.orEmpty()) }
+    var dataUri by remember(entry.activityName) { mutableStateOf(entry.launchIntentData.orEmpty()) }
+    var mimeType by remember(entry.activityName) { mutableStateOf(entry.launchIntentMimeType.orEmpty()) }
+    val canLaunch = action.isNotBlank() || dataUri.isNotBlank() || mimeType.isNotBlank()
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Launcher guidato") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                AppText(
+                    text = entry.label,
+                    style = MaterialTheme.typography.titleSmall
+                )
+                AppText(
+                    text = entry.activityName,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                entry.launchContextHint?.let { hint ->
+                    AppText(
+                        text = "Resolver: $hint",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+                OutlinedTextField(
+                    value = action,
+                    onValueChange = { action = it },
+                    label = { Text("Action") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+                OutlinedTextField(
+                    value = dataUri,
+                    onValueChange = { dataUri = it },
+                    label = { Text("Data URI") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+                OutlinedTextField(
+                    value = mimeType,
+                    onValueChange = { mimeType = it },
+                    label = { Text("MIME type") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    onLaunch(action.ifBlank { null }, dataUri.ifBlank { null }, mimeType.ifBlank { null })
+                    onDismiss()
+                },
+                enabled = canLaunch
+            ) {
+                Text("Avvia")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Annulla")
+            }
+        }
+    )
 }

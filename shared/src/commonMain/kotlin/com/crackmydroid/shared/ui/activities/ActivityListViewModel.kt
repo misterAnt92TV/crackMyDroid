@@ -8,13 +8,11 @@ import com.crackmydroid.shared.presentation.BaseViewModel
 import com.crackmydroid.shared.presentation.operations.OperationLogStore
 import com.crackmydroid.shared.util.saveTextFile
 import com.crackmydroid.shared.util.shareTextFile
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import kotlinx.coroutines.runBlocking
 
 class ActivityListViewModel(
@@ -60,8 +58,36 @@ class ActivityListViewModel(
     }
 
     fun launch(entry: ActivityEntry) {
+        launchInternal(entry)
+    }
+
+    fun launchWithIntent(
+        entry: ActivityEntry,
+        action: String?,
+        dataUri: String?,
+        mimeType: String?
+    ) {
+        launchInternal(entry, action, dataUri, mimeType)
+    }
+
+    private fun launchInternal(
+        entry: ActivityEntry,
+        action: String? = null,
+        dataUri: String? = null,
+        mimeType: String? = null
+    ) {
+        val normalizedAction = action?.trim().orEmpty().ifBlank { null }
+        val normalizedData = dataUri?.trim().orEmpty().ifBlank { null }
+        val normalizedMimeType = mimeType?.trim().orEmpty().ifBlank { null }
+        val hasGuidedIntent = normalizedAction != null || normalizedData != null || normalizedMimeType != null
+        if (!entry.launchableViaShell && !hasGuidedIntent) {
+            val msg = entry.launchabilityReason ?: "Activity non avviabile via am start -n"
+            _state.update { it.copy(error = msg) }
+            OperationLogStore.record("Lancio ${entry.activityName}", success = false, details = msg)
+            return
+        }
         scope.launch {
-            val result = launchActivity(entry)
+            val result = launchActivity(entry, normalizedAction, normalizedData, normalizedMimeType)
             result.onFailure { err ->
                 val msg = err.message ?: "Impossibile avviare ${entry.activityName}"
                 _state.update { it.copy(error = msg) }
@@ -192,11 +218,9 @@ class ActivityListViewModel(
     private fun recomputeAsync(state: ActivityListState) {
         _state.value = state
         recomputeJob?.cancel()
-        recomputeJob = scope.launch(Dispatchers.Default) {
+        recomputeJob = scope.launch {
             val newState = recompute(state)
-            withContext(Dispatchers.Main) {
-                _state.value = newState
-            }
+            _state.value = newState
         }
     }
 

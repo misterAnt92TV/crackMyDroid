@@ -3,6 +3,7 @@ package com.crackmydroid.shared.data.activity
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.content.pm.PackageManager
 import com.crackmydroid.shared.domain.model.ActivityEntry
 import com.crackmydroid.database.CacheDatabase
@@ -60,12 +61,29 @@ class ActivityRepositoryAndroid(
         fresh
     }
 
-    override suspend fun launch(entry: ActivityEntry): Result<Unit> = withContext(Dispatchers.Main) {
+    override suspend fun launch(
+        entry: ActivityEntry,
+        action: String?,
+        dataUri: String?,
+        mimeType: String?
+    ): Result<Unit> = withContext(Dispatchers.Main) {
         runCatching {
             val intent = Intent().apply {
                 component = ComponentName(entry.packageName, entry.activityName)
-                action = Intent.ACTION_MAIN
-                addCategory(Intent.CATEGORY_LAUNCHER)
+                if (!action.isNullOrBlank()) {
+                    this.action = action
+                } else {
+                    this.action = Intent.ACTION_MAIN
+                    addCategory(Intent.CATEGORY_LAUNCHER)
+                }
+                when {
+                    !dataUri.isNullOrBlank() && !mimeType.isNullOrBlank() ->
+                        setDataAndType(Uri.parse(dataUri), mimeType)
+                    !dataUri.isNullOrBlank() ->
+                        data = Uri.parse(dataUri)
+                    !mimeType.isNullOrBlank() ->
+                        type = mimeType
+                }
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             }
             val pm = context.packageManager

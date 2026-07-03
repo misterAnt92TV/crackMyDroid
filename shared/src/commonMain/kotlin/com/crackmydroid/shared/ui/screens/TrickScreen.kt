@@ -94,6 +94,10 @@ fun TrickScreen(
             viewModel.notifyBusyInteraction(command)
             return
         }
+        if (!command.supported) {
+            viewModel.notifyUnsupportedCommand(command)
+            return
+        }
         if (command.confirmation != null) pending = command else viewModel.execute(command)
     }
 
@@ -255,12 +259,14 @@ private fun TrickCommandCard(
     onExecute: () -> Unit
 ) {
     val disabledByOther = running && !runningThis
+    val unsupported = !command.supported
     val cardContainer = when {
         runningThis -> MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)
+        unsupported -> MaterialTheme.colorScheme.error.copy(alpha = 0.08f)
         disabledByOther -> MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp)
         else -> MaterialTheme.colorScheme.surfaceColorAtElevation(6.dp)
     }
-    val cardModifier = if (disabledByOther) Modifier.alpha(0.72f) else Modifier
+    val cardModifier = if (disabledByOther || unsupported) Modifier.alpha(0.72f) else Modifier
 
     ElevatedCard(
         modifier = Modifier
@@ -268,7 +274,11 @@ private fun TrickCommandCard(
             .then(cardModifier),
         colors = CardDefaults.elevatedCardColors(containerColor = cardContainer),
         elevation = CardDefaults.elevatedCardElevation(defaultElevation = 0.dp),
-        onClick = onExecute
+        onClick = {
+            if (!unsupported && !disabledByOther && !runningThis) {
+                onExecute()
+            }
+        }
     ) {
         Column(
             modifier = Modifier.padding(14.dp),
@@ -313,7 +323,11 @@ private fun TrickCommandCard(
                         fontWeight = FontWeight.SemiBold
                     )
                     AppText(
-                        text = if (command.requiresRoot) "Comando privilegiato" else "Comando standard",
+                        text = when {
+                            unsupported -> command.unsupportedReason ?: "Comando non disponibile"
+                            command.requiresRoot -> "Comando privilegiato"
+                            else -> "Comando standard"
+                        },
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -331,6 +345,12 @@ private fun TrickCommandCard(
                     text = if (command.requiresRoot) "ROOT" else "SAFE",
                     tint = if (command.requiresRoot) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary
                 )
+                if (unsupported) {
+                    CommandTag(
+                        text = "NON DISP.",
+                        tint = MaterialTheme.colorScheme.error
+                    )
+                }
                 if (command.confirmation != null) {
                     CommandTag(
                         text = "CONFERMA",
@@ -358,11 +378,12 @@ private fun TrickCommandCard(
             AppButton(
                 text = when {
                     runningThis -> "In esecuzione..."
+                    unsupported -> "Non disponibile"
                     disabledByOther -> "Attendi comando corrente"
                     else -> "Esegui comando"
                 },
                 onClick = onExecute,
-                enabled = !runningThis,
+                enabled = !runningThis && !unsupported,
                 fullWidth = false,
                 variant = if (command.requiresRoot) ButtonVariant.Secondary else ButtonVariant.Tonal,
                 modifier = Modifier.align(Alignment.End)

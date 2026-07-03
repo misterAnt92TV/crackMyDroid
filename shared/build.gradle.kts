@@ -2,6 +2,7 @@ import org.jetbrains.compose.ExperimentalComposeLibrary
 
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
+    alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.android.library)
     alias(libs.plugins.compose.mpp)
     alias(libs.plugins.sqldelight)
@@ -28,6 +29,7 @@ kotlin {
                 implementation(libs.koin.compose)
                 implementation(libs.sqldelight.runtime)
                 implementation(libs.sqldelight.coroutines)
+                implementation(libs.kotlinx.serialization.json)
             }
         }
         val commonTest by getting {

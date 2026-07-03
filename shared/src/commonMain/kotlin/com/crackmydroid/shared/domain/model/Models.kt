@@ -1,23 +1,35 @@
 package com.crackmydroid.shared.domain.model
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class ActivityEntry(
     val label: String,
     val appLabel: String,
     val packageName: String,
-    val activityName: String
+    val activityName: String,
+    val launchableViaShell: Boolean = true,
+    val launchabilityReason: String? = null,
+    val launchContextHint: String? = null,
+    val launchIntentAction: String? = null,
+    val launchIntentData: String? = null,
+    val launchIntentMimeType: String? = null
 )
 
+@Serializable
 data class RootStatus(
     val isRooted: Boolean,
     val details: String
 )
 
+@Serializable
 data class PlayIntegrityResult(
     val basicIntegrity: Boolean? = null,
     val deviceIntegrity: Boolean? = null,
     val details: String
 )
 
+@Serializable
 data class DeviceInfo(
     val manufacturer: String,
     val model: String,
@@ -52,7 +64,9 @@ data class ShellCommand(
     val title: String,
     val command: String,
     val requiresRoot: Boolean,
-    val confirmation: String? = null
+    val confirmation: String? = null,
+    val supported: Boolean = true,
+    val unsupportedReason: String? = null
 )
 
 data class ShellCommandResult(
@@ -64,14 +78,26 @@ data class ShellCommandResult(
 
 enum class AppTheme { LIGHT, DARK, SYSTEM }
 
+@Serializable
 data class AppPermissionEntry(
     val appLabel: String,
     val packageName: String,
     val permissions: List<String>
 )
 
+@Serializable
 data class InstalledAppEntry(
     val appLabel: String,
     val packageName: String,
     val sourcePath: String
+)
+
+@Serializable
+data class ConnectedDevice(
+    val serial: String,
+    val state: String,
+    val model: String? = null,
+    val product: String? = null,
+    val device: String? = null,
+    val transportId: String? = null
 )

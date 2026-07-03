@@ -103,7 +103,7 @@ import com.crackmydroid.shared.ui.screens.LogScreen
 import com.crackmydroid.shared.ui.screens.PermissionsScreen
 import com.crackmydroid.shared.ui.screens.InstalledAppsScreen
 import com.crackmydroid.shared.ui.screens.PenTestingScreen
-import org.koin.core.context.GlobalContext
+import org.koin.mp.KoinPlatform
 import com.crackmydroid.shared.presentation.components.LocalAccessibilityPrefs
 import com.crackmydroid.shared.presentation.components.AccessibilityPrefs
 import com.crackmydroid.shared.presentation.components.SearchHistoryStore
@@ -130,8 +130,8 @@ fun CrackMyDroidApp() {
     val installedAppsVm = rememberVM<InstalledAppsViewModel>()
     val penTestingVm = rememberVM<PenTestingViewModel>()
     val helpDialog = remember { mutableStateOf<String?>(null) }
-    val introSeenUse = remember { GlobalContext.get().get<GetIntroSeenUseCase>() }
-    val setIntroSeenUse = remember { GlobalContext.get().get<SetIntroSeenUseCase>() }
+    val introSeenUse = remember { KoinPlatform.getKoin().get<GetIntroSeenUseCase>() }
+    val setIntroSeenUse = remember { KoinPlatform.getKoin().get<SetIntroSeenUseCase>() }
     val settingsState = settingsVm.state.collectAsState()
     val strings = stringsFor(platformLanguage())
     val showIntro = remember { mutableStateOf(true) }
@@ -609,7 +609,7 @@ fun CrackMyDroidApp() {
 
 @Composable
 inline fun <reified T : Any> rememberVM(): T {
-    return remember { GlobalContext.get().get<T>() }
+    return remember { KoinPlatform.getKoin().get<T>() }
 }
 
 private fun shouldShowEntryHintDialog(screen: Screen): Boolean {
