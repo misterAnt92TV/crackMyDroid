@@ -1,186 +1,190 @@
 # CrackMyDroid
 
-Kotlin Multiplatform (Android + Desktop + iOS) per la sicurezza mobile, il reverse engineering e la diagnostica del dispositivo — tutto in un'unica UI condivisa costruita con Compose Multiplatform.
+🌐 **Languages:** [Italiano](README.it.md) · [Deutsch](README.de.md) · [Français](README.fr.md) · [Español](README.es.md)
 
 ---
 
-## Funzionalità principali
+Kotlin Multiplatform (Android + Desktop + iOS) tool for mobile security, reverse engineering and device diagnostics — all in one shared UI built with Compose Multiplatform.
 
-| Sezione | Descrizione |
+---
+
+## Key Features
+
+| Section | Description |
 |---|---|
-| **Home** | Panoramica rapida, scopo dell'app e FAQ espandibili |
-| **Info dispositivo** | Hardware/software, patch di sicurezza, fingerprint, radio, kernel, bootloader, batteria/rete, flag di debug (ADB, developer options, debuggable), root status; ogni riga copiabile, report esportabile in TXT |
-| **Root / Play Integrity** | Verifica root con RootBeer, controlli Play Integrity con nonce configurabile e dettaglio dei test |
-| **PenTesting** | Elenco check di sicurezza con stato (queued/ok/error), contatori, dettaglio errori, export/share report |
-| **Attività (Activities)** | Lista attività per app con ricerca/cronologia, preferiti, espansione per pacchetto, lancio diretto ed export |
-| **App installate (APK)** | Ricerca, filtri, preferiti, icone app, export APK su storage e condivisione diretta |
-| **Permessi** | Panoramica permessi app installate con analisi del rischio, ricerca e dettagli |
-| **Shell/Trick** | Comandi ADB/shell preconfigurati (con flag root-required), conferma opzionale, output ed exit code |
-| **Log** | Visualizzazione log applicativi con export |
-| **Impostazioni** | Tema (chiaro/scuro/sistema), verbosità log, accessibilità (alto contrasto, animazioni ridotte, testo grande), licenze librerie, versione app |
+| **Home** | Quick overview, app purpose and expandable FAQ |
+| **Device Info** | Hardware/software, security patches, fingerprint, radio, kernel, bootloader, battery/network, debug flags (ADB, developer options, debuggable), root status; every row copyable, report exportable as TXT |
+| **Root / Play Integrity** | Root check with RootBeer, Play Integrity checks with configurable nonce and test detail |
+| **PenTesting** | Security check list with status (queued/ok/error), counters, error detail, export/share report |
+| **Activities** | Activity list per app with search/history, favourites, package expansion, direct launch and export |
+| **Installed Apps (APK)** | Search, filters, favourites, app icons, APK export to storage and direct sharing |
+| **Permissions** | Overview of installed-app permissions with risk analysis, search and details |
+| **Shell/Tricks** | Pre-configured ADB/shell commands (with root-required flag), optional confirmation, output and exit code |
+| **Log** | Application log viewer with export |
+| **Settings** | Theme (light/dark/system), log verbosity, accessibility (high contrast, reduced animations, large text), library licences, app version |
 
 ---
 
-## App Android
+## Android App
 
-Il modulo `:androidApp` è l'applicazione nativa Android. Gira **direttamente sul device** e ha accesso completo a tutte le API di sistema.
+The `:androidApp` module is the native Android application. It runs **directly on the device** and has full access to all system APIs.
 
-### Come funziona
+### How it works
 
 ```
 CrackMyDroidApp (Application)
-  └─ initKoin()                          // avvia l'iniezione delle dipendenze
-  └─ AndroidDeviceSnapshotCoordinator    // raccoglie dati del device in background
-       └─ salva snapshot JSON in /sdcard/Android/data/.../snapshot.json
+  └─ initKoin()                          // starts dependency injection
+  └─ AndroidDeviceSnapshotCoordinator    // collects device data in background
+       └─ saves JSON snapshot to /sdcard/Android/data/.../snapshot.json
 
 MainActivity
-  └─ setContent { CrackMyDroidApp() }   // UI condivisa dal modulo :shared
+  └─ setContent { CrackMyDroidApp() }   // shared UI from the :shared module
 ```
 
-1. All'avvio, `CrackMyDroidApp` (Application) inizializza **Koin** e avvia `AndroidDeviceSnapshotCoordinator` in background.
-2. Il coordinator raccoglie in modo continuativo le informazioni del device (hardware, root status, Play Integrity, pacchetti, permessi…) e le serializza in un **file JSON** sullo storage condiviso del device.
-3. `MainActivity` monta la UI condivisa (`CrackMyDroidApp` Composable dal modulo `:shared`), che legge i dati direttamente dalle repository Android native.
+1. On startup, `CrackMyDroidApp` (Application) initialises **Koin** and launches `AndroidDeviceSnapshotCoordinator` in the background.
+2. The coordinator continuously collects device information (hardware, root status, Play Integrity, packages, permissions…) and serialises it to a **JSON file** on the device's shared storage.
+3. `MainActivity` mounts the shared UI (`CrackMyDroidApp` Composable from the `:shared` module), which reads data directly from the native Android repositories.
 
-### Requisiti
+### Requirements
 
 - Android **API 24+** (Android 7.0)
-- JDK 17, Android SDK con `platform-tools`/`adb` nel PATH
+- JDK 17, Android SDK with `platform-tools`/`adb` in the PATH
 
-### Build e installazione
+### Build & Install
 
 ```bash
-# Compila debug APK
+# Compile debug APK
 ./gradlew :androidApp:assembleDebug
 
-# Installa su device collegato
+# Install on connected device
 adb install -r androidApp/build/outputs/apk/debug/androidApp-debug.apk
 
-# Oppure installa direttamente
+# Or install directly
 ./gradlew :androidApp:installDebug
 ```
 
 ---
 
-## App Desktop (Compose Multiplatform)
+## Desktop App (Compose Multiplatform)
 
-Il modulo `:desktopApp` è un'applicazione **JVM/Desktop** costruita con Compose Multiplatform. Non accede direttamente alle API Android: usa **ADB come bridge** per connettersi a un device Android fisico o emulato e leggerne i dati.
+The `:desktopApp` module is a **JVM/Desktop** application built with Compose Multiplatform. It does not access Android APIs directly: it uses **ADB as a bridge** to connect to a physical or emulated Android device and read its data.
 
-### Come funziona
+### How it works
 
 ```
 Desktop App
-  └─ DevicePickerScreen                 // lista i device ADB disponibili
+  └─ DevicePickerScreen                 // lists available ADB devices
        └─ adb devices
-  └─ DeviceSessionControllerDesktop     // gestisce la sessione ADB
-       └─ RemoteDeviceSnapshotImporter  // adb pull del JSON di snapshot
-            └─ snapshot.json → strutture dati Kotlin
-  └─ DesktopToolbar                     // device info, rescan, cambio device
-  └─ CrackMyDroidApp()                  // stessa UI del modulo :shared
+  └─ DeviceSessionControllerDesktop     // manages the ADB session
+       └─ RemoteDeviceSnapshotImporter  // adb pull of snapshot JSON
+            └─ snapshot.json → Kotlin data structures
+  └─ DesktopToolbar                     // device info, rescan, device switch
+  └─ CrackMyDroidApp()                  // same UI as the :shared module
 ```
 
-1. All'avvio viene mostrata la **schermata di selezione device**.
-2. Se `adb` non è nel PATH di sistema, si può configurare manualmente il percorso del binario (salvato in DataStore, non viene più richiesto ai run successivi).
-3. Cliccando **"Rileva device"** viene eseguito `adb devices`; i device rilevati compaiono in lista.
-4. Selezionando un device, l'app esegue `adb pull` del file di snapshot JSON generato dall'app Android sul device.
-5. Il JSON viene deserializzato e iniettato nelle stesse repository condivise: la **UI `CrackMyDroidApp()`** si avvia identica all'app Android, ma mostra i dati del device remoto.
-6. La **toolbar superiore** mostra: modello + serial + stato ADB, sorgente dati (live/snapshot + timestamp), pulsanti per rescan, cambio device e impostazioni ADB.
+1. On startup the **device selection screen** is shown.
+2. If `adb` is not in the system PATH, the binary path can be configured manually (saved in DataStore, not requested again on subsequent runs).
+3. Clicking **"Detect device"** runs `adb devices`; detected devices appear in the list.
+4. Selecting a device triggers an `adb pull` of the JSON snapshot file generated by the Android app on the device.
+5. The JSON is deserialised and injected into the same shared repositories: the **`CrackMyDroidApp()` UI** starts identically to the Android app, but shows data from the remote device.
+6. The **top toolbar** shows: model + serial + ADB status, data source (live/snapshot + timestamp), buttons for rescan, device switch and ADB settings.
 
-### Requisiti
+### Requirements
 
 - JDK 17+
-- macOS, Linux o Windows
-- `adb` installato (Android SDK platform-tools) e nel PATH **oppure** percorso configurabile nell'app
+- macOS, Linux or Windows
+- `adb` installed (Android SDK platform-tools) and in the PATH **or** a path configurable inside the app
 
-### Build e avvio
+### Build & Run
 
 ```bash
-# Avvia l'app desktop direttamente
+# Run the desktop app directly
 ./gradlew :desktopApp:run
 
-# Crea un pacchetto distribuibile (macOS .dmg, Linux .deb, Windows .msi)
+# Create a distributable package (macOS .dmg, Linux .deb, Windows .msi)
 ./gradlew :desktopApp:packageDistributionForCurrentOS
 ```
 
 ---
 
-## Come usare Android + Desktop insieme
+## Using Android + Desktop Together
 
-L'app Android e l'app desktop si **complementano**: la prima raccoglie i dati sul device, la seconda li visualizza su un computer collegato via ADB.
+The Android app and the desktop app **complement each other**: the former collects data on the device, the latter displays it on a computer connected via ADB.
 
 ```
-[PC/Mac]                          [Device Android]
+[PC/Mac]                          [Android Device]
   desktopApp                          androidApp
       │                                   │
       │  adb pull snapshot.json ◄─────────┤ AndroidDeviceSnapshotCoordinator
-      │                                   │ (genera il JSON in background)
+      │                                   │ (generates the JSON in background)
       ▼                                   │
-  UI con tutti i dati                     │
-  del device remoto                       │
+  UI with all device data                 │
+  from the remote device                  │
 ```
 
-### Flusso passo-passo
+### Step-by-step flow
 
-1. **Installa l'app Android** sul device (vedi sopra).
-2. **Avvia l'app Android** sul device e lasciala girare qualche secondo — il coordinator genera il JSON di snapshot.
-3. **Collega il device al PC** via USB con **debug USB abilitato** (o usa un emulatore già attivo).
-4. **Verifica che ADB veda il device:**
+1. **Install the Android app** on the device (see above).
+2. **Launch the Android app** on the device and let it run for a few seconds — the coordinator generates the snapshot JSON.
+3. **Connect the device to the PC** via USB with **USB debugging enabled** (or use an already-running emulator).
+4. **Verify ADB sees the device:**
    ```bash
    adb devices
-   # atteso: <serial>   device
+   # expected: <serial>   device
    ```
-   Se lo stato è `unauthorized`, autorizza il computer sul device.
-5. **Avvia l'app desktop:**
+   If the status is `unauthorized`, authorise the computer on the device.
+5. **Launch the desktop app:**
    ```bash
    ./gradlew :desktopApp:run
    ```
-6. Nella schermata picker, clicca **"Rileva device"** → seleziona il device.
-7. L'app importa lo snapshot e mostra la UI completa con i dati del device.
+6. In the picker screen, click **"Detect device"** → select the device.
+7. The app imports the snapshot and shows the full UI with the device data.
 
-> **Nota:** se l'app Android non è installata o lo snapshot non è ancora stato generato, la desktop app segnala *"Snapshot non disponibile"* e mostra comunque la UI con le informazioni base ricavabili via ADB direttamente (package list, shell commands, ecc.).
+> **Note:** if the Android app is not installed or the snapshot has not yet been generated, the desktop app reports *"Snapshot unavailable"* and still shows the UI with the basic information retrievable via ADB directly (package list, shell commands, etc.).
 
 ---
 
-## Struttura del progetto
+## Project Structure
 
 ```
 newCrackMyDroid/
-├── androidApp/          # App nativa Android (Activity, Application, BroadcastReceiver)
-├── desktopApp/          # App desktop JVM (entry point, device picker, toolbar)
-├── shared/              # Modulo KMP condiviso
-│   ├── commonMain/      # UI Compose, ViewModel, UseCases, modelli, DI
-│   ├── androidMain/     # Repository Android native (RootBeer, Play Integrity, DataStore…)
-│   ├── desktopMain/     # Repository desktop via ADB, SQLite driver, paths
-│   ├── iosMain/         # Stub per iOS (funzionalità Android non disponibili)
-│   ├── jvmCommonTest/   # Test condivisi JVM (MockK, Android + Desktop)
-│   └── desktopTest/     # Test specifici del layer desktop/ADB
-├── iosApp/              # Applicazione iOS (SwiftUI wrapper)
+├── androidApp/          # Native Android app (Activity, Application, BroadcastReceiver)
+├── desktopApp/          # JVM desktop app (entry point, device picker, toolbar)
+├── shared/              # Shared KMP module
+│   ├── commonMain/      # Compose UI, ViewModel, UseCases, models, DI
+│   ├── androidMain/     # Native Android repositories (RootBeer, Play Integrity, DataStore…)
+│   ├── desktopMain/     # Desktop repositories via ADB, SQLite driver, paths
+│   ├── iosMain/         # iOS stubs (Android features unavailable)
+│   ├── jvmCommonTest/   # Shared JVM tests (MockK, Android + Desktop)
+│   └── desktopTest/     # Desktop/ADB layer-specific tests
+├── iosApp/              # iOS application (SwiftUI wrapper)
 └── gradle/
-    └── libs.versions.toml  # Version catalog centralizzato
+    └── libs.versions.toml  # Centralised version catalog
 ```
 
-### Navigazione UI (shared)
+### UI Navigation (shared)
 
-- **Tab inferiore:** Home · Info dispositivo · Impostazioni
-- **Drawer laterale:** App installate · PenTest · Permessi · Attività · Root · Trick · Log
+- **Bottom tab bar:** Home · Device Info · Settings
+- **Side drawer:** Installed Apps · PenTest · Permissions · Activities · Root · Tricks · Log
 
 ---
 
-## Stack tecnico
+## Tech Stack
 
-| Layer | Librerie |
+| Layer | Libraries |
 |---|---|
 | UI | Compose Multiplatform, Material3 |
 | DI | Koin (core, Android, Compose) |
 | Async | Kotlin Coroutines + Flow |
-| Database locale | SQLDelight (Android driver / SQLite JVM driver) |
-| Sicurezza Android | RootBeer, Play Integrity API |
-| Preferenze | DataStore Preferences |
+| Local database | SQLDelight (Android driver / SQLite JVM driver) |
+| Android security | RootBeer, Play Integrity API |
+| Preferences | DataStore Preferences |
 | Logging | Kermit |
-| Test | kotlin-test, MockK, kotlinx-coroutines-test |
+| Testing | kotlin-test, MockK, kotlinx-coroutines-test |
 
 ---
 
-## Note iOS
+## iOS Notes
 
-Il modulo iOS è incluso per condividere UI e logica. Le funzionalità dipendenti da API Android (Root, ADB, Play Integrity, APK export) non sono disponibili su iOS e vengono rimpiazzate da stub.
+The iOS module is included to share UI and logic. Features that depend on Android APIs (Root, ADB, Play Integrity, APK export) are not available on iOS and are replaced by stubs.
 
