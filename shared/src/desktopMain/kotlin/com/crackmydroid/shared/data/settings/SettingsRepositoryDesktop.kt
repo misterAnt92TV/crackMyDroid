@@ -7,6 +7,8 @@ import java.util.prefs.Preferences
 
 class SettingsRepositoryDesktop : SettingsRepository {
     private val prefs = Preferences.userRoot().node("com.crackmydroid.desktop")
+    private fun getSet(key: String) = prefs.get(key, "").split('\n').filter(String::isNotEmpty).toSet()
+    private fun setSet(key: String, values: Set<String>) { prefs.put(key, values.joinToString("\n")) }
 
     override suspend fun getTheme(): AppTheme =
         prefs.get("theme", AppTheme.SYSTEM.name).toAppTheme()
@@ -69,6 +71,14 @@ class SettingsRepositoryDesktop : SettingsRepository {
     override suspend fun setAdbPath(path: String) {
         prefs.put("adb_path", path)
     }
+    override suspend fun getActivityFavorites() = getSet("activity_favorites")
+    override suspend fun setActivityFavorites(values: Set<String>) = setSet("activity_favorites", values)
+    override suspend fun getActivityPackageFavorites() = getSet("activity_package_favorites")
+    override suspend fun setActivityPackageFavorites(values: Set<String>) = setSet("activity_package_favorites", values)
+    override suspend fun getInstalledAppFavorites() = getSet("installed_app_favorites")
+    override suspend fun setInstalledAppFavorites(values: Set<String>) = setSet("installed_app_favorites", values)
+    override suspend fun getPermissionFavorites() = getSet("permission_favorites")
+    override suspend fun setPermissionFavorites(values: Set<String>) = setSet("permission_favorites", values)
 
     private fun String.toAppTheme(): AppTheme =
         runCatching { AppTheme.valueOf(this) }.getOrDefault(AppTheme.SYSTEM)

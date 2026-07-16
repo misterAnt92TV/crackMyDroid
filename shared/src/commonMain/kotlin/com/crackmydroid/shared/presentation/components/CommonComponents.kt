@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -92,42 +93,40 @@ fun AppButton(
         Text(
             text,
             style = finalStyle,
-            maxLines = 1,
+            maxLines = if (prefs.largeText) 2 else 1,
             overflow = TextOverflow.Ellipsis
         )
     }
     val widthModifier = if (fullWidth) Modifier.fillMaxWidth() else Modifier
+    val buttonModifier = modifier
+        .then(widthModifier)
+        .padding(vertical = 4.dp)
+        .defaultMinSize(minHeight = if (prefs.largeText) 58.dp else 0.dp)
     when (variant) {
         ButtonVariant.Primary -> Button(
             onClick = onClick,
             enabled = enabled,
-            modifier = modifier
-                .then(widthModifier)
-                .padding(vertical = 4.dp),
+            modifier = buttonModifier,
             shape = RoundedCornerShape(20.dp),
-            contentPadding = PaddingValues(horizontal = 18.dp, vertical = 14.dp)
+            contentPadding = PaddingValues(horizontal = 18.dp, vertical = if (prefs.largeText) 16.dp else 14.dp)
         ) { content() }
         ButtonVariant.Secondary -> OutlinedButton(
             onClick = onClick,
             enabled = enabled,
-            modifier = modifier
-                .then(widthModifier)
-                .padding(vertical = 4.dp),
+            modifier = buttonModifier,
             shape = RoundedCornerShape(20.dp),
             border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
             colors = ButtonDefaults.outlinedButtonColors(
                 contentColor = MaterialTheme.colorScheme.primary
             ),
-            contentPadding = PaddingValues(horizontal = 18.dp, vertical = 14.dp)
+            contentPadding = PaddingValues(horizontal = 18.dp, vertical = if (prefs.largeText) 16.dp else 14.dp)
         ) { content() }
         ButtonVariant.Tonal -> ElevatedButton(
             onClick = onClick,
             enabled = enabled,
-            modifier = modifier
-                .then(widthModifier)
-                .padding(vertical = 4.dp),
+            modifier = buttonModifier,
             shape = RoundedCornerShape(20.dp),
-            contentPadding = PaddingValues(horizontal = 18.dp, vertical = 14.dp),
+            contentPadding = PaddingValues(horizontal = 18.dp, vertical = if (prefs.largeText) 16.dp else 14.dp),
             colors = ButtonDefaults.elevatedButtonColors(
                 containerColor = MaterialTheme.colorScheme.secondaryContainer,
                 contentColor = MaterialTheme.colorScheme.onSecondaryContainer
@@ -315,6 +314,7 @@ fun AppListItem(
     modifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null
 ) {
+    val prefs = LocalAccessibilityPrefs.current
     val rowModifier = modifier
         .fillMaxWidth()
         .padding(vertical = 6.dp, horizontal = 4.dp)
@@ -327,7 +327,7 @@ fun AppListItem(
     Row(
         modifier = rowModifier,
         horizontalArrangement = Arrangement.spacedBy(10.dp),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = if (prefs.largeText) Alignment.Top else Alignment.CenterVertically
     ) {
         leading?.let {
             Box(modifier = Modifier.size(44.dp), contentAlignment = Alignment.Center) { it() }
@@ -336,7 +336,7 @@ fun AppListItem(
             AppText(
                 title,
                 style = MaterialTheme.typography.titleMedium,
-                maxLines = 1,
+                maxLines = if (prefs.largeText) 3 else 1,
                 overflow = TextOverflow.Ellipsis
             )
             subtitle?.let {
@@ -344,12 +344,21 @@ fun AppListItem(
                     it,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
+                    maxLines = if (prefs.largeText) 3 else 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+            if (meta != null && prefs.largeText) {
+                AppText(
+                    meta,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
             }
         }
-        if (meta != null) {
+        if (meta != null && !prefs.largeText) {
             AppText(
                 meta,
                 style = MaterialTheme.typography.labelMedium,
@@ -374,6 +383,7 @@ fun AppAccordion(
     actions: @Composable RowScope.() -> Unit = {},
     content: @Composable () -> Unit
 ) {
+    val prefs = LocalAccessibilityPrefs.current
     val reduceMotion = LocalAccessibilityPrefs.current.reduceMotion
     AppCard(modifier = modifier) {
         Row(
@@ -382,7 +392,7 @@ fun AppAccordion(
                 .clickable(role = Role.Button, onClick = onToggle)
                 .padding(vertical = 2.dp),
             horizontalArrangement = Arrangement.spacedBy(10.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = if (prefs.largeText) Alignment.Top else Alignment.CenterVertically
         ) {
             leading?.let {
                 Box(modifier = Modifier.size(44.dp), contentAlignment = Alignment.Center) { it() }
@@ -391,7 +401,7 @@ fun AppAccordion(
                 AppText(
                     title,
                     style = MaterialTheme.typography.titleMedium,
-                    maxLines = 1,
+                    maxLines = if (prefs.largeText) 3 else 1,
                     overflow = TextOverflow.Ellipsis
                 )
                 subtitle?.let {
@@ -399,12 +409,21 @@ fun AppAccordion(
                         it,
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 1,
+                        maxLines = if (prefs.largeText) 3 else 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+                if (meta != null && prefs.largeText) {
+                    AppText(
+                        meta,
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                        maxLines = 2,
                         overflow = TextOverflow.Ellipsis
                     )
                 }
             }
-            if (meta != null) {
+            if (meta != null && !prefs.largeText) {
                 AppText(
                     meta,
                     style = MaterialTheme.typography.labelMedium,
@@ -415,7 +434,7 @@ fun AppAccordion(
             }
             Row(
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = if (prefs.largeText) Alignment.Top else Alignment.CenterVertically
             ) {
                 actions()
                 Icon(
@@ -471,9 +490,21 @@ fun SectionHeader(
         title = {
             val content = titleContent ?: {
                 if (prefs.reduceMotion) {
-                    Text(title, style = MaterialTheme.typography.titleLarge)
+                    Text(
+                        title,
+                        style = MaterialTheme.typography.titleLarge,
+                        maxLines = if (prefs.largeText) 2 else 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
                 } else {
-                    Crossfade(targetState = title) { Text(it, style = MaterialTheme.typography.titleLarge) }
+                    Crossfade(targetState = title) {
+                        Text(
+                            it,
+                            style = MaterialTheme.typography.titleLarge,
+                            maxLines = if (prefs.largeText) 2 else 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
                 }
             }
             content()

@@ -75,3 +75,28 @@ class GetIntroSeenUseCase(private val repo: SettingsRepository) {
 class SetIntroSeenUseCase(private val repo: SettingsRepository) {
     suspend operator fun invoke(seen: Boolean) = repo.setIntroSeen(seen)
 }
+
+class GetActivityFavoritesUseCase(private val repo: SettingsRepository) {
+    suspend operator fun invoke(): Set<String> = repo.getActivityFavorites()
+}
+class SetActivityFavoritesUseCase(private val repo: SettingsRepository) {
+    suspend operator fun invoke(values: Set<String>) = repo.setActivityFavorites(values)
+}
+class GetActivityPackageFavoritesUseCase(private val repo: SettingsRepository) {
+    suspend operator fun invoke(): Set<String> = repo.getActivityPackageFavorites()
+}
+class SetActivityPackageFavoritesUseCase(private val repo: SettingsRepository) {
+    suspend operator fun invoke(values: Set<String>) = repo.setActivityPackageFavorites(values)
+}
+class GetInstalledAppFavoritesUseCase(private val repo: SettingsRepository) {
+    suspend operator fun invoke(): Set<String> = repo.getInstalledAppFavorites()
+}
+class SetInstalledAppFavoritesUseCase(private val repo: SettingsRepository) {
+    suspend operator fun invoke(values: Set<String>) = repo.setInstalledAppFavorites(values)
+}
+class GetPermissionFavoritesUseCase(private val repo: SettingsRepository) {
+    suspend operator fun invoke(): Set<String> = repo.getPermissionFavorites()
+}
+class SetPermissionFavoritesUseCase(private val repo: SettingsRepository) {
+    suspend operator fun invoke(values: Set<String>) = repo.setPermissionFavorites(values)
+}

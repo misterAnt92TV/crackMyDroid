@@ -16,6 +16,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.StarBorder
@@ -48,6 +49,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import com.crackmydroid.shared.domain.model.ActivityEntry
+import com.crackmydroid.shared.domain.model.ActivityIntentRiskAnalyzer
 import com.crackmydroid.shared.i18n.LocalStrings
 import com.crackmydroid.shared.presentation.components.AppAccordion
 import com.crackmydroid.shared.presentation.components.AppButton
@@ -56,10 +58,12 @@ import com.crackmydroid.shared.presentation.components.AppCard
 import com.crackmydroid.shared.presentation.components.AppListItem
 import com.crackmydroid.shared.presentation.components.AppText
 import com.crackmydroid.shared.presentation.components.ErrorDialog
+import com.crackmydroid.shared.presentation.components.ExportDetailsCard
 import com.crackmydroid.shared.presentation.components.PackageIcon
 import com.crackmydroid.shared.presentation.components.SectionHeader
 import com.crackmydroid.shared.presentation.components.SearchFieldWithHistory
 import com.crackmydroid.shared.presentation.components.ScrollToTopButton
+import com.crackmydroid.shared.ui.activities.ActivityAppReport
 import com.crackmydroid.shared.ui.activities.ActivityListViewModel
 
 @Composable
@@ -81,6 +85,8 @@ fun ActivityListScreen(
     val listState = rememberLazyListState()
     var searchToolsExpanded by remember { mutableStateOf(true) }
     var guidedLaunchTarget by remember { mutableStateOf<ActivityEntry?>(null) }
+    var selectedReportPackage by remember { mutableStateOf<String?>(null) }
+    var lastReportPath by remember { mutableStateOf<String?>(null) }
     val showScrollTop by remember {
         derivedStateOf { listState.firstVisibleItemIndex > 1 || listState.firstVisibleItemScrollOffset > 240 }
     }
@@ -182,6 +188,35 @@ fun ActivityListScreen(
                 }
             }
 
+            selectedReportPackage?.let { packageName ->
+                item(key = "activity-report-$packageName") {
+                    viewModel.buildReport(packageName)?.let { report ->
+                        ActivityReportCard(
+                            report = report,
+                            lastExportPath = lastReportPath,
+                            onDismiss = {
+                                selectedReportPackage = null
+                                lastReportPath = null
+                            },
+                            onExport = {
+                                viewModel.exportVisualReport(report.packageName)
+                                    .onSuccess { path ->
+                                        lastReportPath = path
+                                        scope.launch {
+                                            snackbarHostState.showSnackbar("Report HTML esportato per ${report.appLabel}")
+                                        }
+                                    }
+                                    .onFailure { err ->
+                                        scope.launch {
+                                            snackbarHostState.showSnackbar(err.message ?: "Export report non riuscito")
+                                        }
+                                    }
+                            }
+                        )
+                    }
+                }
+            }
+
             if (!state.loading && groups.isEmpty()) {
                 item {
                     AppCard(modifier = Modifier.fillMaxWidth()) {
@@ -240,6 +275,21 @@ fun ActivityListScreen(
                     onToggle = { viewModel.toggleExpanded(group.packageName) },
                     leading = { PackageIcon(packageName = group.packageName, modifier = Modifier.size(44.dp)) },
                     actions = {
+                        IconButton(onClick = {
+                            selectedReportPackage =
+                                if (selectedReportPackage == group.packageName) null else group.packageName
+                            lastReportPath = null
+                        }) {
+                            Icon(
+                                imageVector = Icons.Filled.Description,
+                                contentDescription = "Mostra report activity app",
+                                tint = if (selectedReportPackage == group.packageName) {
+                                    MaterialTheme.colorScheme.primary
+                                } else {
+                                    MaterialTheme.colorScheme.onSurfaceVariant
+                                }
+                            )
+                        }
                         IconButton(onClick = {
                             viewModel.groupContent(group.packageName)?.let { content ->
                                 clipboard.setText(AnnotatedString(content))
@@ -419,4 +469,136 @@ private fun GuidedActivityLaunchDialog(
             }
         }
     )
+}
+
+@Composable
+private fun ActivityReportCard(
+    report: ActivityAppReport,
+    lastExportPath: String?,
+    onDismiss: () -> Unit,
+    onExport: () -> Unit
+) {
+    AppCard(modifier = Modifier.fillMaxWidth()) {
+        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    AppText(
+                        "Report activity desktop",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    AppText(
+                        report.appLabel,
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    AppText(
+                        report.packageName,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                TextButton(onClick = onDismiss) {
+                    Text("Chiudi")
+                }
+            }
+
+            AppText(
+                "Totale ${report.totalActivities} activity • shell ${report.shellLaunchableCount} • guided ${report.guidedLaunchCount} • dump only ${report.dumpOnlyCount}",
+                style = MaterialTheme.typography.bodyMedium
+            )
+            AppText(
+                "Hint contestuali ${report.contextualLaunchCount} • preferite ${report.favoriteActivitiesCount} • rischio ${ActivityIntentRiskAnalyzer.formatLevel(report.highestRiskLevel)}" +
+                    if (report.packageFavorite) " • app preferita" else "",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            if (report.recommendations.isNotEmpty()) {
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    AppText(
+                        "Raccomandazioni PenTest",
+                        style = MaterialTheme.typography.titleSmall
+                    )
+                    report.recommendations.forEach { recommendation ->
+                        AppText(
+                            "• $recommendation",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                report.findings.forEach { finding ->
+                    AppText(
+                        "• $finding",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+
+            if (report.highlights.isNotEmpty()) {
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    AppText(
+                        "Activity in evidenza",
+                        style = MaterialTheme.typography.titleSmall
+                    )
+                    report.highlights.forEach { activity ->
+                        val detail = when {
+                            activity.entry.launchabilityReason != null -> activity.entry.launchabilityReason
+                            activity.entry.launchContextHint != null -> activity.entry.launchContextHint
+                            !activity.entry.launchIntentAction.isNullOrBlank() -> activity.entry.launchIntentAction
+                            !activity.entry.launchIntentData.isNullOrBlank() -> activity.entry.launchIntentData
+                            else -> "Nessun hint aggiuntivo"
+                        }
+                        AppText(
+                            "• ${activity.entry.label} • ${activity.entry.activityName} • ${ActivityIntentRiskAnalyzer.formatLevel(activity.level)} • $detail",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                AppButton(
+                    text = "Esporta report HTML",
+                    onClick = onExport,
+                    variant = ButtonVariant.Tonal,
+                    modifier = Modifier.weight(1f),
+                    fullWidth = false
+                )
+                AppButton(
+                    text = "Chiudi report",
+                    onClick = onDismiss,
+                    variant = ButtonVariant.Secondary,
+                    modifier = Modifier.weight(1f),
+                    fullWidth = false
+                )
+            }
+
+            lastExportPath?.let { path ->
+                ExportDetailsCard(
+                    path = path,
+                    title = "Report activity esportato",
+                    summary = "Report HTML pronto per consultazione desktop.",
+                    details = listOf(
+                        "App: ${report.appLabel}",
+                        "Package: ${report.packageName}",
+                        "Activity incluse: ${report.totalActivities}",
+                        "Pericolosita massima: ${ActivityIntentRiskAnalyzer.formatLevel(report.highestRiskLevel)}"
+                    )
+                )
+            }
+        }
+    }
 }

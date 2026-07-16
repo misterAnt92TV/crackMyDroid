@@ -50,6 +50,7 @@ import com.crackmydroid.shared.util.appPackageName
 import com.crackmydroid.shared.util.appRequestedPermissions
 import com.crackmydroid.shared.util.appSdkInfo
 import kotlinx.coroutines.launch
+import com.crackmydroid.shared.presentation.components.LocalAccessibilityPrefs
 
 @Composable
 fun SettingsScreen(
@@ -255,11 +256,12 @@ private fun SwitchRow(
     onCheckedChange: (Boolean) -> Unit,
     subtitle: String? = null
 ) {
+    val accessibilityPrefs = LocalAccessibilityPrefs.current
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 6.dp),
-        verticalAlignment = Alignment.CenterVertically,
+        verticalAlignment = if (accessibilityPrefs.largeText) Alignment.Top else Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Column(modifier = Modifier.weight(1f)) {

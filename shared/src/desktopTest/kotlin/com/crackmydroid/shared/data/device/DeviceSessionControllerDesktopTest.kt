@@ -119,4 +119,12 @@ private class FakeSettingsRepository : SettingsRepository {
     override suspend fun setFeatureHintsEnabled(enabled: Boolean) { featureHints = enabled }
     override suspend fun getAdbPath(): String = adbPath
     override suspend fun setAdbPath(path: String) { adbPath = path }
+    override suspend fun getActivityFavorites(): Set<String> = emptySet()
+    override suspend fun setActivityFavorites(values: Set<String>) = Unit
+    override suspend fun getActivityPackageFavorites(): Set<String> = emptySet()
+    override suspend fun setActivityPackageFavorites(values: Set<String>) = Unit
+    override suspend fun getInstalledAppFavorites(): Set<String> = emptySet()
+    override suspend fun setInstalledAppFavorites(values: Set<String>) = Unit
+    override suspend fun getPermissionFavorites(): Set<String> = emptySet()
+    override suspend fun setPermissionFavorites(values: Set<String>) = Unit
 }

@@ -15,11 +15,15 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import com.crackmydroid.shared.domain.usecase.GetPermissionFavoritesUseCase
+import com.crackmydroid.shared.domain.usecase.SetPermissionFavoritesUseCase
 
 class PermissionsViewModel(
     private val listPermissions: ListPermissionsUseCase,
     private val analyzePermissionRisks: AnalyzePermissionRisksUseCase,
     private val buildPermissionsReport: BuildPermissionsReportUseCase
+    , private val getFavorites: GetPermissionFavoritesUseCase? = null
+    , private val setFavorites: SetPermissionFavoritesUseCase? = null
 ) : BaseViewModel() {
     private val _state = MutableStateFlow(PermissionsState())
     val state: StateFlow<PermissionsState> = _state
@@ -30,6 +34,7 @@ class PermissionsViewModel(
     fun refresh() {
         cancelAutoRiskScan()
         scope.launch {
+            runCatching { getFavorites?.invoke().orEmpty() }.onSuccess { favorites -> _state.update { it.copy(favorites = favorites) } }
             _state.update {
                 it.copy(
                     loading = true,
@@ -117,6 +122,7 @@ class PermissionsViewModel(
             if (favorites.contains(packageName)) favorites.remove(packageName) else favorites.add(packageName)
             it.copy(favorites = favorites)
         }
+        scope.launch { setFavorites?.invoke(_state.value.favorites) }
     }
 
     fun shareSingle(packageName: String): Result<String> {

@@ -31,6 +31,14 @@ import com.crackmydroid.shared.domain.usecase.GetSuggestionsEnabledUseCase
 import com.crackmydroid.shared.domain.usecase.SetSuggestionsEnabledUseCase
 import com.crackmydroid.shared.domain.usecase.GetFeatureHintsEnabledUseCase
 import com.crackmydroid.shared.domain.usecase.SetFeatureHintsEnabledUseCase
+import com.crackmydroid.shared.domain.usecase.GetActivityFavoritesUseCase
+import com.crackmydroid.shared.domain.usecase.SetActivityFavoritesUseCase
+import com.crackmydroid.shared.domain.usecase.GetActivityPackageFavoritesUseCase
+import com.crackmydroid.shared.domain.usecase.SetActivityPackageFavoritesUseCase
+import com.crackmydroid.shared.domain.usecase.GetInstalledAppFavoritesUseCase
+import com.crackmydroid.shared.domain.usecase.SetInstalledAppFavoritesUseCase
+import com.crackmydroid.shared.domain.usecase.GetPermissionFavoritesUseCase
+import com.crackmydroid.shared.domain.usecase.SetPermissionFavoritesUseCase
 import com.crackmydroid.shared.domain.usecase.permissions.AnalyzePermissionRisksUseCase
 import com.crackmydroid.shared.domain.usecase.permissions.BuildPermissionsReportUseCase
 import com.crackmydroid.shared.ui.activities.ActivityListViewModel
@@ -55,6 +63,14 @@ fun initKoin(appDeclaration: KoinAppDeclaration = {}) = startKoin {
 }
 
 fun commonModule() = module {
+    factory { GetActivityFavoritesUseCase(get()) }
+    factory { SetActivityFavoritesUseCase(get()) }
+    factory { GetActivityPackageFavoritesUseCase(get()) }
+    factory { SetActivityPackageFavoritesUseCase(get()) }
+    factory { GetInstalledAppFavoritesUseCase(get()) }
+    factory { SetInstalledAppFavoritesUseCase(get()) }
+    factory { GetPermissionFavoritesUseCase(get()) }
+    factory { SetPermissionFavoritesUseCase(get()) }
     factory { GetActivitiesUseCase(get()) }
     factory { LaunchActivityUseCase(get()) }
     factory { CheckRootUseCase(get()) }
@@ -91,7 +107,7 @@ fun commonModule() = module {
 }
 
 fun presentationModule() = module {
-    factory { ActivityListViewModel(get(), get(), get()) }
+    factory { ActivityListViewModel(get(), get(), get(), get(), get(), get(), get()) }
     factory { RootViewModel(get(), get()) }
     factory { InfoViewModel(get(), get()) }
     factory { TrickViewModel(get(), get()) }
@@ -109,7 +125,7 @@ fun presentationModule() = module {
         )
     }
     factory { LogViewModel(get(), get()) }
-    factory { PermissionsViewModel(get(), get(), get()) }
-    factory { InstalledAppsViewModel(get(), get(), get(), get()) }
-    factory { PenTestingViewModel(get(), get(), get(), get()) }
+    factory { PermissionsViewModel(get(), get(), get(), get(), get()) }
+    factory { InstalledAppsViewModel(get(), get(), get(), get(), get(), get()) }
+    factory { PenTestingViewModel(get(), get(), get(), get(), get()) }
 }

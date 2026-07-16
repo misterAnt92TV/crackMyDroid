@@ -57,6 +57,14 @@ interface SettingsRepository {
     suspend fun setFeatureHintsEnabled(enabled: Boolean)
     suspend fun getAdbPath(): String
     suspend fun setAdbPath(path: String)
+    suspend fun getActivityFavorites(): Set<String>
+    suspend fun setActivityFavorites(values: Set<String>)
+    suspend fun getActivityPackageFavorites(): Set<String>
+    suspend fun setActivityPackageFavorites(values: Set<String>)
+    suspend fun getInstalledAppFavorites(): Set<String>
+    suspend fun setInstalledAppFavorites(values: Set<String>)
+    suspend fun getPermissionFavorites(): Set<String>
+    suspend fun setPermissionFavorites(values: Set<String>)
 }
 
 interface InstalledAppsRepository {

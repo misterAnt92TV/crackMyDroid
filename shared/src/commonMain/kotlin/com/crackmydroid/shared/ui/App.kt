@@ -304,7 +304,7 @@ fun CrackMyDroidApp() {
                                             text = "Toolkit Android per test rapidi di sicurezza",
                                             style = MaterialTheme.typography.labelMedium,
                                             color = drawerVisual.headerSubtitleColor,
-                                            maxLines = 2
+                                            maxLines = if (accessibilityPrefs.largeText) 3 else 2
                                         )
                                     }
                                 }
@@ -334,7 +334,7 @@ fun CrackMyDroidApp() {
                                                     } else {
                                                         drawerVisual.unselectedSubtitleColor
                                                     },
-                                                    maxLines = 1,
+                                                    maxLines = if (accessibilityPrefs.largeText) 2 else 1,
                                                     overflow = TextOverflow.Ellipsis
                                                 )
                                             }
@@ -352,7 +352,7 @@ fun CrackMyDroidApp() {
                                         shape = RoundedCornerShape(16.dp),
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .heightIn(min = 62.dp)
+                                            .heightIn(min = if (accessibilityPrefs.largeText) 74.dp else 62.dp)
                                             .padding(horizontal = 4.dp, vertical = 1.dp)
                                     )
                                 }
@@ -369,7 +369,7 @@ fun CrackMyDroidApp() {
                 }
             ) {
                 val showBottomBar = bottomScreens.contains(selected.value)
-                val navHeight = 56.dp // keeps >=48dp touch targets when visible
+                val navHeight = if (accessibilityPrefs.largeText) 68.dp else 56.dp
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
                     bottomBar = {
@@ -392,7 +392,13 @@ fun CrackMyDroidApp() {
                                         selected = selected.value == screen,
                                         onClick = { selected.value = screen },
                                         icon = { Icon(screen.icon, contentDescription = screen.title(strings), modifier = Modifier.size(itemIconSize)) },
-                                        label = { Text(screen.title(strings)) },
+                                        label = {
+                                            Text(
+                                                screen.title(strings),
+                                                maxLines = if (accessibilityPrefs.largeText) 2 else 1,
+                                                overflow = TextOverflow.Ellipsis
+                                            )
+                                        },
                                         colors = NavigationBarItemDefaults.colors(
                                             selectedIconColor = accent,
                                             selectedTextColor = MaterialTheme.colorScheme.onSurface,

@@ -15,12 +15,16 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import com.crackmydroid.shared.domain.usecase.GetInstalledAppFavoritesUseCase
+import com.crackmydroid.shared.domain.usecase.SetInstalledAppFavoritesUseCase
 
 class InstalledAppsViewModel(
     private val listUseCase: ListInstalledAppsUseCase,
     private val exportUseCase: ExportApkUseCase,
     private val shareUseCase: ShareApkUseCase,
     private val getExportFormat: GetExportFormatUseCase
+    , private val getFavorites: GetInstalledAppFavoritesUseCase? = null
+    , private val setFavorites: SetInstalledAppFavoritesUseCase? = null
 ) : BaseViewModel() {
     private val _state = MutableStateFlow(InstalledAppsState())
     val state: StateFlow<InstalledAppsState> = _state
@@ -29,6 +33,7 @@ class InstalledAppsViewModel(
 
     fun refresh() {
         scope.launch {
+            runCatching { getFavorites?.invoke().orEmpty() }.onSuccess { favorites -> _state.update { it.copy(favorites = favorites) } }
             _state.update { it.copy(loading = true, error = null) }
             runCatching { listUseCase() }
                 .onSuccess { list ->
@@ -145,6 +150,7 @@ class InstalledAppsViewModel(
             if (favs.contains(packageName)) favs.remove(packageName) else favs.add(packageName)
             it.copy(favorites = favs)
         }
+        scope.launch { setFavorites?.invoke(_state.value.favorites) }
     }
 
     private fun saveListToFile(baseName: String): Result<String> {
