@@ -1,6 +1,9 @@
 package com.crackmydroid.shared.ui.settings
 
 import com.crackmydroid.shared.domain.model.AppTheme
+import com.crackmydroid.shared.domain.model.AppLanguage
+import com.crackmydroid.shared.domain.usecase.GetLanguageUseCase
+import com.crackmydroid.shared.domain.usecase.SetLanguageUseCase
 import com.crackmydroid.shared.domain.usecase.GetThemeUseCase
 import com.crackmydroid.shared.domain.usecase.GetVerboseLogUseCase
 import com.crackmydroid.shared.domain.usecase.SetThemeUseCase
@@ -44,7 +47,9 @@ class SettingsViewModel(
     private val getFeatureHintsEnabled: GetFeatureHintsEnabledUseCase,
     private val setFeatureHintsEnabled: SetFeatureHintsEnabledUseCase,
     private val getIntroSeen: GetIntroSeenUseCase,
-    private val setIntroSeen: SetIntroSeenUseCase
+    private val setIntroSeen: SetIntroSeenUseCase,
+    private val getLanguage: GetLanguageUseCase? = null,
+    private val setLanguage: SetLanguageUseCase? = null
 ) : BaseViewModel() {
     private val _state = MutableStateFlow(SettingsState())
     val state: StateFlow<SettingsState> = _state
@@ -55,6 +60,7 @@ class SettingsViewModel(
             _state.update { it.copy(loading = true, error = null) }
             runCatching {
                 LoadedSettings(
+                    language = getLanguage?.invoke() ?: AppLanguage.ENGLISH,
                     theme = getTheme(),
                     verbose = getVerbose(),
                     format = getExportFormat(),
@@ -69,6 +75,7 @@ class SettingsViewModel(
                 _state.update {
                     it.copy(
                         theme = loaded.theme,
+                        language = loaded.language,
                         verbose = loaded.verbose,
                         exportFormat = loaded.format,
                         highContrast = loaded.highContrast,
@@ -90,6 +97,14 @@ class SettingsViewModel(
         scope.launch {
             setTheme(theme)
             _state.update { it.copy(theme = theme) }
+        }
+    }
+
+    fun selectLanguage(language: AppLanguage) {
+        scope.launch {
+            runCatching { setLanguage?.invoke(language) }
+                .onSuccess { _state.update { it.copy(language = language, error = null) } }
+                .onFailure { err -> _state.update { it.copy(error = err.message) } }
         }
     }
 
@@ -165,6 +180,7 @@ class SettingsViewModel(
 }
 
 private data class LoadedSettings(
+    val language: AppLanguage,
     val theme: AppTheme,
     val verbose: Boolean,
     val format: ExportFormat,

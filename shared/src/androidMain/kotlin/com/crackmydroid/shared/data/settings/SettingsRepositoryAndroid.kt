@@ -7,6 +7,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.crackmydroid.shared.domain.model.AppTheme
+import com.crackmydroid.shared.domain.model.AppLanguage
 import com.crackmydroid.shared.domain.model.ExportFormat
 import com.crackmydroid.shared.domain.repository.SettingsRepository
 import kotlinx.coroutines.flow.first
@@ -16,6 +17,7 @@ private val Context.settingsDataStore by preferencesDataStore(name = "settings")
 class SettingsRepositoryAndroid(private val context: Context) : SettingsRepository {
 
     private val themeKey = stringPreferencesKey("theme")
+    private val languageKey = stringPreferencesKey("language")
     private val verboseKey = booleanPreferencesKey("verbose_log")
     private val introKey = booleanPreferencesKey("intro_seen")
     private val exportFormatKey = stringPreferencesKey("export_format")
@@ -34,6 +36,13 @@ class SettingsRepositoryAndroid(private val context: Context) : SettingsReposito
         val prefs = context.settingsDataStore.data.first()
         val stored = prefs[themeKey]
         return stored?.let { runCatching { AppTheme.valueOf(it) }.getOrNull() } ?: AppTheme.SYSTEM
+    }
+
+    override suspend fun getLanguage(): AppLanguage =
+        AppLanguage.fromCode(context.settingsDataStore.data.first()[languageKey])
+
+    override suspend fun setLanguage(language: AppLanguage) {
+        context.settingsDataStore.edit { it[languageKey] = language.code }
     }
 
     override suspend fun setTheme(theme: AppTheme) {

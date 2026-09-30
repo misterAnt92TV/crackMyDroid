@@ -1,12 +1,16 @@
 package com.crackmydroid.shared.domain.usecase
 
 import com.crackmydroid.shared.domain.model.AppTheme
+import com.crackmydroid.shared.domain.model.AppLanguage
 import com.crackmydroid.shared.domain.model.ExportFormat
 import com.crackmydroid.shared.domain.repository.SettingsRepository
 
 class GetThemeUseCase(private val repo: SettingsRepository) {
     suspend operator fun invoke(): AppTheme = repo.getTheme()
 }
+
+class GetLanguageUseCase(private val repo: SettingsRepository) { suspend operator fun invoke() = repo.getLanguage() }
+class SetLanguageUseCase(private val repo: SettingsRepository) { suspend operator fun invoke(language: AppLanguage) = repo.setLanguage(language) }
 
 class SetThemeUseCase(private val repo: SettingsRepository) {
     suspend operator fun invoke(theme: AppTheme) = repo.setTheme(theme)

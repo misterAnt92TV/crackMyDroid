@@ -1,12 +1,15 @@
 package com.crackmydroid.shared.data.settings
 
 import com.crackmydroid.shared.domain.model.AppTheme
+import com.crackmydroid.shared.domain.model.AppLanguage
 import com.crackmydroid.shared.domain.model.ExportFormat
 import com.crackmydroid.shared.domain.repository.SettingsRepository
 import java.util.prefs.Preferences
 
 class SettingsRepositoryDesktop : SettingsRepository {
     private val prefs = Preferences.userRoot().node("com.crackmydroid.desktop")
+    override suspend fun getLanguage() = AppLanguage.fromCode(prefs.get("language", "en"))
+    override suspend fun setLanguage(language: AppLanguage) { prefs.put("language", language.code) }
     private fun getSet(key: String) = prefs.get(key, "").split('\n').filter(String::isNotEmpty).toSet()
     private fun setSet(key: String, values: Set<String>) { prefs.put(key, values.joinToString("\n")) }
 

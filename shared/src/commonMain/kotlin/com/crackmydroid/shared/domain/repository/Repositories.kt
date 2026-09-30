@@ -2,6 +2,7 @@ package com.crackmydroid.shared.domain.repository
 
 import com.crackmydroid.shared.domain.model.ActivityEntry
 import com.crackmydroid.shared.domain.model.AppTheme
+import com.crackmydroid.shared.domain.model.AppLanguage
 import com.crackmydroid.shared.domain.model.DeviceInfo
 import com.crackmydroid.shared.domain.model.InstalledAppEntry
 import com.crackmydroid.shared.domain.model.RootStatus
@@ -14,6 +15,7 @@ import kotlinx.coroutines.flow.StateFlow
 
 interface ActivityRepository {
     suspend fun getActivities(): List<ActivityEntry>
+    suspend fun getComponents(): List<com.crackmydroid.shared.domain.model.AppComponent>
     suspend fun launch(
         entry: ActivityEntry,
         action: String? = null,
@@ -37,6 +39,8 @@ interface ShellCommandRepository {
 }
 
 interface SettingsRepository {
+    suspend fun getLanguage(): AppLanguage
+    suspend fun setLanguage(language: AppLanguage)
     suspend fun getTheme(): AppTheme
     suspend fun setTheme(theme: AppTheme)
     suspend fun isVerboseLog(): Boolean
@@ -69,8 +73,17 @@ interface SettingsRepository {
 
 interface InstalledAppsRepository {
     suspend fun listInstalled(): List<InstalledAppEntry>
+    suspend fun analyzeManifestSecurity(): List<com.crackmydroid.shared.domain.model.ManifestSecurityReport>
     suspend fun exportApk(packageName: String): Result<String>
     suspend fun shareApk(packageName: String, bluetoothOnly: Boolean): Result<Unit>
+}
+
+interface CacheMaintenance {
+    suspend fun clearAllCaches()
+    suspend fun invalidateActivitiesCache()
+    suspend fun invalidatePermissionsCache()
+    suspend fun invalidateInstalledAppsCache()
+    suspend fun invalidateManifestSecurityCache()
 }
 
 interface RemotePackageManager {

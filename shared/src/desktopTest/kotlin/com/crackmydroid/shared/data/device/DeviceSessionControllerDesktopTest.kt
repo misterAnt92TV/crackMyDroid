@@ -2,6 +2,7 @@ package com.crackmydroid.shared.data.device
 
 import com.crackmydroid.shared.data.DesktopScanCache
 import com.crackmydroid.shared.domain.model.AppTheme
+import com.crackmydroid.shared.domain.model.AppLanguage
 import com.crackmydroid.shared.domain.model.ConnectedDevice
 import com.crackmydroid.shared.domain.model.ExportFormat
 import com.crackmydroid.shared.domain.repository.AdbBridge
@@ -88,6 +89,7 @@ private class FakeAdbBridge(
 }
 
 private class FakeSettingsRepository : SettingsRepository {
+    private var language = AppLanguage.ENGLISH
     var adbPath: String = ""
     private var theme = AppTheme.SYSTEM
     private var verbose = false
@@ -119,6 +121,8 @@ private class FakeSettingsRepository : SettingsRepository {
     override suspend fun setFeatureHintsEnabled(enabled: Boolean) { featureHints = enabled }
     override suspend fun getAdbPath(): String = adbPath
     override suspend fun setAdbPath(path: String) { adbPath = path }
+    override suspend fun getLanguage(): AppLanguage = language
+    override suspend fun setLanguage(language: AppLanguage) { this.language = language }
     override suspend fun getActivityFavorites(): Set<String> = emptySet()
     override suspend fun setActivityFavorites(values: Set<String>) = Unit
     override suspend fun getActivityPackageFavorites(): Set<String> = emptySet()

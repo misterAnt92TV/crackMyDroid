@@ -4,6 +4,7 @@ import com.crackmydroid.shared.data.DesktopAdbRepositorySupport
 import com.crackmydroid.shared.data.DesktopScanCache
 import com.crackmydroid.shared.data.adb.AdbParsers
 import com.crackmydroid.shared.domain.model.ActivityEntry
+import com.crackmydroid.shared.domain.model.AppComponent
 import com.crackmydroid.shared.domain.repository.ActivityRepository
 import com.crackmydroid.shared.domain.repository.AdbBridge
 import com.crackmydroid.shared.domain.repository.DeviceSessionController
@@ -27,6 +28,11 @@ class ActivityRepositoryDesktop(
         }.sortedBy { it.label.lowercase() }
         cache.activities = fresh
         fresh
+    }
+
+    override suspend fun getComponents(): List<AppComponent> = withContext(Dispatchers.IO) {
+        // Desktop: components available only via full PackageManager dump from snapshot
+        emptyList()
     }
 
     override suspend fun launch(

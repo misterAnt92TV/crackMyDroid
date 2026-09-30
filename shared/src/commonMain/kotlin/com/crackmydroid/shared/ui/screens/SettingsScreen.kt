@@ -36,6 +36,7 @@ import androidx.compose.material.icons.filled.Description
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import com.crackmydroid.shared.domain.model.AppTheme
+import com.crackmydroid.shared.domain.model.AppLanguage
 import com.crackmydroid.shared.i18n.LocalStrings
 import com.crackmydroid.shared.ui.settings.SettingsViewModel
 import com.crackmydroid.shared.presentation.components.CardBlock
@@ -85,6 +86,18 @@ fun SettingsScreen(
                 ThemeRow(strings.light, AppTheme.LIGHT, state.theme) { viewModel.selectTheme(AppTheme.LIGHT) }
                 ThemeRow(strings.dark, AppTheme.DARK, state.theme) { viewModel.selectTheme(AppTheme.DARK) }
                 ThemeRow(strings.system, AppTheme.SYSTEM, state.theme) { viewModel.selectTheme(AppTheme.SYSTEM) }
+            }
+
+            CardBlock(strings.languageTitle, leadingIcon = Icons.Filled.Settings) {
+                AppText(strings.languageDescription, style = MaterialTheme.typography.bodySmall)
+                AppLanguage.entries.forEach { language ->
+                    AppButton(
+                        text = if (state.language == language) "✔︎ ${language.displayName}" else language.displayName,
+                        onClick = { viewModel.selectLanguage(language) },
+                        modifier = Modifier.padding(vertical = 4.dp),
+                        variant = ButtonVariant.Tonal
+                    )
+                }
             }
 
             CardBlock("Suggerimenti ricerca", leadingIcon = Icons.Filled.History) {

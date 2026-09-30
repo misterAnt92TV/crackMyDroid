@@ -1,6 +1,8 @@
 package com.crackmydroid.shared.di
 
 import com.crackmydroid.shared.data.activity.ActivityRepositoryAndroid
+import com.crackmydroid.shared.data.cache.CacheMaintenanceRepositoryAndroid
+import com.crackmydroid.shared.data.cache.PackageChangeReceiver
 import com.crackmydroid.shared.data.db.DatabaseDriverFactory
 import com.crackmydroid.shared.data.device.DeviceInfoRepositoryAndroid
 import com.crackmydroid.shared.data.root.RootCheckRepositoryAndroid
@@ -12,6 +14,7 @@ import com.crackmydroid.shared.data.apps.InstalledAppsRepositoryAndroid
 import com.crackmydroid.shared.data.snapshot.AndroidDeviceSnapshotCoordinator
 import com.crackmydroid.database.CacheDatabase
 import com.crackmydroid.shared.domain.repository.ActivityRepository
+import com.crackmydroid.shared.domain.repository.CacheMaintenance
 import com.crackmydroid.shared.domain.repository.DeviceInfoRepository
 import com.crackmydroid.shared.domain.repository.RootCheckRepository
 import com.crackmydroid.shared.domain.repository.SettingsRepository
@@ -35,5 +38,11 @@ actual fun platformModule(): Module = module {
     single<LogRepository> { LogRepositoryAndroid(androidContext()) }
     single<PermissionsRepository> { PermissionsRepositoryAndroid(androidContext(), get()) }
     single<InstalledAppsRepository> { InstalledAppsRepositoryAndroid(androidContext(), get()) }
+    single<CacheMaintenance> { CacheMaintenanceRepositoryAndroid(get()) }
     single { AndroidDeviceSnapshotCoordinator(androidContext(), get(), get(), get(), get(), get(), get(), get()) }
+    
+    // Register PackageChangeReceiver to invalidate caches on package install/uninstall
+    single {
+        PackageChangeReceiver.registerReceiver(androidContext(), get<CacheMaintenance>())
+    }
 }

@@ -18,10 +18,11 @@ data class DeviceScanSnapshot(
     val installedApps: SnapshotSection<List<InstalledAppEntry>>,
     val permissions: SnapshotSection<List<AppPermissionEntry>>,
     val activities: SnapshotSection<List<ActivityEntry>>,
-    val logs: SnapshotSection<List<String>>
+    val logs: SnapshotSection<List<String>>,
+    val manifestSecurityReports: SnapshotSection<List<com.crackmydroid.shared.domain.model.ManifestSecurityReport>> = SnapshotSection.skipped("Manifest security reports not generated")
 ) {
     companion object {
-        const val SCHEMA_VERSION: Int = 1
+        const val SCHEMA_VERSION: Int = 2
     }
 }
 

@@ -6,6 +6,8 @@ import android.content.Intent
 import android.net.Uri
 import android.content.pm.PackageManager
 import com.crackmydroid.shared.domain.model.ActivityEntry
+import com.crackmydroid.shared.domain.model.AppComponent
+import com.crackmydroid.shared.domain.model.ComponentType
 import com.crackmydroid.database.CacheDatabase
 import com.crackmydroid.shared.domain.repository.ActivityRepository
 import kotlinx.coroutines.Dispatchers
@@ -21,7 +23,9 @@ class ActivityRepositoryAndroid(
                 label = it.label,
                 appLabel = it.appLabel,
                 packageName = it.packageName,
-                activityName = it.activityName
+                activityName = it.activityName,
+                exported = it.exported ?: false,
+                permission = it.permission
             )
         }
         if (cached.isNotEmpty()) return@withContext cached
@@ -42,7 +46,9 @@ class ActivityRepositoryAndroid(
                     label = label,
                     appLabel = appLabel,
                     packageName = pkgInfo.packageName,
-                    activityName = activityInfo.name
+                    activityName = activityInfo.name,
+                    exported = activityInfo.exported,
+                    permission = activityInfo.permission
                 )
             }
         }.sortedBy { it.label.lowercase() }
@@ -54,11 +60,69 @@ class ActivityRepositoryAndroid(
                     packageName = it.packageName,
                     appLabel = it.appLabel,
                     activityName = it.activityName,
-                    label = it.label
+                    label = it.label,
+                    exported = it.exported,
+                    permission = it.permission
                 )
             }
         }
         fresh
+    }
+
+    override suspend fun getComponents(): List<AppComponent> = withContext(Dispatchers.IO) {
+        val pm = context.packageManager
+        val packages = pm.getInstalledPackages(
+            PackageManager.GET_SERVICES or 
+            PackageManager.GET_RECEIVERS or 
+            PackageManager.GET_PROVIDERS
+        )
+        
+        packages.flatMap { pkgInfo ->
+            val appLabel = pkgInfo.applicationInfo
+                ?.loadLabel(pm)
+                ?.toString()
+                ?.takeIf { it.isNotBlank() }
+                ?: pkgInfo.packageName
+            val components = mutableListOf<AppComponent>()
+            
+            pkgInfo.services?.forEach { service ->
+                components += AppComponent(
+                    label = service.name.substringAfterLast('.'),
+                    appLabel = appLabel,
+                    packageName = pkgInfo.packageName,
+                    name = service.name,
+                    type = ComponentType.SERVICE,
+                    exported = service.exported,
+                    permission = service.permission
+                )
+            }
+            
+            pkgInfo.receivers?.forEach { receiver ->
+                components += AppComponent(
+                    label = receiver.name.substringAfterLast('.'),
+                    appLabel = appLabel,
+                    packageName = pkgInfo.packageName,
+                    name = receiver.name,
+                    type = ComponentType.RECEIVER,
+                    exported = receiver.exported,
+                    permission = receiver.permission
+                )
+            }
+            
+            pkgInfo.providers?.forEach { provider ->
+                components += AppComponent(
+                    label = provider.name.substringAfterLast('.'),
+                    appLabel = appLabel,
+                    packageName = pkgInfo.packageName,
+                    name = provider.name,
+                    type = ComponentType.PROVIDER,
+                    exported = provider.exported,
+                    permission = provider.permission
+                )
+            }
+            
+            components
+        }.sortedBy { it.label.lowercase() }
     }
 
     override suspend fun launch(

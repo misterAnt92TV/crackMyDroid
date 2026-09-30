@@ -2,9 +2,12 @@ package com.crackmydroid.shared.data
 
 import com.crackmydroid.shared.domain.model.ActivityEntry
 import com.crackmydroid.shared.domain.model.AppTheme
+import com.crackmydroid.shared.domain.model.AppLanguage
+import com.crackmydroid.shared.domain.model.AppComponent
 import com.crackmydroid.shared.domain.model.DeviceInfo
 import com.crackmydroid.shared.domain.model.ExportFormat
 import com.crackmydroid.shared.domain.model.InstalledAppEntry
+import com.crackmydroid.shared.domain.model.ManifestSecurityReport
 import com.crackmydroid.shared.domain.model.RootStatus
 import com.crackmydroid.shared.domain.model.ShellCommand
 import com.crackmydroid.shared.domain.model.ShellCommandResult
@@ -16,9 +19,11 @@ import com.crackmydroid.shared.domain.repository.RootCheckRepository
 import com.crackmydroid.shared.domain.repository.SettingsRepository
 import com.crackmydroid.shared.domain.repository.ShellCommandRepository
 import com.crackmydroid.shared.domain.repository.PermissionsRepository
+import com.crackmydroid.shared.domain.repository.CacheMaintenance
 
 class ActivityRepositoryIos : ActivityRepository {
     override suspend fun getActivities(): List<ActivityEntry> = emptyList()
+    override suspend fun getComponents(): List<AppComponent> = emptyList()
     override suspend fun launch(
         entry: ActivityEntry,
         action: String?,
@@ -75,6 +80,7 @@ class ShellCommandRepositoryIos : ShellCommandRepository {
 }
 
 class SettingsRepositoryIos : SettingsRepository {
+    private var language = AppLanguage.ENGLISH
     private var theme: AppTheme = AppTheme.SYSTEM
     private var verbose = false
     private var introSeen = false
@@ -105,6 +111,16 @@ class SettingsRepositoryIos : SettingsRepository {
     override suspend fun setFeatureHintsEnabled(enabled: Boolean) { featureHintsEnabled = enabled }
     override suspend fun getAdbPath(): String = adbPath
     override suspend fun setAdbPath(path: String) { adbPath = path }
+    override suspend fun getLanguage(): AppLanguage = language
+    override suspend fun setLanguage(language: AppLanguage) { this.language = language }
+    override suspend fun getActivityFavorites(): Set<String> = emptySet()
+    override suspend fun setActivityFavorites(values: Set<String>) {}
+    override suspend fun getActivityPackageFavorites(): Set<String> = emptySet()
+    override suspend fun setActivityPackageFavorites(values: Set<String>) {}
+    override suspend fun getInstalledAppFavorites(): Set<String> = emptySet()
+    override suspend fun setInstalledAppFavorites(values: Set<String>) {}
+    override suspend fun getPermissionFavorites(): Set<String> = emptySet()
+    override suspend fun setPermissionFavorites(values: Set<String>) {}
 }
 
 class LogRepositoryIos : LogRepository {
@@ -118,8 +134,18 @@ class PermissionsRepositoryIos : PermissionsRepository {
 
 class InstalledAppsRepositoryIos : InstalledAppsRepository {
     override suspend fun listInstalled(): List<InstalledAppEntry> = emptyList()
+    override suspend fun analyzeManifestSecurity(): List<ManifestSecurityReport> = emptyList()
     override suspend fun exportApk(packageName: String): Result<String> =
         Result.failure(UnsupportedOperationException("Non supportato su iOS"))
     override suspend fun shareApk(packageName: String, bluetoothOnly: Boolean): Result<Unit> =
         Result.failure(UnsupportedOperationException("Non supportato su iOS"))
 }
+
+class CacheMaintenanceRepositoryIos : CacheMaintenance {
+    override suspend fun clearAllCaches() {}
+    override suspend fun invalidateActivitiesCache() {}
+    override suspend fun invalidatePermissionsCache() {}
+    override suspend fun invalidateInstalledAppsCache() {}
+    override suspend fun invalidateManifestSecurityCache() {}
+}
+

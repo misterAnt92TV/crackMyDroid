@@ -133,7 +133,7 @@ fun CrackMyDroidApp() {
     val introSeenUse = remember { KoinPlatform.getKoin().get<GetIntroSeenUseCase>() }
     val setIntroSeenUse = remember { KoinPlatform.getKoin().get<SetIntroSeenUseCase>() }
     val settingsState = settingsVm.state.collectAsState()
-    val strings = stringsFor(platformLanguage())
+    val strings = stringsFor(settingsState.value.language.code)
     val showIntro = remember { mutableStateOf(true) }
     val sectionHintDialog = remember { mutableStateOf<Screen?>(null) }
     val accessibilityPrefs = AccessibilityPrefs(

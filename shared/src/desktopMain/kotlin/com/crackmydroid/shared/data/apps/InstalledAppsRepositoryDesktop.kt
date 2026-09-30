@@ -1,7 +1,11 @@
 package com.crackmydroid.shared.data.apps
 
 import com.crackmydroid.shared.data.DesktopAdbRepositorySupport
+import com.crackmydroid.shared.data.DesktopScanCache
+import com.crackmydroid.shared.data.adb.AdbParsers
 import com.crackmydroid.shared.domain.model.InstalledAppEntry
+import com.crackmydroid.shared.domain.model.ManifestSecurityReport
+import com.crackmydroid.shared.domain.model.ManifestSecurityAnalyzer
 import com.crackmydroid.shared.domain.repository.AdbBridge
 import com.crackmydroid.shared.domain.repository.DeviceSessionController
 import com.crackmydroid.shared.domain.repository.InstalledAppsRepository
@@ -19,6 +23,19 @@ class InstalledAppsRepositoryDesktop(
 ) : DesktopAdbRepositorySupport(adbBridge, sessionController), InstalledAppsRepository {
     override suspend fun listInstalled(): List<InstalledAppEntry> =
         withContext(Dispatchers.IO) { packageManager.listInstalledApps() }
+
+    override suspend fun analyzeManifestSecurity(): List<ManifestSecurityReport> = withContext(Dispatchers.IO) {
+        runCatching {
+            val installedApps = packageManager.listInstalledApps()
+            installedApps.mapNotNull { app ->
+                val dump = packageManager.readPackageDump(app.packageName)
+                if (dump.isNotBlank()) {
+                    val security = AdbParsers.parseManifestSecurity(app.packageName, app.appLabel, dump)
+                    ManifestSecurityAnalyzer.analyze(security)
+                } else null
+            }
+        }.getOrNull() ?: emptyList()
+    }
 
     override suspend fun exportApk(packageName: String): Result<String> = withContext(Dispatchers.IO) {
         runCatching {
@@ -43,3 +60,4 @@ class InstalledAppsRepositoryDesktop(
         }
     }
 }
+

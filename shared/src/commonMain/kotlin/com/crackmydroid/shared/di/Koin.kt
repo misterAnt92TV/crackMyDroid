@@ -30,6 +30,8 @@ import com.crackmydroid.shared.domain.usecase.SetLargeTextUseCase
 import com.crackmydroid.shared.domain.usecase.GetSuggestionsEnabledUseCase
 import com.crackmydroid.shared.domain.usecase.SetSuggestionsEnabledUseCase
 import com.crackmydroid.shared.domain.usecase.GetFeatureHintsEnabledUseCase
+import com.crackmydroid.shared.domain.usecase.GetLanguageUseCase
+import com.crackmydroid.shared.domain.usecase.SetLanguageUseCase
 import com.crackmydroid.shared.domain.usecase.SetFeatureHintsEnabledUseCase
 import com.crackmydroid.shared.domain.usecase.GetActivityFavoritesUseCase
 import com.crackmydroid.shared.domain.usecase.SetActivityFavoritesUseCase
@@ -63,6 +65,8 @@ fun initKoin(appDeclaration: KoinAppDeclaration = {}) = startKoin {
 }
 
 fun commonModule() = module {
+    factory { GetLanguageUseCase(get()) }
+    factory { SetLanguageUseCase(get()) }
     factory { GetActivityFavoritesUseCase(get()) }
     factory { SetActivityFavoritesUseCase(get()) }
     factory { GetActivityPackageFavoritesUseCase(get()) }
@@ -122,6 +126,7 @@ fun presentationModule() = module {
             get(), get(), // suggestions enabled
             get(), get(), // feature hints enabled
             get(), get()  // intro seen
+            , get(), get() // language
         )
     }
     factory { LogViewModel(get(), get()) }

@@ -4,6 +4,8 @@ CREATE TABLE activities_cache (
     appLabel TEXT NOT NULL,
     activityName TEXT NOT NULL,
     label TEXT NOT NULL,
+    exported BOOLEAN NOT NULL DEFAULT 0,
+    permission TEXT,
     PRIMARY KEY(packageName, activityName)
 );
 
@@ -17,8 +19,8 @@ clearActivities:
 DELETE FROM activities_cache;
 
 insertActivity:
-INSERT OR REPLACE INTO activities_cache(packageName, appLabel, activityName, label)
-VALUES (?, ?, ?, ?);
+INSERT OR REPLACE INTO activities_cache(packageName, appLabel, activityName, label, exported, permission)
+VALUES (?, ?, ?, ?, ?, ?);
 
 -- Permissions cache
 CREATE TABLE permissions_cache (
@@ -45,7 +47,12 @@ VALUES (?, ?, ?);
 CREATE TABLE installed_apps_cache (
     packageName TEXT NOT NULL PRIMARY KEY,
     appLabel TEXT NOT NULL,
-    sourcePath TEXT NOT NULL
+    sourcePath TEXT NOT NULL,
+    debuggable BOOLEAN NOT NULL DEFAULT 0,
+    allowBackup BOOLEAN NOT NULL DEFAULT 0,
+    testOnly BOOLEAN NOT NULL DEFAULT 0,
+    targetSdkVersion INTEGER,
+    minSdkVersion INTEGER
 );
 
 selectAllInstalled:
@@ -55,8 +62,8 @@ clearInstalled:
 DELETE FROM installed_apps_cache;
 
 insertInstalled:
-INSERT OR REPLACE INTO installed_apps_cache(packageName, appLabel, sourcePath)
-VALUES (?, ?, ?);
+INSERT OR REPLACE INTO installed_apps_cache(packageName, appLabel, sourcePath, debuggable, allowBackup, testOnly, targetSdkVersion, minSdkVersion)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?);
 
 -- Device info cache (single row as JSON string)
 CREATE TABLE device_info_cache (

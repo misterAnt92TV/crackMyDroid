@@ -66,7 +66,9 @@ class ProcessAdbBridge : AdbBridge {
         val explicit = configuredPath?.trim().orEmpty()
         if (explicit.isNotBlank()) {
             val file = File(explicit)
-            require(file.exists()) { "adb non trovato in $explicit" }
+            require(file.isFile && file.canExecute()) {
+                "adb non valido o non eseguibile in $explicit"
+            }
             return file.absolutePath
         }
 

@@ -66,6 +66,7 @@ class AndroidDeviceSnapshotCoordinator(
         val installedAppsSection = captureSection { installedAppsRepository.listInstalled() }
         val permissionsSection = captureSection { permissionsRepository.listAppPermissions() }
         val activitiesSection = captureSection { activityRepository.getActivities() }
+        val manifestSecuritySection = captureSection { installedAppsRepository.analyzeManifestSecurity() }
         val rootStatusSection = captureSection { rootCheckRepository.checkRoot() }
         val logsSection = captureSection { logRepository.fetchLog().takeLast(MAX_LOG_LINES) }
         val playIntegritySection = SnapshotSection.skipped(
@@ -90,7 +91,8 @@ class AndroidDeviceSnapshotCoordinator(
             installedApps = installedAppsSection,
             permissions = permissionsSection,
             activities = activitiesSection,
-            logs = logsSection
+            logs = logsSection,
+            manifestSecurityReports = manifestSecuritySection
         )
 
         writeAtomically(snapshot)

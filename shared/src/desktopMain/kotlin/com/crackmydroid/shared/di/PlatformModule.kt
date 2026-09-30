@@ -4,6 +4,7 @@ import com.crackmydroid.shared.data.activity.ActivityRepositoryDesktop
 import com.crackmydroid.shared.data.DesktopScanCache
 import com.crackmydroid.shared.data.adb.ProcessAdbBridge
 import com.crackmydroid.shared.data.apps.InstalledAppsRepositoryDesktop
+import com.crackmydroid.shared.data.cache.CacheMaintenanceRepositoryDesktop
 import com.crackmydroid.shared.data.device.DeviceInfoRepositoryDesktop
 import com.crackmydroid.shared.data.device.DeviceSessionControllerDesktop
 import com.crackmydroid.shared.data.log.LogRepositoryDesktop
@@ -15,6 +16,7 @@ import com.crackmydroid.shared.data.shell.ShellCommandRepositoryDesktop
 import com.crackmydroid.shared.data.snapshot.RemoteDeviceSnapshotImporter
 import com.crackmydroid.shared.domain.repository.ActivityRepository
 import com.crackmydroid.shared.domain.repository.AdbBridge
+import com.crackmydroid.shared.domain.repository.CacheMaintenance
 import com.crackmydroid.shared.domain.repository.DeviceInfoRepository
 import com.crackmydroid.shared.domain.repository.DeviceSessionController
 import com.crackmydroid.shared.domain.repository.InstalledAppsRepository
@@ -31,6 +33,7 @@ actual fun platformModule(): Module = module {
     single { DesktopScanCache() }
     single<SettingsRepository> { SettingsRepositoryDesktop() }
     single<AdbBridge> { ProcessAdbBridge() }
+    single<CacheMaintenance> { CacheMaintenanceRepositoryDesktop() }
     single { RemoteDeviceSnapshotImporter(get(), get()) }
     single<DeviceSessionController> { DeviceSessionControllerDesktop(get(), get(), get(), get()) }
     single<RemotePackageManager> { RemotePackageManagerDesktop(get(), get(), get()) }
