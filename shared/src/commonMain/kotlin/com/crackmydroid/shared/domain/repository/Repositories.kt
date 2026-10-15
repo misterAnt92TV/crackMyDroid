@@ -15,7 +15,9 @@ import kotlinx.coroutines.flow.StateFlow
 
 interface ActivityRepository {
     suspend fun getActivities(): List<ActivityEntry>
+    suspend fun getActivitiesPaginated(offset: Int = 0, limit: Int = 50): List<ActivityEntry>
     suspend fun getComponents(): List<com.crackmydroid.shared.domain.model.AppComponent>
+    suspend fun getComponentsCached(): List<com.crackmydroid.shared.domain.model.AppComponent>
     suspend fun launch(
         entry: ActivityEntry,
         action: String? = null,
@@ -73,7 +75,9 @@ interface SettingsRepository {
 
 interface InstalledAppsRepository {
     suspend fun listInstalled(): List<InstalledAppEntry>
+    suspend fun listInstalledPaginated(offset: Int = 0, limit: Int = 50): List<InstalledAppEntry>
     suspend fun analyzeManifestSecurity(): List<com.crackmydroid.shared.domain.model.ManifestSecurityReport>
+    suspend fun analyzeManifestSecurityCached(): List<com.crackmydroid.shared.domain.model.ManifestSecurityReport>
     suspend fun exportApk(packageName: String): Result<String>
     suspend fun shareApk(packageName: String, bluetoothOnly: Boolean): Result<Unit>
 }

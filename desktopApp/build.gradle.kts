@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
+    alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.compose.mpp)
 }
 
@@ -12,8 +13,8 @@ kotlin {
             dependencies {
                 implementation(project(":shared"))
                 implementation(compose.desktop.currentOs)
-                implementation(compose.material3)
-                implementation(compose.materialIconsExtended)
+                implementation(libs.compose.material3)
+                implementation(libs.compose.icons)
                 implementation(libs.koin.core)
                 implementation(libs.coroutines.swing)
             }

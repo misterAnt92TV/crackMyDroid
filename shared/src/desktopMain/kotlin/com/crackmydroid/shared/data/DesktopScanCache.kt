@@ -4,6 +4,7 @@ import com.crackmydroid.shared.domain.model.ActivityEntry
 import com.crackmydroid.shared.domain.model.AppPermissionEntry
 import com.crackmydroid.shared.domain.model.DeviceInfo
 import com.crackmydroid.shared.domain.model.InstalledAppEntry
+import com.crackmydroid.shared.domain.model.ManifestSecurityReport
 import com.crackmydroid.shared.domain.model.PlayIntegrityResult
 import com.crackmydroid.shared.domain.model.RootStatus
 import com.crackmydroid.shared.domain.model.SnapshotMetadata
@@ -13,6 +14,7 @@ class DesktopScanCache {
     var installedApps: List<InstalledAppEntry>? = null
     var permissions: List<AppPermissionEntry>? = null
     var activities: List<ActivityEntry>? = null
+    var manifestSecurityReports: List<ManifestSecurityReport>? = null
     var rootStatus: RootStatus? = null
     var playIntegrity: PlayIntegrityResult? = null
     var logs: List<String>? = null
@@ -27,6 +29,7 @@ class DesktopScanCache {
         installedApps = null
         permissions = null
         activities = null
+        manifestSecurityReports = null
         rootStatus = null
         playIntegrity = null
         logs = null

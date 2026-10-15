@@ -12,6 +12,7 @@ import com.crackmydroid.shared.domain.repository.InstalledAppsRepository
 import com.crackmydroid.shared.domain.repository.RemotePackageManager
 import com.crackmydroid.shared.util.DesktopPaths
 import com.crackmydroid.shared.util.revealInDesktop
+import com.crackmydroid.shared.data.cache.PaginationHelper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -19,10 +20,17 @@ import java.io.File
 class InstalledAppsRepositoryDesktop(
     adbBridge: AdbBridge,
     sessionController: DeviceSessionController,
-    private val packageManager: RemotePackageManager
+    private val packageManager: RemotePackageManager,
+    private val cache: DesktopScanCache
 ) : DesktopAdbRepositorySupport(adbBridge, sessionController), InstalledAppsRepository {
     override suspend fun listInstalled(): List<InstalledAppEntry> =
         withContext(Dispatchers.IO) { packageManager.listInstalledApps() }
+
+    override suspend fun listInstalledPaginated(offset: Int, limit: Int): List<InstalledAppEntry> =
+        withContext(Dispatchers.IO) {
+            val all = listInstalled()
+            PaginationHelper.paginate(all, offset, limit)
+        }
 
     override suspend fun analyzeManifestSecurity(): List<ManifestSecurityReport> = withContext(Dispatchers.IO) {
         runCatching {
@@ -36,6 +44,13 @@ class InstalledAppsRepositoryDesktop(
             }
         }.getOrNull() ?: emptyList()
     }
+
+    override suspend fun analyzeManifestSecurityCached(): List<ManifestSecurityReport> =
+        withContext(Dispatchers.IO) {
+            cache.manifestSecurityReports ?: analyzeManifestSecurity().also {
+                cache.manifestSecurityReports = it
+            }
+        }
 
     override suspend fun exportApk(packageName: String): Result<String> = withContext(Dispatchers.IO) {
         runCatching {

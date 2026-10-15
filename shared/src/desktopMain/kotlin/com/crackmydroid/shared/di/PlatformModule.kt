@@ -43,5 +43,5 @@ actual fun platformModule(): Module = module {
     single<ShellCommandRepository> { ShellCommandRepositoryDesktop(get(), get(), get()) }
     single<LogRepository> { LogRepositoryDesktop(get(), get(), get()) }
     single<PermissionsRepository> { PermissionsRepositoryDesktop(get(), get(), get(), get()) }
-    single<InstalledAppsRepository> { InstalledAppsRepositoryDesktop(get(), get(), get()) }
+    single<InstalledAppsRepository> { InstalledAppsRepositoryDesktop(get(), get(), get(), get()) }
 }

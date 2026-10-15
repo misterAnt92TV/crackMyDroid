@@ -10,6 +10,8 @@ import com.crackmydroid.shared.domain.model.AppComponent
 import com.crackmydroid.shared.domain.model.ComponentType
 import com.crackmydroid.database.CacheDatabase
 import com.crackmydroid.shared.domain.repository.ActivityRepository
+import com.crackmydroid.shared.data.cache.CachingRepositoryDecorator
+import com.crackmydroid.shared.data.cache.PaginationHelper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -17,6 +19,7 @@ class ActivityRepositoryAndroid(
     private val context: Context,
     private val db: CacheDatabase
 ) : ActivityRepository {
+    private val cachingDecorator = CachingRepositoryDecorator()
     override suspend fun getActivities(): List<ActivityEntry> = withContext(Dispatchers.IO) {
         val cached = db.cacheDatabaseQueries.selectAllActivities().executeAsList().map {
             ActivityEntry(
@@ -24,7 +27,7 @@ class ActivityRepositoryAndroid(
                 appLabel = it.appLabel,
                 packageName = it.packageName,
                 activityName = it.activityName,
-                exported = it.exported ?: false,
+                exported = it.exported == 1L,
                 permission = it.permission
             )
         }
@@ -61,13 +64,19 @@ class ActivityRepositoryAndroid(
                     appLabel = it.appLabel,
                     activityName = it.activityName,
                     label = it.label,
-                    exported = it.exported,
+                    exported = if (it.exported) 1L else 0L,
                     permission = it.permission
                 )
             }
         }
         fresh
     }
+
+    override suspend fun getActivitiesPaginated(offset: Int, limit: Int): List<ActivityEntry> =
+        withContext(Dispatchers.IO) {
+            val all = getActivities()
+            PaginationHelper.paginate(all, offset, limit)
+        }
 
     override suspend fun getComponents(): List<AppComponent> = withContext(Dispatchers.IO) {
         val pm = context.packageManager
@@ -124,6 +133,18 @@ class ActivityRepositoryAndroid(
             components
         }.sortedBy { it.label.lowercase() }
     }
+
+    override suspend fun getComponentsCached(): List<AppComponent> =
+        withContext(Dispatchers.IO) {
+            cachingDecorator.getCachedOrCompute(
+                cacheGetter = { cachingDecorator.getComponentsCache() },
+                cacheSetter = { cachingDecorator.cacheComponents(it) },
+                timeGetter = { 0L },
+                timeSetter = { }
+            ) {
+                getComponents()
+            }
+        }
 
     override suspend fun launch(
         entry: ActivityEntry,

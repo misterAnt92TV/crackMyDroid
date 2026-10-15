@@ -5,6 +5,7 @@ import android.content.pm.PackageManager
 import com.crackmydroid.shared.domain.model.AppPermissionEntry
 import com.crackmydroid.database.CacheDatabase
 import com.crackmydroid.shared.domain.repository.PermissionsRepository
+import com.crackmydroid.shared.data.cache.PaginationHelper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -51,4 +52,10 @@ class PermissionsRepositoryAndroid(
 
         fresh
     }
+
+    override suspend fun listAppPermissionsPaginated(offset: Int, limit: Int): List<AppPermissionEntry> =
+        withContext(Dispatchers.IO) {
+            val all = listAppPermissions()
+            PaginationHelper.paginate(all, offset, limit)
+        }
 }

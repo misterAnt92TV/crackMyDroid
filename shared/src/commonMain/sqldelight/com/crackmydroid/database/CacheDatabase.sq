@@ -4,7 +4,7 @@ CREATE TABLE activities_cache (
     appLabel TEXT NOT NULL,
     activityName TEXT NOT NULL,
     label TEXT NOT NULL,
-    exported BOOLEAN NOT NULL DEFAULT 0,
+    exported INTEGER NOT NULL DEFAULT 0,
     permission TEXT,
     PRIMARY KEY(packageName, activityName)
 );
@@ -48,9 +48,9 @@ CREATE TABLE installed_apps_cache (
     packageName TEXT NOT NULL PRIMARY KEY,
     appLabel TEXT NOT NULL,
     sourcePath TEXT NOT NULL,
-    debuggable BOOLEAN NOT NULL DEFAULT 0,
-    allowBackup BOOLEAN NOT NULL DEFAULT 0,
-    testOnly BOOLEAN NOT NULL DEFAULT 0,
+    debuggable INTEGER NOT NULL DEFAULT 0,
+    allowBackup INTEGER NOT NULL DEFAULT 0,
+    testOnly INTEGER NOT NULL DEFAULT 0,
     targetSdkVersion INTEGER,
     minSdkVersion INTEGER
 );

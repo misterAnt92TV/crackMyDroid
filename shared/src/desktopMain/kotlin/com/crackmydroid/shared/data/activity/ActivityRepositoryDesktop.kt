@@ -9,6 +9,7 @@ import com.crackmydroid.shared.domain.repository.ActivityRepository
 import com.crackmydroid.shared.domain.repository.AdbBridge
 import com.crackmydroid.shared.domain.repository.DeviceSessionController
 import com.crackmydroid.shared.domain.repository.RemotePackageManager
+import com.crackmydroid.shared.data.cache.PaginationHelper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -30,7 +31,18 @@ class ActivityRepositoryDesktop(
         fresh
     }
 
+    override suspend fun getActivitiesPaginated(offset: Int, limit: Int): List<ActivityEntry> =
+        withContext(Dispatchers.IO) {
+            val all = getActivities()
+            PaginationHelper.paginate(all, offset, limit)
+        }
+
     override suspend fun getComponents(): List<AppComponent> = withContext(Dispatchers.IO) {
+        // Desktop: components available only via full PackageManager dump from snapshot
+        emptyList()
+    }
+
+    override suspend fun getComponentsCached(): List<AppComponent> = withContext(Dispatchers.IO) {
         // Desktop: components available only via full PackageManager dump from snapshot
         emptyList()
     }

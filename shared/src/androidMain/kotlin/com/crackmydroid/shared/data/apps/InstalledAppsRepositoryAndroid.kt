@@ -13,6 +13,8 @@ import com.crackmydroid.shared.domain.model.ExposedComponentInfo
 import com.crackmydroid.shared.domain.model.AppComponentType
 import com.crackmydroid.database.CacheDatabase
 import com.crackmydroid.shared.domain.repository.InstalledAppsRepository
+import com.crackmydroid.shared.data.cache.CachingRepositoryDecorator
+import com.crackmydroid.shared.data.cache.PaginationHelper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -22,6 +24,7 @@ class InstalledAppsRepositoryAndroid(
     private val db: CacheDatabase
 ) : InstalledAppsRepository {
     private val cacheDir = File(context.cacheDir, "extracted_apks")
+    private val cachingDecorator = CachingRepositoryDecorator()
 
     override suspend fun listInstalled(): List<InstalledAppEntry> = withContext(Dispatchers.IO) {
         val cached = db.cacheDatabaseQueries.selectAllInstalled().executeAsList().map {
@@ -29,9 +32,9 @@ class InstalledAppsRepositoryAndroid(
                 appLabel = it.appLabel,
                 packageName = it.packageName,
                 sourcePath = it.sourcePath,
-                debuggable = it.debuggable ?: false,
-                allowBackup = it.allowBackup ?: false,
-                testOnly = it.testOnly ?: false,
+                debuggable = it.debuggable == 1L,
+                allowBackup = it.allowBackup == 1L,
+                testOnly = it.testOnly == 1L,
                 targetSdkVersion = it.targetSdkVersion?.toInt(),
                 minSdkVersion = it.minSdkVersion?.toInt()
             )
@@ -65,9 +68,9 @@ class InstalledAppsRepositoryAndroid(
                     packageName = entry.packageName,
                     appLabel = entry.appLabel,
                     sourcePath = entry.sourcePath,
-                    debuggable = entry.debuggable,
-                    allowBackup = entry.allowBackup,
-                    testOnly = entry.testOnly,
+                    debuggable = if (entry.debuggable) 1L else 0L,
+                    allowBackup = if (entry.allowBackup) 1L else 0L,
+                    testOnly = if (entry.testOnly) 1L else 0L,
                     targetSdkVersion = entry.targetSdkVersion?.toLong(),
                     minSdkVersion = entry.minSdkVersion?.toLong()
                 )
@@ -76,6 +79,12 @@ class InstalledAppsRepositoryAndroid(
 
         fresh
     }
+
+    override suspend fun listInstalledPaginated(offset: Int, limit: Int): List<InstalledAppEntry> =
+        withContext(Dispatchers.IO) {
+            val all = listInstalled()
+            PaginationHelper.paginate(all, offset, limit)
+        }
 
     override suspend fun analyzeManifestSecurity(): List<ManifestSecurityReport> = withContext(Dispatchers.IO) {
         val pm = context.packageManager
@@ -137,6 +146,18 @@ class InstalledAppsRepositoryAndroid(
             ManifestSecurityAnalyzer.analyze(info)
         }
     }
+
+    override suspend fun analyzeManifestSecurityCached(): List<ManifestSecurityReport> =
+        withContext(Dispatchers.IO) {
+            cachingDecorator.getCachedOrCompute(
+                cacheGetter = { cachingDecorator.getManifestSecurityCache() },
+                cacheSetter = { cachingDecorator.cacheManifestSecurityReport(it) },
+                timeGetter = { 0L },
+                timeSetter = { }
+            ) {
+                analyzeManifestSecurity()
+            }
+        }
 
     override suspend fun exportApk(packageName: String): Result<String> = withContext(Dispatchers.IO) {
         runCatching {
