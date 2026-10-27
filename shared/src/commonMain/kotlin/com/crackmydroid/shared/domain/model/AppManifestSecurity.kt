@@ -36,6 +36,7 @@ data class AppManifestSecurity(
         get() = exposedComponents.filter { it.exported && it.permission.isNullOrBlank() }
 }
 
+@Serializable
 enum class ManifestRiskLevel {
     Low,
     Medium,
@@ -43,12 +44,14 @@ enum class ManifestRiskLevel {
     Critical
 }
 
+@Serializable
 data class ManifestSecurityFinding(
     val level: ManifestRiskLevel,
     val title: String,
     val detail: String
 )
 
+@Serializable
 data class ManifestSecurityReport(
     val info: AppManifestSecurity,
     val level: ManifestRiskLevel,

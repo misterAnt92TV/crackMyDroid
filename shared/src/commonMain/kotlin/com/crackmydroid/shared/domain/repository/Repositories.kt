@@ -82,6 +82,11 @@ interface InstalledAppsRepository {
     suspend fun shareApk(packageName: String, bluetoothOnly: Boolean): Result<Unit>
 }
 
+interface ReportFileRepository {
+    suspend fun save(fileName: String, content: String): Result<String>
+    suspend fun share(path: String): Result<Unit>
+}
+
 interface CacheMaintenance {
     suspend fun clearAllCaches()
     suspend fun invalidateActivitiesCache()

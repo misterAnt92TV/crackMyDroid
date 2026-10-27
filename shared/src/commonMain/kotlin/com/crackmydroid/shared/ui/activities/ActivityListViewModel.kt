@@ -11,16 +11,15 @@ import com.crackmydroid.shared.domain.usecase.GetActivityFavoritesUseCase
 import com.crackmydroid.shared.domain.usecase.SetActivityFavoritesUseCase
 import com.crackmydroid.shared.domain.usecase.GetActivityPackageFavoritesUseCase
 import com.crackmydroid.shared.domain.usecase.SetActivityPackageFavoritesUseCase
+import com.crackmydroid.shared.domain.usecase.reports.ExportReportUseCase
+import com.crackmydroid.shared.domain.repository.OperationLogRepository
 import com.crackmydroid.shared.presentation.BaseViewModel
-import com.crackmydroid.shared.presentation.operations.OperationLogStore
-import com.crackmydroid.shared.util.saveTextFile
-import com.crackmydroid.shared.util.shareTextFile
+import com.crackmydroid.shared.presentation.operations.NoOpOperationLogRepository
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -28,11 +27,13 @@ import kotlinx.serialization.json.Json
 class ActivityListViewModel(
     private val getActivities: GetActivitiesUseCase,
     private val launchActivity: LaunchActivityUseCase,
-    private val getExportFormat: GetExportFormatUseCase
-    , private val getFavorites: GetActivityFavoritesUseCase? = null
-    , private val setFavorites: SetActivityFavoritesUseCase? = null
-    , private val getPackageFavorites: GetActivityPackageFavoritesUseCase? = null
-    , private val setPackageFavorites: SetActivityPackageFavoritesUseCase? = null
+    private val getExportFormat: GetExportFormatUseCase,
+    private val getFavorites: GetActivityFavoritesUseCase? = null,
+    private val setFavorites: SetActivityFavoritesUseCase? = null,
+    private val getPackageFavorites: GetActivityPackageFavoritesUseCase? = null,
+    private val setPackageFavorites: SetActivityPackageFavoritesUseCase? = null,
+    private val reportExporter: ExportReportUseCase,
+    private val operationLogs: OperationLogRepository = NoOpOperationLogRepository
 ) : BaseViewModel() {
     private val json = Json { prettyPrint = true }
     private val _state = MutableStateFlow(ActivityListState())
@@ -50,11 +51,11 @@ class ActivityListViewModel(
             runCatching { getActivities() }
                 .onSuccess { list ->
                     recomputeAsync(_state.value.copy(activities = list, loading = false))
-                    OperationLogStore.record("Caricate ${list.size} activity", success = true)
+                    operationLogs.record("Caricate ${list.size} activity", success = true)
                 }
                 .onFailure { err ->
                     _state.update { it.copy(error = err.message ?: "Errore", loading = false) }
-                    OperationLogStore.record("Caricamento activity", success = false, details = err.message)
+                    operationLogs.record("Caricamento activity", success = false, details = err.message)
                 }
         }
     }
@@ -102,7 +103,7 @@ class ActivityListViewModel(
         if (!entry.launchableViaShell && !hasGuidedIntent) {
             val msg = entry.launchabilityReason ?: "Activity non avviabile via am start -n"
             _state.update { it.copy(error = msg) }
-            OperationLogStore.record(
+            operationLogs.record(
                 "Lancio ${entry.activityName}",
                 success = false,
                 details = "$msg • rischio ${ActivityIntentRiskAnalyzer.formatLevel(risk.level)}"
@@ -114,13 +115,13 @@ class ActivityListViewModel(
             result.onFailure { err ->
                 val msg = err.message ?: "Impossibile avviare ${entry.activityName}"
                 _state.update { it.copy(error = msg) }
-                OperationLogStore.record(
+                operationLogs.record(
                     "Lancio ${entry.activityName}",
                     success = false,
                     details = "$msg • rischio ${ActivityIntentRiskAnalyzer.formatLevel(risk.level)}"
                 )
             }.onSuccess {
-                OperationLogStore.record(
+                operationLogs.record(
                     "Lancio ${entry.activityName}",
                     success = true,
                     details = "Rischio ${ActivityIntentRiskAnalyzer.formatLevel(risk.level)} • ${risk.summary}"
@@ -156,38 +157,40 @@ class ActivityListViewModel(
         _state.update { it.copy(expandedPackages = expanded) }
     }
 
-    fun exportAll(): Result<String> {
-        val content = buildExportContent(_state.value.activities)
-        val result = saveTextFile("activities${extForCurrentFormat()}", content)
-        result.onSuccess { path ->
-            OperationLogStore.record("Export attività", success = true, details = path)
-        }.onFailure { err ->
-            _state.update { it.copy(error = err.message) }
-            OperationLogStore.record("Export attività", success = false, details = err.message)
+    fun exportAll() {
+        scope.launch {
+            val content = buildExportContent(_state.value.activities)
+            reportExporter.save("activities${extensionForCurrentFormat()}", content)
+                .onSuccess { path ->
+                    operationLogs.record("Export attività", success = true, details = path)
+                }.onFailure { error ->
+                    _state.update { it.copy(error = error.message) }
+                    operationLogs.record("Export attività", success = false, details = error.message)
+                }
         }
-        return result
     }
 
     fun exportGroup(packageName: String) {
         val acts = _state.value.activities.filter { it.packageName == packageName }
         if (acts.isEmpty()) {
             _state.update { it.copy(error = "Nessuna activity per $packageName") }
-            OperationLogStore.record("Export attività $packageName", success = false, details = "Nessuna activity")
+            operationLogs.record("Export attività $packageName", success = false, details = "Nessuna activity")
             return
         }
-        val content = buildExportContent(acts)
-        val baseName = "activities_${packageName.replace('.', '_')}"
-        val result = saveTextFile(baseName + extForCurrentFormat(), content)
-        result.onSuccess { path ->
-            shareTextFile(path).onFailure { err -> _state.update { it.copy(error = err.message) } }
-            OperationLogStore.record("Export attività $packageName", success = true, details = path)
-        }.onFailure { err ->
-            _state.update { it.copy(error = err.message) }
-            OperationLogStore.record("Export attività $packageName", success = false, details = err.message)
+        scope.launch {
+            val content = buildExportContent(acts)
+            val fileName = "activities_${packageName.replace('.', '_')}" + extensionForCurrentFormat()
+            reportExporter.share(fileName, content)
+                .onSuccess { path ->
+                    operationLogs.record("Export attività $packageName", success = true, details = path)
+                }.onFailure { error ->
+                    _state.update { it.copy(error = error.message) }
+                    operationLogs.record("Export attività $packageName", success = false, details = error.message)
+                }
         }
     }
 
-    fun groupContent(packageName: String): String? {
+    suspend fun groupContent(packageName: String): String? {
         val acts = _state.value.activities.filter { it.packageName == packageName }
         if (acts.isEmpty()) return null
         return buildExportContent(acts)
@@ -261,24 +264,25 @@ class ActivityListViewModel(
         )
     }
 
-    fun exportVisualReport(packageName: String): Result<String> {
+    suspend fun exportVisualReport(packageName: String): Result<String> {
         val report = buildReport(packageName)
-            ?: return Result.failure(IllegalArgumentException("Nessuna activity per $packageName"))
+            ?: run {
+                _state.update { it.copy(error = "Nessuna activity per $packageName") }
+                return Result.failure(IllegalArgumentException("Nessuna activity per $packageName"))
+            }
         val baseName = "activity_report_${packageName.replace('.', '_')}.html"
         val content = buildHtmlReport(report)
-        val result = saveTextFile(baseName, content)
-        result.onSuccess { path ->
-            shareTextFile(path).onFailure { err -> _state.update { it.copy(error = err.message) } }
-            OperationLogStore.record("Report activity $packageName", success = true, details = path)
-        }.onFailure { err ->
-            _state.update { it.copy(error = err.message) }
-            OperationLogStore.record("Report activity $packageName", success = false, details = err.message)
-        }
-        return result
+        return reportExporter.share(baseName, content)
+            .onSuccess { path ->
+                operationLogs.record("Report activity $packageName", success = true, details = path)
+            }.onFailure { error ->
+                _state.update { it.copy(error = error.message) }
+                operationLogs.record("Report activity $packageName", success = false, details = error.message)
+            }
     }
 
-    private fun buildExportContent(list: List<ActivityEntry>): String {
-        val format = runBlocking { getExportFormat() }
+    private suspend fun buildExportContent(list: List<ActivityEntry>): String {
+        val format = getExportFormat()
         return if (format == com.crackmydroid.shared.domain.model.ExportFormat.JSON) {
             val payload = list.map { entry -> entry.toExportPayload() }
             json.encodeToString(payload)
@@ -349,8 +353,8 @@ class ActivityListViewModel(
         }
     }
 
-    private fun extForCurrentFormat(): String =
-        if (runBlocking { getExportFormat() } == com.crackmydroid.shared.domain.model.ExportFormat.JSON) ".json" else ".txt"
+    private suspend fun extensionForCurrentFormat(): String =
+        if (getExportFormat() == com.crackmydroid.shared.domain.model.ExportFormat.JSON) ".json" else ".txt"
 
     private fun normalizeQuery(value: String): String = value
         .trim()

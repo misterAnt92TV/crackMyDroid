@@ -16,12 +16,21 @@ import com.crackmydroid.shared.domain.repository.LogRepository
 import com.crackmydroid.shared.domain.repository.InstalledAppsRepository
 import com.crackmydroid.shared.domain.repository.RootCheckRepository
 import com.crackmydroid.shared.domain.repository.SettingsRepository
+import com.crackmydroid.shared.domain.repository.ReportFileRepository
+import com.crackmydroid.shared.data.reports.ReportFileRepositoryIos
+import com.crackmydroid.shared.presentation.operations.DefaultOperationLogRepository
+import com.crackmydroid.shared.presentation.operations.InMemoryOperationLogPersistence
+import com.crackmydroid.shared.presentation.operations.OperationLogPersistence
 import com.crackmydroid.shared.domain.repository.ShellCommandRepository
+import com.crackmydroid.shared.domain.repository.OperationLogRepository
 import com.crackmydroid.shared.domain.repository.PermissionsRepository
 import org.koin.core.module.Module
 import org.koin.dsl.module
 
 actual fun platformModule(): Module = module {
+    single<ReportFileRepository> { ReportFileRepositoryIos() }
+    single<OperationLogPersistence> { InMemoryOperationLogPersistence() }
+    single<OperationLogRepository> { DefaultOperationLogRepository(get()) }
     single<ActivityRepository> { ActivityRepositoryIos() }
     single<RootCheckRepository> { RootCheckRepositoryIos() }
     single<DeviceInfoRepository> { DeviceInfoRepositoryIos() }

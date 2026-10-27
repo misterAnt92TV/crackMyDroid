@@ -23,7 +23,9 @@ import com.crackmydroid.shared.domain.repository.CacheMaintenance
 
 class ActivityRepositoryIos : ActivityRepository {
     override suspend fun getActivities(): List<ActivityEntry> = emptyList()
+    override suspend fun getActivitiesPaginated(offset: Int, limit: Int): List<ActivityEntry> = emptyList()
     override suspend fun getComponents(): List<AppComponent> = emptyList()
+    override suspend fun getComponentsCached(): List<AppComponent> = emptyList()
     override suspend fun launch(
         entry: ActivityEntry,
         action: String?,
@@ -130,11 +132,17 @@ class LogRepositoryIos : LogRepository {
 
 class PermissionsRepositoryIos : PermissionsRepository {
     override suspend fun listAppPermissions(): List<com.crackmydroid.shared.domain.model.AppPermissionEntry> = emptyList()
+    override suspend fun listAppPermissionsPaginated(
+        offset: Int,
+        limit: Int
+    ): List<com.crackmydroid.shared.domain.model.AppPermissionEntry> = emptyList()
 }
 
 class InstalledAppsRepositoryIos : InstalledAppsRepository {
     override suspend fun listInstalled(): List<InstalledAppEntry> = emptyList()
+    override suspend fun listInstalledPaginated(offset: Int, limit: Int): List<InstalledAppEntry> = emptyList()
     override suspend fun analyzeManifestSecurity(): List<ManifestSecurityReport> = emptyList()
+    override suspend fun analyzeManifestSecurityCached(): List<ManifestSecurityReport> = emptyList()
     override suspend fun exportApk(packageName: String): Result<String> =
         Result.failure(UnsupportedOperationException("Non supportato su iOS"))
     override suspend fun shareApk(packageName: String, bluetoothOnly: Boolean): Result<Unit> =

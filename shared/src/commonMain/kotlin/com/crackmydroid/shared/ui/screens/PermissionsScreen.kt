@@ -1,3 +1,5 @@
+@file:OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class, androidx.compose.ui.ExperimentalComposeUiApi::class)
+
 package com.crackmydroid.shared.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
@@ -26,7 +28,7 @@ import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -84,7 +86,7 @@ fun PermissionsScreen(
 ) {
     val state by viewModel.state.collectAsState()
     val strings = LocalStrings.current
-    val clipboard = LocalClipboardManager.current
+    val clipboard = LocalClipboard.current
     val expandedPackages = remember { mutableStateMapOf<String, Boolean>() }
     val favoriteQueries = remember(state.favorites) { state.favorites.toList().sorted() }
     val filteredApps = remember(
@@ -328,8 +330,7 @@ fun PermissionsScreen(
             }
             if (state.loading) {
                 item {
-                    CircularProgressIndicator(modifier = Modifier.padding(top = 8.dp))
-                }
+                    CircularProgressIndicator(modifier = Modifier.padding(top = 8.dp)) }
             }
 
             if (!state.loading && filteredApps.isEmpty()) {
@@ -415,7 +416,9 @@ fun PermissionsScreen(
                     actions = {
                         IconButton(onClick = {
                             val content = viewModel.singleReportPreview(app.packageName)
-                            clipboard.setText(AnnotatedString(content))
+                            scope.launch {
+                                clipboard.setClipEntry(androidx.compose.ui.platform.ClipEntry(AnnotatedString(content)))
+                            }
                             viewModel.shareSingle(app.packageName)
                         }) {
                             Icon(

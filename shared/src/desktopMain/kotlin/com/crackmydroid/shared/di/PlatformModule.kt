@@ -14,6 +14,10 @@ import com.crackmydroid.shared.data.root.RootCheckRepositoryDesktop
 import com.crackmydroid.shared.data.settings.SettingsRepositoryDesktop
 import com.crackmydroid.shared.data.shell.ShellCommandRepositoryDesktop
 import com.crackmydroid.shared.data.snapshot.RemoteDeviceSnapshotImporter
+import com.crackmydroid.shared.data.reports.ReportFileRepositoryDesktop
+import com.crackmydroid.shared.presentation.operations.DefaultOperationLogRepository
+import com.crackmydroid.shared.presentation.operations.OperationLogPersistence
+import com.crackmydroid.shared.presentation.operations.OperationLogPersistenceDesktop
 import com.crackmydroid.shared.domain.repository.ActivityRepository
 import com.crackmydroid.shared.domain.repository.AdbBridge
 import com.crackmydroid.shared.domain.repository.CacheMaintenance
@@ -24,6 +28,8 @@ import com.crackmydroid.shared.domain.repository.LogRepository
 import com.crackmydroid.shared.domain.repository.PermissionsRepository
 import com.crackmydroid.shared.domain.repository.RemotePackageManager
 import com.crackmydroid.shared.domain.repository.RootCheckRepository
+import com.crackmydroid.shared.domain.repository.ReportFileRepository
+import com.crackmydroid.shared.domain.repository.OperationLogRepository
 import com.crackmydroid.shared.domain.repository.SettingsRepository
 import com.crackmydroid.shared.domain.repository.ShellCommandRepository
 import org.koin.core.module.Module
@@ -44,4 +50,7 @@ actual fun platformModule(): Module = module {
     single<LogRepository> { LogRepositoryDesktop(get(), get(), get()) }
     single<PermissionsRepository> { PermissionsRepositoryDesktop(get(), get(), get(), get()) }
     single<InstalledAppsRepository> { InstalledAppsRepositoryDesktop(get(), get(), get(), get()) }
+    single<ReportFileRepository> { ReportFileRepositoryDesktop() }
+    single<OperationLogPersistence> { OperationLogPersistenceDesktop() }
+    single<OperationLogRepository> { DefaultOperationLogRepository(get()) }
 }

@@ -6,6 +6,8 @@ import com.crackmydroid.shared.domain.usecase.ListInstalledAppsUseCase
 import com.crackmydroid.shared.domain.usecase.ShareApkUseCase
 import com.crackmydroid.shared.domain.usecase.GetExportFormatUseCase
 import com.crackmydroid.shared.domain.model.ExportFormat
+import com.crackmydroid.shared.domain.repository.ReportFileRepository
+import com.crackmydroid.shared.domain.usecase.reports.ExportReportUseCase
 import com.crackmydroid.shared.ui.installedapps.InstalledAppsViewModel
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -28,6 +30,8 @@ import kotlin.test.assertNull
 class InstalledAppsViewModelTest {
     private val dispatcher = StandardTestDispatcher()
 
+    private fun reportExporter() = ExportReportUseCase(mockk<ReportFileRepository>())
+
     @BeforeTest
     fun setUp() {
         Dispatchers.setMain(dispatcher)
@@ -46,7 +50,7 @@ class InstalledAppsViewModelTest {
         val format = mockk<GetExportFormatUseCase>()
         coEvery { list() } returns listOf(InstalledAppEntry("App", "pkg", "/path"))
         coEvery { format() } returns ExportFormat.TXT
-        val vm = InstalledAppsViewModel(list, export, share, format)
+        val vm = InstalledAppsViewModel(list, export, share, format, reportExporter())
 
         vm.refresh()
         advanceUntilIdle()
@@ -66,7 +70,7 @@ class InstalledAppsViewModelTest {
         coEvery { list() } returns emptyList()
         coEvery { export("pkg") } returns Result.success("/tmp/pkg.apk")
         coEvery { format() } returns ExportFormat.TXT
-        val vm = InstalledAppsViewModel(list, export, share, format)
+        val vm = InstalledAppsViewModel(list, export, share, format, reportExporter())
 
         vm.export("pkg")
         advanceUntilIdle()
@@ -74,6 +78,34 @@ class InstalledAppsViewModelTest {
         assertEquals("/tmp/pkg.apk", vm.state.value.lastExportPath)
         assertNull(vm.state.value.error)
         coVerify { export("pkg") }
+        vm.onCleared()
+    }
+
+    @Test
+    fun exportAllWritesTheGeneratedReportThroughTheReportPort() = runTest(dispatcher) {
+        val list = mockk<ListInstalledAppsUseCase>()
+        val export = mockk<ExportApkUseCase>()
+        val share = mockk<ShareApkUseCase>()
+        val format = mockk<GetExportFormatUseCase>()
+        val reportFiles = mockk<ReportFileRepository>()
+        coEvery { list() } returns listOf(InstalledAppEntry("App", "pkg", "/path"))
+        coEvery { format() } returns ExportFormat.JSON
+        coEvery { reportFiles.save("installed_apps.json", any()) } returns Result.success("/tmp/apps.json")
+        val vm = InstalledAppsViewModel(
+            list,
+            export,
+            share,
+            format,
+            ExportReportUseCase(reportFiles)
+        )
+
+        vm.refresh()
+        advanceUntilIdle()
+        vm.exportAll()
+        advanceUntilIdle()
+
+        assertEquals("/tmp/apps.json", vm.state.value.lastExportPath)
+        coVerify { reportFiles.save("installed_apps.json", any()) }
         vm.onCleared()
     }
 
@@ -86,7 +118,7 @@ class InstalledAppsViewModelTest {
         coEvery { list() } returns emptyList()
         coEvery { share("pkg", false) } returns Result.success(Unit)
         coEvery { format() } returns ExportFormat.TXT
-        val vm = InstalledAppsViewModel(list, export, share, format)
+        val vm = InstalledAppsViewModel(list, export, share, format, reportExporter())
 
         vm.share("pkg", false)
         advanceUntilIdle()
@@ -106,7 +138,7 @@ class InstalledAppsViewModelTest {
         coEvery { list() } returns emptyList()
         coEvery { share("pkg", true) } returns Result.failure(IllegalStateException("fail"))
         coEvery { format() } returns ExportFormat.TXT
-        val vm = InstalledAppsViewModel(list, export, share, format)
+        val vm = InstalledAppsViewModel(list, export, share, format, reportExporter())
 
         vm.share("pkg", true)
         advanceUntilIdle()
@@ -127,7 +159,7 @@ class InstalledAppsViewModelTest {
             InstalledAppEntry("Beta App", "pkg.beta", "/b.apk")
         )
         coEvery { format() } returns ExportFormat.TXT
-        val vm = InstalledAppsViewModel(list, export, share, format)
+        val vm = InstalledAppsViewModel(list, export, share, format, reportExporter())
 
         vm.refresh()
         advanceUntilIdle()
@@ -151,7 +183,7 @@ class InstalledAppsViewModelTest {
         val format = mockk<GetExportFormatUseCase>()
         coEvery { list() } returns emptyList()
         coEvery { format() } returns ExportFormat.TXT
-        val vm = InstalledAppsViewModel(list, export, share, format)
+        val vm = InstalledAppsViewModel(list, export, share, format, reportExporter())
 
         vm.setFilter("alpha")
         assertNull(vm.state.value.topQuery)

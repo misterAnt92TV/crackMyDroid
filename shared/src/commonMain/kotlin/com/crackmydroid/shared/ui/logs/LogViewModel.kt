@@ -3,7 +3,8 @@ package com.crackmydroid.shared.ui.logs
 import com.crackmydroid.shared.domain.usecase.ExportLogsUseCase
 import com.crackmydroid.shared.domain.usecase.GetLogsUseCase
 import com.crackmydroid.shared.presentation.BaseViewModel
-import kotlinx.coroutines.Dispatchers
+import com.crackmydroid.shared.presentation.AppDispatchers
+import com.crackmydroid.shared.presentation.DefaultAppDispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -13,8 +14,9 @@ import kotlinx.coroutines.withContext
 
 class LogViewModel(
     private val getLogs: GetLogsUseCase,
-    private val exportLogs: ExportLogsUseCase
-) : BaseViewModel() {
+    private val exportLogs: ExportLogsUseCase,
+    dispatchers: AppDispatchers = DefaultAppDispatchers
+) : BaseViewModel(dispatchers) {
     private val _state = MutableStateFlow(LogState())
     val state: StateFlow<LogState> = _state
     private var recomputeJob: Job? = null
@@ -74,9 +76,9 @@ class LogViewModel(
     private fun recomputeAsync(state: LogState) {
         _state.value = state
         recomputeJob?.cancel()
-        recomputeJob = scope.launch(Dispatchers.Default) {
+        recomputeJob = scope.launch(dispatchers.default) {
             val newState = recompute(state)
-            withContext(Dispatchers.Main) { _state.value = newState }
+            withContext(dispatchers.main) { _state.value = newState }
         }
     }
 

@@ -1,6 +1,7 @@
 package com.crackmydroid.shared.presentation.operations
 
 import android.content.Context
+import com.crackmydroid.shared.domain.model.OperationEntry
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
@@ -41,8 +42,4 @@ class OperationLogPersistenceAndroid(private val context: Context) : OperationLo
             prefs[logKey] = encoded
         }
     }
-}
-
-fun OperationLogStore.init(context: Context) {
-    configure(OperationLogPersistenceAndroid(context))
 }

@@ -1,3 +1,5 @@
+@file:OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class, androidx.compose.ui.ExperimentalComposeUiApi::class)
+
 package com.crackmydroid.shared.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
@@ -44,7 +46,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import kotlinx.coroutines.launch
-import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
@@ -77,7 +79,7 @@ fun ActivityListScreen(
 ) {
     val state by viewModel.state.collectAsState()
     val strings = LocalStrings.current
-    val clipboard = LocalClipboardManager.current
+    val clipboard = LocalClipboard.current
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val groups = state.groups
@@ -199,18 +201,16 @@ fun ActivityListScreen(
                                 lastReportPath = null
                             },
                             onExport = {
-                                viewModel.exportVisualReport(report.packageName)
-                                    .onSuccess { path ->
-                                        lastReportPath = path
-                                        scope.launch {
+                                scope.launch {
+                                    viewModel.exportVisualReport(report.packageName)
+                                        .onSuccess { path ->
+                                            lastReportPath = path
                                             snackbarHostState.showSnackbar("Report HTML esportato per ${report.appLabel}")
                                         }
-                                    }
-                                    .onFailure { err ->
-                                        scope.launch {
+                                        .onFailure { err ->
                                             snackbarHostState.showSnackbar(err.message ?: "Export report non riuscito")
                                         }
-                                    }
+                                }
                             }
                         )
                     }
@@ -291,8 +291,10 @@ fun ActivityListScreen(
                             )
                         }
                         IconButton(onClick = {
-                            viewModel.groupContent(group.packageName)?.let { content ->
-                                clipboard.setText(AnnotatedString(content))
+                            scope.launch {
+                                viewModel.groupContent(group.packageName)?.let { content ->
+                                    clipboard.setClipEntry(androidx.compose.ui.platform.ClipEntry(AnnotatedString(content)))
+                                }
                             }
                             viewModel.exportGroup(group.packageName)
                         }) {

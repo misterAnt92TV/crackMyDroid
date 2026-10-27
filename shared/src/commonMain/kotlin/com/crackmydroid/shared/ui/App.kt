@@ -91,6 +91,7 @@ import com.crackmydroid.shared.ui.pentest.PenTestingViewModel
 import com.crackmydroid.shared.ui.screens.HomeScreen
 import com.crackmydroid.shared.domain.usecase.GetIntroSeenUseCase
 import com.crackmydroid.shared.domain.usecase.SetIntroSeenUseCase
+import com.crackmydroid.shared.domain.repository.OperationLogRepository
 import com.crackmydroid.shared.presentation.navigation.Screen
 import com.crackmydroid.shared.presentation.navigation.bottomScreens
 import com.crackmydroid.shared.presentation.navigation.drawerScreens
@@ -129,6 +130,7 @@ fun CrackMyDroidApp() {
     val permissionsVm = rememberVM<PermissionsViewModel>()
     val installedAppsVm = rememberVM<InstalledAppsViewModel>()
     val penTestingVm = rememberVM<PenTestingViewModel>()
+    val operationLogs = remember { KoinPlatform.getKoin().get<OperationLogRepository>() }
     val helpDialog = remember { mutableStateOf<String?>(null) }
     val introSeenUse = remember { KoinPlatform.getKoin().get<GetIntroSeenUseCase>() }
     val setIntroSeenUse = remember { KoinPlatform.getKoin().get<SetIntroSeenUseCase>() }
@@ -451,6 +453,7 @@ fun CrackMyDroidApp() {
                         ) { screen ->
                             when (screen) {
                                 Screen.Home -> HomeScreen(
+                                    operationLogs = operationLogs,
                                     padding = adjustedPadding,
                                     headerHelp = strings.helpHome,
                                     onHelp = { helpDialog.value = it },

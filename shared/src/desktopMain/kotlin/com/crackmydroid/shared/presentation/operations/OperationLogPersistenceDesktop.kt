@@ -1,6 +1,7 @@
 package com.crackmydroid.shared.presentation.operations
 
 import com.crackmydroid.shared.util.DesktopPaths
+import com.crackmydroid.shared.domain.model.OperationEntry
 
 private const val SEP = "\u001f"
 
@@ -33,8 +34,4 @@ class OperationLogPersistenceDesktop : OperationLogPersistence {
         }
         DesktopPaths.logsFile().writeText(encoded)
     }
-}
-
-fun OperationLogStore.init() {
-    configure(OperationLogPersistenceDesktop())
 }

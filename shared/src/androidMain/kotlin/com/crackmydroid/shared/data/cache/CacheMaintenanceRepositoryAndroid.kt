@@ -48,10 +48,9 @@ class CacheMaintenanceRepositoryAndroid(
 ) : CacheMaintenance {
     override suspend fun clearAllCaches() = withContext(Dispatchers.IO) {
         db.cacheDatabaseQueries.transaction {
-            invalidateActivitiesCache()
-            invalidatePermissionsCache()
-            invalidateInstalledAppsCache()
-            invalidateManifestSecurityCache()
+            db.cacheDatabaseQueries.clearActivities()
+            db.cacheDatabaseQueries.clearPermissions()
+            db.cacheDatabaseQueries.clearInstalled()
             db.cacheDatabaseQueries.clearDeviceInfo()
         }
     }

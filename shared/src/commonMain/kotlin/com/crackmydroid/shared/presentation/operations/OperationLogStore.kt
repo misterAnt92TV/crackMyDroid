@@ -1,5 +1,7 @@
 package com.crackmydroid.shared.presentation.operations
 
+import com.crackmydroid.shared.domain.model.OperationEntry
+import com.crackmydroid.shared.domain.repository.OperationLogRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -8,46 +10,52 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 
-data class OperationEntry(
-    val description: String,
-    val success: Boolean,
-    val details: String? = null,
-    val timestamp: Long = currentTimeMillis()
-)
-
 interface OperationLogPersistence {
     suspend fun load(): List<OperationEntry>
     suspend fun save(entries: List<OperationEntry>)
 }
 
-object OperationLogStore {
-    private const val MAX = 50
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
-    private val _entries = MutableStateFlow<List<OperationEntry>>(emptyList())
-    val entries: StateFlow<List<OperationEntry>> = _entries
-    private var persistence: OperationLogPersistence? = null
+class InMemoryOperationLogPersistence : OperationLogPersistence {
+    private var entries: List<OperationEntry> = emptyList()
 
-    fun record(description: String, success: Boolean, details: String? = null) {
-        _entries.update { list -> (listOf(OperationEntry(description, success, details)) + list).take(MAX) }
-        persist()
+    override suspend fun load(): List<OperationEntry> = entries
+
+    override suspend fun save(entries: List<OperationEntry>) {
+        this.entries = entries
     }
+}
 
-    fun configure(persistence: OperationLogPersistence) {
-        this.persistence = persistence
+class DefaultOperationLogRepository(
+    private val persistence: OperationLogPersistence,
+    private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+) : OperationLogRepository {
+    private val maxEntries = 50
+    private val _entries = MutableStateFlow<List<OperationEntry>>(emptyList())
+    override val entries: StateFlow<List<OperationEntry>> = _entries
+
+    init {
         scope.launch {
             runCatching { persistence.load() }
-                .onSuccess { loaded ->
-                    if (loaded.isNotEmpty()) {
-                        _entries.value = loaded.take(MAX)
-                    }
-                }
+                .onSuccess { loaded -> _entries.value = loaded.take(maxEntries) }
         }
+    }
+
+    override fun record(description: String, success: Boolean, details: String?) {
+        _entries.update { list ->
+            (listOf(OperationEntry(description, success, details, currentTimeMillis())) + list).take(maxEntries)
+        }
+        persist()
     }
 
     private fun persist() {
         val current = _entries.value
-        persistence?.let { p ->
-            scope.launch { runCatching { p.save(current) } }
-        }
+        scope.launch { runCatching { persistence.save(current) } }
     }
+}
+
+object NoOpOperationLogRepository : OperationLogRepository {
+    private val emptyEntries = MutableStateFlow<List<OperationEntry>>(emptyList())
+    override val entries: StateFlow<List<OperationEntry>> = emptyEntries
+
+    override fun record(description: String, success: Boolean, details: String?) = Unit
 }

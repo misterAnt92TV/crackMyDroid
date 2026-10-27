@@ -3,8 +3,8 @@ package com.crackmydroid.shared.presentation.navigation
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Build
 import androidx.compose.material.icons.rounded.Info
-import androidx.compose.material.icons.rounded.List
-import androidx.compose.material.icons.rounded.ReceiptLong
+import androidx.compose.material.icons.automirrored.rounded.List
+import androidx.compose.material.icons.automirrored.rounded.ReceiptLong
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.rounded.VerifiedUser
 import androidx.compose.material.icons.rounded.Home
@@ -15,12 +15,12 @@ import androidx.compose.ui.graphics.vector.ImageVector
 
 sealed class Screen(val title: (com.crackmydroid.shared.i18n.Strings) -> String, val icon: ImageVector) {
     object Home : Screen({ it.navHome }, Icons.Rounded.Home)
-    object Activities : Screen({ it.navActivities }, Icons.Rounded.List)
+    object Activities : Screen({ it.navActivities }, Icons.AutoMirrored.Rounded.List)
     object Root : Screen({ it.navRoot }, Icons.Rounded.VerifiedUser)
     object Info : Screen({ it.navInfo }, Icons.Rounded.Info)
     object Trick : Screen({ it.navTrick }, Icons.Rounded.Build)
     object Settings : Screen({ it.navSettings }, Icons.Rounded.Settings)
-    object Log : Screen({ it.navLog }, Icons.Rounded.ReceiptLong)
+    object Log : Screen({ it.navLog }, Icons.AutoMirrored.Rounded.ReceiptLong)
     object Permissions : Screen({ it.navPermissions }, Icons.Rounded.PrivacyTip)
     object InstalledApps : Screen({ it.navApk }, Icons.Rounded.Apps)
     object Pentest : Screen({ it.navPentest }, Icons.Rounded.Security)

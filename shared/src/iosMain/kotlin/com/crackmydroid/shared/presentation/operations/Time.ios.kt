@@ -1,5 +1,7 @@
 package com.crackmydroid.shared.presentation.operations
 
-import platform.Foundation.NSDate
+import kotlinx.cinterop.ExperimentalForeignApi
+import platform.posix.time
 
-actual fun currentTimeMillis(): Long = (NSDate().timeIntervalSince1970 * 1000.0).toLong()
+@OptIn(ExperimentalForeignApi::class)
+actual fun currentTimeMillis(): Long = time(null) * 1_000L

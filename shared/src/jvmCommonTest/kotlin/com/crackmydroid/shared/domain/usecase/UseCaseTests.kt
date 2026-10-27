@@ -6,8 +6,11 @@ import com.crackmydroid.shared.domain.model.RootStatus
 import com.crackmydroid.shared.domain.repository.ActivityRepository
 import com.crackmydroid.shared.domain.repository.InstalledAppsRepository
 import com.crackmydroid.shared.domain.repository.RootCheckRepository
+import com.crackmydroid.shared.domain.repository.ReportFileRepository
+import com.crackmydroid.shared.domain.usecase.reports.ExportReportUseCase
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.coVerifyOrder
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
@@ -73,5 +76,21 @@ class UseCaseTests {
 
         assertTrue(result.isSuccess)
         coVerify { repo.shareApk("pkg", true) }
+    }
+
+    @Test
+    fun shareReportSavesThenSharesTheGeneratedPath() = runTest {
+        val repo = mockk<ReportFileRepository>()
+        coEvery { repo.save("report.txt", "content") } returns Result.success("/tmp/report.txt")
+        coEvery { repo.share("/tmp/report.txt") } returns Result.success(Unit)
+        val useCase = ExportReportUseCase(repo)
+
+        val result = useCase.share("report.txt", "content")
+
+        assertEquals("/tmp/report.txt", result.getOrNull())
+        coVerifyOrder {
+            repo.save("report.txt", "content")
+            repo.share("/tmp/report.txt")
+        }
     }
 }

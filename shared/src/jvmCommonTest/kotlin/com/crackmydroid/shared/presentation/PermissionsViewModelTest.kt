@@ -4,6 +4,8 @@ import com.crackmydroid.shared.domain.model.AppPermissionEntry
 import com.crackmydroid.shared.domain.usecase.ListPermissionsUseCase
 import com.crackmydroid.shared.domain.usecase.permissions.AnalyzePermissionRisksUseCase
 import com.crackmydroid.shared.domain.usecase.permissions.BuildPermissionsReportUseCase
+import com.crackmydroid.shared.domain.repository.ReportFileRepository
+import com.crackmydroid.shared.domain.usecase.reports.ExportReportUseCase
 import com.crackmydroid.shared.ui.permissions.PermissionsViewModel
 import io.mockk.coEvery
 import io.mockk.mockk
@@ -22,6 +24,7 @@ import kotlin.test.assertEquals
 @OptIn(ExperimentalCoroutinesApi::class)
 class PermissionsViewModelTest {
     private val dispatcher = StandardTestDispatcher()
+    private fun reportExporter() = ExportReportUseCase(mockk<ReportFileRepository>(relaxed = true))
 
     @BeforeTest
     fun setUp() {
@@ -41,7 +44,7 @@ class PermissionsViewModelTest {
         )
         val analyzePermissionRisks = AnalyzePermissionRisksUseCase()
         val buildPermissionsReport = BuildPermissionsReportUseCase(analyzePermissionRisks)
-        val vm = PermissionsViewModel(listPermissions, analyzePermissionRisks, buildPermissionsReport)
+        val vm = PermissionsViewModel(listPermissions, analyzePermissionRisks, buildPermissionsReport, reportExporter())
 
         vm.refresh()
         advanceUntilIdle()
@@ -62,7 +65,7 @@ class PermissionsViewModelTest {
         )
         val analyzePermissionRisks = AnalyzePermissionRisksUseCase()
         val buildPermissionsReport = BuildPermissionsReportUseCase(analyzePermissionRisks)
-        val vm = PermissionsViewModel(listPermissions, analyzePermissionRisks, buildPermissionsReport)
+        val vm = PermissionsViewModel(listPermissions, analyzePermissionRisks, buildPermissionsReport, reportExporter())
 
         vm.refresh()
         advanceUntilIdle()

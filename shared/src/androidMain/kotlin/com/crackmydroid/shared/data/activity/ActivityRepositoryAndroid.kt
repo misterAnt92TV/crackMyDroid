@@ -11,6 +11,7 @@ import com.crackmydroid.shared.domain.model.ComponentType
 import com.crackmydroid.database.CacheDatabase
 import com.crackmydroid.shared.domain.repository.ActivityRepository
 import com.crackmydroid.shared.data.cache.CachingRepositoryDecorator
+import android.content.pm.ActivityInfo
 import com.crackmydroid.shared.data.cache.PaginationHelper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -126,7 +127,7 @@ class ActivityRepositoryAndroid(
                     name = provider.name,
                     type = ComponentType.PROVIDER,
                     exported = provider.exported,
-                    permission = provider.permission
+                    permission = provider.readPermission ?: provider.writePermission
                 )
             }
             

@@ -2,7 +2,6 @@ package com.crackmydroid.shared.data.cache
 
 import com.crackmydroid.shared.domain.model.ManifestSecurityReport
 import com.crackmydroid.shared.domain.model.AppComponent
-import kotlin.system.measureTimeMillis
 
 /**
  * Wrapper di caching in-memory per ridurre accessi ripetuti al PackageManager
@@ -13,9 +12,9 @@ class CachingRepositoryDecorator {
     private var componentsCache: List<AppComponent>? = null
     private var lastManifestSecurityTime = 0L
     private var lastComponentsTime = 0L
-    private val CACHE_VALIDITY_MS = 60_000L // 60 secondi
+    private val cacheValidityMs = 60_000L
 
-    suspend inline fun <T> getCachedOrCompute(
+    suspend fun <T> getCachedOrCompute(
         cacheGetter: () -> T?,
         cacheSetter: (T) -> Unit,
         timeGetter: () -> Long,
@@ -26,7 +25,7 @@ class CachingRepositoryDecorator {
         val now = System.currentTimeMillis()
         val lastTime = timeGetter()
 
-        return if (cached != null && (now - lastTime) < CACHE_VALIDITY_MS) {
+        return if (cached != null && (now - lastTime) < cacheValidityMs) {
             cached
         } else {
             val result = compute()
@@ -59,23 +58,4 @@ class CachingRepositoryDecorator {
     }
 
     fun getComponentsCache(): List<AppComponent>? = componentsCache
-}
-
-/**
- * Utilità per paginazione lazy loading
- */
-object PaginationHelper {
-    fun <T> paginate(items: List<T>, offset: Int, limit: Int): List<T> {
-        val startIdx = offset.coerceAtLeast(0)
-        val endIdx = (startIdx + limit).coerceAtMost(items.size)
-        return if (startIdx >= items.size) {
-            emptyList()
-        } else {
-            items.subList(startIdx, endIdx)
-        }
-    }
-
-    fun <T> countPages(totalItems: Int, pageSize: Int): Int {
-        return (totalItems + pageSize - 1) / pageSize
-    }
 }

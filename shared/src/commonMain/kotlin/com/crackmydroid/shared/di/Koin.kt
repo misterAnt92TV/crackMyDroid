@@ -43,12 +43,16 @@ import com.crackmydroid.shared.domain.usecase.GetPermissionFavoritesUseCase
 import com.crackmydroid.shared.domain.usecase.SetPermissionFavoritesUseCase
 import com.crackmydroid.shared.domain.usecase.permissions.AnalyzePermissionRisksUseCase
 import com.crackmydroid.shared.domain.usecase.permissions.BuildPermissionsReportUseCase
+import com.crackmydroid.shared.domain.usecase.pentest.RunPenTestChecksUseCase
+import com.crackmydroid.shared.domain.usecase.reports.ExportReportUseCase
 import com.crackmydroid.shared.ui.activities.ActivityListViewModel
 import com.crackmydroid.shared.ui.info.InfoViewModel
 import com.crackmydroid.shared.ui.root.RootViewModel
 import com.crackmydroid.shared.ui.settings.SettingsViewModel
 import com.crackmydroid.shared.ui.trick.TrickViewModel
 import com.crackmydroid.shared.ui.logs.LogViewModel
+import com.crackmydroid.shared.presentation.AppDispatchers
+import com.crackmydroid.shared.presentation.DefaultAppDispatchers
 import com.crackmydroid.shared.ui.permissions.PermissionsViewModel
 import com.crackmydroid.shared.ui.installedapps.InstalledAppsViewModel
 import com.crackmydroid.shared.ui.pentest.PenTestingViewModel
@@ -105,15 +109,18 @@ fun commonModule() = module {
     factory { ListPermissionsUseCase(get()) }
     factory { AnalyzePermissionRisksUseCase() }
     factory { BuildPermissionsReportUseCase(get()) }
+    factory { RunPenTestChecksUseCase(get()) }
+    factory { ExportReportUseCase(get()) }
     factory { ListInstalledAppsUseCase(get()) }
     factory { ExportApkUseCase(get()) }
     factory { ShareApkUseCase(get()) }
 }
 
 fun presentationModule() = module {
-    factory { ActivityListViewModel(get(), get(), get(), get(), get(), get(), get()) }
-    factory { RootViewModel(get(), get()) }
-    factory { InfoViewModel(get(), get()) }
+    single<AppDispatchers> { DefaultAppDispatchers }
+    factory { ActivityListViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get()) }
+    factory { RootViewModel(get(), get(), get()) }
+    factory { InfoViewModel(get(), get(), get()) }
     factory { TrickViewModel(get(), get()) }
     factory {
         SettingsViewModel(
@@ -129,8 +136,8 @@ fun presentationModule() = module {
             , get(), get() // language
         )
     }
-    factory { LogViewModel(get(), get()) }
-    factory { PermissionsViewModel(get(), get(), get(), get(), get()) }
-    factory { InstalledAppsViewModel(get(), get(), get(), get(), get(), get()) }
-    factory { PenTestingViewModel(get(), get(), get(), get(), get()) }
+    factory { LogViewModel(get(), get(), get()) }
+    factory { PermissionsViewModel(get(), get(), get(), get(), get(), get()) }
+    factory { InstalledAppsViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
+    factory { PenTestingViewModel(get(), get(), get(), get(), get(), get()) }
 }

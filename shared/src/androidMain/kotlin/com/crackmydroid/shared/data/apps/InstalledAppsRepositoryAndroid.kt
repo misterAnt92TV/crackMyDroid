@@ -128,7 +128,7 @@ class InstalledAppsRepositoryAndroid(
                         type = AppComponentType.PROVIDER,
                         name = provider.name,
                         exported = true,
-                        permission = provider.permission
+                        permission = provider.readPermission ?: provider.writePermission
                     )
                 }
             }

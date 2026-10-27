@@ -480,7 +480,7 @@ fun SectionHeader(
             .fillMaxWidth()
             .padding(horizontal = 2.dp)
             .clip(RoundedCornerShape(20.dp)),
-        colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+        colors = TopAppBarDefaults.topAppBarColors(
             containerColor = containerColor,
             scrolledContainerColor = containerColor,
             navigationIconContentColor = MaterialTheme.colorScheme.primary,

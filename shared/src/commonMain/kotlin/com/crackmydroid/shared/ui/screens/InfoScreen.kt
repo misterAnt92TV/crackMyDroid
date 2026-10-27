@@ -1,3 +1,5 @@
+@file:OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class, androidx.compose.ui.ExperimentalComposeUiApi::class)
+
 package com.crackmydroid.shared.ui.screens
 
 import androidx.compose.foundation.clickable
@@ -29,7 +31,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -113,7 +115,7 @@ fun InfoScreen(
     val state by viewModel.state.collectAsState()
     val strings = LocalStrings.current
     val root = state.root
-    val clipboard = LocalClipboardManager.current
+    val clipboard = LocalClipboard.current
     val scrollState = rememberScrollState()
     val scope = rememberCoroutineScope()
     val showScrollTop by remember {
@@ -150,7 +152,9 @@ fun InfoScreen(
                                 onClick = {
                                     state.info?.let { info ->
                                         val content = buildInfoContent(info, root)
-                                        clipboard.setText(AnnotatedString(content))
+                                        scope.launch {
+                                            clipboard.setClipEntry(androidx.compose.ui.platform.ClipEntry(AnnotatedString(content)))
+                                        }
                                         viewModel.share(content)
                                     }
                                 }
@@ -210,8 +214,7 @@ fun InfoScreen(
                         InfoRow("RAM totale", info.totalMemory?.let { "${it/1024/1024} MB" } ?: "n/d")
                         InfoRow("RAM libera", info.freeMemory?.let { "${it/1024/1024} MB" } ?: "n/d")
                         InfoRow("Batteria", info.batteryLevel?.let { "$it%" } ?: "n/d")
-                        Spacer(modifier = Modifier.height(16.dp))
-                    }
+                        Spacer(modifier = Modifier.height(16.dp)) }
                 }
 
                 info.systemPropDump?.takeIf { it.isNotBlank() }?.let { dump ->
@@ -267,7 +270,8 @@ fun InfoScreen(
 
 @Composable
 private fun InfoRow(label: String, value: String, copyValue: String? = null) {
-    val clipboard = LocalClipboardManager.current
+    val clipboard = LocalClipboard.current
+    val scope = rememberCoroutineScope()
     val copyText = copyValue ?: value
     Row(
         modifier = Modifier
@@ -279,7 +283,11 @@ private fun InfoRow(label: String, value: String, copyValue: String? = null) {
         AppText(
             label,
             fontWeight = FontWeight.SemiBold,
-            modifier = Modifier.clickable { clipboard.setText(AnnotatedString("$label: $copyText")) }
+            modifier = Modifier.clickable {
+                scope.launch {
+                    clipboard.setClipEntry(androidx.compose.ui.platform.ClipEntry(AnnotatedString("$label: $copyText")))
+                }
+            }
         )
         Spacer(modifier = Modifier.width(12.dp))
         AppText(

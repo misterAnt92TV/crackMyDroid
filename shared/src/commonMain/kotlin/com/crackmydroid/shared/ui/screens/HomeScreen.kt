@@ -34,19 +34,20 @@ import com.crackmydroid.shared.presentation.components.AppCard
 import com.crackmydroid.shared.presentation.components.AppText
 import com.crackmydroid.shared.presentation.components.PackageIcon
 import com.crackmydroid.shared.presentation.components.SectionHeader
-import com.crackmydroid.shared.presentation.operations.OperationLogStore
+import com.crackmydroid.shared.domain.repository.OperationLogRepository
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.text.font.FontWeight
 
 @Composable
 fun HomeScreen(
+    operationLogs: OperationLogRepository,
     padding: androidx.compose.foundation.layout.PaddingValues,
     headerHelp: String,
     onHelp: (String) -> Unit,
     onMenu: () -> Unit = {}
 ) {
     val strings = LocalStrings.current
-    val history = OperationLogStore.entries.collectAsState()
+    val history = operationLogs.entries.collectAsState()
     val uniqueHistory = history.value
         .distinctBy { it.description to it.success }
         .take(5)
