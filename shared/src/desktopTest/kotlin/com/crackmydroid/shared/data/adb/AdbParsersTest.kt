@@ -95,4 +95,14 @@ class AdbParsersTest {
         assertEquals("com.example.demo.HiddenActivity", activities[2].activityName)
         assertEquals(false, activities[2].launchableViaShell)
     }
+
+    @Test
+    fun malformedOrEmptyOutput_returnsSafeFallbacks() {
+        assertEquals(emptyList(), AdbParsers.parseAdbDevices("List of devices attached\n\ninvalid"))
+        assertEquals(emptyList(), AdbParsers.parseInstalledApps("not-a-package"))
+        assertEquals(emptyList(), AdbParsers.parseRequestedPermissions("Activities:\n Activity{bad}"))
+        assertEquals(emptyList(), AdbParsers.parseActivities("pkg", "Demo", ""))
+        assertEquals(null, AdbParsers.parseBatteryLevel("level: unavailable"))
+        assertEquals(null, AdbParsers.parseDensity("Physical density: unknown"))
+    }
 }
