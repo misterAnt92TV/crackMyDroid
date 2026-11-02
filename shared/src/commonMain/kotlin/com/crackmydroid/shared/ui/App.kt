@@ -459,7 +459,8 @@ fun CrackMyDroidApp() {
                                 Screen.Help -> HelpScreen(
                                     padding = adjustedPadding,
                                     onHelp = { helpDialog.value = it },
-                                    onMenu = openDrawer
+                                    onMenu = openDrawer,
+                                    onNavigate = { target -> selected.value = target }
                                 )
                             }
                         }
