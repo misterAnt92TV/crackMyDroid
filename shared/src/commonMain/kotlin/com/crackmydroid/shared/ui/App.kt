@@ -26,8 +26,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.TextButton
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -38,7 +36,6 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.unit.dp
@@ -98,6 +95,7 @@ import com.crackmydroid.shared.presentation.components.LocalAccessibilityPrefs
 import com.crackmydroid.shared.presentation.components.AccessibilityPrefs
 import com.crackmydroid.shared.presentation.components.SearchHistoryStore
 import com.crackmydroid.shared.presentation.components.PackageIcon
+import com.crackmydroid.shared.presentation.theme.CrackMyDroidTheme
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.setValue
@@ -162,61 +160,7 @@ fun CrackMyDroidApp() {
         AppTheme.SYSTEM -> isSystemInDarkTheme()
     }
 
-    val lightPalette = lightColorScheme(
-        primary = Color(0xFF1A73E8),
-        onPrimary = Color.White,
-        primaryContainer = Color(0xFFD2E3FC),
-        onPrimaryContainer = Color(0xFF0B3C74),
-        secondary = Color(0xFF188038),
-        onSecondary = Color.White,
-        secondaryContainer = Color(0xFFCEEAD6),
-        onSecondaryContainer = Color(0xFF0F3A1B),
-        tertiary = Color(0xFFF9AB00),
-        onTertiary = Color(0xFF2F1F00),
-        tertiaryContainer = Color(0xFFFEEFC3),
-        onTertiaryContainer = Color(0xFF4A3300),
-        error = Color(0xFFD93025),
-        onError = Color.White,
-        errorContainer = Color(0xFFFDE8E7),
-        onErrorContainer = Color(0xFF5C0A05),
-        background = Color(0xFFF7F9FC),
-        onBackground = Color(0xFF1C1F26),
-        surface = Color(0xFFFFFFFF),
-        onSurface = Color(0xFF1C1F26),
-        surfaceVariant = Color(0xFFE9EDF4),
-        onSurfaceVariant = Color(0xFF444A56),
-        outline = Color(0xFF737A88),
-        outlineVariant = Color(0xFFC2C8D3)
-    )
-    val darkPalette = darkColorScheme(
-        primary = Color(0xFFA8C7FA),
-        onPrimary = Color(0xFF053062),
-        primaryContainer = Color(0xFF174EA6),
-        onPrimaryContainer = Color(0xFFD8E2FF),
-        secondary = Color(0xFF81C995),
-        onSecondary = Color(0xFF0B3819),
-        secondaryContainer = Color(0xFF0F5223),
-        onSecondaryContainer = Color(0xFFB7F1C3),
-        tertiary = Color(0xFFFDD663),
-        onTertiary = Color(0xFF443100),
-        tertiaryContainer = Color(0xFF604600),
-        onTertiaryContainer = Color(0xFFFFE59A),
-        error = Color(0xFFF28B82),
-        onError = Color(0xFF690005),
-        errorContainer = Color(0xFF8C1D18),
-        onErrorContainer = Color(0xFFFFDAD6),
-        background = Color(0xFF101418),
-        onBackground = Color(0xFFE3E8F0),
-        surface = Color(0xFF101418),
-        onSurface = Color(0xFFE3E8F0),
-        surfaceVariant = Color(0xFF3F4652),
-        onSurfaceVariant = Color(0xFFC0C7D2),
-        outline = Color(0xFF8A92A1),
-        outlineVariant = Color(0xFF3F4652)
-    )
-
-    val colorScheme = if (darkTheme) darkPalette else lightPalette
-    MaterialTheme(colorScheme = colorScheme) {
+    CrackMyDroidTheme(darkTheme = darkTheme) {
         CompositionLocalProvider(
             LocalStrings provides strings,
             LocalAccessibilityPrefs provides accessibilityPrefs

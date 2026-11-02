@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.clickable
@@ -20,9 +21,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Accessibility
 import androidx.compose.material.icons.filled.ColorLens
@@ -39,6 +40,9 @@ import com.crackmydroid.shared.domain.model.AppTheme
 import com.crackmydroid.shared.domain.model.AppLanguage
 import com.crackmydroid.shared.i18n.LocalStrings
 import com.crackmydroid.shared.ui.settings.SettingsViewModel
+import com.crackmydroid.shared.ui.settings.SettingsActions
+import com.crackmydroid.shared.ui.settings.SettingsAppInfo
+import com.crackmydroid.shared.ui.settings.SettingsState
 import com.crackmydroid.shared.presentation.components.CardBlock
 import com.crackmydroid.shared.presentation.components.AppButton
 import com.crackmydroid.shared.presentation.components.AppText
@@ -62,8 +66,48 @@ fun SettingsScreen(
     onMenu: () -> Unit = {}
 ) {
     val state by viewModel.state.collectAsState()
-    val strings = LocalStrings.current
     val uriHandler = LocalUriHandler.current
+    val sdkInfo = appSdkInfo()
+    SettingsContent(
+        state = state,
+        padding = padding,
+        headerHelp = headerHelp,
+        appInfo = SettingsAppInfo(
+            versionName = appVersionName(),
+            packageName = appPackageName(),
+            minSdk = sdkInfo?.minSdk,
+            targetSdk = sdkInfo?.targetSdk,
+            requestedPermissions = appRequestedPermissions()
+        ),
+        actions = SettingsActions(
+            onSelectTheme = viewModel::selectTheme,
+            onSelectLanguage = viewModel::selectLanguage,
+            onSetSuggestionsEnabled = viewModel::setSuggestionsEnabled,
+            onClearSuggestions = viewModel::clearSuggestions,
+            onSetFeatureHintsEnabled = viewModel::setFeatureHintsEnabled,
+            onSetShowIntroOnLaunch = viewModel::setShowIntroOnLaunch,
+            onToggleVerbose = viewModel::toggleVerbose,
+            onSetExportFormat = viewModel::setExportFormat,
+            onSetHighContrast = viewModel::setHighContrast,
+            onSetReduceMotion = viewModel::setReduceMotion,
+            onSetLargeText = viewModel::setLargeText,
+            onOpenUri = uriHandler::openUri,
+            onHelp = onHelp,
+            onMenu = onMenu,
+            onClearError = viewModel::clearError
+        )
+    )
+}
+
+@Composable
+internal fun SettingsContent(
+    state: SettingsState,
+    padding: androidx.compose.foundation.layout.PaddingValues,
+    headerHelp: String,
+    appInfo: SettingsAppInfo,
+    actions: SettingsActions
+) {
+    val strings = LocalStrings.current
     val scrollState = rememberScrollState()
     val scope = rememberCoroutineScope()
     val showScrollTop by remember {
@@ -77,15 +121,17 @@ fun SettingsScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .align(Alignment.TopCenter)
+                .widthIn(max = 840.dp)
                 .padding(16.dp)
                 .verticalScroll(scrollState),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            SectionHeader(title = strings.navSettings, help = headerHelp, onHelp = onHelp, onMenu = onMenu)
+            SectionHeader(title = strings.navSettings, help = headerHelp, onHelp = actions.onHelp, onMenu = actions.onMenu)
             CardBlock(strings.themeTitle, leadingIcon = Icons.Filled.ColorLens) {
-                ThemeRow(strings.light, AppTheme.LIGHT, state.theme) { viewModel.selectTheme(AppTheme.LIGHT) }
-                ThemeRow(strings.dark, AppTheme.DARK, state.theme) { viewModel.selectTheme(AppTheme.DARK) }
-                ThemeRow(strings.system, AppTheme.SYSTEM, state.theme) { viewModel.selectTheme(AppTheme.SYSTEM) }
+                ThemeRow(strings.light, AppTheme.LIGHT, state.theme) { actions.onSelectTheme(AppTheme.LIGHT) }
+                ThemeRow(strings.dark, AppTheme.DARK, state.theme) { actions.onSelectTheme(AppTheme.DARK) }
+                ThemeRow(strings.system, AppTheme.SYSTEM, state.theme) { actions.onSelectTheme(AppTheme.SYSTEM) }
             }
 
             CardBlock(strings.languageTitle, leadingIcon = Icons.Filled.Settings) {
@@ -93,7 +139,7 @@ fun SettingsScreen(
                 AppLanguage.entries.forEach { language ->
                     AppButton(
                         text = if (state.language == language) "✔︎ ${language.displayName}" else language.displayName,
-                        onClick = { viewModel.selectLanguage(language) },
+                        onClick = { actions.onSelectLanguage(language) },
                         modifier = Modifier.padding(vertical = 4.dp),
                         variant = ButtonVariant.Tonal
                     )
@@ -104,7 +150,7 @@ fun SettingsScreen(
                 SwitchRow(
                     label = "Abilita suggerimenti",
                     checked = state.suggestionsEnabled,
-                    onCheckedChange = viewModel::setSuggestionsEnabled
+                    onCheckedChange = actions.onSetSuggestionsEnabled
                 )
                 AppText(
                     "Memorizza le ultime ricerche e riproponile come chip rapidi nelle aree di cerca.",
@@ -113,7 +159,7 @@ fun SettingsScreen(
                 )
                 AppButton(
                     text = "Cancella suggerimenti",
-                    onClick = viewModel::clearSuggestions,
+                    onClick = actions.onClearSuggestions,
                     variant = ButtonVariant.Tonal,
                     modifier = Modifier.padding(top = 8.dp),
                     leadingIcon = Icons.Filled.History
@@ -124,7 +170,7 @@ fun SettingsScreen(
                 SwitchRow(
                     label = "Abilita dialog di suggerimento",
                     checked = state.featureHintsEnabled,
-                    onCheckedChange = viewModel::setFeatureHintsEnabled
+                    onCheckedChange = actions.onSetFeatureHintsEnabled
                 )
                 AppText(
                     "Mostra la dialog di ingresso nelle sezioni tecniche. Da ogni dialog puoi anche selezionare \"Non visualizzare più\" per disattivarla.",
@@ -137,7 +183,7 @@ fun SettingsScreen(
                 SwitchRow(
                     label = "Mostra introduzione all'avvio",
                     checked = state.showIntroOnLaunch,
-                    onCheckedChange = viewModel::setShowIntroOnLaunch
+                    onCheckedChange = actions.onSetShowIntroOnLaunch
                 )
                 AppText(
                     "Se attivo, la schermata introduttiva viene mostrata all'apertura dell'app.",
@@ -150,7 +196,7 @@ fun SettingsScreen(
                 SwitchRow(
                     label = strings.verboseTitle,
                     checked = state.verbose,
-                    onCheckedChange = viewModel::toggleVerbose
+                    onCheckedChange = actions.onToggleVerbose
                 )
                 AppText(strings.verboseSubtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
@@ -159,11 +205,11 @@ fun SettingsScreen(
                 ExportFormatRow(
                     label = "Testo (.txt)",
                     selected = state.exportFormat == com.crackmydroid.shared.domain.model.ExportFormat.TXT
-                ) { viewModel.setExportFormat(com.crackmydroid.shared.domain.model.ExportFormat.TXT) }
+                ) { actions.onSetExportFormat(com.crackmydroid.shared.domain.model.ExportFormat.TXT) }
                 ExportFormatRow(
                     label = "JSON formattato",
                     selected = state.exportFormat == com.crackmydroid.shared.domain.model.ExportFormat.JSON
-                ) { viewModel.setExportFormat(com.crackmydroid.shared.domain.model.ExportFormat.JSON) }
+                ) { actions.onSetExportFormat(com.crackmydroid.shared.domain.model.ExportFormat.JSON) }
                 AppText(
                     "Si applica a export e condividi (liste activity / app).",
                     style = MaterialTheme.typography.bodySmall,
@@ -175,9 +221,9 @@ fun SettingsScreen(
             CardBlock(strings.accessibilityTitle, leadingIcon = Icons.Filled.Accessibility) {
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     AppText(strings.accessibilityDesc, style = MaterialTheme.typography.bodySmall)
-                    SwitchRow(label = strings.accessibilityContrast, checked = state.highContrast, onCheckedChange = viewModel::setHighContrast)
-                    SwitchRow(label = strings.accessibilityReduceMotion, checked = state.reduceMotion, onCheckedChange = viewModel::setReduceMotion)
-                    SwitchRow(label = strings.accessibilityLargeText, checked = state.largeText, onCheckedChange = viewModel::setLargeText)
+                    SwitchRow(label = strings.accessibilityContrast, checked = state.highContrast, onCheckedChange = actions.onSetHighContrast)
+                    SwitchRow(label = strings.accessibilityReduceMotion, checked = state.reduceMotion, onCheckedChange = actions.onSetReduceMotion)
+                    SwitchRow(label = strings.accessibilityLargeText, checked = state.largeText, onCheckedChange = actions.onSetLargeText)
                 }
             }
 
@@ -200,7 +246,7 @@ fun SettingsScreen(
                         color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier
                             .padding(vertical = 2.dp)
-                            .clickable { uriHandler.openUri(url) }
+                            .clickable { actions.onOpenUri(url) }
                     )
                 }
             }
@@ -208,16 +254,16 @@ fun SettingsScreen(
             DisclaimerBox()
 
             CardBlock("Info app", leadingIcon = Icons.Filled.Info) {
-                AppText("Versione: ${appVersionName()}", style = MaterialTheme.typography.titleMedium)
-                AppText("Package: ${appPackageName()}", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                appSdkInfo()?.let { sdk ->
+                AppText("Versione: ${appInfo.versionName}", style = MaterialTheme.typography.titleMedium)
+                AppText("Package: ${appInfo.packageName}", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                if (appInfo.minSdk != null || appInfo.targetSdk != null) {
                     AppText(
-                        "SDK min/target: ${sdk.minSdk ?: "?"} / ${sdk.targetSdk ?: "?"}",
+                        "SDK min/target: ${appInfo.minSdk ?: "?"} / ${appInfo.targetSdk ?: "?"}",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
-                val perms = appRequestedPermissions()
+                val perms = appInfo.requestedPermissions
                 if (perms.isNotEmpty()) {
                     AppText("Permessi richiesti:", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
                     perms.forEach { perm ->
@@ -244,7 +290,7 @@ fun SettingsScreen(
         )
     }
 
-    state.error?.let { ErrorDialog(it, viewModel::clearError) }
+    state.error?.let { ErrorDialog(it, actions.onClearError) }
 }
 
 @Composable

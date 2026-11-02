@@ -48,7 +48,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -58,16 +57,6 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-
-data class AccessibilityPrefs(
-    val highContrast: Boolean = false,
-    val reduceMotion: Boolean = false,
-    val largeText: Boolean = false
-)
-
-val LocalAccessibilityPrefs = staticCompositionLocalOf { AccessibilityPrefs() }
-
-enum class ButtonVariant { Primary, Secondary, Tonal }
 
 @Composable
 fun AppButton(

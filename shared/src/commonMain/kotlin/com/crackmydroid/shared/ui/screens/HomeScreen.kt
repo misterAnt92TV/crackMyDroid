@@ -35,6 +35,7 @@ import com.crackmydroid.shared.presentation.components.AppText
 import com.crackmydroid.shared.presentation.components.PackageIcon
 import com.crackmydroid.shared.presentation.components.SectionHeader
 import com.crackmydroid.shared.domain.repository.OperationLogRepository
+import com.crackmydroid.shared.domain.model.OperationEntry
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.text.font.FontWeight
 
@@ -46,9 +47,26 @@ fun HomeScreen(
     onHelp: (String) -> Unit,
     onMenu: () -> Unit = {}
 ) {
-    val strings = LocalStrings.current
     val history = operationLogs.entries.collectAsState()
-    val uniqueHistory = history.value
+    HomeContent(
+        history = history.value,
+        padding = padding,
+        headerHelp = headerHelp,
+        onHelp = onHelp,
+        onMenu = onMenu
+    )
+}
+
+@Composable
+internal fun HomeContent(
+    history: List<OperationEntry>,
+    padding: androidx.compose.foundation.layout.PaddingValues,
+    headerHelp: String,
+    onHelp: (String) -> Unit,
+    onMenu: () -> Unit = {}
+) {
+    val strings = LocalStrings.current
+    val uniqueHistory = history
         .distinctBy { it.description to it.success }
         .take(5)
 
