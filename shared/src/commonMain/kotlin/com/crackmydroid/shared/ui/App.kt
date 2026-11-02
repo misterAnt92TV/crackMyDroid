@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.windowInsetsTopHeight
@@ -43,7 +42,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
@@ -303,35 +301,29 @@ fun CrackMyDroidApp() {
                     }
                     }
                 ) {
-                val showBottomBar = bottomScreens.contains(selected.value)
-                val navHeight = if (accessibilityPrefs.largeText) 68.dp else 56.dp
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
                     contentWindowInsets = WindowInsets.safeDrawing,
                     bottomBar = {
-                        if (showBottomBar) {
-                            NavigationBar(
-                                modifier = Modifier
-                                    .height(navHeight),
-                                windowInsets = NavigationBarDefaults.windowInsets,
-                                tonalElevation = 3.dp
-                            ) {
-                                val itemIconSize = 20.dp
-                                bottomScreens.forEach { screen ->
-                                    NavigationBarItem(
-                                        selected = selected.value == screen,
-                                        onClick = { selected.value = screen },
-                                        icon = { Icon(screen.icon, contentDescription = screen.title(strings), modifier = Modifier.size(itemIconSize)) },
-                                        label = {
-                                            Text(
-                                                screen.title(strings),
-                                                maxLines = if (accessibilityPrefs.largeText) 2 else 1,
-                                                overflow = TextOverflow.Ellipsis
-                                            )
-                                        },
-                                        alwaysShowLabel = true
-                                    )
-                                }
+                        NavigationBar(
+                            windowInsets = NavigationBarDefaults.windowInsets,
+                            tonalElevation = 3.dp
+                        ) {
+                            val itemIconSize = 20.dp
+                            bottomScreens.forEach { screen ->
+                                NavigationBarItem(
+                                    selected = selected.value == screen,
+                                    onClick = { selected.value = screen },
+                                    icon = { Icon(screen.icon, contentDescription = screen.title(strings), modifier = Modifier.size(itemIconSize)) },
+                                    label = {
+                                        Text(
+                                            screen.title(strings),
+                                            maxLines = if (accessibilityPrefs.largeText) 2 else 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                    },
+                                    alwaysShowLabel = true
+                                )
                             }
                         }
                     }
