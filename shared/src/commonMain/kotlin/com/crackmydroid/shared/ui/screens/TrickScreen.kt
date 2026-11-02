@@ -102,17 +102,13 @@ fun TrickScreen(
     }
 
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(padding)
+        modifier = Modifier.fillMaxSize()
     ) {
         LazyColumn(
             state = listState,
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 16.dp, vertical = 10.dp),
+            modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(10.dp),
-            contentPadding = PaddingValues(bottom = 28.dp)
+            contentPadding = screenContentPadding(padding, horizontal = 16.dp, vertical = 10.dp)
         ) {
             item {
                 SectionHeader(

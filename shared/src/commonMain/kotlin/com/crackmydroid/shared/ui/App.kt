@@ -9,11 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.calculateStartPadding
-import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.windowInsetsTopHeight
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.statusBars
@@ -48,7 +44,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.LayoutDirection
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
@@ -341,14 +336,8 @@ fun CrackMyDroidApp() {
                         }
                     }
                 ) { padding ->
-                    val layoutDirection = LocalLayoutDirection.current
                     val focusManager = LocalFocusManager.current
-                    val adjustedPadding = PaddingValues(
-                        start = padding.calculateStartPadding(layoutDirection),
-                        top = padding.calculateTopPadding(),
-                        end = padding.calculateEndPadding(layoutDirection),
-                        bottom = if (showBottomBar) navHeight else 0.dp
-                    )
+                    val adjustedPadding = padding
                     val openDrawer: () -> Unit = { scope.launch { drawerState.open() } }
                     val backToHome: () -> Unit = { selected.value = Screen.Home }
                     Column(
@@ -364,7 +353,6 @@ fun CrackMyDroidApp() {
                                 }
                             }
                             .background(MaterialTheme.colorScheme.background)
-                            .imePadding()
                     ) {
                         val reduceMotion = accessibilityPrefs.reduceMotion
                         AnimatedContent(
