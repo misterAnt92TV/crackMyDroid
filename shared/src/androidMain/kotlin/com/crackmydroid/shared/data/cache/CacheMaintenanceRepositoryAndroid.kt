@@ -3,14 +3,13 @@ package com.crackmydroid.shared.data.cache
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
-import androidx.core.content.ContextCompat
 import com.crackmydroid.database.CacheDatabase
 import com.crackmydroid.shared.domain.repository.CacheMaintenance
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.koin.core.context.GlobalContext
 
-class PackageChangeReceiver(private val cacheMaintenance: CacheMaintenance) : BroadcastReceiver() {
+class PackageChangeReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         when (intent.action) {
             Intent.ACTION_PACKAGE_ADDED,
@@ -19,26 +18,13 @@ class PackageChangeReceiver(private val cacheMaintenance: CacheMaintenance) : Br
                 goAsync().apply {
                     try {
                         kotlinx.coroutines.runBlocking {
-                            cacheMaintenance.clearAllCaches()
+                            GlobalContext.get().get<CacheMaintenance>().clearAllCaches()
                         }
                     } finally {
                         finish()
                     }
                 }
             }
-        }
-    }
-
-    companion object {
-        fun registerReceiver(context: Context, cacheMaintenance: CacheMaintenance) {
-            val receiver = PackageChangeReceiver(cacheMaintenance)
-            val filter = IntentFilter().apply {
-                addAction(Intent.ACTION_PACKAGE_ADDED)
-                addAction(Intent.ACTION_PACKAGE_REPLACED)
-                addAction(Intent.ACTION_PACKAGE_REMOVED)
-                addDataScheme("package")
-            }
-            ContextCompat.registerReceiver(context, receiver, filter, ContextCompat.RECEIVER_NOT_EXPORTED)
         }
     }
 }

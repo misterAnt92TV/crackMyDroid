@@ -174,9 +174,11 @@ class DeviceInfoRepositoryAndroid(
     private fun isAppDebuggable(): Boolean =
         (context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
 
-    @Suppress("DEPRECATION")
-    private fun readSerial(): String? =
-        runCatching { Build.getSerial() }.getOrNull()
+    @Suppress("DEPRECATION", "MissingPermission")
+    private fun readSerial(): String? {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return null
+        return runCatching { Build.getSerial() }.getOrNull()
+    }
 
     @Suppress("MissingPermission")
     private fun readImei(): String? {

@@ -2,7 +2,6 @@ package com.crackmydroid.shared.di
 
 import com.crackmydroid.shared.data.activity.ActivityRepositoryAndroid
 import com.crackmydroid.shared.data.cache.CacheMaintenanceRepositoryAndroid
-import com.crackmydroid.shared.data.cache.PackageChangeReceiver
 import com.crackmydroid.shared.data.db.DatabaseDriverFactory
 import com.crackmydroid.shared.data.device.DeviceInfoRepositoryAndroid
 import com.crackmydroid.shared.data.root.RootCheckRepositoryAndroid
@@ -49,9 +48,4 @@ actual fun platformModule(): Module = module {
     single<OperationLogRepository> { DefaultOperationLogRepository(get()) }
     single<CacheMaintenance> { CacheMaintenanceRepositoryAndroid(get()) }
     single { AndroidDeviceSnapshotCoordinator(androidContext(), get(), get(), get(), get(), get(), get(), get()) }
-    
-    // Register PackageChangeReceiver to invalidate caches on package install/uninstall
-    single {
-        PackageChangeReceiver.registerReceiver(androidContext(), get<CacheMaintenance>())
-    }
 }

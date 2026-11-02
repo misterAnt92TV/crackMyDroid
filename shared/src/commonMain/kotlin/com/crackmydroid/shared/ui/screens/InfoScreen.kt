@@ -31,7 +31,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.platform.LocalClipboard
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -115,7 +115,8 @@ fun InfoScreen(
     val state by viewModel.state.collectAsState()
     val strings = LocalStrings.current
     val root = state.root
-    val clipboard = LocalClipboard.current
+    @Suppress("DEPRECATION")
+    val clipboard = LocalClipboardManager.current
     val scrollState = rememberScrollState()
     val scope = rememberCoroutineScope()
     val showScrollTop by remember {
@@ -152,9 +153,7 @@ fun InfoScreen(
                                 onClick = {
                                     state.info?.let { info ->
                                         val content = buildInfoContent(info, root)
-                                        scope.launch {
-                                            clipboard.setClipEntry(androidx.compose.ui.platform.ClipEntry(AnnotatedString(content)))
-                                        }
+                                        clipboard.setText(AnnotatedString(content))
                                         viewModel.share(content)
                                     }
                                 }
@@ -270,7 +269,8 @@ fun InfoScreen(
 
 @Composable
 private fun InfoRow(label: String, value: String, copyValue: String? = null) {
-    val clipboard = LocalClipboard.current
+    @Suppress("DEPRECATION")
+    val clipboard = LocalClipboardManager.current
     val scope = rememberCoroutineScope()
     val copyText = copyValue ?: value
     Row(
@@ -284,9 +284,7 @@ private fun InfoRow(label: String, value: String, copyValue: String? = null) {
             label,
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier.clickable {
-                scope.launch {
-                    clipboard.setClipEntry(androidx.compose.ui.platform.ClipEntry(AnnotatedString("$label: $copyText")))
-                }
+                clipboard.setText(AnnotatedString("$label: $copyText"))
             }
         )
         Spacer(modifier = Modifier.width(12.dp))

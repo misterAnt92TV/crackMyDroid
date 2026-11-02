@@ -28,7 +28,7 @@ import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.ui.platform.LocalClipboard
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -86,7 +86,8 @@ fun PermissionsScreen(
 ) {
     val state by viewModel.state.collectAsState()
     val strings = LocalStrings.current
-    val clipboard = LocalClipboard.current
+    @Suppress("DEPRECATION")
+    val clipboard = LocalClipboardManager.current
     val expandedPackages = remember { mutableStateMapOf<String, Boolean>() }
     val favoriteQueries = remember(state.favorites) { state.favorites.toList().sorted() }
     val filteredApps = remember(
@@ -416,9 +417,7 @@ fun PermissionsScreen(
                     actions = {
                         IconButton(onClick = {
                             val content = viewModel.singleReportPreview(app.packageName)
-                            scope.launch {
-                                clipboard.setClipEntry(androidx.compose.ui.platform.ClipEntry(AnnotatedString(content)))
-                            }
+                            clipboard.setText(AnnotatedString(content))
                             viewModel.shareSingle(app.packageName)
                         }) {
                             Icon(

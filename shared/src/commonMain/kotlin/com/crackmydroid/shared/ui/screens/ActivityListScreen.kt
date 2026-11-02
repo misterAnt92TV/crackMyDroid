@@ -46,7 +46,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import kotlinx.coroutines.launch
-import androidx.compose.ui.platform.LocalClipboard
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
@@ -79,7 +79,8 @@ fun ActivityListScreen(
 ) {
     val state by viewModel.state.collectAsState()
     val strings = LocalStrings.current
-    val clipboard = LocalClipboard.current
+    @Suppress("DEPRECATION")
+    val clipboard = LocalClipboardManager.current
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val groups = state.groups
@@ -293,7 +294,7 @@ fun ActivityListScreen(
                         IconButton(onClick = {
                             scope.launch {
                                 viewModel.groupContent(group.packageName)?.let { content ->
-                                    clipboard.setClipEntry(androidx.compose.ui.platform.ClipEntry(AnnotatedString(content)))
+                                    clipboard.setText(AnnotatedString(content))
                                 }
                             }
                             viewModel.exportGroup(group.packageName)
