@@ -43,11 +43,11 @@ import com.crackmydroid.shared.domain.model.SnapshotMetadata
 import com.crackmydroid.shared.domain.repository.DeviceSessionController
 import com.crackmydroid.shared.presentation.components.AppButton
 import com.crackmydroid.shared.ui.CrackMyDroidApp
+import kotlinx.coroutines.launch
+import org.koin.mp.KoinPlatform
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import kotlinx.coroutines.launch
-import org.koin.mp.KoinPlatform
 
 @Composable
 fun DesktopCrackMyDroidApp() {

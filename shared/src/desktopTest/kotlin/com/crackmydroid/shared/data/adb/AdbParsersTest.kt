@@ -72,7 +72,10 @@ class AdbParsersTest {
         val permissions = AdbParsers.parseRequestedPermissions(dump)
         val activities = AdbParsers.parseActivities("com.example.demo", "Demo", dump)
 
-        assertEquals(listOf("android.permission.CAMERA", "android.permission.INTERNET"), permissions)
+        assertEquals(
+            listOf("android.permission.CAMERA", "android.permission.INTERNET"),
+            permissions
+        )
         assertEquals(3, activities.size)
         assertEquals("com.example.demo.MainActivity", activities[0].activityName)
         assertEquals(true, activities[0].launchableViaShell)
@@ -81,7 +84,10 @@ class AdbParsersTest {
         assertEquals("com.example.demo.Settings\$DeepLinkActivity", activities[1].activityName)
         assertEquals("DeepLinkActivity", activities[1].label)
         assertEquals(false, activities[1].launchableViaShell)
-        assertEquals("action android.intent.action.VIEW • scheme demo • authority host.example • type image/* • path /details", activities[1].launchContextHint)
+        assertEquals(
+            "action android.intent.action.VIEW • scheme demo • authority host.example • type image/* • path /details",
+            activities[1].launchContextHint
+        )
         assertTrue(activities[1].launchabilityReason?.contains("intent contestualizzato") == true)
         assertEquals("android.intent.action.VIEW", activities[1].launchIntentAction)
         assertEquals("demo://host.example/details", activities[1].launchIntentData)

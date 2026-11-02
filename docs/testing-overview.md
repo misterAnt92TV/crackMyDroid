@@ -75,21 +75,21 @@ commonTest
         └── desktopTest
 ```
 
-| Source Set | Dipendenze aggiuntive | Eseguito con |
-|---|---|---|
-| `commonTest` | `kotlin("test")`, `coroutines-test 1.8.1` | tutti i target |
-| `jvmCommonTest` | + `mockk 1.13.13` | JVM (Android unit + Desktop) |
-| `androidUnitTest` | + `junit4 4.13.2` | `./gradlew :shared:testDebugUnitTest` |
-| `desktopTest` | nessuna aggiuntiva | `./gradlew :shared:desktopTest` |
+| Source Set        | Dipendenze aggiuntive                     | Eseguito con                          |
+|-------------------|-------------------------------------------|---------------------------------------|
+| `commonTest`      | `kotlin("test")`, `coroutines-test 1.8.1` | tutti i target                        |
+| `jvmCommonTest`   | + `mockk 1.13.13`                         | JVM (Android unit + Desktop)          |
+| `androidUnitTest` | + `junit4 4.13.2`                         | `./gradlew :shared:testDebugUnitTest` |
+| `desktopTest`     | nessuna aggiuntiva                        | `./gradlew :shared:desktopTest`       |
 
 ### Versioni librerie di test
 
-| Libreria | Versione |
-|---|---|
-| kotlin-test | 2.3.21 |
-| kotlinx-coroutines-test | 1.8.1 |
-| MockK | 1.13.13 |
-| JUnit 4 | 4.13.2 |
+| Libreria                | Versione |
+|-------------------------|----------|
+| kotlin-test             | 2.3.21   |
+| kotlinx-coroutines-test | 1.8.1    |
+| MockK                   | 1.13.13  |
+| JUnit 4                 | 4.13.2   |
 
 ---
 
@@ -167,9 +167,11 @@ class MyViewModelTest {
 }
 ```
 
-**Perché `StandardTestDispatcher`?** Fornisce un orologio virtuale: `advanceUntilIdle()` esegue tutte le coroutine in coda in modo deterministo, senza aspettare tempo reale.
+**Perché `StandardTestDispatcher`?** Fornisce un orologio virtuale: `advanceUntilIdle()` esegue
+tutte le coroutine in coda in modo deterministo, senza aspettare tempo reale.
 
-**Perché `vm.onCleared()` manuale?** I ViewModel in KMP non hanno un lifecycle legato a un `ViewModelStore` nei test JVM. Chiamarlo esplicitamente cancella il `viewModelScope` ed evita leak.
+**Perché `vm.onCleared()` manuale?** I ViewModel in KMP non hanno un lifecycle legato a un
+`ViewModelStore` nei test JVM. Chiamarlo esplicitamente cancella il `viewModelScope` ed evita leak.
 
 ---
 
@@ -196,7 +198,9 @@ class MyRepositoryDesktopTest {
 }
 ```
 
-**Perché fakes invece di MockK?** Le classi desktop implementano interfacce con comportamenti complessi (stato, caching, side-effect su filesystem). I fakes permettono di verificare interazioni stateful in modo più leggibile e senza riflession MockK.
+**Perché fakes invece di MockK?** Le classi desktop implementano interfacce con comportamenti
+complessi (stato, caching, side-effect su filesystem). I fakes permettono di verificare interazioni
+stateful in modo più leggibile e senza riflession MockK.
 
 ---
 
@@ -242,30 +246,30 @@ Necessario perché `SearchHistoryStore` è un object singleton con stato persist
 
 ### `jvmCommonTest`
 
-| File | Classe testata | # Test | Aree coperte |
-|---|---|---|---|
-| `UseCaseTests.kt` | 5 use case | 5 | Delegazione a repository, valori di ritorno, `coVerify` |
-| `PenTestingViewModelTest.kt` | `PenTestingViewModel` | 2 | Manifest check con intent exposure, deduplicazione chiamate permessi |
-| `PermissionsViewModelTest.kt` | `PermissionsViewModel` | 2 | Frequency tracking query, filtro "solo a rischio" post-scan |
-| `ActivityListViewModelTest.kt` | `ActivityListViewModel` | 5 | Load, filtro, top-query, guided launch, report aggregation |
-| `InstalledAppsViewModelTest.kt` | `InstalledAppsViewModel` | 7 | Load, export, exportAll, share OK, share error, filtro+preferiti, topQuery |
-| `LogViewModelTest.kt` | `LogViewModel` | 1 | Filtro immediato su stato |
-| `TrickViewModelTest.kt` | `TrickViewModel` | 2 | Load comandi, blocco esecuzione concorrente |
-| `DeviceScanSnapshotJsonTest.kt` | serializzazione snapshot | 2 | Round-trip completo, tolleranza campi sconosciuti |
-| `SearchHistoryStoreTest.kt` | `SearchHistoryStore` | 3 | Deduplication, prefix sorting, disabled mode |
+| File                            | Classe testata           | # Test | Aree coperte                                                               |
+|---------------------------------|--------------------------|--------|----------------------------------------------------------------------------|
+| `UseCaseTests.kt`               | 5 use case               | 5      | Delegazione a repository, valori di ritorno, `coVerify`                    |
+| `PenTestingViewModelTest.kt`    | `PenTestingViewModel`    | 2      | Manifest check con intent exposure, deduplicazione chiamate permessi       |
+| `PermissionsViewModelTest.kt`   | `PermissionsViewModel`   | 2      | Frequency tracking query, filtro "solo a rischio" post-scan                |
+| `ActivityListViewModelTest.kt`  | `ActivityListViewModel`  | 5      | Load, filtro, top-query, guided launch, report aggregation                 |
+| `InstalledAppsViewModelTest.kt` | `InstalledAppsViewModel` | 7      | Load, export, exportAll, share OK, share error, filtro+preferiti, topQuery |
+| `LogViewModelTest.kt`           | `LogViewModel`           | 1      | Filtro immediato su stato                                                  |
+| `TrickViewModelTest.kt`         | `TrickViewModel`         | 2      | Load comandi, blocco esecuzione concorrente                                |
+| `DeviceScanSnapshotJsonTest.kt` | serializzazione snapshot | 2      | Round-trip completo, tolleranza campi sconosciuti                          |
+| `SearchHistoryStoreTest.kt`     | `SearchHistoryStore`     | 3      | Deduplication, prefix sorting, disabled mode                               |
 
 ### `desktopTest`
 
-| File | Classe testata | # Test | Aree coperte |
-|---|---|---|---|
-| `AdbParsersTest.kt` | `AdbParsers` | 3 | Parse `adb devices`, `pm list packages`, `dumpsys package` (permessi + attività) |
-| `ProcessAdbBridgeTest.kt` | `ProcessAdbBridge` | 2 | Rifiuto directory come ADB, rifiuto file non eseguibile |
-| `AppManifestSecurityTest.kt` | `ManifestSecurityAnalyzer` | 6 | Tutti i livelli di rischio, score composito, stringhe italiane |
-| `ActivityRepositoryDesktopTest.kt` | `ActivityRepositoryDesktop` | 1 | Costruzione comando `am start` con inner class `$` e argomenti quotati |
-| `ShellCommandRepositoryDesktopTest.kt` | `ShellCommandRepositoryDesktop` | 1 | Marcatura comandi root non supportati quando `su` assente |
-| `RemotePackageManagerDesktopTest.kt` | `RemotePackageManagerDesktop` | 1 | Caching ADB: ogni comando eseguito esattamente una volta per sessione |
-| `DeviceSessionControllerDesktopTest.kt` | `DeviceSessionControllerDesktop` | 2 | Selezione device + invalidazione cache, rescan + clear selection |
-| `RemoteDeviceSnapshotImporterTest.kt` | `RemoteDeviceSnapshotImporter` | 2 | Import snapshot valido in cache, fallback su schema incompatibile |
+| File                                    | Classe testata                   | # Test | Aree coperte                                                                     |
+|-----------------------------------------|----------------------------------|--------|----------------------------------------------------------------------------------|
+| `AdbParsersTest.kt`                     | `AdbParsers`                     | 3      | Parse `adb devices`, `pm list packages`, `dumpsys package` (permessi + attività) |
+| `ProcessAdbBridgeTest.kt`               | `ProcessAdbBridge`               | 2      | Rifiuto directory come ADB, rifiuto file non eseguibile                          |
+| `AppManifestSecurityTest.kt`            | `ManifestSecurityAnalyzer`       | 6      | Tutti i livelli di rischio, score composito, stringhe italiane                   |
+| `ActivityRepositoryDesktopTest.kt`      | `ActivityRepositoryDesktop`      | 1      | Costruzione comando `am start` con inner class `$` e argomenti quotati           |
+| `ShellCommandRepositoryDesktopTest.kt`  | `ShellCommandRepositoryDesktop`  | 1      | Marcatura comandi root non supportati quando `su` assente                        |
+| `RemotePackageManagerDesktopTest.kt`    | `RemotePackageManagerDesktop`    | 1      | Caching ADB: ogni comando eseguito esattamente una volta per sessione            |
+| `DeviceSessionControllerDesktopTest.kt` | `DeviceSessionControllerDesktop` | 2      | Selezione device + invalidazione cache, rescan + clear selection                 |
+| `RemoteDeviceSnapshotImporterTest.kt`   | `RemoteDeviceSnapshotImporter`   | 2      | Import snapshot valido in cache, fallback su schema incompatibile                |
 
 ---
 
@@ -273,8 +277,8 @@ Necessario perché `SearchHistoryStore` è un object singleton con stato persist
 
 Vedi i file specifici per la documentazione completa test-per-test:
 
-| Documento | Contenuto |
-|---|---|
-| [`testing-viewmodels.md`](testing-viewmodels.md) | Test di tutti i ViewModel (PenTesting, Permissions, ActivityList, InstalledApps, Log, Trick) con fixture, mock e assertions |
-| [`testing-usecases-models.md`](testing-usecases-models.md) | Test dei use case, modelli di dominio, serializzazione snapshot, SearchHistoryStore |
-| [`testing-desktop-adb.md`](testing-desktop-adb.md) | Test del layer Desktop/ADB: parser, bridge, repository, session controller, snapshot importer |
+| Documento                                                  | Contenuto                                                                                                                   |
+|------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------|
+| [`testing-viewmodels.md`](testing-viewmodels.md)           | Test di tutti i ViewModel (PenTesting, Permissions, ActivityList, InstalledApps, Log, Trick) con fixture, mock e assertions |
+| [`testing-usecases-models.md`](testing-usecases-models.md) | Test dei use case, modelli di dominio, serializzazione snapshot, SearchHistoryStore                                         |
+| [`testing-desktop-adb.md`](testing-desktop-adb.md)         | Test del layer Desktop/ADB: parser, bridge, repository, session controller, snapshot importer                               |

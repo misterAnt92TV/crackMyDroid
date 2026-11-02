@@ -24,30 +24,26 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.HelpOutline
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.automirrored.filled.HelpOutline
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -70,7 +66,8 @@ fun AppButton(
 ) {
     val prefs = LocalAccessibilityPrefs.current
     val baseStyle = MaterialTheme.typography.labelLarge
-    val finalStyle = if (prefs.largeText) baseStyle.copy(fontSize = baseStyle.fontSize * 1.1f) else baseStyle
+    val finalStyle =
+        if (prefs.largeText) baseStyle.copy(fontSize = baseStyle.fontSize * 1.1f) else baseStyle
     val content = @Composable {
         if (leadingIcon != null) {
             Icon(leadingIcon, contentDescription = null, modifier = Modifier.padding(end = 6.dp))
@@ -92,19 +89,30 @@ fun AppButton(
             onClick = onClick,
             enabled = enabled,
             modifier = buttonModifier,
-            contentPadding = PaddingValues(horizontal = 18.dp, vertical = if (prefs.largeText) 16.dp else 14.dp)
+            contentPadding = PaddingValues(
+                horizontal = 18.dp,
+                vertical = if (prefs.largeText) 16.dp else 14.dp
+            )
         ) { content() }
+
         ButtonVariant.Secondary -> OutlinedButton(
             onClick = onClick,
             enabled = enabled,
             modifier = buttonModifier,
-            contentPadding = PaddingValues(horizontal = 18.dp, vertical = if (prefs.largeText) 16.dp else 14.dp)
+            contentPadding = PaddingValues(
+                horizontal = 18.dp,
+                vertical = if (prefs.largeText) 16.dp else 14.dp
+            )
         ) { content() }
+
         ButtonVariant.Tonal -> FilledTonalButton(
             onClick = onClick,
             enabled = enabled,
             modifier = buttonModifier,
-            contentPadding = PaddingValues(horizontal = 18.dp, vertical = if (prefs.largeText) 16.dp else 14.dp)
+            contentPadding = PaddingValues(
+                horizontal = 18.dp,
+                vertical = if (prefs.largeText) 16.dp else 14.dp
+            )
         ) { content() }
     }
 }
@@ -121,8 +129,10 @@ fun AppText(
 ) {
     val prefs = LocalAccessibilityPrefs.current
     val withWeight = if (fontWeight != null) style.copy(fontWeight = fontWeight) else style
-    val sized = if (prefs.largeText) withWeight.copy(fontSize = withWeight.fontSize * 1.1f) else withWeight
-    val finalColor = color ?: if (prefs.highContrast) MaterialTheme.colorScheme.onBackground else androidx.compose.material3.LocalContentColor.current
+    val sized =
+        if (prefs.largeText) withWeight.copy(fontSize = withWeight.fontSize * 1.1f) else withWeight
+    val finalColor = color
+        ?: if (prefs.highContrast) MaterialTheme.colorScheme.onBackground else androidx.compose.material3.LocalContentColor.current
     Text(
         text,
         modifier = modifier,
@@ -134,7 +144,12 @@ fun AppText(
 }
 
 @Composable
-fun CardBlock(title: String, modifier: Modifier = Modifier, leadingIcon: ImageVector? = null, content: @Composable () -> Unit) {
+fun CardBlock(
+    title: String,
+    modifier: Modifier = Modifier,
+    leadingIcon: ImageVector? = null,
+    content: @Composable () -> Unit
+) {
     AppCard(
         modifier = modifier.padding(vertical = 12.dp)
     ) {
@@ -150,7 +165,11 @@ fun CardBlock(title: String, modifier: Modifier = Modifier, leadingIcon: ImageVe
                     modifier = Modifier.size(18.dp)
                 )
             }
-            AppText(title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+            AppText(
+                title,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold
+            )
         }
         Spacer(modifier = Modifier.height(8.dp))
         content()
@@ -360,7 +379,10 @@ fun AppAccordion(
             leading?.let {
                 Box(modifier = Modifier.size(44.dp), contentAlignment = Alignment.Center) { it() }
             }
-            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
                 AppText(
                     title,
                     style = MaterialTheme.typography.titleMedium,
@@ -410,7 +432,11 @@ fun AppAccordion(
 
         AnimatedVisibility(
             visible = expanded,
-            enter = if (reduceMotion) fadeIn() else fadeIn(animationSpec = androidx.compose.animation.core.tween(220)) + slideInVertically { it / 8 },
+            enter = if (reduceMotion) fadeIn() else fadeIn(
+                animationSpec = androidx.compose.animation.core.tween(
+                    220
+                )
+            ) + slideInVertically { it / 8 },
             exit = fadeOut()
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -498,6 +524,7 @@ fun SectionHeader(
                 ) {
                     Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                 }
+
                 onMenu != null -> IconButton(
                     onClick = onMenu,
                     modifier = Modifier

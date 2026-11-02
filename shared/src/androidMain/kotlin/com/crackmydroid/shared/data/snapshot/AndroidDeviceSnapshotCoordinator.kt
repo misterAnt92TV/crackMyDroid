@@ -14,13 +14,13 @@ import com.crackmydroid.shared.domain.repository.InstalledAppsRepository
 import com.crackmydroid.shared.domain.repository.LogRepository
 import com.crackmydroid.shared.domain.repository.PermissionsRepository
 import com.crackmydroid.shared.domain.repository.RootCheckRepository
-import java.io.File
-import java.util.concurrent.atomic.AtomicBoolean
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
+import java.io.File
+import java.util.concurrent.atomic.AtomicBoolean
 
 class AndroidDeviceSnapshotCoordinator(
     private val context: Context,
@@ -66,7 +66,8 @@ class AndroidDeviceSnapshotCoordinator(
         val installedAppsSection = captureSection { installedAppsRepository.listInstalled() }
         val permissionsSection = captureSection { permissionsRepository.listAppPermissions() }
         val activitiesSection = captureSection { activityRepository.getActivities() }
-        val manifestSecuritySection = captureSection { installedAppsRepository.analyzeManifestSecurity() }
+        val manifestSecuritySection =
+            captureSection { installedAppsRepository.analyzeManifestSecurity() }
         val rootStatusSection = captureSection { rootCheckRepository.checkRoot() }
         val logsSection = captureSection { logRepository.fetchLog().takeLast(MAX_LOG_LINES) }
         val playIntegritySection = SnapshotSection.skipped(

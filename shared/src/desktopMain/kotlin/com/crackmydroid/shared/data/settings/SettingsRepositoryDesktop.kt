@@ -1,7 +1,7 @@
 package com.crackmydroid.shared.data.settings
 
-import com.crackmydroid.shared.domain.model.AppTheme
 import com.crackmydroid.shared.domain.model.AppLanguage
+import com.crackmydroid.shared.domain.model.AppTheme
 import com.crackmydroid.shared.domain.model.ExportFormat
 import com.crackmydroid.shared.domain.repository.SettingsRepository
 import java.util.prefs.Preferences
@@ -9,9 +9,16 @@ import java.util.prefs.Preferences
 class SettingsRepositoryDesktop : SettingsRepository {
     private val prefs = Preferences.userRoot().node("com.crackmydroid.desktop")
     override suspend fun getLanguage() = AppLanguage.fromCode(prefs.get("language", "en"))
-    override suspend fun setLanguage(language: AppLanguage) { prefs.put("language", language.code) }
-    private fun getSet(key: String) = prefs.get(key, "").split('\n').filter(String::isNotEmpty).toSet()
-    private fun setSet(key: String, values: Set<String>) { prefs.put(key, values.joinToString("\n")) }
+    override suspend fun setLanguage(language: AppLanguage) {
+        prefs.put("language", language.code)
+    }
+
+    private fun getSet(key: String) =
+        prefs.get(key, "").split('\n').filter(String::isNotEmpty).toSet()
+
+    private fun setSet(key: String, values: Set<String>) {
+        prefs.put(key, values.joinToString("\n"))
+    }
 
     override suspend fun getTheme(): AppTheme =
         prefs.get("theme", AppTheme.SYSTEM.name).toAppTheme()
@@ -57,13 +64,15 @@ class SettingsRepositoryDesktop : SettingsRepository {
         prefs.putBoolean("large_text", enabled)
     }
 
-    override suspend fun isSuggestionsEnabled(): Boolean = prefs.getBoolean("suggestions_enabled", true)
+    override suspend fun isSuggestionsEnabled(): Boolean =
+        prefs.getBoolean("suggestions_enabled", true)
 
     override suspend fun setSuggestionsEnabled(enabled: Boolean) {
         prefs.putBoolean("suggestions_enabled", enabled)
     }
 
-    override suspend fun isFeatureHintsEnabled(): Boolean = prefs.getBoolean("feature_hints_enabled", true)
+    override suspend fun isFeatureHintsEnabled(): Boolean =
+        prefs.getBoolean("feature_hints_enabled", true)
 
     override suspend fun setFeatureHintsEnabled(enabled: Boolean) {
         prefs.putBoolean("feature_hints_enabled", enabled)
@@ -74,14 +83,22 @@ class SettingsRepositoryDesktop : SettingsRepository {
     override suspend fun setAdbPath(path: String) {
         prefs.put("adb_path", path)
     }
+
     override suspend fun getActivityFavorites() = getSet("activity_favorites")
-    override suspend fun setActivityFavorites(values: Set<String>) = setSet("activity_favorites", values)
+    override suspend fun setActivityFavorites(values: Set<String>) =
+        setSet("activity_favorites", values)
+
     override suspend fun getActivityPackageFavorites() = getSet("activity_package_favorites")
-    override suspend fun setActivityPackageFavorites(values: Set<String>) = setSet("activity_package_favorites", values)
+    override suspend fun setActivityPackageFavorites(values: Set<String>) =
+        setSet("activity_package_favorites", values)
+
     override suspend fun getInstalledAppFavorites() = getSet("installed_app_favorites")
-    override suspend fun setInstalledAppFavorites(values: Set<String>) = setSet("installed_app_favorites", values)
+    override suspend fun setInstalledAppFavorites(values: Set<String>) =
+        setSet("installed_app_favorites", values)
+
     override suspend fun getPermissionFavorites() = getSet("permission_favorites")
-    override suspend fun setPermissionFavorites(values: Set<String>) = setSet("permission_favorites", values)
+    override suspend fun setPermissionFavorites(values: Set<String>) =
+        setSet("permission_favorites", values)
 
     private fun String.toAppTheme(): AppTheme =
         runCatching { AppTheme.valueOf(this) }.getOrDefault(AppTheme.SYSTEM)

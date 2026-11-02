@@ -1,7 +1,7 @@
 package com.crackmydroid.shared.presentation.operations
 
-import com.crackmydroid.shared.util.DesktopPaths
 import com.crackmydroid.shared.domain.model.OperationEntry
+import com.crackmydroid.shared.util.DesktopPaths
 
 private const val SEP = "\u001f"
 

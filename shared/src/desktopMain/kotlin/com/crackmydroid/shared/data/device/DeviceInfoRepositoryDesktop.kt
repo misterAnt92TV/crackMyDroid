@@ -27,11 +27,13 @@ class DeviceInfoRepositoryDesktop(
         val memInfo = shell("cat /proc/meminfo")
         val kernel = shell("uname -a")
         val adbEnabled = shell("settings get global adb_enabled").trim() == "1"
-        val developerOptions = shell("settings get global development_settings_enabled").trim() == "1"
+        val developerOptions =
+            shell("settings get global development_settings_enabled").trim() == "1"
 
         val (totalMemory, freeMemory) = AdbParsers.parseMemInfo(memInfo)
         val info = DeviceInfo(
-            manufacturer = props["ro.product.manufacturer"] ?: props["ro.product.vendor.manufacturer"] ?: "unknown",
+            manufacturer = props["ro.product.manufacturer"]
+                ?: props["ro.product.vendor.manufacturer"] ?: "unknown",
             model = props["ro.product.model"] ?: device.model ?: "unknown",
             brand = props["ro.product.brand"],
             device = props["ro.product.device"] ?: device.device,

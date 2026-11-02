@@ -1,52 +1,26 @@
-@file:OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class, androidx.compose.ui.ExperimentalComposeUiApi::class)
+@file:OptIn(
+    androidx.compose.foundation.ExperimentalFoundationApi::class,
+    androidx.compose.ui.ExperimentalComposeUiApi::class
+)
 
 package com.crackmydroid.shared.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.filled.StarBorder
-import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material.icons.filled.Stop
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.ui.platform.LocalClipboardManager
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.mutableStateMapOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.unit.dp
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bluetooth
-import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.CalendarToday
+import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material.icons.filled.Contacts
 import androidx.compose.material.icons.filled.Fingerprint
@@ -55,23 +29,51 @@ import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Phone
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.SdStorage
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Sms
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.StarBorder
+import androidx.compose.material.icons.filled.Stop
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.filled.Wifi
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.unit.dp
 import com.crackmydroid.shared.domain.model.PermissionRiskFinding
 import com.crackmydroid.shared.domain.model.PermissionRiskLevel
 import com.crackmydroid.shared.i18n.LocalStrings
+import com.crackmydroid.shared.presentation.components.AppAccordion
 import com.crackmydroid.shared.presentation.components.AppButton
 import com.crackmydroid.shared.presentation.components.AppCard
-import com.crackmydroid.shared.presentation.components.AppAccordion
 import com.crackmydroid.shared.presentation.components.AppText
 import com.crackmydroid.shared.presentation.components.ButtonVariant
 import com.crackmydroid.shared.presentation.components.ErrorDialog
 import com.crackmydroid.shared.presentation.components.ExportDetailsCard
-import com.crackmydroid.shared.presentation.components.SectionHeader
 import com.crackmydroid.shared.presentation.components.PackageIcon
-import com.crackmydroid.shared.presentation.components.SearchFieldWithHistory
 import com.crackmydroid.shared.presentation.components.ScrollToTopButton
+import com.crackmydroid.shared.presentation.components.SearchFieldWithHistory
+import com.crackmydroid.shared.presentation.components.SectionHeader
 import com.crackmydroid.shared.ui.permissions.PermissionsViewModel
 import kotlinx.coroutines.launch
 
@@ -86,6 +88,7 @@ fun PermissionsScreen(
 ) {
     val state by viewModel.state.collectAsState()
     val strings = LocalStrings.current
+
     @Suppress("DEPRECATION")
     val clipboard = LocalClipboardManager.current
     val expandedPackages = remember { mutableStateMapOf<String, Boolean>() }
@@ -97,7 +100,8 @@ fun PermissionsScreen(
         state.showOnlyRisky,
         state.riskReports
     ) { viewModel.filtered() }
-    val riskByPackage = remember(state.riskReports) { state.riskReports.associateBy { it.packageName } }
+    val riskByPackage =
+        remember(state.riskReports) { state.riskReports.associateBy { it.packageName } }
     val criticalTotal = state.riskReports.sumOf { it.criticalCount }
     val highTotal = state.riskReports.sumOf { it.highCount }
     val mediumTotal = state.riskReports.sumOf { it.mediumCount }
@@ -255,7 +259,9 @@ fun PermissionsScreen(
                         LazyRow(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            contentPadding = androidx.compose.foundation.layout.PaddingValues(vertical = 6.dp)
+                            contentPadding = androidx.compose.foundation.layout.PaddingValues(
+                                vertical = 6.dp
+                            )
                         ) {
                             items(favoriteQueries, key = { it }) { fav ->
                                 FilterChip(
@@ -293,7 +299,12 @@ fun PermissionsScreen(
                             items(state.riskReports.take(8), key = { it.packageName }) { report ->
                                 FilterChip(
                                     selected = false,
-                                    onClick = { viewModel.setFilter(report.packageName, trackUsage = true) },
+                                    onClick = {
+                                        viewModel.setFilter(
+                                            report.packageName,
+                                            trackUsage = true
+                                        )
+                                    },
                                     label = { Text("${report.appLabel} (${report.findings.size})") }
                                 )
                             }
@@ -327,7 +338,8 @@ fun PermissionsScreen(
             }
             if (state.loading) {
                 item {
-                    CircularProgressIndicator(modifier = Modifier.padding(top = 8.dp)) }
+                    CircularProgressIndicator(modifier = Modifier.padding(top = 8.dp))
+                }
             }
 
             if (!state.loading && filteredApps.isEmpty()) {
@@ -457,7 +469,11 @@ fun PermissionsScreen(
                             )
                         }
                     }
-                    androidx.compose.foundation.layout.Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    androidx.compose.foundation.layout.Column(
+                        verticalArrangement = Arrangement.spacedBy(
+                            4.dp
+                        )
+                    ) {
                         app.permissions.forEach { perm ->
                             PermissionRow(
                                 permission = perm,

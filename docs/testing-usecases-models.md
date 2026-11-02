@@ -1,6 +1,7 @@
 # CrackMyDroid — Test Use Case, Modelli e Componenti (`jvmCommonTest`)
 
-> Test del layer domain e dei componenti condivisi: use case, serializzazione snapshot, `SearchHistoryStore`.
+> Test del layer domain e dei componenti condivisi: use case, serializzazione snapshot,
+> `SearchHistoryStore`.
 
 ---
 
@@ -18,7 +19,8 @@
 **Package:** `com.crackmydroid.shared.domain.usecase`
 **Pattern:** `runTest` con `coEvery` / `coVerify` (MockK)
 
-Questi test verificano che ogni use case **deleghi correttamente** alla repository sottostante e restituisca esattamente il valore ricevuto — senza logica aggiuntiva.
+Questi test verificano che ogni use case **deleghi correttamente** alla repository sottostante e
+restituisca esattamente il valore ricevuto — senza logica aggiuntiva.
 
 ---
 
@@ -29,7 +31,7 @@ val repo = mockk<ActivityRepository>()
 coEvery { repo.getActivities() } returns listOf(ActivityEntry("A", "App", "pkg", "Act"))
 
 val useCase = GetActivitiesUseCase(repo)
-val result  = useCase()
+val result = useCase()
 
 assertEquals(1, result.size)
 coVerify { repo.getActivities() }
@@ -95,12 +97,14 @@ coVerify { repo.shareApk("pkg", true) }
 
 ## DeviceScanSnapshotJsonTest
 
-**File:** `shared/src/jvmCommonTest/kotlin/com/crackmydroid/shared/domain/model/DeviceScanSnapshotJsonTest.kt`
+**File:**
+`shared/src/jvmCommonTest/kotlin/com/crackmydroid/shared/domain/model/DeviceScanSnapshotJsonTest.kt`
 **Package:** `com.crackmydroid.shared.domain.model`
-**Pattern:** unit test puro — nessun mock, nessun dispatcher
-**Soggetto:** `DeviceScanSnapshotJson.format` (oggetto `kotlinx.serialization` JSON)
+**Pattern:** unit test puro — nessun mock, nessun dispatcher **Soggetto:**
+`DeviceScanSnapshotJson.format` (oggetto `kotlinx.serialization` JSON)
 
-Questi test verificano che il modello `DeviceScanSnapshot` — usato come contratto di serializzazione tra app Android e desktop — sopravviva intatto al ciclo encode → decode.
+Questi test verificano che il modello `DeviceScanSnapshot` — usato come contratto di serializzazione
+tra app Android e desktop — sopravviva intatto al ciclo encode → decode.
 
 ---
 
@@ -134,9 +138,11 @@ data class SectionData<T>(
 
 ### Test 1 — `roundTripSnapshotWithReadyFailedAndSkippedSections`
 
-**Obiettivo:** tutti e tre gli stati di `SectionData` (`READY`, `FAILED`, `SKIPPED`) sopravvivono al round-trip JSON.
+**Obiettivo:** tutti e tre gli stati di `SectionData` (`READY`, `FAILED`, `SKIPPED`) sopravvivono al
+round-trip JSON.
 
 **Input:**
+
 ```kotlin
 val snapshot = DeviceScanSnapshot(
     schemaVersion    = DeviceScanSnapshot.SCHEMA_VERSION,
@@ -153,12 +159,14 @@ val snapshot = DeviceScanSnapshot(
 ```
 
 **Esecuzione:**
+
 ```kotlin
 val json    = DeviceScanSnapshotJson.format.encodeToString(snapshot)
 val decoded = DeviceScanSnapshotJson.format.decodeFromString<DeviceScanSnapshot>(json)
 ```
 
 **Assertions:**
+
 ```kotlin
 assertEquals(DeviceScanSnapshot.SCHEMA_VERSION, decoded.schemaVersion)
 assertEquals("SERIAL1",                          decoded.deviceSerial)
@@ -176,6 +184,7 @@ assertEquals("I/Test: ok",                       decoded.logs.data?.first())
 **Obiettivo:** un JSON con campi sconosciuti non causa eccezioni (`ignoreUnknownKeys = true`).
 
 **Input (JSON raw):**
+
 ```json
 {
   "schemaVersion": 1,
@@ -189,6 +198,7 @@ assertEquals("I/Test: ok",                       decoded.logs.data?.first())
 ```
 
 **Assertions:**
+
 ```kotlin
 assertEquals(10L,                decoded.createdAtEpochMs)
 assertEquals(SectionState.FAILED, decoded.rootStatus.state)
@@ -200,21 +210,23 @@ assertNotNull(decoded.deviceInfo.data)
 
 ## SearchHistoryStoreTest
 
-**File:** `shared/src/jvmCommonTest/kotlin/com/crackmydroid/shared/presentation/components/SearchHistoryStoreTest.kt`
+**File:**
+`shared/src/jvmCommonTest/kotlin/com/crackmydroid/shared/presentation/components/SearchHistoryStoreTest.kt`
 **Package:** `com.crackmydroid.shared.presentation.components`
-**Pattern:** unit test puro sincrono
-**Soggetto:** `SearchHistoryStore` (singleton in-memory)
+**Pattern:** unit test puro sincrono **Soggetto:** `SearchHistoryStore` (singleton in-memory)
 
-`SearchHistoryStore` mantiene la cronologia delle ricerche per ogni `SearchFieldWithHistory` nell'app. È un singleton con stato globale — i test devono resettarlo esplicitamente prima e dopo ogni esecuzione.
+`SearchHistoryStore` mantiene la cronologia delle ricerche per ogni `SearchFieldWithHistory`
+nell'app. È un singleton con stato globale — i test devono resettarlo esplicitamente prima e dopo
+ogni esecuzione.
 
 ### Configurazione `SearchHistoryStore`
 
-| Proprietà | Valore default |
-|---|---|
-| Max entries globali per chiave | 8 |
-| Max entries visibili nei suggerimenti | 6 |
-| Ordine suggerimenti | più recente prima + prefix match prioritizzato |
-| Exact match escluso | sì (non suggerire la query corrente) |
+| Proprietà                             | Valore default                                 |
+|---------------------------------------|------------------------------------------------|
+| Max entries globali per chiave        | 8                                              |
+| Max entries visibili nei suggerimenti | 6                                              |
+| Ordine suggerimenti                   | più recente prima + prefix match prioritizzato |
+| Exact match escluso                   | sì (non suggerire la query corrente)           |
 
 ### Setup e teardown
 
@@ -234,7 +246,8 @@ assertNotNull(decoded.deviceInfo.data)
 
 ### Test 1 — `addNormalizesAndDeduplicatesCaseInsensitive`
 
-**Obiettivo:** la stessa query (indipendentemente da maiuscole e spazi) è deduplicata; la versione più recente vince.
+**Obiettivo:** la stessa query (indipendentemente da maiuscole e spazi) è deduplicata; la versione
+più recente vince.
 
 ```kotlin
 SearchHistoryStore.add("apps", "  Demo   Query  ")  // normalizzato → "demo query"
@@ -251,7 +264,8 @@ assertEquals(listOf("Second Query", "demo query"), suggestions)
 
 ### Test 2 — `suggestionsPrioritizePrefixAndHideExactMatch`
 
-**Obiettivo:** i suggerimenti: (a) escludono la query corrente esatta, (b) mostrano max 6 risultati, (c) mettono prime le entry con prefix match.
+**Obiettivo:** i suggerimenti: (a) escludono la query corrente esatta, (b) mostrano max 6 risultati,
+(c) mettono prime le entry con prefix match.
 
 ```kotlin
 // Aggiungi 8 entry: "log", "logcat", "log level", "login", "root", "root check",
@@ -270,7 +284,8 @@ assertTrue(suggestions.first().startsWith("log"))  // prefix match prima
 
 ### Test 3 — `disabledSuggestionsDoNotStoreOrShowHistory`
 
-**Obiettivo:** `setEnabled(false)` disabilita completamente la funzionalità — né le entry vengono salvate né i suggerimenti restituiti.
+**Obiettivo:** `setEnabled(false)` disabilita completamente la funzionalità — né le entry vengono
+salvate né i suggerimenti restituiti.
 
 ```kotlin
 SearchHistoryStore.setEnabled(false)

@@ -1,16 +1,28 @@
 package com.crackmydroid.shared.ui.screens
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.clickable
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Accessibility
+import androidx.compose.material.icons.filled.BugReport
+import androidx.compose.material.icons.filled.ColorLens
+import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Link
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.runtime.Composable
@@ -19,43 +31,31 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Accessibility
-import androidx.compose.material.icons.filled.ColorLens
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Link
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material.icons.filled.BugReport
-import androidx.compose.material.icons.filled.History
-import androidx.compose.material.icons.filled.Description
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
-import com.crackmydroid.shared.domain.model.AppTheme
 import com.crackmydroid.shared.domain.model.AppLanguage
+import com.crackmydroid.shared.domain.model.AppTheme
 import com.crackmydroid.shared.i18n.LocalStrings
-import com.crackmydroid.shared.ui.settings.SettingsViewModel
+import com.crackmydroid.shared.presentation.components.AppButton
+import com.crackmydroid.shared.presentation.components.AppText
+import com.crackmydroid.shared.presentation.components.ButtonVariant
+import com.crackmydroid.shared.presentation.components.CardBlock
+import com.crackmydroid.shared.presentation.components.ErrorDialog
+import com.crackmydroid.shared.presentation.components.LocalAccessibilityPrefs
+import com.crackmydroid.shared.presentation.components.ScrollToTopButton
+import com.crackmydroid.shared.presentation.components.SectionHeader
 import com.crackmydroid.shared.ui.settings.SettingsActions
 import com.crackmydroid.shared.ui.settings.SettingsAppInfo
 import com.crackmydroid.shared.ui.settings.SettingsState
-import com.crackmydroid.shared.presentation.components.CardBlock
-import com.crackmydroid.shared.presentation.components.AppButton
-import com.crackmydroid.shared.presentation.components.AppText
-import com.crackmydroid.shared.presentation.components.SectionHeader
-import com.crackmydroid.shared.presentation.components.ButtonVariant
-import com.crackmydroid.shared.presentation.components.ErrorDialog
-import com.crackmydroid.shared.presentation.components.ScrollToTopButton
-import com.crackmydroid.shared.util.appVersionName
+import com.crackmydroid.shared.ui.settings.SettingsViewModel
 import com.crackmydroid.shared.util.appPackageName
 import com.crackmydroid.shared.util.appRequestedPermissions
 import com.crackmydroid.shared.util.appSdkInfo
+import com.crackmydroid.shared.util.appVersionName
 import kotlinx.coroutines.launch
-import com.crackmydroid.shared.presentation.components.LocalAccessibilityPrefs
 
 @Composable
 fun SettingsScreen(
@@ -127,11 +127,28 @@ internal fun SettingsContent(
                 .verticalScroll(scrollState),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            SectionHeader(title = strings.navSettings, help = headerHelp, onHelp = actions.onHelp, onMenu = actions.onMenu)
+            SectionHeader(
+                title = strings.navSettings,
+                help = headerHelp,
+                onHelp = actions.onHelp,
+                onMenu = actions.onMenu
+            )
             CardBlock(strings.themeTitle, leadingIcon = Icons.Filled.ColorLens) {
-                ThemeRow(strings.light, AppTheme.LIGHT, state.theme) { actions.onSelectTheme(AppTheme.LIGHT) }
-                ThemeRow(strings.dark, AppTheme.DARK, state.theme) { actions.onSelectTheme(AppTheme.DARK) }
-                ThemeRow(strings.system, AppTheme.SYSTEM, state.theme) { actions.onSelectTheme(AppTheme.SYSTEM) }
+                ThemeRow(strings.light, AppTheme.LIGHT, state.theme) {
+                    actions.onSelectTheme(
+                        AppTheme.LIGHT
+                    )
+                }
+                ThemeRow(
+                    strings.dark,
+                    AppTheme.DARK,
+                    state.theme
+                ) { actions.onSelectTheme(AppTheme.DARK) }
+                ThemeRow(strings.system, AppTheme.SYSTEM, state.theme) {
+                    actions.onSelectTheme(
+                        AppTheme.SYSTEM
+                    )
+                }
             }
 
             CardBlock(strings.languageTitle, leadingIcon = Icons.Filled.Settings) {
@@ -198,7 +215,11 @@ internal fun SettingsContent(
                     checked = state.verbose,
                     onCheckedChange = actions.onToggleVerbose
                 )
-                AppText(strings.verboseSubtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                AppText(
+                    strings.verboseSubtitle,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
 
             CardBlock("Formato esportazione", leadingIcon = Icons.Filled.Description) {
@@ -221,9 +242,21 @@ internal fun SettingsContent(
             CardBlock(strings.accessibilityTitle, leadingIcon = Icons.Filled.Accessibility) {
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     AppText(strings.accessibilityDesc, style = MaterialTheme.typography.bodySmall)
-                    SwitchRow(label = strings.accessibilityContrast, checked = state.highContrast, onCheckedChange = actions.onSetHighContrast)
-                    SwitchRow(label = strings.accessibilityReduceMotion, checked = state.reduceMotion, onCheckedChange = actions.onSetReduceMotion)
-                    SwitchRow(label = strings.accessibilityLargeText, checked = state.largeText, onCheckedChange = actions.onSetLargeText)
+                    SwitchRow(
+                        label = strings.accessibilityContrast,
+                        checked = state.highContrast,
+                        onCheckedChange = actions.onSetHighContrast
+                    )
+                    SwitchRow(
+                        label = strings.accessibilityReduceMotion,
+                        checked = state.reduceMotion,
+                        onCheckedChange = actions.onSetReduceMotion
+                    )
+                    SwitchRow(
+                        label = strings.accessibilityLargeText,
+                        checked = state.largeText,
+                        onCheckedChange = actions.onSetLargeText
+                    )
                 }
             }
 
@@ -254,8 +287,15 @@ internal fun SettingsContent(
             DisclaimerBox()
 
             CardBlock("Info app", leadingIcon = Icons.Filled.Info) {
-                AppText("Versione: ${appInfo.versionName}", style = MaterialTheme.typography.titleMedium)
-                AppText("Package: ${appInfo.packageName}", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                AppText(
+                    "Versione: ${appInfo.versionName}",
+                    style = MaterialTheme.typography.titleMedium
+                )
+                AppText(
+                    "Package: ${appInfo.packageName}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
                 if (appInfo.minSdk != null || appInfo.targetSdk != null) {
                     AppText(
                         "SDK min/target: ${appInfo.minSdk ?: "?"} / ${appInfo.targetSdk ?: "?"}",
@@ -265,12 +305,24 @@ internal fun SettingsContent(
                 }
                 val perms = appInfo.requestedPermissions
                 if (perms.isNotEmpty()) {
-                    AppText("Permessi richiesti:", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
+                    AppText(
+                        "Permessi richiesti:",
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.SemiBold
+                    )
                     perms.forEach { perm ->
-                        AppText("• $perm", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        AppText(
+                            "• $perm",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     }
                 } else {
-                    AppText("Permessi richiesti: nessuno", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    AppText(
+                        "Permessi richiesti: nessuno",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
                 Spacer(modifier = Modifier.height(8.dp))
             }
@@ -295,7 +347,12 @@ internal fun SettingsContent(
 
 @Composable
 private fun ThemeRow(label: String, theme: AppTheme, current: AppTheme, onClick: () -> Unit) {
-    AppButton(text = if (current == theme) "✔︎ $label" else label, onClick = onClick, modifier = Modifier.padding(vertical = 4.dp), variant = ButtonVariant.Tonal)
+    AppButton(
+        text = if (current == theme) "✔︎ $label" else label,
+        onClick = onClick,
+        modifier = Modifier.padding(vertical = 4.dp),
+        variant = ButtonVariant.Tonal
+    )
 }
 
 @Composable
@@ -341,6 +398,9 @@ private fun SwitchRow(
 private fun DisclaimerBox() {
     val strings = LocalStrings.current
     CardBlock(strings.disclaimerTitle, leadingIcon = Icons.Filled.Warning) {
-        AppText(strings.disclaimerBody, style = androidx.compose.material3.MaterialTheme.typography.bodySmall)
+        AppText(
+            strings.disclaimerBody,
+            style = androidx.compose.material3.MaterialTheme.typography.bodySmall
+        )
     }
 }

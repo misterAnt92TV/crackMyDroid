@@ -8,13 +8,13 @@ import com.crackmydroid.shared.domain.repository.RootCheckRepository
 import com.crackmydroid.shared.i18n.platformLanguage
 import com.crackmydroid.shared.i18n.stringsFor
 import com.scottyab.rootbeer.RootBeer
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.Calendar
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 
 class RootCheckRepositoryAndroid(private val context: Context) : RootCheckRepository {
     private data class RootSignal(
@@ -164,7 +164,8 @@ class RootCheckRepositoryAndroid(private val context: Context) : RootCheckReposi
             }
         )
 
-        val adbEnabled = Settings.Global.getInt(context.contentResolver, Settings.Global.ADB_ENABLED, 0) == 1
+        val adbEnabled =
+            Settings.Global.getInt(context.contentResolver, Settings.Global.ADB_ENABLED, 0) == 1
         hardeningSignals += RootSignal(
             label = "ADB debugging",
             detected = adbEnabled,
@@ -221,7 +222,8 @@ class RootCheckRepositoryAndroid(private val context: Context) : RootCheckReposi
     override suspend fun checkPlayIntegrity(nonce: String): com.crackmydroid.shared.domain.model.PlayIntegrityResult =
         withContext(Dispatchers.IO) {
             try {
-                val manager = com.google.android.play.core.integrity.IntegrityManagerFactory.create(context)
+                val manager =
+                    com.google.android.play.core.integrity.IntegrityManagerFactory.create(context)
                 val request = com.google.android.play.core.integrity.IntegrityTokenRequest.builder()
                     .setNonce(nonce)
                     .build()
@@ -234,7 +236,11 @@ class RootCheckRepositoryAndroid(private val context: Context) : RootCheckReposi
                 com.crackmydroid.shared.domain.model.PlayIntegrityResult(
                     basicIntegrity = null,
                     deviceIntegrity = null,
-                    details = stringsFor(platformLanguage()).playIntegrityDetails + ": ${token.take(120)}..."
+                    details = stringsFor(platformLanguage()).playIntegrityDetails + ": ${
+                        token.take(
+                            120
+                        )
+                    }..."
                 )
             } catch (t: Throwable) {
                 com.crackmydroid.shared.domain.model.PlayIntegrityResult(

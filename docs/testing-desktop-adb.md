@@ -1,6 +1,7 @@
 # CrackMyDroid — Test Desktop e Layer ADB (`desktopTest`)
 
-> Test del layer Desktop: parser ADB, bridge di processo, repository via ADB, session controller, snapshot importer e analisi manifest.
+> Test del layer Desktop: parser ADB, bridge di processo, repository via ADB, session controller,
+> snapshot importer e analisi manifest.
 
 ---
 
@@ -20,7 +21,10 @@
 
 ## Filosofia: Fakes vs MockK
 
-I test del layer desktop usano esclusivamente **fakes hand-written** invece di MockK. Motivo: le repository desktop implementano interfacce con comportamenti stateful complessi (cache per sessione, cattura comandi, filesystem), che sono più leggibili e manutenibili come classi concrete che come `mockk<T>()` con `slot` e `answers`.
+I test del layer desktop usano esclusivamente **fakes hand-written** invece di MockK. Motivo: le
+repository desktop implementano interfacce con comportamenti stateful complessi (cache per sessione,
+cattura comandi, filesystem), che sono più leggibili e manutenibili come classi concrete che come
+`mockk<T>()` con `slot` e `answers`.
 
 ```kotlin
 // Fake tipico nel desktopTest
@@ -52,9 +56,11 @@ private class FakeAdbBridge(
 
 ### Test 1 — `parsesDeviceList`
 
-**Obiettivo:** `parseAdbDevices()` interpreta correttamente l'output di `adb devices` con stati `device`, `offline`, `unauthorized`.
+**Obiettivo:** `parseAdbDevices()` interpreta correttamente l'output di `adb devices` con stati
+`device`, `offline`, `unauthorized`.
 
 **Input simulato (`adb devices -l`):**
+
 ```
 List of devices attached
 RZCX20J738K            device product:a54xnsxx model:SM_A546B device:a54x transport_id:1
@@ -63,6 +69,7 @@ emulator-5554          offline
 ```
 
 **Assertions:**
+
 ```kotlin
 assertEquals(3,             devices.size)
 assertEquals("RZCX20J738K", devices[0].serial)
@@ -76,15 +83,18 @@ assertEquals("unauthorized",devices[2].state)
 
 ### Test 2 — `parsesInstalledAppsAndPmPath`
 
-**Obiettivo:** `parseInstalledApps()` e `parsePmPath()` elaborano correttamente `pm list packages -f`.
+**Obiettivo:** `parseInstalledApps()` e `parsePmPath()` elaborano correttamente
+`pm list packages -f`.
 
 **Input simulato:**
+
 ```
 package:/system/priv-app/Calculator/Calculator.apk=com.android.calculator2
 package:/data/app/com.example.demo-1/base.apk=com.example.demo
 ```
 
 **Assertions:**
+
 ```kotlin
 // parseInstalledApps
 assertEquals(2,                   apps.size)
@@ -98,9 +108,12 @@ assertTrue(paths.first().endsWith("Calculator.apk"))
 
 ### Test 3 — `parsesPermissionsAndActivitiesFromDump`
 
-**Obiettivo:** `parseRequestedPermissions()` e `parseActivities()` elaborano l'output di `dumpsys package <pkg>`, incluse activity con intent resolver, inner class (`$`), scheme, authority, path e MIME type.
+**Obiettivo:** `parseRequestedPermissions()` e `parseActivities()` elaborano l'output di
+`dumpsys package <pkg>`, incluse activity con intent resolver, inner class (`$`), scheme, authority,
+path e MIME type.
 
 **Input simulato (excerpt da `dumpsys package`):**
+
 ```
 requested permissions:
   android.permission.CAMERA
@@ -125,11 +138,13 @@ Activities:
 ```
 
 **Assertions — permessi:**
+
 ```kotlin
 assertEquals(listOf("CAMERA", "INTERNET"), permissions)  // ordinati
 ```
 
 **Assertions — attività:**
+
 ```kotlin
 assertEquals(3, activities.size)
 
@@ -162,7 +177,8 @@ assertEquals(false,                              activities[2].launchableViaShel
 **Soggetto:** `ProcessAdbBridge` (implementazione reale — avvia processi di sistema)
 **Pattern:** `runTest` con filesystem reale (temp dir)
 
-Questi test verificano la **validazione della configurazione ADB** prima di eseguire qualsiasi processo. Usano `createTempDirectory()` per creare scenari reali.
+Questi test verificano la **validazione della configurazione ADB** prima di eseguire qualsiasi
+processo. Usano `createTempDirectory()` per creare scenari reali.
 
 > Cleanup: ogni test usa `try/finally { dir.deleteRecursively() }` — nessun `@After`.
 
@@ -170,7 +186,8 @@ Questi test verificano la **validazione della configurazione ADB** prima di eseg
 
 ### Test 1 — `rejectsConfiguredDirectoryAsAdbBinary`
 
-**Obiettivo:** se il percorso ADB punta a una **directory** (non un file), il bridge restituisce `Result.failure` con messaggio d'errore.
+**Obiettivo:** se il percorso ADB punta a una **directory** (non un file), il bridge restituisce
+`Result.failure` con messaggio d'errore.
 
 ```kotlin
 val dir = createTempDirectory("adb-test-")
@@ -189,7 +206,8 @@ try {
 
 ### Test 2 — `rejectsConfiguredNonExecutableFileAsAdbBinary`
 
-**Obiettivo:** se il percorso ADB punta a un file **non eseguibile**, il bridge restituisce `Result.failure`.
+**Obiettivo:** se il percorso ADB punta a un file **non eseguibile**, il bridge restituisce
+`Result.failure`.
 
 ```kotlin
 val dir  = createTempDirectory("adb-test-")
@@ -209,11 +227,13 @@ try {
 
 ## AppManifestSecurityTest
 
-**File:** `shared/src/desktopTest/kotlin/com/crackmydroid/shared/domain/model/AppManifestSecurityTest.kt`
+**File:**
+`shared/src/desktopTest/kotlin/com/crackmydroid/shared/domain/model/AppManifestSecurityTest.kt`
 **Soggetto:** `ManifestSecurityAnalyzer.analyze()` e `ManifestSecurityAnalyzer.formatLevel()`
 **Pattern:** test puro sincrono — nessun mock, nessun dispatcher
 
-Questi test coprono ogni check dell'analizzatore, incluso il calcolo del punteggio composito e le stringhe di localizzazione italiane.
+Questi test coprono ogni check dell'analizzatore, incluso il calcolo del punteggio composito e le
+stringhe di localizzazione italiane.
 
 ---
 
@@ -262,9 +282,9 @@ assertTrue(report.findings.any { it.title.contains("Backup") })
 val security = AppManifestSecurity(
     exposedComponents = listOf(
         ExposedComponentInfo(
-            name       = "com.example.DataProvider",
-            type       = ComponentType.PROVIDER,
-            exported   = true,
+            name = "com.example.DataProvider",
+            type = ComponentType.PROVIDER,
+            exported = true,
             permission = null    // ← nessuna permission → Critical
         )
     ), ...
@@ -284,8 +304,8 @@ assertTrue(report.findings.any { it.title.contains("provider") })
 val security = AppManifestSecurity(
     exposedComponents = listOf(
         ExposedComponentInfo(
-            type       = ComponentType.SERVICE,
-            exported   = true,
+            type = ComponentType.SERVICE,
+            exported = true,
             permission = "android.permission.INTERNET"  // ← protetto
         )
     ), ...
@@ -313,13 +333,13 @@ assertEquals("BASSA",   ManifestSecurityAnalyzer.formatLevel(ManifestRiskLevel.L
 
 **Obiettivo:** il punteggio finale è la somma dei pesi di tutti i finding rilevati.
 
-| Flag attivo | Peso |
-|---|---|
-| `debuggable=true` | 5 |
-| `allowBackup=true` (senza agent) | 3 |
-| `usesCleartextTraffic=true` | 1 |
-| `debugCertSigned=true` | 3 |
-| **Totale** | **12** |
+| Flag attivo                      | Peso   |
+|----------------------------------|--------|
+| `debuggable=true`                | 5      |
+| `allowBackup=true` (senza agent) | 3      |
+| `usesCleartextTraffic=true`      | 1      |
+| `debugCertSigned=true`           | 3      |
+| **Totale**                       | **12** |
 
 ```kotlin
 val security = AppManifestSecurity(
@@ -341,25 +361,28 @@ assertTrue(report.findings.size >= 4)
 
 ## ActivityRepositoryDesktopTest
 
-**File:** `shared/src/desktopTest/kotlin/com/crackmydroid/shared/data/activity/ActivityRepositoryDesktopTest.kt`
+**File:**
+`shared/src/desktopTest/kotlin/com/crackmydroid/shared/data/activity/ActivityRepositoryDesktopTest.kt`
 **Soggetto:** `ActivityRepositoryDesktop`
 **Pattern:** `runTest` con fakes hand-written
 
 ### Fakes utilizzati
 
-| Fake | Implementa | Comportamento |
-|---|---|---|
-| `CapturingActivityAdbBridge` | `AdbBridge` | Cattura l'ultimo comando `shell()` in `var lastCommand`; restituisce sempre `Result.success("Starting: Intent { ... }")` |
-| `FakeActivitySessionController` | `DeviceSessionController` | Ritorna stato fisso: `adbPath="/usr/bin/adb"`, device `SERIAL1` |
-| `FakeActivityRemotePackageManager` | `RemotePackageManager` | Tutti i metodi ritornano empty |
+| Fake                               | Implementa                | Comportamento                                                                                                            |
+|------------------------------------|---------------------------|--------------------------------------------------------------------------------------------------------------------------|
+| `CapturingActivityAdbBridge`       | `AdbBridge`               | Cattura l'ultimo comando `shell()` in `var lastCommand`; restituisce sempre `Result.success("Starting: Intent { ... }")` |
+| `FakeActivitySessionController`    | `DeviceSessionController` | Ritorna stato fisso: `adbPath="/usr/bin/adb"`, device `SERIAL1`                                                          |
+| `FakeActivityRemotePackageManager` | `RemotePackageManager`    | Tutti i metodi ritornano empty                                                                                           |
 
 ---
 
 ### Test 1 — `guidedLaunchBuildsIntentCommandWithQuotedArguments`
 
-**Obiettivo:** il lancio guidato di una activity con inner class (`$`) costruisce il comando `am start` con tutti gli argomenti singolo-quotati e il `$` correttamente escaped.
+**Obiettivo:** il lancio guidato di una activity con inner class (`$`) costruisce il comando
+`am start` con tutti gli argomenti singolo-quotati e il `$` correttamente escaped.
 
 **Fixture:**
+
 ```kotlin
 val entry = ActivityEntry(
     packageName        = "pkg.demo",
@@ -372,13 +395,17 @@ val entry = ActivityEntry(
 ```
 
 **Esecuzione:**
+
 ```kotlin
 val repo = ActivityRepositoryDesktop(adbBridge, sessionController, packageManager)
-repo.launch(entry.packageName, entry.activityName,
-            entry.launchIntentAction, entry.launchIntentData, entry.launchIntentMimeType)
+repo.launch(
+    entry.packageName, entry.activityName,
+    entry.launchIntentAction, entry.launchIntentData, entry.launchIntentMimeType
+)
 ```
 
 **Assertion:**
+
 ```kotlin
 assertEquals(
     "am start -n 'pkg.demo/pkg.demo.Settings\$DeepLinkActivity'" +
@@ -393,24 +420,28 @@ assertEquals(
 
 ## ShellCommandRepositoryDesktopTest
 
-**File:** `shared/src/desktopTest/kotlin/com/crackmydroid/shared/data/shell/ShellCommandRepositoryDesktopTest.kt`
+**File:**
+`shared/src/desktopTest/kotlin/com/crackmydroid/shared/data/shell/ShellCommandRepositoryDesktopTest.kt`
 **Soggetto:** `ShellCommandRepositoryDesktop`
 **Pattern:** `runTest` con fakes
 
 ### Fakes utilizzati
 
-| Fake | Implementa | Comportamento |
-|---|---|---|
-| `FakeShellAdbBridge` | `AdbBridge` | `which su` → `Result.failure`; `id` (root) → `Result.failure`; altri → `Result.success("")` |
-| `FakeShellSessionController` | `DeviceSessionController` | Stato fisso, serial `SERIAL1` |
+| Fake                         | Implementa                | Comportamento                                                                               |
+|------------------------------|---------------------------|---------------------------------------------------------------------------------------------|
+| `FakeShellAdbBridge`         | `AdbBridge`               | `which su` → `Result.failure`; `id` (root) → `Result.failure`; altri → `Result.success("")` |
+| `FakeShellSessionController` | `DeviceSessionController` | Stato fisso, serial `SERIAL1`                                                               |
 
 ---
 
 ### Test 1 — `marksRootCommandsUnsupportedWhenSuIsUnavailable`
 
-**Obiettivo:** quando `su` non è disponibile sul device, i comandi `requiresRoot=true` vengono marcati `supported=false` con ragione che contiene `"adb-only"`. La chiamata a `execute()` su un comando non supportato ritorna `ShellCommandResult(success=false, code=126)`.
+**Obiettivo:** quando `su` non è disponibile sul device, i comandi `requiresRoot=true` vengono
+marcati `supported=false` con ragione che contiene `"adb-only"`. La chiamata a `execute()` su un
+comando non supportato ritorna `ShellCommandResult(success=false, code=126)`.
 
 **Esecuzione:**
+
 ```kotlin
 val commands = repo.listCommands()
 val rootCommand = commands.first { it.requiresRoot }
@@ -432,7 +463,8 @@ assertEquals(rootCommand.unsupportedReason, result.stderr)
 
 ## RemotePackageManagerDesktopTest
 
-**File:** `shared/src/desktopTest/kotlin/com/crackmydroid/shared/data/packages/RemotePackageManagerDesktopTest.kt`
+**File:**
+`shared/src/desktopTest/kotlin/com/crackmydroid/shared/data/packages/RemotePackageManagerDesktopTest.kt`
 **Soggetto:** `RemotePackageManagerDesktop`
 **Pattern:** `runTest` con fake che registra comandi eseguiti
 
@@ -453,6 +485,7 @@ private class FakePackageAdbBridge(
 ```
 
 **Responses pre-caricate:**
+
 ```kotlin
 mapOf(
     "pm list packages -f"                    to "<2-package output>",
@@ -465,7 +498,8 @@ mapOf(
 
 ### Test 1 — `cachesPackageQueriesPerSession`
 
-**Obiettivo:** ogni comando ADB viene eseguito **esattamente una volta** per sessione — le chiamate successive usano la cache.
+**Obiettivo:** ogni comando ADB viene eseguito **esattamente una volta** per sessione — le chiamate
+successive usano la cache.
 
 ```kotlin
 // Chiamate doppie
@@ -493,31 +527,36 @@ assertEquals(1, bridge.commands.count { it == "pm path com.example.demo" })
 
 ## DeviceSessionControllerDesktopTest
 
-**File:** `shared/src/desktopTest/kotlin/com/crackmydroid/shared/data/device/DeviceSessionControllerDesktopTest.kt`
+**File:**
+`shared/src/desktopTest/kotlin/com/crackmydroid/shared/data/device/DeviceSessionControllerDesktopTest.kt`
 **Soggetto:** `DeviceSessionControllerDesktop`
 **Pattern:** `runTest` con fakes (inclusa implementazione completa di `SettingsRepository`)
 
 ### Fakes utilizzati
 
-| Fake | Implementa | Note |
-|---|---|---|
-| `FakeAdbBridge` | `AdbBridge` | `listDevices()` ritorna lista iniettata; `shell()` → `""` |
+| Fake                     | Implementa           | Note                                                                                                           |
+|--------------------------|----------------------|----------------------------------------------------------------------------------------------------------------|
+| `FakeAdbBridge`          | `AdbBridge`          | `listDevices()` ritorna lista iniettata; `shell()` → `""`                                                      |
 | `FakeSettingsRepository` | `SettingsRepository` | Implementazione in-memory completa con tutti i 20+ campi (theme, language, adbPath, favorites, accessibility…) |
 
-**Interazione con `DesktopScanCache`:** il test usa l'istanza reale di `DesktopScanCache` per verificare l'invalidazione.
+**Interazione con `DesktopScanCache`:** il test usa l'istanza reale di `DesktopScanCache` per
+verificare l'invalidazione.
 
 ---
 
 ### Test 1 — `refreshAndSelectDeviceUpdatesStateAndClearsCache`
 
-**Obiettivo:** `selectDevice()` aggiorna lo stato, persiste `adbPath` nelle impostazioni e **invalida** la cache di scan.
+**Obiettivo:** `selectDevice()` aggiorna lo stato, persiste `adbPath` nelle impostazioni e
+**invalida** la cache di scan.
 
 **Pre-condizione — cache popolata:**
+
 ```kotlin
 cache.installedApps = listOf(InstalledAppEntry("Pkg", "pkg", "/tmp/pkg.apk"))
 ```
 
 **Esecuzione:**
+
 ```kotlin
 val device = ConnectedDevice(serial = "SERIAL1", state = "device")
 controller.refreshDevices("/opt/homebrew/bin/adb")
@@ -526,6 +565,7 @@ advanceUntilIdle()
 ```
 
 **Assertions:**
+
 ```kotlin
 val state = controller.state.value
 
@@ -539,7 +579,8 @@ assertEquals(1, state.sessionVersion)
 
 ### Test 2 — `rescanAndClearSelectionWork`
 
-**Obiettivo:** `rescanSelectedDevice()` incrementa `sessionVersion` (forza reload); `clearSelection()` deseleziona il device mantenendo la lista disponibile.
+**Obiettivo:** `rescanSelectedDevice()` incrementa `sessionVersion` (forza reload);
+`clearSelection()` deseleziona il device mantenendo la lista disponibile.
 
 ```kotlin
 controller.refreshDevices("/usr/bin/adb")
@@ -561,7 +602,8 @@ assertTrue(controller.state.value.availableDevices.isNotEmpty())  // lista mante
 
 ## RemoteDeviceSnapshotImporterTest
 
-**File:** `shared/src/desktopTest/kotlin/com/crackmydroid/shared/data/snapshot/RemoteDeviceSnapshotImporterTest.kt`
+**File:**
+`shared/src/desktopTest/kotlin/com/crackmydroid/shared/data/snapshot/RemoteDeviceSnapshotImporterTest.kt`
 **Soggetto:** `RemoteDeviceSnapshotImporter`
 **Pattern:** `runTest` con fake che simula `adb pull` scrivendo su filesystem reale
 
@@ -581,15 +623,18 @@ private class FakeSnapshotAdbBridge(
 }
 ```
 
-Il fake simula `adb pull` scrivendo il testo dello snapshot su un file locale — lo stesso comportamento del bridge reale.
+Il fake simula `adb pull` scrivendo il testo dello snapshot su un file locale — lo stesso
+comportamento del bridge reale.
 
 ---
 
 ### Test 1 — `importsValidSnapshotIntoCache`
 
-**Obiettivo:** uno snapshot valido viene scaricato via ADB, deserializzato e distribuito correttamente in tutti i campi di `DesktopScanCache`.
+**Obiettivo:** uno snapshot valido viene scaricato via ADB, deserializzato e distribuito
+correttamente in tutti i campi di `DesktopScanCache`.
 
 **Input — snapshot costruito programmaticamente:**
+
 ```kotlin
 val snapshot = DeviceScanSnapshot(
     schemaVersion    = DeviceScanSnapshot.SCHEMA_VERSION,
@@ -605,6 +650,7 @@ bridge.snapshotText = DeviceScanSnapshotJson.format.encodeToString(snapshot)
 ```
 
 **Assertions:**
+
 ```kotlin
 val outcome = importer.importSnapshot("SERIAL1")
 
@@ -625,9 +671,11 @@ assertEquals("Non eseguito automaticamente", cache.playIntegrity!!.details)
 
 ### Test 2 — `fallsBackWhenSnapshotSchemaIsIncompatible`
 
-**Obiettivo:** uno snapshot con `schemaVersion` futura/incompatibile viene rifiutato; la cache rimane vuota e il messaggio di fallback contiene `"schema"`.
+**Obiettivo:** uno snapshot con `schemaVersion` futura/incompatibile viene rifiutato; la cache
+rimane vuota e il messaggio di fallback contiene `"schema"`.
 
 **Input:**
+
 ```json
 {
   "schemaVersion": 999,
@@ -637,6 +685,7 @@ assertEquals("Non eseguito automaticamente", cache.playIntegrity!!.details)
 ```
 
 **Assertions:**
+
 ```kotlin
 val outcome = importer.importSnapshot("SERIAL1")
 

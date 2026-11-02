@@ -20,7 +20,10 @@ class ActivityLaunchabilityTest {
         val result = classifyAndroidActivityLaunchability(exported = false, permission = null)
 
         assertFalse(result.launchableViaShell)
-        assertEquals("Activity non esportata: non avviabile da questa app", result.launchabilityReason)
+        assertEquals(
+            "Activity non esportata: non avviabile da questa app",
+            result.launchabilityReason
+        )
     }
 
     @Test

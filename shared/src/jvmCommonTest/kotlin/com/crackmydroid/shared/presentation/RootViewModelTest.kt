@@ -39,7 +39,10 @@ class RootViewModelTest {
     @Test
     fun verifyUpdatesRootStatus() = runTest(dispatcher) {
         val repository = mockk<RootCheckRepository>()
-        coEvery { repository.checkRoot() } returns RootStatus(isRooted = true, details = "su available")
+        coEvery { repository.checkRoot() } returns RootStatus(
+            isRooted = true,
+            details = "su available"
+        )
         val viewModel = viewModel(repository)
 
         viewModel.verify()

@@ -240,7 +240,11 @@ interface InstalledAppsRepository {
 ```kotlin
 interface ActivityRepository {
     suspend fun getActivities(packageName: String): List<ActivityEntry>
-    suspend fun getActivitiesPaginated(packageName: String, offset: Int, limit: Int): List<ActivityEntry>
+    suspend fun getActivitiesPaginated(
+        packageName: String,
+        offset: Int,
+        limit: Int
+    ): List<ActivityEntry>
     suspend fun getComponents(packageName: String): List<AppComponent>
     suspend fun getComponentsCached(packageName: String): List<AppComponent>
     suspend fun launch(packageName: String, activityName: String): ResultWrapper<Unit>

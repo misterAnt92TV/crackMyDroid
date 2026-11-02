@@ -45,7 +45,7 @@ class BuildPermissionsReportUseCase(
             } else {
                 appendLine(
                     "Analisi rischio: score ${risk.score} • ${risk.findings.size} finding " +
-                        "(Critici ${risk.criticalCount}, Alti ${risk.highCount}, Medi ${risk.mediumCount})"
+                            "(Critici ${risk.criticalCount}, Alti ${risk.highCount}, Medi ${risk.mediumCount})"
                 )
                 appendLine("Dettaglio finding:")
                 risk.findings.forEach { finding ->
@@ -84,7 +84,7 @@ class BuildPermissionsReportUseCase(
             appendLine("Score rischio: ${riskReport.score}")
             appendLine(
                 "Finding: ${riskReport.findings.size} " +
-                    "(Critici ${riskReport.criticalCount}, Alti ${riskReport.highCount}, Medi ${riskReport.mediumCount})"
+                        "(Critici ${riskReport.criticalCount}, Alti ${riskReport.highCount}, Medi ${riskReport.mediumCount})"
             )
             riskReport.findings.forEachIndexed { index, finding ->
                 appendLine("${index + 1}. [${analyzePermissionRisks.riskLabel(finding.level)}] ${finding.title}")

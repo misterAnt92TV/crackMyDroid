@@ -3,7 +3,8 @@
 > Documentazione visiva delle schermate principali dell'app.
 > Visual documentation of the main app screens.
 >
-> *Nota: le schermate seguenti sono mockup ASCII che riproducono fedelmente la UI Compose Multiplatform. Le schermate reali possono differire leggermente in base al tema e al device.*
+> *Nota: le schermate seguenti sono mockup ASCII che riproducono fedelmente la UI Compose
+Multiplatform. Le schermate reali possono differire leggermente in base al tema e al device.*
 
 ---
 
@@ -27,7 +28,8 @@
 
 ### Struttura dell'app
 
-L'app usa un **Bottom Tab Bar** per le sezioni principali e un **Navigation Drawer** per le funzionalità avanzate.
+L'app usa un **Bottom Tab Bar** per le sezioni principali e un **Navigation Drawer** per le
+funzionalità avanzate.
 
 ```
 ┌─────────────────────────────────────────────────┐
@@ -110,6 +112,7 @@ La schermata di benvenuto mostra le ultime operazioni eseguite e una sezione FAQ
 ```
 
 **Elementi interattivi:**
+
 - `[≡]` apre il Navigation Drawer
 - `[?]` mostra un dialog di aiuto contestuale
 - Le righe delle operazioni sono cliccabili per dettagli
@@ -178,6 +181,7 @@ Panoramica completa dell'hardware e software del device, con ogni riga copiabile
 ```
 
 **Elementi interattivi:**
+
 - Ogni riga `InfoRow` è cliccabile → copia "Label: Valore" negli appunti
 - `[📋 Copia]` nella sezione Dispositivo → copia il report completo
 - `[↑]` FAB scroll-to-top (appare dopo scroll)
@@ -678,6 +682,7 @@ Il PenTesting è organizzato come un wizard a 4 step con una progress card persi
 ```
 
 **Legenda icone permesso:**
+
 ```
 🎵  Audio/Mic          📍  Location        📷  Camera
 📞  Phone/Call         👥  Contacts        💬  SMS

@@ -1,6 +1,5 @@
 package com.crackmydroid.shared.ui.root
 
-import com.crackmydroid.shared.domain.model.RootStatus
 import com.crackmydroid.shared.domain.usecase.CheckRootUseCase
 import com.crackmydroid.shared.domain.usecase.reports.ExportReportUseCase
 import com.crackmydroid.shared.i18n.Strings
@@ -39,7 +38,14 @@ class RootViewModel(
             _state.update { it.copy(loading = true, error = null) }
             runCatching { checkRoot() }
                 .onSuccess { status -> _state.update { it.copy(status = status, loading = false) } }
-                .onFailure { err -> _state.update { it.copy(error = err.message, loading = false) } }
+                .onFailure { err ->
+                    _state.update {
+                        it.copy(
+                            error = err.message,
+                            loading = false
+                        )
+                    }
+                }
         }
     }
 
@@ -47,8 +53,22 @@ class RootViewModel(
         scope.launch {
             _state.update { it.copy(loading = true, error = null) }
             runCatching { checkPlayIntegrity(nonce) }
-                .onSuccess { res -> _state.update { it.copy(playIntegrity = res, loading = false) } }
-                .onFailure { err -> _state.update { it.copy(error = err.message, loading = false) } }
+                .onSuccess { res ->
+                    _state.update {
+                        it.copy(
+                            playIntegrity = res,
+                            loading = false
+                        )
+                    }
+                }
+                .onFailure { err ->
+                    _state.update {
+                        it.copy(
+                            error = err.message,
+                            loading = false
+                        )
+                    }
+                }
         }
     }
 

@@ -1,18 +1,34 @@
 package com.crackmydroid.shared.ui
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.windowInsetsTopHeight
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.windowInsetsTopHeight
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.DrawerState
+import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
@@ -23,82 +39,64 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.TextButton
-import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.getValue
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.ui.Modifier
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.material3.DrawerState
-import androidx.compose.material3.DrawerValue
-import androidx.compose.material3.rememberDrawerState
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.togetherWith
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.foundation.gestures.awaitEachGesture
-import androidx.compose.foundation.gestures.awaitFirstDown
-import androidx.compose.foundation.gestures.waitForUpOrCancellation
-import kotlinx.coroutines.launch
-import com.crackmydroid.shared.util.appVersionName
-import com.crackmydroid.shared.util.appPackageName
-import androidx.compose.material.icons.Icons
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import com.crackmydroid.shared.domain.model.AppTheme
-import com.crackmydroid.shared.i18n.LocalStrings
-import com.crackmydroid.shared.i18n.Strings
-import com.crackmydroid.shared.i18n.platformLanguage
-import com.crackmydroid.shared.i18n.stringsFor
-import com.crackmydroid.shared.ui.activities.ActivityListViewModel
-import com.crackmydroid.shared.ui.info.InfoViewModel
-import com.crackmydroid.shared.ui.root.RootViewModel
-import com.crackmydroid.shared.ui.settings.SettingsViewModel
-import com.crackmydroid.shared.ui.trick.TrickViewModel
-import com.crackmydroid.shared.ui.logs.LogViewModel
-import com.crackmydroid.shared.ui.permissions.PermissionsViewModel
-import com.crackmydroid.shared.ui.installedapps.InstalledAppsViewModel
-import com.crackmydroid.shared.ui.pentest.PenTestingViewModel
-import com.crackmydroid.shared.ui.screens.HomeScreen
+import com.crackmydroid.shared.domain.repository.OperationLogRepository
 import com.crackmydroid.shared.domain.usecase.GetIntroSeenUseCase
 import com.crackmydroid.shared.domain.usecase.SetIntroSeenUseCase
-import com.crackmydroid.shared.domain.repository.OperationLogRepository
+import com.crackmydroid.shared.i18n.LocalStrings
+import com.crackmydroid.shared.i18n.Strings
+import com.crackmydroid.shared.i18n.stringsFor
+import com.crackmydroid.shared.presentation.components.AccessibilityPrefs
+import com.crackmydroid.shared.presentation.components.LocalAccessibilityPrefs
+import com.crackmydroid.shared.presentation.components.PackageIcon
+import com.crackmydroid.shared.presentation.components.SearchHistoryStore
 import com.crackmydroid.shared.presentation.navigation.Screen
 import com.crackmydroid.shared.presentation.navigation.bottomScreens
 import com.crackmydroid.shared.presentation.navigation.drawerScreens
+import com.crackmydroid.shared.presentation.theme.CrackMyDroidTheme
+import com.crackmydroid.shared.ui.activities.ActivityListViewModel
+import com.crackmydroid.shared.ui.info.InfoViewModel
+import com.crackmydroid.shared.ui.installedapps.InstalledAppsViewModel
+import com.crackmydroid.shared.ui.logs.LogViewModel
+import com.crackmydroid.shared.ui.pentest.PenTestingViewModel
+import com.crackmydroid.shared.ui.permissions.PermissionsViewModel
+import com.crackmydroid.shared.ui.root.RootViewModel
 import com.crackmydroid.shared.ui.screens.ActivityListScreen
+import com.crackmydroid.shared.ui.screens.HelpScreen
+import com.crackmydroid.shared.ui.screens.HomeScreen
 import com.crackmydroid.shared.ui.screens.InfoScreen
+import com.crackmydroid.shared.ui.screens.InstalledAppsScreen
+import com.crackmydroid.shared.ui.screens.LogScreen
+import com.crackmydroid.shared.ui.screens.PenTestingScreen
+import com.crackmydroid.shared.ui.screens.PermissionsScreen
 import com.crackmydroid.shared.ui.screens.RootScreen
 import com.crackmydroid.shared.ui.screens.SettingsScreen
 import com.crackmydroid.shared.ui.screens.TrickScreen
-import com.crackmydroid.shared.ui.screens.LogScreen
-import com.crackmydroid.shared.ui.screens.PermissionsScreen
-import com.crackmydroid.shared.ui.screens.InstalledAppsScreen
-import com.crackmydroid.shared.ui.screens.PenTestingScreen
-import com.crackmydroid.shared.ui.screens.HelpScreen
+import com.crackmydroid.shared.ui.settings.SettingsViewModel
+import com.crackmydroid.shared.ui.trick.TrickViewModel
+import com.crackmydroid.shared.util.appPackageName
+import com.crackmydroid.shared.util.appVersionName
+import kotlinx.coroutines.launch
 import org.koin.mp.KoinPlatform
-import com.crackmydroid.shared.presentation.components.LocalAccessibilityPrefs
-import com.crackmydroid.shared.presentation.components.AccessibilityPrefs
-import com.crackmydroid.shared.presentation.components.SearchHistoryStore
-import com.crackmydroid.shared.presentation.components.PackageIcon
-import com.crackmydroid.shared.presentation.theme.CrackMyDroidTheme
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.runtime.setValue
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
@@ -182,214 +180,231 @@ fun CrackMyDroidApp() {
                 ModalNavigationDrawer(
                     drawerState = drawerState,
                     drawerContent = {
-                    ModalDrawerSheet(
-                    ) {
+                        ModalDrawerSheet(
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(horizontal = 12.dp, vertical = 16.dp),
+                                verticalArrangement = Arrangement.spacedBy(10.dp)
+                            ) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    PackageIcon(
+                                        packageName = appPackageName(),
+                                        size = 40.dp,
+                                        contentPadding = 0.dp
+                                    )
+                                    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                                        Text(
+                                            text = "CrackMyDroid",
+                                            style = MaterialTheme.typography.titleLarge,
+                                            color = MaterialTheme.colorScheme.onSurface
+                                        )
+                                        Text(
+                                            text = "Toolkit Android per test rapidi di sicurezza",
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            maxLines = if (accessibilityPrefs.largeText) 3 else 2
+                                        )
+                                    }
+                                }
+                                HorizontalDivider()
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .weight(1f),
+                                    verticalArrangement = Arrangement.spacedBy(2.dp)
+                                ) {
+                                    drawerScreens.forEach { screen ->
+                                        NavigationDrawerItem(
+                                            icon = { Icon(screen.icon, contentDescription = null) },
+                                            label = { Text(screen.title(strings)) },
+                                            selected = selected.value == screen,
+                                            onClick = { navigateFromDrawer(screen) },
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(vertical = 2.dp)
+                                        )
+                                    }
+                                }
+                                HorizontalDivider()
+                                Text(
+                                    text = "Versione $androidAppVersionName",
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier
+                                        .padding(vertical = 8.dp)
+                                )
+                            }
+                        }
+                    }
+                ) {
+                    Scaffold(
+                        modifier = Modifier.fillMaxSize(),
+                        contentWindowInsets = WindowInsets.safeDrawing,
+                        bottomBar = {
+                            NavigationBar(
+                                windowInsets = NavigationBarDefaults.windowInsets,
+                                tonalElevation = 3.dp
+                            ) {
+                                val itemIconSize = 20.dp
+                                bottomScreens.forEach { screen ->
+                                    NavigationBarItem(
+                                        selected = selected.value == screen,
+                                        onClick = { selected.value = screen },
+                                        icon = {
+                                            Icon(
+                                                screen.icon,
+                                                contentDescription = screen.title(strings),
+                                                modifier = Modifier.size(itemIconSize)
+                                            )
+                                        },
+                                        label = {
+                                            Text(
+                                                screen.title(strings),
+                                                maxLines = if (accessibilityPrefs.largeText) 2 else 1,
+                                                overflow = TextOverflow.Ellipsis
+                                            )
+                                        },
+                                        alwaysShowLabel = true
+                                    )
+                                }
+                            }
+                        }
+                    ) { padding ->
+                        val focusManager = LocalFocusManager.current
+                        val adjustedPadding = padding
+                        val openDrawer: () -> Unit = { scope.launch { drawerState.open() } }
+                        val backToHome: () -> Unit = { selected.value = Screen.Home }
                         Column(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .padding(horizontal = 12.dp, vertical = 16.dp),
-                            verticalArrangement = Arrangement.spacedBy(10.dp)
-                        ) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                PackageIcon(
-                                    packageName = appPackageName(),
-                                    size = 40.dp,
-                                    contentPadding = 0.dp
-                                )
-                                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                                    Text(
-                                        text = "CrackMyDroid",
-                                        style = MaterialTheme.typography.titleLarge,
-                                        color = MaterialTheme.colorScheme.onSurface
-                                    )
-                                    Text(
-                                        text = "Toolkit Android per test rapidi di sicurezza",
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        maxLines = if (accessibilityPrefs.largeText) 3 else 2
-                                    )
-                                }
-                            }
-                            HorizontalDivider()
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .weight(1f),
-                                verticalArrangement = Arrangement.spacedBy(2.dp)
-                            ) {
-                                drawerScreens.forEach { screen ->
-                                    NavigationDrawerItem(
-                                        icon = { Icon(screen.icon, contentDescription = null) },
-                                        label = { Text(screen.title(strings)) },
-                                        selected = selected.value == screen,
-                                        onClick = { navigateFromDrawer(screen) },
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(vertical = 2.dp)
-                                    )
-                                }
-                            }
-                            HorizontalDivider()
-                            Text(
-                                text = "Versione $androidAppVersionName",
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier
-                                    .padding(vertical = 8.dp)
-                            )
-                        }
-                    }
-                    }
-                ) {
-                Scaffold(
-                    modifier = Modifier.fillMaxSize(),
-                    contentWindowInsets = WindowInsets.safeDrawing,
-                    bottomBar = {
-                        NavigationBar(
-                            windowInsets = NavigationBarDefaults.windowInsets,
-                            tonalElevation = 3.dp
-                        ) {
-                            val itemIconSize = 20.dp
-                            bottomScreens.forEach { screen ->
-                                NavigationBarItem(
-                                    selected = selected.value == screen,
-                                    onClick = { selected.value = screen },
-                                    icon = { Icon(screen.icon, contentDescription = screen.title(strings), modifier = Modifier.size(itemIconSize)) },
-                                    label = {
-                                        Text(
-                                            screen.title(strings),
-                                            maxLines = if (accessibilityPrefs.largeText) 2 else 1,
-                                            overflow = TextOverflow.Ellipsis
-                                        )
-                                    },
-                                    alwaysShowLabel = true
-                                )
-                            }
-                        }
-                    }
-                ) { padding ->
-                    val focusManager = LocalFocusManager.current
-                    val adjustedPadding = padding
-                    val openDrawer: () -> Unit = { scope.launch { drawerState.open() } }
-                    val backToHome: () -> Unit = { selected.value = Screen.Home }
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .pointerInput(Unit) {
-                                awaitEachGesture {
-                                    awaitFirstDown(pass = PointerEventPass.Final)
-                                    val up = waitForUpOrCancellation(pass = PointerEventPass.Final)
-                                    if (up != null && !up.isConsumed) {
-                                        focusManager.clearFocus()
+                                .pointerInput(Unit) {
+                                    awaitEachGesture {
+                                        awaitFirstDown(pass = PointerEventPass.Final)
+                                        val up =
+                                            waitForUpOrCancellation(pass = PointerEventPass.Final)
+                                        if (up != null && !up.isConsumed) {
+                                            focusManager.clearFocus()
+                                        }
                                     }
                                 }
-                            }
-                            .background(MaterialTheme.colorScheme.background)
-                    ) {
-                        val reduceMotion = accessibilityPrefs.reduceMotion
-                        AnimatedContent(
-                            targetState = selected.value,
-                            transitionSpec = {
-                                if (reduceMotion) {
-                                    fadeIn(tween(1)) togetherWith fadeOut(tween(1))
-                                } else {
-                                    fadeIn(tween(250)) togetherWith fadeOut(tween(200))
+                                .background(MaterialTheme.colorScheme.background)
+                        ) {
+                            val reduceMotion = accessibilityPrefs.reduceMotion
+                            AnimatedContent(
+                                targetState = selected.value,
+                                transitionSpec = {
+                                    if (reduceMotion) {
+                                        fadeIn(tween(1)) togetherWith fadeOut(tween(1))
+                                    } else {
+                                        fadeIn(tween(250)) togetherWith fadeOut(tween(200))
+                                    }
+                                },
+                                modifier = Modifier.weight(1f)
+                            ) { screen ->
+                                when (screen) {
+                                    Screen.Home -> HomeScreen(
+                                        operationLogs = operationLogs,
+                                        padding = adjustedPadding,
+                                        headerHelp = strings.helpHome,
+                                        onHelp = { helpDialog.value = it },
+                                        onMenu = openDrawer
+                                    )
+
+                                    Screen.Activities -> ActivityListScreen(
+                                        viewModel = activityVm,
+                                        padding = adjustedPadding,
+                                        headerHelp = strings.helpActivities,
+                                        onHelp = { helpDialog.value = it },
+                                        onBack = backToHome,
+                                        onMenu = openDrawer
+                                    )
+
+                                    Screen.Root -> RootScreen(
+                                        rootVm,
+                                        adjustedPadding,
+                                        headerHelp = strings.helpRoot,
+                                        onHelp = { helpDialog.value = it },
+                                        onBack = backToHome,
+                                        onMenu = openDrawer
+                                    )
+
+                                    Screen.Info -> InfoScreen(
+                                        infoVm,
+                                        adjustedPadding,
+                                        headerHelp = strings.helpInfo,
+                                        onHelp = { helpDialog.value = it },
+                                        onMenu = openDrawer
+                                    )
+
+                                    Screen.Trick -> TrickScreen(
+                                        trickVm,
+                                        adjustedPadding,
+                                        headerHelp = strings.helpTrick,
+                                        onHelp = { helpDialog.value = it },
+                                        onBack = backToHome,
+                                        onMenu = openDrawer
+                                    )
+
+                                    Screen.Pentest -> PenTestingScreen(
+                                        penTestingVm,
+                                        adjustedPadding,
+                                        headerHelp = strings.helpPentest,
+                                        onHelp = { helpDialog.value = it },
+                                        onBack = backToHome,
+                                        onMenu = openDrawer
+                                    )
+
+                                    Screen.InstalledApps -> InstalledAppsScreen(
+                                        installedAppsVm,
+                                        adjustedPadding,
+                                        headerHelp = strings.helpApk,
+                                        onHelp = { helpDialog.value = it },
+                                        onBack = backToHome,
+                                        onMenu = openDrawer
+                                    )
+
+                                    Screen.Permissions -> PermissionsScreen(
+                                        permissionsVm,
+                                        adjustedPadding,
+                                        headerHelp = strings.helpPermissions,
+                                        onHelp = { helpDialog.value = it },
+                                        onBack = backToHome,
+                                        onMenu = openDrawer
+                                    )
+
+                                    Screen.Log -> LogScreen(
+                                        logVm,
+                                        adjustedPadding,
+                                        headerHelp = strings.helpLog,
+                                        onHelp = { helpDialog.value = it },
+                                        onBack = backToHome,
+                                        onMenu = openDrawer
+                                    )
+
+                                    Screen.Settings -> SettingsScreen(
+                                        settingsVm,
+                                        adjustedPadding,
+                                        headerHelp = strings.helpSettings,
+                                        onHelp = { helpDialog.value = it },
+                                        onMenu = openDrawer
+                                    )
+
+                                    Screen.Help -> HelpScreen(
+                                        padding = adjustedPadding,
+                                        onHelp = { helpDialog.value = it },
+                                        onMenu = openDrawer,
+                                        onNavigate = { target -> selected.value = target }
+                                    )
                                 }
-                            },
-                            modifier = Modifier.weight(1f)
-                        ) { screen ->
-                            when (screen) {
-                                Screen.Home -> HomeScreen(
-                                    operationLogs = operationLogs,
-                                    padding = adjustedPadding,
-                                    headerHelp = strings.helpHome,
-                                    onHelp = { helpDialog.value = it },
-                                    onMenu = openDrawer
-                                )
-                                Screen.Activities -> ActivityListScreen(
-                                    viewModel = activityVm,
-                                    padding = adjustedPadding,
-                                    headerHelp = strings.helpActivities,
-                                    onHelp = { helpDialog.value = it },
-                                    onBack = backToHome,
-                                    onMenu = openDrawer
-                                )
-                                Screen.Root -> RootScreen(
-                                    rootVm,
-                                    adjustedPadding,
-                                    headerHelp = strings.helpRoot,
-                                    onHelp = { helpDialog.value = it },
-                                    onBack = backToHome,
-                                    onMenu = openDrawer
-                                )
-                                Screen.Info -> InfoScreen(
-                                    infoVm,
-                                    adjustedPadding,
-                                    headerHelp = strings.helpInfo,
-                                    onHelp = { helpDialog.value = it },
-                                    onMenu = openDrawer
-                                )
-                                Screen.Trick -> TrickScreen(
-                                    trickVm,
-                                    adjustedPadding,
-                                    headerHelp = strings.helpTrick,
-                                    onHelp = { helpDialog.value = it },
-                                    onBack = backToHome,
-                                    onMenu = openDrawer
-                                )
-                                Screen.Pentest -> PenTestingScreen(
-                                    penTestingVm,
-                                    adjustedPadding,
-                                    headerHelp = strings.helpPentest,
-                                    onHelp = { helpDialog.value = it },
-                                    onBack = backToHome,
-                                    onMenu = openDrawer
-                                )
-                                Screen.InstalledApps -> InstalledAppsScreen(
-                                    installedAppsVm,
-                                    adjustedPadding,
-                                    headerHelp = strings.helpApk,
-                                    onHelp = { helpDialog.value = it },
-                                    onBack = backToHome,
-                                    onMenu = openDrawer
-                                )
-                                Screen.Permissions -> PermissionsScreen(
-                                    permissionsVm,
-                                    adjustedPadding,
-                                    headerHelp = strings.helpPermissions,
-                                    onHelp = { helpDialog.value = it },
-                                    onBack = backToHome,
-                                    onMenu = openDrawer
-                                )
-                                Screen.Log -> LogScreen(
-                                    logVm,
-                                    adjustedPadding,
-                                    headerHelp = strings.helpLog,
-                                    onHelp = { helpDialog.value = it },
-                                    onBack = backToHome,
-                                    onMenu = openDrawer
-                                )
-                                Screen.Settings -> SettingsScreen(
-                                    settingsVm,
-                                    adjustedPadding,
-                                    headerHelp = strings.helpSettings,
-                                    onHelp = { helpDialog.value = it },
-                                    onMenu = openDrawer
-                                )
-                                Screen.Help -> HelpScreen(
-                                    padding = adjustedPadding,
-                                    onHelp = { helpDialog.value = it },
-                                    onMenu = openDrawer,
-                                    onNavigate = { target -> selected.value = target }
-                                )
                             }
                         }
                     }
-                }
                 }
                 Spacer(
                     modifier = Modifier
@@ -480,6 +495,7 @@ fun CrackMyDroidApp() {
         }
     }
 }
+
 @Composable
 inline fun <reified T : Any> rememberVM(): T {
     return remember { KoinPlatform.getKoin().get<T>() }
@@ -493,6 +509,7 @@ private fun shouldShowEntryHintDialog(screen: Screen): Boolean {
         Screen.Activities,
         Screen.Root,
         Screen.Trick -> true
+
         else -> false
     }
 }

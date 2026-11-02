@@ -94,7 +94,10 @@ private class FakeDeviceSessionController : DeviceSessionController {
     override suspend fun refreshDevices(adbPathOverride: String?): Result<List<ConnectedDevice>> =
         Result.success(emptyList())
 
-    override suspend fun selectDevice(device: ConnectedDevice, adbPathOverride: String?): Result<Unit> =
+    override suspend fun selectDevice(
+        device: ConnectedDevice,
+        adbPathOverride: String?
+    ): Result<Unit> =
         Result.success(Unit)
 
     override suspend fun clearSelection() = Unit

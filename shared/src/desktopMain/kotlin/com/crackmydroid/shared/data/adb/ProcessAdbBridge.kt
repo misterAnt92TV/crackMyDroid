@@ -14,12 +14,13 @@ class ProcessAdbBridge : AdbBridge {
         resolveBinaryPath(configuredPath)
     }
 
-    override suspend fun listDevices(configuredPath: String?): Result<List<ConnectedDevice>> = runCatching {
-        val adb = resolveBinaryPath(configuredPath)
-        val output = runCommand(listOf(adb, "devices", "-l"))
-        ensureSuccess(output, "Impossibile leggere i device ADB")
-        AdbParsers.parseAdbDevices(output.stdout)
-    }
+    override suspend fun listDevices(configuredPath: String?): Result<List<ConnectedDevice>> =
+        runCatching {
+            val adb = resolveBinaryPath(configuredPath)
+            val output = runCommand(listOf(adb, "devices", "-l"))
+            ensureSuccess(output, "Impossibile leggere i device ADB")
+            AdbParsers.parseAdbDevices(output.stdout)
+        }
 
     override suspend fun shell(
         serial: String,
@@ -57,7 +58,19 @@ class ProcessAdbBridge : AdbBridge {
         lines: Int
     ): Result<List<String>> = runCatching {
         val adb = resolveBinaryPath(configuredPath)
-        val output = runCommand(listOf(adb, "-s", serial, "logcat", "-d", "-t", lines.toString(), "-v", "time"))
+        val output = runCommand(
+            listOf(
+                adb,
+                "-s",
+                serial,
+                "logcat",
+                "-d",
+                "-t",
+                lines.toString(),
+                "-v",
+                "time"
+            )
+        )
         ensureSuccess(output, "Lettura logcat fallita")
         output.stdout.lines().filter { it.isNotBlank() }
     }
@@ -85,22 +98,23 @@ class ProcessAdbBridge : AdbBridge {
         return candidate.absolutePath
     }
 
-    private suspend fun runCommand(args: List<String>): CommandOutput = withContext(Dispatchers.IO) {
-        coroutineScope {
-            val process = ProcessBuilder(args).start()
-            val stdout = async { process.inputStream.bufferedReader().use { it.readText() } }
-            val stderr = async { process.errorStream.bufferedReader().use { it.readText() } }
-            if (!process.waitFor(60, TimeUnit.SECONDS)) {
-                process.destroyForcibly()
-                error("Timeout eseguendo: ${args.joinToString(" ")}")
+    private suspend fun runCommand(args: List<String>): CommandOutput =
+        withContext(Dispatchers.IO) {
+            coroutineScope {
+                val process = ProcessBuilder(args).start()
+                val stdout = async { process.inputStream.bufferedReader().use { it.readText() } }
+                val stderr = async { process.errorStream.bufferedReader().use { it.readText() } }
+                if (!process.waitFor(60, TimeUnit.SECONDS)) {
+                    process.destroyForcibly()
+                    error("Timeout eseguendo: ${args.joinToString(" ")}")
+                }
+                CommandOutput(
+                    exitCode = process.exitValue(),
+                    stdout = stdout.await().trim(),
+                    stderr = stderr.await().trim()
+                )
             }
-            CommandOutput(
-                exitCode = process.exitValue(),
-                stdout = stdout.await().trim(),
-                stderr = stderr.await().trim()
-            )
         }
-    }
 
     private fun ensureSuccess(output: CommandOutput, message: String) {
         if (output.exitCode == 0) return

@@ -51,7 +51,8 @@ class RootCheckRepositoryDesktop(
         }.getOrNull()?.isNotBlank() == true
         val selinux = runCatching { shell("getenforce") }.getOrDefault("unknown")
         val adbEnabled = shell("settings get global adb_enabled").trim() == "1"
-        val developerOptions = shell("settings get global development_settings_enabled").trim() == "1"
+        val developerOptions =
+            shell("settings get global development_settings_enabled").trim() == "1"
         val securityPatch = props["ro.build.version.security_patch"] ?: "unknown"
         val patchYear = securityPatch.take(4).toIntOrNull()
         val currentYear = Calendar.getInstance().get(Calendar.YEAR)
@@ -74,7 +75,15 @@ class RootCheckRepositoryDesktop(
                 appendLine("${if (detected) "[ALERT]" else "[OK]"} $label")
             }
             appendLine()
-            appendLine("${if (selinux.equals("Enforcing", true)) "[OK]" else "[WARN]"} SELinux: $selinux")
+            appendLine(
+                "${
+                    if (selinux.equals(
+                            "Enforcing",
+                            true
+                        )
+                    ) "[OK]" else "[WARN]"
+                } SELinux: $selinux"
+            )
             appendLine("${if (adbEnabled) "[WARN]" else "[OK]"} ADB debugging: ${if (adbEnabled) "Attivo" else "Disattivo"}")
             appendLine("${if (developerOptions) "[WARN]" else "[OK]"} Developer options: ${if (developerOptions) "Attive" else "Disattivate"}")
             appendLine("${if (outdatedPatch) "[WARN]" else "[OK]"} Security patch: $securityPatch")

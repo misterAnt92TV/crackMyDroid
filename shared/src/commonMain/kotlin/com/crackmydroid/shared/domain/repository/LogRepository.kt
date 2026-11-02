@@ -16,5 +16,8 @@ interface OperationLogRepository {
 
 interface PermissionsRepository {
     suspend fun listAppPermissions(): List<com.crackmydroid.shared.domain.model.AppPermissionEntry>
-    suspend fun listAppPermissionsPaginated(offset: Int = 0, limit: Int = 50): List<com.crackmydroid.shared.domain.model.AppPermissionEntry>
+    suspend fun listAppPermissionsPaginated(
+        offset: Int = 0,
+        limit: Int = 50
+    ): List<com.crackmydroid.shared.domain.model.AppPermissionEntry>
 }

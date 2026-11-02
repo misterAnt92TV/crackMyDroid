@@ -54,8 +54,8 @@ import com.crackmydroid.shared.presentation.components.AppButton
 import com.crackmydroid.shared.presentation.components.AppText
 import com.crackmydroid.shared.presentation.components.ButtonVariant
 import com.crackmydroid.shared.presentation.components.ErrorDialog
-import com.crackmydroid.shared.presentation.components.SectionHeader
 import com.crackmydroid.shared.presentation.components.ScrollToTopButton
+import com.crackmydroid.shared.presentation.components.SectionHeader
 import com.crackmydroid.shared.ui.trick.TrickViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch

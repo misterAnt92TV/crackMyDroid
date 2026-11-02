@@ -9,7 +9,8 @@ import java.io.File
 class LogRepositoryAndroid(private val context: Context) : LogRepository {
     override suspend fun fetchLog(): List<String> = withContext(Dispatchers.IO) {
         try {
-            val process = Runtime.getRuntime().exec(arrayOf("logcat", "-d", "-t", "1500", "-v", "time"))
+            val process =
+                Runtime.getRuntime().exec(arrayOf("logcat", "-d", "-t", "1500", "-v", "time"))
             process.inputStream.bufferedReader().readLines()
         } catch (t: Throwable) {
             listOf("Errore lettura log: ${t.message}")

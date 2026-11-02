@@ -1,6 +1,7 @@
 # CrackMyDroid — Test ViewModel (`jvmCommonTest`)
 
-> Test dei ViewModel condivisi. Tutti risiedono in `shared/src/jvmCommonTest/` e usano `StandardTestDispatcher` + MockK.
+> Test dei ViewModel condivisi. Tutti risiedono in `shared/src/jvmCommonTest/` e usano
+> `StandardTestDispatcher` + MockK.
 
 ---
 
@@ -39,53 +40,64 @@ class XyzViewModelTest {
 }
 ```
 
-**`StandardTestDispatcher`** — orologio virtuale; `advanceUntilIdle()` svuota la coda di coroutine senza aspettare tempo reale.
-**`vm.onCleared()`** — cancella il `viewModelScope` del ViewModel; necessario perché nei test JVM non esiste un `ViewModelStore`.
+**`StandardTestDispatcher`** — orologio virtuale; `advanceUntilIdle()` svuota la coda di coroutine
+senza aspettare tempo reale. **`vm.onCleared()`** — cancella il `viewModelScope` del ViewModel;
+necessario perché nei test JVM non esiste un `ViewModelStore`.
 
 ---
 
 ## PenTestingViewModelTest
 
-**File:** `shared/src/jvmCommonTest/kotlin/com/crackmydroid/shared/presentation/PenTestingViewModelTest.kt`
+**File:**
+`shared/src/jvmCommonTest/kotlin/com/crackmydroid/shared/presentation/PenTestingViewModelTest.kt`
 **ViewModel:** `PenTestingViewModel`
 
 ### Dipendenze iniettate
 
-| Dipendenza | Tipo | Note |
-|---|---|---|
-| `ListInstalledAppsUseCase` | MockK | |
-| `ListPermissionsUseCase` | MockK | |
-| `CheckRootUseCase` | MockK | |
-| `GetActivitiesUseCase` | MockK | |
-| `AnalyzePermissionRisksUseCase` | **reale** | Istanziato direttamente (logica pura) |
-| `RunPenTestChecksUseCase` | **reale** | Dipende da `analyzePermissionRisks` |
-| `ExportReportUseCase` | reale con port mockato | `ExportReportUseCase(mockk<ReportFileRepository>())` |
+| Dipendenza                      | Tipo                   | Note                                                 |
+|---------------------------------|------------------------|------------------------------------------------------|
+| `ListInstalledAppsUseCase`      | MockK                  |                                                      |
+| `ListPermissionsUseCase`        | MockK                  |                                                      |
+| `CheckRootUseCase`              | MockK                  |                                                      |
+| `GetActivitiesUseCase`          | MockK                  |                                                      |
+| `AnalyzePermissionRisksUseCase` | **reale**              | Istanziato direttamente (logica pura)                |
+| `RunPenTestChecksUseCase`       | **reale**              | Dipende da `analyzePermissionRisks`                  |
+| `ExportReportUseCase`           | reale con port mockato | `ExportReportUseCase(mockk<ReportFileRepository>())` |
 
 ---
 
 ### Test 1 — `manifestCheckIncludesIntentExposureInPentestResult`
 
-**Obiettivo:** verificare che il check `manifest_flags` rilevi come `PenTestStatus.Error` un'activity con deep-link intent esposto.
+**Obiettivo:** verificare che il check `manifest_flags` rilevi come `PenTestStatus.Error`un'activity
+con deep-link intent esposto.
 
 **Setup fixture:**
+
 ```kotlin
 // Un'app con una sola activity con intent action + data URI
 val activity = ActivityEntry(
-    label              = "DeepLink",
-    appLabel           = "Demo App",
-    packageName        = "com.demo.app",
-    activityName       = "com.demo.app.DeepLinkActivity",
+    label = "DeepLink",
+    appLabel = "Demo App",
+    packageName = "com.demo.app",
+    activityName = "com.demo.app.DeepLinkActivity",
     launchableViaShell = false,
     launchIntentAction = "android.intent.action.VIEW",
-    launchIntentData   = "demo://host/details"
+    launchIntentData = "demo://host/details"
 )
-coEvery { listInstalled() } returns listOf(InstalledAppEntry("Demo App", "com.demo.app", "/data/..."))
+coEvery { listInstalled() } returns listOf(
+    InstalledAppEntry(
+        "Demo App",
+        "com.demo.app",
+        "/data/..."
+    )
+)
 coEvery { listPermissions("com.demo.app") } returns AppPermissionEntry("com.demo.app", emptyList())
 coEvery { checkRoot() } returns RootStatus(false, "")
 coEvery { getActivities("com.demo.app") } returns listOf(activity)
 ```
 
 **Esecuzione:**
+
 ```kotlin
 vm.selectApp("com.demo.app", "Demo App")
 vm.runSelectedChecks(setOf("manifest_flags"))
@@ -93,6 +105,7 @@ advanceUntilIdle()
 ```
 
 **Assertions:**
+
 ```kotlin
 val result = vm.state.value.checkResults["manifest_flags"]
 assertEquals(PenTestStatus.Error::class, result!!.status::class)
@@ -103,18 +116,25 @@ assertTrue(result.error!!.contains("intent/deeplink"))
 
 ### Test 2 — `selectedChecksShareOnePermissionsLoadAndComplete`
 
-**Obiettivo:** verificare che tre check distinti (`network_monitor`, `permission_risk`, `manifest_flags`) condividano una sola chiamata a `listPermissions()` grazie alla lazy cache interna.
+**Obiettivo:** verificare che tre check distinti (`network_monitor`, `permission_risk`,
+`manifest_flags`) condividano una sola chiamata a `listPermissions()` grazie alla lazy cache
+interna.
 
 **Setup fixture:**
+
 ```kotlin
 coEvery { listInstalled() } returns listOf(InstalledAppEntry("App", "com.demo.app", "/data/..."))
 coEvery { listPermissions("com.demo.app") } returns
-    AppPermissionEntry("com.demo.app", listOf(PermissionInfo("android.permission.INTERNET", granted = true)))
+        AppPermissionEntry(
+            "com.demo.app",
+            listOf(PermissionInfo("android.permission.INTERNET", granted = true))
+        )
 coEvery { checkRoot() } returns RootStatus(false, "")
 coEvery { getActivities("com.demo.app") } returns emptyList()
 ```
 
 **Esecuzione:**
+
 ```kotlin
 vm.selectApp("com.demo.app", "App")
 vm.runSelectedChecks(setOf("network_monitor", "permission_risk", "manifest_flags"))
@@ -122,6 +142,7 @@ advanceUntilIdle()
 ```
 
 **Assertions:**
+
 ```kotlin
 val results = vm.state.value.checkResults
 assertEquals(3, results.size)
@@ -133,15 +154,16 @@ coVerify(exactly = 1) { listPermissions("com.demo.app") }               // una s
 
 ## PermissionsViewModelTest
 
-**File:** `shared/src/jvmCommonTest/kotlin/com/crackmydroid/shared/presentation/PermissionsViewModelTest.kt`
+**File:**
+`shared/src/jvmCommonTest/kotlin/com/crackmydroid/shared/presentation/PermissionsViewModelTest.kt`
 **ViewModel:** `PermissionsViewModel`
 
 ### Dipendenze iniettate
 
-| Dipendenza | Tipo | Note |
-|---|---|---|
-| `ListPermissionsUseCase` | MockK | |
-| `AnalyzePermissionRisksUseCase` | **reale** | |
+| Dipendenza                      | Tipo      | Note                                |
+|---------------------------------|-----------|-------------------------------------|
+| `ListPermissionsUseCase`        | MockK     |                                     |
+| `AnalyzePermissionRisksUseCase` | **reale** |                                     |
 | `BuildPermissionsReportUseCase` | **reale** | Dipende da `analyzePermissionRisks` |
 
 ---
@@ -163,9 +185,11 @@ assertEquals("sms", vm.state.value.topQuery)
 
 ### Test 2 — `showOnlyRiskyFiltersOutSafeAppsAfterScan`
 
-**Obiettivo:** dopo `startAutoRiskScan()`, il filtro `showOnlyRisky=true` mostra solo le app con permessi pericolosi.
+**Obiettivo:** dopo `startAutoRiskScan()`, il filtro `showOnlyRisky=true` mostra solo le app con
+permessi pericolosi.
 
 **Setup fixture:**
+
 ```kotlin
 coEvery { listPermissions("pkg.safe") } returns
     AppPermissionEntry("pkg.safe", listOf(PermissionInfo("android.permission.INTERNET", true)))
@@ -177,6 +201,7 @@ coEvery { listPermissions("pkg.risky") } returns
 ```
 
 **Esecuzione:**
+
 ```kotlin
 vm.startAutoRiskScan()
 advanceUntilIdle()
@@ -192,15 +217,16 @@ assertEquals("pkg.risky", filtered.first().packageName)
 
 ## ActivityListViewModelTest
 
-**File:** `shared/src/jvmCommonTest/kotlin/com/crackmydroid/shared/presentation/ActivityListViewModelTest.kt`
+**File:**
+`shared/src/jvmCommonTest/kotlin/com/crackmydroid/shared/presentation/ActivityListViewModelTest.kt`
 **ViewModel:** `ActivityListViewModel`
 
 ### Dipendenze iniettate
 
-| Dipendenza | Tipo | Note |
-|---|---|---|
-| `GetActivitiesUseCase` | MockK | |
-| `LaunchActivityUseCase` | MockK | |
+| Dipendenza               | Tipo  | Note                                             |
+|--------------------------|-------|--------------------------------------------------|
+| `GetActivitiesUseCase`   | MockK |                                                  |
+| `LaunchActivityUseCase`  | MockK |                                                  |
 | `GetExportFormatUseCase` | MockK | Ritorna `ExportFormat.TXT` o `ExportFormat.JSON` |
 
 ---
@@ -246,23 +272,26 @@ assertEquals("sec", vm.state.value.topQuery)
 
 ### Test 4 — `launchWithIntentPassesGuidedArgumentsToUseCase`
 
-**Obiettivo:** `launchWithIntent()` chiama `LaunchActivityUseCase` con esattamente i parametri forniti.
+**Obiettivo:** `launchWithIntent()` chiama `LaunchActivityUseCase` con esattamente i parametri
+forniti.
 
 **Fixture:**
+
 ```kotlin
 val deepLinkEntry = ActivityEntry(
-    label              = "DeepLink",
-    appLabel           = "Demo App",
-    packageName        = "com.demo.app",
-    activityName       = "com.demo.app.DeepLinkActivity",
+    label = "DeepLink",
+    appLabel = "Demo App",
+    packageName = "com.demo.app",
+    activityName = "com.demo.app.DeepLinkActivity",
     launchableViaShell = false,
     launchIntentAction = "android.intent.action.VIEW",
-    launchIntentData   = "demo://host/details"
+    launchIntentData = "demo://host/details"
 )
 coEvery { launch(deepLinkEntry, any(), any(), anyOrNull()) } returns Result.success(Unit)
 ```
 
 **Esecuzione:**
+
 ```kotlin
 vm.launchWithIntent(deepLinkEntry, "android.intent.action.VIEW", "demo://host/details", null)
 advanceUntilIdle()
@@ -300,12 +329,14 @@ val other = ActivityEntry(
 ```
 
 **Setup preferiti:**
+
 ```kotlin
 vm.toggleFavoritePackage("com.demo.app")      // package preferito
 vm.toggleFavorite(deepLink)                    // attività preferita
 ```
 
 **Assertions:**
+
 ```kotlin
 val report = vm.buildReport("com.demo.app")
 
@@ -323,20 +354,22 @@ assertEquals(ActivityIntentRiskLevel.High, report.highestRiskLevel)
 
 ## InstalledAppsViewModelTest
 
-**File:** `shared/src/jvmCommonTest/kotlin/com/crackmydroid/shared/presentation/InstalledAppsViewModelTest.kt`
+**File:**
+`shared/src/jvmCommonTest/kotlin/com/crackmydroid/shared/presentation/InstalledAppsViewModelTest.kt`
 **ViewModel:** `InstalledAppsViewModel`
 
 ### Dipendenze iniettate
 
-| Dipendenza | Tipo | Note |
-|---|---|---|
-| `ListInstalledAppsUseCase` | MockK | |
-| `ExportApkUseCase` | MockK | |
-| `ShareApkUseCase` | MockK | |
-| `GetExportFormatUseCase` | MockK | |
-| `ExportReportUseCase` | reale con port mockato | `ExportReportUseCase(mockk<ReportFileRepository>())` |
+| Dipendenza                 | Tipo                   | Note                                                 |
+|----------------------------|------------------------|------------------------------------------------------|
+| `ListInstalledAppsUseCase` | MockK                  |                                                      |
+| `ExportApkUseCase`         | MockK                  |                                                      |
+| `ShareApkUseCase`          | MockK                  |                                                      |
+| `GetExportFormatUseCase`   | MockK                  |                                                      |
+| `ExportReportUseCase`      | reale con port mockato | `ExportReportUseCase(mockk<ReportFileRepository>())` |
 
 **Helper privato:**
+
 ```kotlin
 private fun reportExporter() = ExportReportUseCase(mockk<ReportFileRepository>())
 ```
@@ -371,7 +404,8 @@ coVerify { export("pkg") }
 
 ### Test 3 — `exportAllWritesTheGeneratedReportThroughTheReportPort`
 
-**Obiettivo:** `exportAll()` serializza la lista app nel formato scelto e la scrive tramite `ReportFileRepository`.
+**Obiettivo:** `exportAll()` serializza la lista app nel formato scelto e la scrive tramite
+`ReportFileRepository`.
 
 ```kotlin
 val reportFiles = mockk<ReportFileRepository>()
@@ -413,7 +447,8 @@ assertNotNull(vm.state.value.error)
 
 ### Test 6 — `filterTracksTopQueryAndFavoritesArePrioritized`
 
-**Obiettivo:** le app preferite appaiono prime nella lista filtrata; `topQuery` rispecchia la query più usata.
+**Obiettivo:** le app preferite appaiono prime nella lista filtrata; `topQuery` rispecchia la query
+più usata.
 
 ```kotlin
 // Due app: Alpha (pkg.alpha) e Beta (pkg.beta)
@@ -454,12 +489,13 @@ assertEquals("alpha", vm.state.value.topQuery)
 
 ### Dipendenze iniettate
 
-| Dipendenza | Tipo |
-|---|---|
-| `GetLogsUseCase` | MockK |
+| Dipendenza          | Tipo                |
+|---------------------|---------------------|
+| `GetLogsUseCase`    | MockK               |
 | `ExportLogsUseCase` | MockK (non stubbed) |
 
-> **Nota:** `tearDown()` usa `Thread.sleep(50)` prima di `resetMain()` per proteggere da race condition nel ViewModel scope.
+> **Nota:** `tearDown()` usa `Thread.sleep(50)` prima di `resetMain()` per proteggere da race
+> condition nel ViewModel scope.
 
 ---
 
@@ -483,14 +519,15 @@ assertEquals("fatal", vm.state.value.filter)
 
 ## TrickViewModelTest
 
-**File:** `shared/src/jvmCommonTest/kotlin/com/crackmydroid/shared/presentation/TrickViewModelTest.kt`
+**File:**
+`shared/src/jvmCommonTest/kotlin/com/crackmydroid/shared/presentation/TrickViewModelTest.kt`
 **ViewModel:** `TrickViewModel`
 
 ### Dipendenze iniettate
 
-| Dipendenza | Tipo |
-|---|---|
-| `ListShellCommandsUseCase` | MockK |
+| Dipendenza                   | Tipo  |
+|------------------------------|-------|
+| `ListShellCommandsUseCase`   | MockK |
 | `ExecuteShellCommandUseCase` | MockK |
 
 ---
@@ -511,9 +548,11 @@ assertEquals("Elenco pacchetti", vm.state.value.commands.first().title)
 
 ### Test 2 — `secondExecuteWhileRunningIsBlockedAndShowsHint`
 
-**Obiettivo:** se un comando è in esecuzione, una seconda chiamata `execute()` viene bloccata con un hint di interazione.
+**Obiettivo:** se un comando è in esecuzione, una seconda chiamata `execute()` viene bloccata con un
+hint di interazione.
 
 **Setup — simula latenza artificiale:**
+
 ```kotlin
 val packages = ShellCommand("Elenco pacchetti", "pm list packages", requiresRoot = false)
 val top      = ShellCommand("Top processi",     "top -n 1",         requiresRoot = false)
@@ -530,6 +569,7 @@ coEvery { execUseCase(top) } returns
 ```
 
 **Esecuzione:**
+
 ```kotlin
 vm.load(); advanceUntilIdle()
 
@@ -544,6 +584,7 @@ advanceUntilIdle()      // "packages" completa
 ```
 
 **Assertions finali:**
+
 ```kotlin
 assertFalse(vm.state.value.running)
 assertEquals("Elenco pacchetti", vm.state.value.lastCommandTitle)

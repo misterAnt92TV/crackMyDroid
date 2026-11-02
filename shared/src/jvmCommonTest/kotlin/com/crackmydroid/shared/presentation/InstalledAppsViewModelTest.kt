@@ -1,12 +1,12 @@
 package com.crackmydroid.shared.presentation
 
+import com.crackmydroid.shared.domain.model.ExportFormat
 import com.crackmydroid.shared.domain.model.InstalledAppEntry
+import com.crackmydroid.shared.domain.repository.ReportFileRepository
 import com.crackmydroid.shared.domain.usecase.ExportApkUseCase
+import com.crackmydroid.shared.domain.usecase.GetExportFormatUseCase
 import com.crackmydroid.shared.domain.usecase.ListInstalledAppsUseCase
 import com.crackmydroid.shared.domain.usecase.ShareApkUseCase
-import com.crackmydroid.shared.domain.usecase.GetExportFormatUseCase
-import com.crackmydroid.shared.domain.model.ExportFormat
-import com.crackmydroid.shared.domain.repository.ReportFileRepository
 import com.crackmydroid.shared.domain.usecase.reports.ExportReportUseCase
 import com.crackmydroid.shared.ui.installedapps.InstalledAppsViewModel
 import io.mockk.coEvery
@@ -15,10 +15,10 @@ import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import kotlinx.coroutines.test.advanceUntilIdle
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -90,7 +90,12 @@ class InstalledAppsViewModelTest {
         val reportFiles = mockk<ReportFileRepository>()
         coEvery { list() } returns listOf(InstalledAppEntry("App", "pkg", "/path"))
         coEvery { format() } returns ExportFormat.JSON
-        coEvery { reportFiles.save("installed_apps.json", any()) } returns Result.success("/tmp/apps.json")
+        coEvery {
+            reportFiles.save(
+                "installed_apps.json",
+                any()
+            )
+        } returns Result.success("/tmp/apps.json")
         val vm = InstalledAppsViewModel(
             list,
             export,

@@ -142,14 +142,16 @@ class DeviceInfoRepositoryAndroid(
     }
 
     private fun readMemory(): Pair<Long?, Long?> {
-        val am = context.getSystemService(Context.ACTIVITY_SERVICE) as? ActivityManager ?: return null to null
+        val am = context.getSystemService(Context.ACTIVITY_SERVICE) as? ActivityManager
+            ?: return null to null
         val memInfo = ActivityManager.MemoryInfo()
         am.getMemoryInfo(memInfo)
         return memInfo.totalMem to memInfo.availMem
     }
 
     private fun readNetworkType(): String {
-        val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager ?: return "unknown"
+        val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
+            ?: return "unknown"
         val network = cm.activeNetwork ?: return "offline"
         val caps = cm.getNetworkCapabilities(network) ?: return "offline"
         return when {
@@ -169,7 +171,11 @@ class DeviceInfoRepositoryAndroid(
         Settings.Global.getInt(context.contentResolver, Settings.Global.ADB_ENABLED, 0) == 1
 
     private fun isDeveloperOptionsEnabled(): Boolean =
-        Settings.Global.getInt(context.contentResolver, Settings.Global.DEVELOPMENT_SETTINGS_ENABLED, 0) == 1
+        Settings.Global.getInt(
+            context.contentResolver,
+            Settings.Global.DEVELOPMENT_SETTINGS_ENABLED,
+            0
+        ) == 1
 
     private fun isAppDebuggable(): Boolean =
         (context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
@@ -182,7 +188,8 @@ class DeviceInfoRepositoryAndroid(
 
     @Suppress("MissingPermission")
     private fun readImei(): String? {
-        val tm = context.getSystemService(Context.TELEPHONY_SERVICE) as? TelephonyManager ?: return null
+        val tm =
+            context.getSystemService(Context.TELEPHONY_SERVICE) as? TelephonyManager ?: return null
         return runCatching {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 tm.imei ?: tm.meid

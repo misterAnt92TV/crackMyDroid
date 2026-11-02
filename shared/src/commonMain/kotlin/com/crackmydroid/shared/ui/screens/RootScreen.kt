@@ -1,5 +1,6 @@
 package com.crackmydroid.shared.ui.screens
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -7,15 +8,19 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -33,18 +38,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.filled.Warning
 import com.crackmydroid.shared.i18n.LocalStrings
-import com.crackmydroid.shared.ui.root.RootViewModel
 import com.crackmydroid.shared.presentation.components.AppButton
 import com.crackmydroid.shared.presentation.components.AppText
-import com.crackmydroid.shared.presentation.components.SectionHeader
 import com.crackmydroid.shared.presentation.components.ErrorDialog
 import com.crackmydroid.shared.presentation.components.ScrollToTopButton
+import com.crackmydroid.shared.presentation.components.SectionHeader
+import com.crackmydroid.shared.ui.root.RootViewModel
 import kotlinx.coroutines.launch
 
 @Composable
@@ -103,12 +103,24 @@ fun RootScreen(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
                     ) {
-                        Text(strings.verifyRoot, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+                        Text(
+                            strings.verifyRoot,
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.SemiBold
+                        )
                         IconButton(onClick = { viewModel.verify() }) {
-                            Icon(Icons.Filled.Refresh, contentDescription = strings.verifyRoot, tint = MaterialTheme.colorScheme.primary)
+                            Icon(
+                                Icons.Filled.Refresh,
+                                contentDescription = strings.verifyRoot,
+                                tint = MaterialTheme.colorScheme.primary
+                            )
                         }
                     }
-                    AppButton(text = strings.verifyRoot, onClick = { viewModel.verify() }, fullWidth = true)
+                    AppButton(
+                        text = strings.verifyRoot,
+                        onClick = { viewModel.verify() },
+                        fullWidth = true
+                    )
 
                     OutlinedTextField(
                         value = nonceInput,
@@ -138,8 +150,10 @@ fun RootScreen(
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     state.status?.let { status ->
-                        val bg = if (status.isRooted) MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.secondaryContainer
-                        val onBg = if (status.isRooted) MaterialTheme.colorScheme.onErrorContainer else MaterialTheme.colorScheme.onSecondaryContainer
+                        val bg =
+                            if (status.isRooted) MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.secondaryContainer
+                        val onBg =
+                            if (status.isRooted) MaterialTheme.colorScheme.onErrorContainer else MaterialTheme.colorScheme.onSecondaryContainer
                         ElevatedCard(
                             modifier = Modifier.fillMaxWidth(),
                             shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp),
@@ -235,7 +249,11 @@ fun RootScreen(
             }
 
             state.error?.let { err ->
-                AppText(err, modifier = Modifier.padding(top = 8.dp), style = androidx.compose.material3.MaterialTheme.typography.bodySmall)
+                AppText(
+                    err,
+                    modifier = Modifier.padding(top = 8.dp),
+                    style = androidx.compose.material3.MaterialTheme.typography.bodySmall
+                )
             }
         }
 

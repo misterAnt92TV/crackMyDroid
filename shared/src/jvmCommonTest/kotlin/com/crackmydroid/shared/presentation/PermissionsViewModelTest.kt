@@ -1,10 +1,10 @@
 package com.crackmydroid.shared.presentation
 
 import com.crackmydroid.shared.domain.model.AppPermissionEntry
+import com.crackmydroid.shared.domain.repository.ReportFileRepository
 import com.crackmydroid.shared.domain.usecase.ListPermissionsUseCase
 import com.crackmydroid.shared.domain.usecase.permissions.AnalyzePermissionRisksUseCase
 import com.crackmydroid.shared.domain.usecase.permissions.BuildPermissionsReportUseCase
-import com.crackmydroid.shared.domain.repository.ReportFileRepository
 import com.crackmydroid.shared.domain.usecase.reports.ExportReportUseCase
 import com.crackmydroid.shared.ui.permissions.PermissionsViewModel
 import io.mockk.coEvery
@@ -44,7 +44,12 @@ class PermissionsViewModelTest {
         )
         val analyzePermissionRisks = AnalyzePermissionRisksUseCase()
         val buildPermissionsReport = BuildPermissionsReportUseCase(analyzePermissionRisks)
-        val vm = PermissionsViewModel(listPermissions, analyzePermissionRisks, buildPermissionsReport, reportExporter())
+        val vm = PermissionsViewModel(
+            listPermissions,
+            analyzePermissionRisks,
+            buildPermissionsReport,
+            reportExporter()
+        )
 
         vm.refresh()
         advanceUntilIdle()
@@ -61,11 +66,20 @@ class PermissionsViewModelTest {
         val listPermissions = mockk<ListPermissionsUseCase>()
         coEvery { listPermissions() } returns listOf(
             AppPermissionEntry("Safe App", "pkg.safe", emptyList()),
-            AppPermissionEntry("Risky App", "pkg.risky", listOf("android.permission.SYSTEM_ALERT_WINDOW"))
+            AppPermissionEntry(
+                "Risky App",
+                "pkg.risky",
+                listOf("android.permission.SYSTEM_ALERT_WINDOW")
+            )
         )
         val analyzePermissionRisks = AnalyzePermissionRisksUseCase()
         val buildPermissionsReport = BuildPermissionsReportUseCase(analyzePermissionRisks)
-        val vm = PermissionsViewModel(listPermissions, analyzePermissionRisks, buildPermissionsReport, reportExporter())
+        val vm = PermissionsViewModel(
+            listPermissions,
+            analyzePermissionRisks,
+            buildPermissionsReport,
+            reportExporter()
+        )
 
         vm.refresh()
         advanceUntilIdle()

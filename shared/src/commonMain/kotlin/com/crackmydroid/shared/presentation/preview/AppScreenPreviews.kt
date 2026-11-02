@@ -1,9 +1,9 @@
 package com.crackmydroid.shared.presentation.preview
 
-import androidx.compose.ui.tooling.preview.Devices
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.AndroidUiModes.UI_MODE_NIGHT_YES
 import androidx.compose.ui.tooling.preview.AndroidUiModes.UI_MODE_TYPE_NORMAL
+import androidx.compose.ui.tooling.preview.Devices
+import androidx.compose.ui.tooling.preview.Preview
 
 @Retention(AnnotationRetention.BINARY)
 @Target(AnnotationTarget.FUNCTION)

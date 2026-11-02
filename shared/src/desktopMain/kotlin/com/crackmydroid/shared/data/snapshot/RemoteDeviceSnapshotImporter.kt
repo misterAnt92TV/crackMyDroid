@@ -11,7 +11,6 @@ import com.crackmydroid.shared.domain.model.SnapshotSectionState
 import com.crackmydroid.shared.domain.repository.AdbBridge
 import com.crackmydroid.shared.util.DesktopPaths
 import java.io.File
-import kotlinx.serialization.decodeFromString
 
 class RemoteDeviceSnapshotImporter(
     private val adbBridge: AdbBridge,

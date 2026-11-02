@@ -1,5 +1,7 @@
 package com.crackmydroid.shared.ui.screens
 
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -10,54 +12,51 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.StarBorder
-import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Snackbar
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.combinedClickable
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.launch
-import androidx.compose.runtime.rememberCoroutineScope
 import com.crackmydroid.shared.i18n.LocalStrings
 import com.crackmydroid.shared.presentation.components.AppAccordion
-import com.crackmydroid.shared.presentation.components.AppCard
 import com.crackmydroid.shared.presentation.components.AppButton
-import com.crackmydroid.shared.presentation.components.ButtonVariant
+import com.crackmydroid.shared.presentation.components.AppCard
 import com.crackmydroid.shared.presentation.components.AppText
+import com.crackmydroid.shared.presentation.components.ButtonVariant
 import com.crackmydroid.shared.presentation.components.ErrorDialog
 import com.crackmydroid.shared.presentation.components.ExportDetailsCard
-import com.crackmydroid.shared.presentation.components.SectionHeader
 import com.crackmydroid.shared.presentation.components.PackageIcon
-import com.crackmydroid.shared.presentation.components.SearchFieldWithHistory
 import com.crackmydroid.shared.presentation.components.ScrollToTopButton
+import com.crackmydroid.shared.presentation.components.SearchFieldWithHistory
+import com.crackmydroid.shared.presentation.components.SectionHeader
 import com.crackmydroid.shared.ui.installedapps.InstalledAppsViewModel
+import kotlinx.coroutines.launch
 
 @Composable
 fun InstalledAppsScreen(
@@ -161,7 +160,9 @@ fun InstalledAppsScreen(
                         LazyRow(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(6.dp),
-                            contentPadding = androidx.compose.foundation.layout.PaddingValues(vertical = 4.dp)
+                            contentPadding = androidx.compose.foundation.layout.PaddingValues(
+                                vertical = 4.dp
+                            )
                         ) {
                             items(favoriteQueries, key = { it }) { fav ->
                                 @OptIn(ExperimentalFoundationApi::class)

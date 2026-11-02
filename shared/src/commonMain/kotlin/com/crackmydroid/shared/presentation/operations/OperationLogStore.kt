@@ -5,10 +5,10 @@ import com.crackmydroid.shared.domain.repository.OperationLogRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 interface OperationLogPersistence {
     suspend fun load(): List<OperationEntry>
@@ -42,7 +42,14 @@ class DefaultOperationLogRepository(
 
     override fun record(description: String, success: Boolean, details: String?) {
         _entries.update { list ->
-            (listOf(OperationEntry(description, success, details, currentTimeMillis())) + list).take(maxEntries)
+            (listOf(
+                OperationEntry(
+                    description,
+                    success,
+                    details,
+                    currentTimeMillis()
+                )
+            ) + list).take(maxEntries)
         }
         persist()
     }

@@ -67,6 +67,7 @@ object ActivityIntentRiskAnalyzer {
                         detail = "L'intent puo innescare chiamate o flussi telefonici con impatto immediato."
                     )
                 )
+
             normalizedAction.contains("ACTION_SEND") || normalizedAction.contains("ACTION_SENDTO") ->
                 register(
                     findings,
@@ -77,6 +78,7 @@ object ActivityIntentRiskAnalyzer {
                         detail = "L'activity accetta payload da share/send: verificare input injection ed esposizione dati."
                     )
                 )
+
             normalizedAction.contains("ACTION_VIEW") && scheme.isNotBlank() ->
                 register(
                     findings,
@@ -91,7 +93,10 @@ object ActivityIntentRiskAnalyzer {
                         detail = "L'activity espone un endpoint VIEW su schema ${scheme.ifBlank { "non specificato" }}."
                     )
                 )
-            normalizedAction.contains("PROCESS_TEXT") || normalizedAction.contains("PICK") || normalizedAction.contains("EDIT") ->
+
+            normalizedAction.contains("PROCESS_TEXT") || normalizedAction.contains("PICK") || normalizedAction.contains(
+                "EDIT"
+            ) ->
                 register(
                     findings,
                     "input_action",
@@ -114,6 +119,7 @@ object ActivityIntentRiskAnalyzer {
                         detail = "Gestisce URI locali/content provider: verificare path traversal, permessi e leakage."
                     )
                 )
+
             "intent" ->
                 register(
                     findings,
@@ -124,6 +130,7 @@ object ActivityIntentRiskAnalyzer {
                         detail = "Supporta intent://: verificare sanitizzazione dei parametri e chaining tra componenti."
                     )
                 )
+
             "tel", "sms", "smsto", "mms", "mmsto", "mailto" ->
                 register(
                     findings,
@@ -134,6 +141,7 @@ object ActivityIntentRiskAnalyzer {
                         detail = "Lo schema $scheme puo attivare canali sensibili o azioni verso app di sistema."
                     )
                 )
+
             "http", "https" ->
                 register(
                     findings,
@@ -144,6 +152,7 @@ object ActivityIntentRiskAnalyzer {
                         detail = "Endpoint web da validare con open redirect, host confusion e parametri malevoli."
                     )
                 )
+
             else -> if (scheme.isNotBlank()) {
                 register(
                     findings,
@@ -158,7 +167,8 @@ object ActivityIntentRiskAnalyzer {
         }
 
         if (mimeType.isNotBlank()) {
-            val level = if (mimeType.contains("*")) ActivityIntentRiskLevel.High else ActivityIntentRiskLevel.Medium
+            val level =
+                if (mimeType.contains("*")) ActivityIntentRiskLevel.High else ActivityIntentRiskLevel.Medium
             register(
                 findings,
                 "mime_type",
@@ -175,7 +185,8 @@ object ActivityIntentRiskAnalyzer {
                 .thenBy { it.title }
         )
         val score = orderedFindings.sumOf { weight(it.level) }
-        val level = orderedFindings.maxByOrNull { weight(it.level) }?.level ?: ActivityIntentRiskLevel.Low
+        val level =
+            orderedFindings.maxByOrNull { weight(it.level) }?.level ?: ActivityIntentRiskLevel.Low
         val launchMode = when {
             !entry.launchableViaShell && entry.hasLaunchMetadata() -> "guided-intent"
             !entry.launchableViaShell -> "dump-only"
@@ -185,10 +196,13 @@ object ActivityIntentRiskAnalyzer {
         val recommendation = when (level) {
             ActivityIntentRiskLevel.Critical ->
                 "Usa device di test isolato, payload controllati e osserva side-effect su file/provider/canali sensibili."
+
             ActivityIntentRiskLevel.High ->
                 "Avvia l'intent con dati innocui e poi aumenta i payload per verificare sanitizzazione e routing."
+
             ActivityIntentRiskLevel.Medium ->
                 "Verifica host, parametri e comportamento con input malformed prima di test piu invasivi."
+
             ActivityIntentRiskLevel.Low ->
                 "Nessuna pericolosita evidente: mantieni comunque test base di reachability."
         }
@@ -238,7 +252,7 @@ object ActivityIntentRiskAnalyzer {
 
     private fun ActivityEntry.hasLaunchMetadata(): Boolean =
         !launchContextHint.isNullOrBlank() ||
-            !launchIntentAction.isNullOrBlank() ||
-            !launchIntentData.isNullOrBlank() ||
-            !launchIntentMimeType.isNullOrBlank()
+                !launchIntentAction.isNullOrBlank() ||
+                !launchIntentData.isNullOrBlank() ||
+                !launchIntentMimeType.isNullOrBlank()
 }

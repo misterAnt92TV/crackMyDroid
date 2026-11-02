@@ -1,7 +1,7 @@
 package com.crackmydroid.shared.di
 
-import com.crackmydroid.shared.data.activity.ActivityRepositoryDesktop
 import com.crackmydroid.shared.data.DesktopScanCache
+import com.crackmydroid.shared.data.activity.ActivityRepositoryDesktop
 import com.crackmydroid.shared.data.adb.ProcessAdbBridge
 import com.crackmydroid.shared.data.apps.InstalledAppsRepositoryDesktop
 import com.crackmydroid.shared.data.cache.CacheMaintenanceRepositoryDesktop
@@ -10,14 +10,11 @@ import com.crackmydroid.shared.data.device.DeviceSessionControllerDesktop
 import com.crackmydroid.shared.data.log.LogRepositoryDesktop
 import com.crackmydroid.shared.data.packages.RemotePackageManagerDesktop
 import com.crackmydroid.shared.data.permissions.PermissionsRepositoryDesktop
+import com.crackmydroid.shared.data.reports.ReportFileRepositoryDesktop
 import com.crackmydroid.shared.data.root.RootCheckRepositoryDesktop
 import com.crackmydroid.shared.data.settings.SettingsRepositoryDesktop
 import com.crackmydroid.shared.data.shell.ShellCommandRepositoryDesktop
 import com.crackmydroid.shared.data.snapshot.RemoteDeviceSnapshotImporter
-import com.crackmydroid.shared.data.reports.ReportFileRepositoryDesktop
-import com.crackmydroid.shared.presentation.operations.DefaultOperationLogRepository
-import com.crackmydroid.shared.presentation.operations.OperationLogPersistence
-import com.crackmydroid.shared.presentation.operations.OperationLogPersistenceDesktop
 import com.crackmydroid.shared.domain.repository.ActivityRepository
 import com.crackmydroid.shared.domain.repository.AdbBridge
 import com.crackmydroid.shared.domain.repository.CacheMaintenance
@@ -25,13 +22,16 @@ import com.crackmydroid.shared.domain.repository.DeviceInfoRepository
 import com.crackmydroid.shared.domain.repository.DeviceSessionController
 import com.crackmydroid.shared.domain.repository.InstalledAppsRepository
 import com.crackmydroid.shared.domain.repository.LogRepository
+import com.crackmydroid.shared.domain.repository.OperationLogRepository
 import com.crackmydroid.shared.domain.repository.PermissionsRepository
 import com.crackmydroid.shared.domain.repository.RemotePackageManager
-import com.crackmydroid.shared.domain.repository.RootCheckRepository
 import com.crackmydroid.shared.domain.repository.ReportFileRepository
-import com.crackmydroid.shared.domain.repository.OperationLogRepository
+import com.crackmydroid.shared.domain.repository.RootCheckRepository
 import com.crackmydroid.shared.domain.repository.SettingsRepository
 import com.crackmydroid.shared.domain.repository.ShellCommandRepository
+import com.crackmydroid.shared.presentation.operations.DefaultOperationLogRepository
+import com.crackmydroid.shared.presentation.operations.OperationLogPersistence
+import com.crackmydroid.shared.presentation.operations.OperationLogPersistenceDesktop
 import org.koin.core.module.Module
 import org.koin.dsl.module
 

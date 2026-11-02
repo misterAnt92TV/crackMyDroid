@@ -1,10 +1,10 @@
 package com.crackmydroid.shared.presentation.operations
 
 import android.content.Context
-import com.crackmydroid.shared.domain.model.OperationEntry
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.crackmydroid.shared.domain.model.OperationEntry
 import kotlinx.coroutines.flow.first
 
 private val Context.operationLogDataStore by preferencesDataStore(name = "operation_log")

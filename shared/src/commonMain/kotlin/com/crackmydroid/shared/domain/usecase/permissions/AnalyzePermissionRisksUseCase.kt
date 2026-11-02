@@ -133,65 +133,75 @@ class AnalyzePermissionRisksUseCase {
                 level = PermissionRiskLevel.Critical,
                 reason = "Può leggere contenuti a schermo e simulare interazioni utente."
             )
+
             "SYSTEM_ALERT_WINDOW" in key -> PermissionRiskFinding(
                 key = permission,
                 title = permission,
                 level = PermissionRiskLevel.Critical,
                 reason = "Consente overlay sopra altre app (rischio phishing/tapjacking)."
             )
+
             "SEND_SMS" in key || "READ_SMS" in key || "RECEIVE_SMS" in key ||
-                "RECEIVE_MMS" in key || "RECEIVE_WAP_PUSH" in key -> PermissionRiskFinding(
+                    "RECEIVE_MMS" in key || "RECEIVE_WAP_PUSH" in key -> PermissionRiskFinding(
                 key = permission,
                 title = permission,
                 level = PermissionRiskLevel.Critical,
                 reason = "Accesso a canali SMS/MMS con possibile esfiltrazione o frode."
             )
+
             "REQUEST_INSTALL_PACKAGES" in key -> PermissionRiskFinding(
                 key = permission,
                 title = permission,
                 level = PermissionRiskLevel.High,
                 reason = "Può richiedere installazioni di APK fuori dal Play Store."
             )
+
             "MANAGE_EXTERNAL_STORAGE" in key -> PermissionRiskFinding(
                 key = permission,
                 title = permission,
                 level = PermissionRiskLevel.High,
                 reason = "Accesso esteso allo storage del dispositivo."
             )
+
             "QUERY_ALL_PACKAGES" in key -> PermissionRiskFinding(
                 key = permission,
                 title = permission,
                 level = PermissionRiskLevel.High,
                 reason = "Permette inventario completo delle app installate."
             )
+
             "READ_CALL_LOG" in key || "WRITE_CALL_LOG" in key || "PROCESS_OUTGOING_CALLS" in key ||
-                "READ_CONTACTS" in key || "WRITE_CONTACTS" in key ||
-                "READ_PHONE_STATE" in key || "CALL_PHONE" in key || "ANSWER_PHONE_CALLS" in key -> PermissionRiskFinding(
+                    "READ_CONTACTS" in key || "WRITE_CONTACTS" in key ||
+                    "READ_PHONE_STATE" in key || "CALL_PHONE" in key || "ANSWER_PHONE_CALLS" in key -> PermissionRiskFinding(
                 key = permission,
                 title = permission,
                 level = PermissionRiskLevel.High,
                 reason = "Accesso a dati telefonici o rubriche sensibili."
             )
+
             "ACCESS_BACKGROUND_LOCATION" in key || "ACCESS_FINE_LOCATION" in key -> PermissionRiskFinding(
                 key = permission,
                 title = permission,
                 level = PermissionRiskLevel.High,
                 reason = "Tracciamento posizione preciso, anche in background."
             )
+
             "RECORD_AUDIO" in key || "CAMERA" in key -> PermissionRiskFinding(
                 key = permission,
                 title = permission,
                 level = PermissionRiskLevel.High,
                 reason = "Accesso a microfono/camera con possibile acquisizione sensibile."
             )
+
             "READ_EXTERNAL_STORAGE" in key || "WRITE_EXTERNAL_STORAGE" in key ||
-                "READ_MEDIA_" in key || "READ_CALENDAR" in key || "WRITE_CALENDAR" in key ||
-                "BODY_SENSORS" in key || "USE_BIOMETRIC" in key || "USE_FINGERPRINT" in key -> PermissionRiskFinding(
+                    "READ_MEDIA_" in key || "READ_CALENDAR" in key || "WRITE_CALENDAR" in key ||
+                    "BODY_SENSORS" in key || "USE_BIOMETRIC" in key || "USE_FINGERPRINT" in key -> PermissionRiskFinding(
                 key = permission,
                 title = permission,
                 level = PermissionRiskLevel.Medium,
                 reason = "Permesso sensibile da verificare nel contesto funzionale dell'app."
             )
+
             else -> null
         }
     }

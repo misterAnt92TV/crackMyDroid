@@ -1,15 +1,15 @@
 package com.crackmydroid.shared.domain.repository
 
 import com.crackmydroid.shared.domain.model.ActivityEntry
-import com.crackmydroid.shared.domain.model.AppTheme
 import com.crackmydroid.shared.domain.model.AppLanguage
+import com.crackmydroid.shared.domain.model.AppTheme
+import com.crackmydroid.shared.domain.model.ConnectedDevice
 import com.crackmydroid.shared.domain.model.DeviceInfo
+import com.crackmydroid.shared.domain.model.ExportFormat
 import com.crackmydroid.shared.domain.model.InstalledAppEntry
 import com.crackmydroid.shared.domain.model.RootStatus
 import com.crackmydroid.shared.domain.model.ShellCommand
 import com.crackmydroid.shared.domain.model.ShellCommandResult
-import com.crackmydroid.shared.domain.model.ExportFormat
-import com.crackmydroid.shared.domain.model.ConnectedDevice
 import com.crackmydroid.shared.domain.model.SnapshotMetadata
 import kotlinx.coroutines.flow.StateFlow
 
@@ -110,12 +110,14 @@ interface AdbBridge {
         configuredPath: String? = null,
         asRoot: Boolean = false
     ): Result<String>
+
     suspend fun pull(
         serial: String,
         remotePath: String,
         localPath: String,
         configuredPath: String? = null
     ): Result<String>
+
     suspend fun logcat(
         serial: String,
         configuredPath: String? = null,

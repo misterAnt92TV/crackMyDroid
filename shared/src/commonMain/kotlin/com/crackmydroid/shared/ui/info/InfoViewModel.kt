@@ -27,8 +27,23 @@ class InfoViewModel(
                 val root = checkRoot()
                 info to root
             }
-                .onSuccess { (info, root) -> _state.update { it.copy(info = info, root = root, loading = false) } }
-                .onFailure { err -> _state.update { it.copy(error = err.message, loading = false) } }
+                .onSuccess { (info, root) ->
+                    _state.update {
+                        it.copy(
+                            info = info,
+                            root = root,
+                            loading = false
+                        )
+                    }
+                }
+                .onFailure { err ->
+                    _state.update {
+                        it.copy(
+                            error = err.message,
+                            loading = false
+                        )
+                    }
+                }
         }
     }
 
@@ -37,7 +52,14 @@ class InfoViewModel(
         val content = buildInfoText(info, _state.value.root)
         scope.launch {
             reportExporter.save("device_info", content)
-                .onSuccess { path -> _state.update { it.copy(lastExportPath = path, error = null) } }
+                .onSuccess { path ->
+                    _state.update {
+                        it.copy(
+                            lastExportPath = path,
+                            error = null
+                        )
+                    }
+                }
                 .onFailure { error -> _state.update { it.copy(error = error.message) } }
         }
     }
@@ -47,7 +69,14 @@ class InfoViewModel(
         val content = contentOverride ?: buildInfoText(info, _state.value.root)
         scope.launch {
             reportExporter.share("device_info", content)
-                .onSuccess { path -> _state.update { it.copy(lastExportPath = path, error = null) } }
+                .onSuccess { path ->
+                    _state.update {
+                        it.copy(
+                            lastExportPath = path,
+                            error = null
+                        )
+                    }
+                }
                 .onFailure { error -> _state.update { it.copy(error = error.message) } }
         }
     }

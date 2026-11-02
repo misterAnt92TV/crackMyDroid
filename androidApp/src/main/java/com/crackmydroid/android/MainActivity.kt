@@ -6,8 +6,8 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
-import androidx.activity.enableEdgeToEdge
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Surface
@@ -31,7 +31,8 @@ class MainActivity : ComponentActivity() {
                 Manifest.permission.QUERY_ALL_PACKAGES
             ) == PackageManager.PERMISSION_GRANTED
         )
-        val disclosurePreferences = getSharedPreferences(DISCLOSURE_PREFERENCES, Context.MODE_PRIVATE)
+        val disclosurePreferences =
+            getSharedPreferences(DISCLOSURE_PREFERENCES, Context.MODE_PRIVATE)
         val disclosureSeen = disclosurePreferences.getBoolean(DISCLOSURE_SEEN_KEY, false)
         setContent {
             Surface {
@@ -50,6 +51,7 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                     }
+
                     PackageInventoryAccess.Unavailable -> PackageInventoryUnavailableDialog(
                         onClose = ::finish
                     )
@@ -72,9 +74,9 @@ private fun PackageInventoryDisclosure(onAcknowledge: () -> Unit) {
         text = {
             Text(
                 "CrackMyDroid legge localmente l'inventario delle app installate per mostrare APK, " +
-                    "activity, componenti e permessi. Non viene mostrato un dialogo di sistema: " +
-                    "l'accesso alla visibilita dei package e dichiarato nel manifest. " +
-                    "L'esportazione o la condivisione di un APK avviene solo quando la avvii tu."
+                        "activity, componenti e permessi. Non viene mostrato un dialogo di sistema: " +
+                        "l'accesso alla visibilita dei package e dichiarato nel manifest. " +
+                        "L'esportazione o la condivisione di un APK avviene solo quando la avvii tu."
             )
         },
         confirmButton = {
@@ -93,8 +95,8 @@ private fun PackageInventoryUnavailableDialog(onClose: () -> Unit) {
         text = {
             Text(
                 "Questa installazione non dispone della visibilita completa delle app. " +
-                    "Per evitare risultati parziali, la scansione non viene avviata. Reinstalla un APK " +
-                    "che dichiari QUERY_ALL_PACKAGES nel manifest."
+                        "Per evitare risultati parziali, la scansione non viene avviata. Reinstalla un APK " +
+                        "che dichiari QUERY_ALL_PACKAGES nel manifest."
             )
         },
         confirmButton = {

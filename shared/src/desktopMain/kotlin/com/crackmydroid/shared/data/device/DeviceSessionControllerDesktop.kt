@@ -62,7 +62,10 @@ class DeviceSessionControllerDesktop(
             }
     }
 
-    override suspend fun selectDevice(device: ConnectedDevice, adbPathOverride: String?): Result<Unit> {
+    override suspend fun selectDevice(
+        device: ConnectedDevice,
+        adbPathOverride: String?
+    ): Result<Unit> {
         val adbPath = adbPathOverride?.trim().orEmpty().ifBlank { _state.value.adbPath }
         val configured = !adbPathOverride.isNullOrBlank()
         return runCatching {

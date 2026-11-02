@@ -13,15 +13,38 @@ import java.util.Locale
 class ShellCommandRepositoryAndroid : ShellCommandRepository {
 
     private val baseCommands = listOf(
-        ShellCommand("Riavvia", "reboot", requiresRoot = true, confirmation = "Riavviare il dispositivo?"),
-        ShellCommand("Force stop SystemUI", "am force-stop com.android.systemui", requiresRoot = true, confirmation = "Forzare l'arresto di SystemUI?"),
-        ShellCommand("Toggle animazioni 0", "settings put global window_animation_scale 0; settings put global transition_animation_scale 0; settings put global animator_duration_scale 0", true),
-        ShellCommand("Toggle animazioni 1", "settings put global window_animation_scale 1; settings put global transition_animation_scale 1; settings put global animator_duration_scale 1", true),
+        ShellCommand(
+            "Riavvia",
+            "reboot",
+            requiresRoot = true,
+            confirmation = "Riavviare il dispositivo?"
+        ),
+        ShellCommand(
+            "Force stop SystemUI",
+            "am force-stop com.android.systemui",
+            requiresRoot = true,
+            confirmation = "Forzare l'arresto di SystemUI?"
+        ),
+        ShellCommand(
+            "Toggle animazioni 0",
+            "settings put global window_animation_scale 0; settings put global transition_animation_scale 0; settings put global animator_duration_scale 0",
+            true
+        ),
+        ShellCommand(
+            "Toggle animazioni 1",
+            "settings put global window_animation_scale 1; settings put global transition_animation_scale 1; settings put global animator_duration_scale 1",
+            true
+        ),
         ShellCommand("Attiva debug USB", "settings put global adb_enabled 1", true),
         ShellCommand("Disattiva debug USB", "settings put global adb_enabled 0", true),
         ShellCommand("Mostra top process", "top -n 1", false),
         ShellCommand("Elenco pacchetti", "pm list packages", false),
-        ShellCommand("Riavvia SystemUI", "pkill -TERM com.android.systemui", true, "Riavviare SystemUI?"),
+        ShellCommand(
+            "Riavvia SystemUI",
+            "pkill -TERM com.android.systemui",
+            true,
+            "Riavviare SystemUI?"
+        ),
         ShellCommand("Forza luminosità 50%", "settings put system screen_brightness 128", true),
         ShellCommand("Audio muto", "service call audio 7 i32 3 i32 0", true),
         ShellCommand(
@@ -251,9 +274,10 @@ class ShellCommandRepositoryAndroid : ShellCommandRepository {
         return baseCommands + oemCommands
     }
 
-    override suspend fun execute(command: ShellCommand): ShellCommandResult = withContext(Dispatchers.IO) {
-        runCommand(command.command, command.requiresRoot)
-    }
+    override suspend fun execute(command: ShellCommand): ShellCommandResult =
+        withContext(Dispatchers.IO) {
+            runCommand(command.command, command.requiresRoot)
+        }
 
     private fun runCommand(cmd: String, root: Boolean): ShellCommandResult {
         return try {

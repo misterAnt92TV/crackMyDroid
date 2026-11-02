@@ -5,7 +5,11 @@ package com.crackmydroid.shared.domain.model
  */
 sealed class Result<out T> {
     data class Success<T>(val data: T) : Result<T>()
-    data class Error(val exception: Throwable, val message: String = exception.message ?: "Unknown error") : Result<Nothing>()
+    data class Error(
+        val exception: Throwable,
+        val message: String = exception.message ?: "Unknown error"
+    ) : Result<Nothing>()
+
     data object Loading : Result<Nothing>()
 
     inline fun <R> map(transform: (T) -> R): Result<R> = when (this) {

@@ -1,6 +1,5 @@
 package com.crackmydroid.shared.domain.model
 
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlin.test.Test
 import kotlin.test.assertEquals

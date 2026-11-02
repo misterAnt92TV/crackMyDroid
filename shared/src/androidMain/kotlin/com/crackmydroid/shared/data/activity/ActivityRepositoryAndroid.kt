@@ -3,17 +3,16 @@ package com.crackmydroid.shared.data.activity
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.content.pm.PackageManager
+import android.net.Uri
+import com.crackmydroid.database.CacheDatabase
+import com.crackmydroid.shared.data.cache.CachingRepositoryDecorator
+import com.crackmydroid.shared.data.cache.PaginationHelper
 import com.crackmydroid.shared.domain.model.ActivityEntry
 import com.crackmydroid.shared.domain.model.AppComponent
 import com.crackmydroid.shared.domain.model.ComponentType
 import com.crackmydroid.shared.domain.model.classifyAndroidActivityLaunchability
-import com.crackmydroid.database.CacheDatabase
 import com.crackmydroid.shared.domain.repository.ActivityRepository
-import com.crackmydroid.shared.data.cache.CachingRepositoryDecorator
-import android.content.pm.ActivityInfo
-import com.crackmydroid.shared.data.cache.PaginationHelper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -95,11 +94,11 @@ class ActivityRepositoryAndroid(
     override suspend fun getComponents(): List<AppComponent> = withContext(Dispatchers.IO) {
         val pm = context.packageManager
         val packages = pm.getInstalledPackages(
-            PackageManager.GET_SERVICES or 
-            PackageManager.GET_RECEIVERS or 
-            PackageManager.GET_PROVIDERS
+            PackageManager.GET_SERVICES or
+                    PackageManager.GET_RECEIVERS or
+                    PackageManager.GET_PROVIDERS
         )
-        
+
         packages.flatMap { pkgInfo ->
             val appLabel = pkgInfo.applicationInfo
                 ?.loadLabel(pm)
@@ -107,7 +106,7 @@ class ActivityRepositoryAndroid(
                 ?.takeIf { it.isNotBlank() }
                 ?: pkgInfo.packageName
             val components = mutableListOf<AppComponent>()
-            
+
             pkgInfo.services?.forEach { service ->
                 components += AppComponent(
                     label = service.name.substringAfterLast('.'),
@@ -119,7 +118,7 @@ class ActivityRepositoryAndroid(
                     permission = service.permission
                 )
             }
-            
+
             pkgInfo.receivers?.forEach { receiver ->
                 components += AppComponent(
                     label = receiver.name.substringAfterLast('.'),
@@ -131,7 +130,7 @@ class ActivityRepositoryAndroid(
                     permission = receiver.permission
                 )
             }
-            
+
             pkgInfo.providers?.forEach { provider ->
                 components += AppComponent(
                     label = provider.name.substringAfterLast('.'),
@@ -143,7 +142,7 @@ class ActivityRepositoryAndroid(
                     permission = provider.readPermission ?: provider.writePermission
                 )
             }
-            
+
             components
         }.sortedBy { it.label.lowercase() }
     }
@@ -178,8 +177,10 @@ class ActivityRepositoryAndroid(
                 when {
                     !dataUri.isNullOrBlank() && !mimeType.isNullOrBlank() ->
                         setDataAndType(Uri.parse(dataUri), mimeType)
+
                     !dataUri.isNullOrBlank() ->
                         data = Uri.parse(dataUri)
+
                     !mimeType.isNullOrBlank() ->
                         type = mimeType
                 }

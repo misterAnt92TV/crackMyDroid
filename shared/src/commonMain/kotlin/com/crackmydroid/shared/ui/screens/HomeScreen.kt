@@ -1,43 +1,43 @@
 package com.crackmydroid.shared.ui.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.background
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.material3.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Error
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import com.crackmydroid.shared.domain.model.OperationEntry
+import com.crackmydroid.shared.domain.repository.OperationLogRepository
 import com.crackmydroid.shared.i18n.LocalStrings
 import com.crackmydroid.shared.presentation.components.AppAccordion
 import com.crackmydroid.shared.presentation.components.AppCard
 import com.crackmydroid.shared.presentation.components.AppText
 import com.crackmydroid.shared.presentation.components.PackageIcon
 import com.crackmydroid.shared.presentation.components.SectionHeader
-import com.crackmydroid.shared.domain.repository.OperationLogRepository
-import com.crackmydroid.shared.domain.model.OperationEntry
-import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.text.font.FontWeight
 
 @Composable
 fun HomeScreen(
@@ -138,7 +138,8 @@ internal fun HomeContent(
             )
         }
         items(uniqueHistory) { entry ->
-            val statusColor = if (entry.success) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.error
+            val statusColor =
+                if (entry.success) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.error
             AppCard(modifier = Modifier.fillMaxWidth()) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -170,7 +171,11 @@ internal fun HomeContent(
             }
         }
         item {
-            AppText(strings.homePurposeTitle, style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(top = 12.dp))
+            AppText(
+                strings.homePurposeTitle,
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.padding(top = 12.dp)
+            )
         }
         item {
             AppText(
@@ -180,7 +185,11 @@ internal fun HomeContent(
             )
         }
         item {
-            AppText(strings.faqTitle, style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(top = 12.dp))
+            AppText(
+                strings.faqTitle,
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.padding(top = 12.dp)
+            )
         }
         items(strings.faqItems) { faq ->
             val (q, a) = faq

@@ -57,26 +57,26 @@
 
 ## Moduli Gradle / Gradle Modules
 
-| Modulo | Tipo | Scopo |
-|---|---|---|
-| `:shared` | KMP Library | Tutta la logica condivisa: UI, domain, data, DI |
-| `:androidApp` | Android Application | Entry point Android; monta la UI condivisa |
-| `:desktopApp` | JVM Application | Entry point Desktop; device picker, toolbar ADB |
-| `iosApp` | Xcode project | Wrapper SwiftUI |
+| Modulo        | Tipo                | Scopo                                           |
+|---------------|---------------------|-------------------------------------------------|
+| `:shared`     | KMP Library         | Tutta la logica condivisa: UI, domain, data, DI |
+| `:androidApp` | Android Application | Entry point Android; monta la UI condivisa      |
+| `:desktopApp` | JVM Application     | Entry point Desktop; device picker, toolbar ADB |
+| `iosApp`      | Xcode project       | Wrapper SwiftUI                                 |
 
 ### Version Catalog (`gradle/libs.versions.toml`)
 
 Le versioni di tutte le dipendenze sono centralizzate nel version catalog. Le principali:
 
-| Libreria | Versione |
-|---|---|
-| Kotlin | `2.3.21` |
+| Libreria              | Versione |
+|-----------------------|----------|
+| Kotlin                | `2.3.21` |
 | Compose Multiplatform | `1.10.3` |
-| AGP | `8.13.0` |
-| Koin | `3.5.6` |
-| SQLDelight | `2.0.1` |
-| Coroutines | `1.8.1` |
-| kotlinx.serialization | `1.6.3` |
+| AGP                   | `8.13.0` |
+| Koin                  | `3.5.6`  |
+| SQLDelight            | `2.0.1`  |
+| Coroutines            | `1.8.1`  |
+| kotlinx.serialization | `1.6.3`  |
 
 ---
 
@@ -105,7 +105,9 @@ shared/src/commonMain/kotlin/com/crackmydroid/shared/
     └── root/                     // RootViewModel
 ```
 
-**Pattern ViewModel:** tutti estendono `BaseViewModel`. Lo stato è un data class immutabile; le azioni sono sealed class. Il pattern è UDF (Unidirectional Data Flow): `Action → ViewModel → State → UI`.
+**Pattern ViewModel:** tutti estendono `BaseViewModel`. Lo stato è un data class immutabile; le
+azioni sono sealed class. Il pattern è UDF (Unidirectional Data Flow):
+`Action → ViewModel → State → UI`.
 
 ### Domain Layer
 
@@ -134,18 +136,19 @@ domain/
 
 ### Data Layer
 
-Le repository sono definite come **interfacce** in `commonMain` e implementate separatamente per ogni piattaforma:
+Le repository sono definite come **interfacce** in `commonMain` e implementate separatamente per
+ogni piattaforma:
 
-| Repository | androidMain | desktopMain |
-|---|---|---|
-| `InstalledAppsRepository` | `InstalledAppsRepositoryAndroid` | via ADB/snapshot |
-| `ActivityRepository` | `ActivityRepositoryAndroid` | via snapshot |
-| `PermissionsRepository` | `PermissionsRepositoryAndroid` | via snapshot |
-| `RootCheckRepository` | `RootCheckRepositoryAndroid` (RootBeer) | stub |
-| `DeviceInfoRepository` | `DeviceInfoRepositoryAndroid` | via snapshot |
-| `ShellCommandRepository` | `ShellCommandRepositoryAndroid` | via `adb shell` |
-| `LogRepository` | `LogRepositoryAndroid` | — |
-| `SettingsRepository` | `SettingsRepositoryAndroid` (DataStore) | DataStore JVM |
+| Repository                | androidMain                             | desktopMain      |
+|---------------------------|-----------------------------------------|------------------|
+| `InstalledAppsRepository` | `InstalledAppsRepositoryAndroid`        | via ADB/snapshot |
+| `ActivityRepository`      | `ActivityRepositoryAndroid`             | via snapshot     |
+| `PermissionsRepository`   | `PermissionsRepositoryAndroid`          | via snapshot     |
+| `RootCheckRepository`     | `RootCheckRepositoryAndroid` (RootBeer) | stub             |
+| `DeviceInfoRepository`    | `DeviceInfoRepositoryAndroid`           | via snapshot     |
+| `ShellCommandRepository`  | `ShellCommandRepositoryAndroid`         | via `adb shell`  |
+| `LogRepository`           | `LogRepositoryAndroid`                  | —                |
+| `SettingsRepository`      | `SettingsRepositoryAndroid` (DataStore) | DataStore JVM    |
 
 ---
 
@@ -168,7 +171,8 @@ Package Manager / System APIs
 [ViewModel]  ──► StateFlow<State> ──► [Compose Screen]
 ```
 
-`AndroidDeviceSnapshotCoordinator` gira in parallelo, serializzando lo stato corrente in JSON per la desktop app.
+`AndroidDeviceSnapshotCoordinator` gira in parallelo, serializzando lo stato corrente in JSON per la
+desktop app.
 
 ---
 
@@ -209,7 +213,8 @@ object PaginationHelper {
 }
 ```
 
-Utility stateless per slicing offset-based. Usata da `getActivitiesPaginated()` e `listInstalledPaginated()`.
+Utility stateless per slicing offset-based. Usata da `getActivitiesPaginated()` e
+`listInstalledPaginated()`.
 
 ### CachingRepositoryDecorator (`androidMain`)
 
@@ -234,9 +239,11 @@ class CachingRepositoryDecorator {
 
 ### CacheMaintenanceRepositoryAndroid
 
-`BroadcastReceiver` che ascolta `ACTION_PACKAGE_REPLACED` / `ACTION_PACKAGE_REMOVED` per invalidare automaticamente le cache quando un'app viene aggiornata o rimossa.
+`BroadcastReceiver` che ascolta `ACTION_PACKAGE_REPLACED` / `ACTION_PACKAGE_REMOVED` per invalidare
+automaticamente le cache quando un'app viene aggiornata o rimossa.
 
 Metodi di invalidazione manuale:
+
 - `clearAllCaches()`
 - `invalidateActivitiesCache()`
 - `invalidatePermissionsCache()`
@@ -258,6 +265,7 @@ CrackMyDroidApp.onCreate() {
 ```
 
 I moduli Koin sono:
+
 - `sharedModule` (`commonMain/di/Koin.kt`): ViewModels, Use Cases, repository interfaces
 - `platformModule` (`androidMain/di/PlatformModule.kt`): implementazioni Android concrete
 - `platformModule` (`desktopMain/di/PlatformModule.kt`): implementazioni Desktop concrete
@@ -270,14 +278,14 @@ I moduli Koin sono:
 
 ### Check disponibili
 
-| checkId | Cosa verifica |
-|---|---|
-| `permission_risk` | Score rischio permessi + count critical |
-| `manifest_flags` | Permessi manifest sensibili + intent risk activity |
-| `file_scout` | Root disponibile + permessi storage pericolosi |
+| checkId           | Cosa verifica                                                  |
+|-------------------|----------------------------------------------------------------|
+| `permission_risk` | Score rischio permessi + count critical                        |
+| `manifest_flags`  | Permessi manifest sensibili + intent risk activity             |
+| `file_scout`      | Root disponibile + permessi storage pericolosi                 |
 | `network_monitor` | INTERNET + permessi dati sensibili (SMS, contatti, posizione…) |
-| `lib_scan` | Score rischio elevato + `REQUEST_INSTALL_PACKAGES` |
-| *(generic)* | Score critical o activity entry point critici |
+| `lib_scan`        | Score rischio elevato + `REQUEST_INSTALL_PACKAGES`             |
+| *(generic)*       | Score critical o activity entry point critici                  |
 
 ### Modalità di esecuzione
 
@@ -291,7 +299,8 @@ const val MAX_HISTORY_ITEMS = 240
 const val MAX_SAVED_REPORTS = 12
 ```
 
-I report vengono auto-salvati come snapshot al reset. Export disponibile via `saveTextFile()` / `shareTextFile()`.
+I report vengono auto-salvati come snapshot al reset. Export disponibile via `saveTextFile()` /
+`shareTextFile()`.
 
 ---
 
@@ -334,12 +343,12 @@ data class ManifestSecurityReport(
 
 ### Pesi dei findings
 
-| Level | Peso |
-|---|---|
-| Critical | 5 |
-| High | 3 |
-| Medium | 1 |
-| Low | 0 |
+| Level    | Peso |
+|----------|------|
+| Critical | 5    |
+| High     | 3    |
+| Medium   | 1    |
+| Low      | 0    |
 
 ---
 
@@ -366,10 +375,12 @@ CrackMyDroidApp (Composable root)
 ## Internazionalizzazione / Internationalization
 
 Le stringhe UI sono definite in `commonMain/i18n/Strings.kt` con supporto per:
+
 - **Italiano** (`AppLanguage.ITALIAN`) — default
 - **Inglese** (`AppLanguage.ENGLISH`)
 
 Il rilevamento della lingua di sistema è delegato a `PlatformLocale` (expect/actual):
+
 - `androidMain`: `Locale.getDefault().language`
 - `desktopMain`: `System.getProperty("user.language")`
 

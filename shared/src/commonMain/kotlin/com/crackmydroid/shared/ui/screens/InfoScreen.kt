@@ -1,4 +1,7 @@
-@file:OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class, androidx.compose.ui.ExperimentalComposeUiApi::class)
+@file:OptIn(
+    androidx.compose.foundation.ExperimentalFoundationApi::class,
+    androidx.compose.ui.ExperimentalComposeUiApi::class
+)
 
 package com.crackmydroid.shared.ui.screens
 
@@ -10,14 +13,20 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Memory
+import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.Smartphone
+import androidx.compose.material.icons.filled.Storage
+import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -29,29 +38,26 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.filled.Smartphone
-import androidx.compose.material.icons.filled.Memory
-import androidx.compose.material.icons.filled.Wifi
-import androidx.compose.material.icons.filled.Storage
 import com.crackmydroid.shared.i18n.LocalStrings
 import com.crackmydroid.shared.presentation.components.AppCard
 import com.crackmydroid.shared.presentation.components.AppText
-import com.crackmydroid.shared.presentation.components.SectionHeader
 import com.crackmydroid.shared.presentation.components.ScrollToTopButton
+import com.crackmydroid.shared.presentation.components.SectionHeader
 import com.crackmydroid.shared.ui.info.InfoViewModel
 import kotlinx.coroutines.launch
 
-private fun buildInfoContent(info: com.crackmydroid.shared.domain.model.DeviceInfo, root: com.crackmydroid.shared.domain.model.RootStatus?): String =
+private fun buildInfoContent(
+    info: com.crackmydroid.shared.domain.model.DeviceInfo,
+    root: com.crackmydroid.shared.domain.model.RootStatus?
+): String =
     buildString {
         val brand = info.brand ?: "n/d"
         val device = info.device ?: "n/d"
@@ -115,6 +121,7 @@ fun InfoScreen(
     val state by viewModel.state.collectAsState()
     val strings = LocalStrings.current
     val root = state.root
+
     @Suppress("DEPRECATION")
     val clipboard = LocalClipboardManager.current
     val scrollState = rememberScrollState()
@@ -134,7 +141,12 @@ fun InfoScreen(
                 .verticalScroll(scrollState),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            SectionHeader(title = strings.navInfo, help = headerHelp, onHelp = onHelp, onMenu = onMenu)
+            SectionHeader(
+                title = strings.navInfo,
+                help = headerHelp,
+                onHelp = onHelp,
+                onMenu = onMenu
+            )
             state.info?.let { info ->
                 AppCard(modifier = Modifier.fillMaxWidth()) {
                     Column(
@@ -145,9 +157,21 @@ fun InfoScreen(
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                Icon(Icons.Filled.Smartphone, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp))
-                                AppText("Dispositivo", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Icon(
+                                    Icons.Filled.Smartphone,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                AppText(
+                                    "Dispositivo",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.SemiBold
+                                )
                             }
                             IconButton(
                                 onClick = {
@@ -174,9 +198,21 @@ fun InfoScreen(
                         InfoRow("Serial", info.serial ?: "n/d")
 
                         HorizontalDivider()
-                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Icon(Icons.Filled.Memory, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp))
-                            AppText("Sistema", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Icon(
+                                Icons.Filled.Memory,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            AppText(
+                                "Sistema",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.SemiBold
+                            )
                         }
                         InfoRow("Android", info.androidVersion)
                         InfoRow("Patch", info.securityPatch)
@@ -189,13 +225,28 @@ fun InfoScreen(
                         InfoRow("Bootloader", info.bootloader)
 
                         HorizontalDivider()
-                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Icon(Icons.Filled.Wifi, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp))
-                            AppText("Connessione e debug", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Icon(
+                                Icons.Filled.Wifi,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            AppText(
+                                "Connessione e debug",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.SemiBold
+                            )
                         }
                         InfoRow("Rete", info.networkType)
                         InfoRow("USB Debug", if (info.adbEnabled) "Attivo" else "Disattivo")
-                        InfoRow("Opzioni sviluppatore", if (info.developerOptions) "Attive" else "Spente")
+                        InfoRow(
+                            "Opzioni sviluppatore",
+                            if (info.developerOptions) "Attive" else "Spente"
+                        )
                         InfoRow("App debuggable", if (info.appDebuggable) "Sì" else "No")
                         InfoRow(
                             "Root",
@@ -204,16 +255,33 @@ fun InfoScreen(
                         )
 
                         HorizontalDivider()
-                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Icon(Icons.Filled.Storage, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp))
-                            AppText("Display e memoria", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Icon(
+                                Icons.Filled.Storage,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            AppText(
+                                "Display e memoria",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.SemiBold
+                            )
                         }
                         InfoRow("Schermo", info.screenResolution ?: "n/d")
                         InfoRow("Densità", info.densityDpi?.let { "${it} dpi" } ?: "n/d")
-                        InfoRow("RAM totale", info.totalMemory?.let { "${it/1024/1024} MB" } ?: "n/d")
-                        InfoRow("RAM libera", info.freeMemory?.let { "${it/1024/1024} MB" } ?: "n/d")
+                        InfoRow(
+                            "RAM totale",
+                            info.totalMemory?.let { "${it / 1024 / 1024} MB" } ?: "n/d")
+                        InfoRow(
+                            "RAM libera",
+                            info.freeMemory?.let { "${it / 1024 / 1024} MB" } ?: "n/d")
                         InfoRow("Batteria", info.batteryLevel?.let { "$it%" } ?: "n/d")
-                        Spacer(modifier = Modifier.height(16.dp)) }
+                        Spacer(modifier = Modifier.height(16.dp))
+                    }
                 }
 
                 info.systemPropDump?.takeIf { it.isNotBlank() }?.let { dump ->

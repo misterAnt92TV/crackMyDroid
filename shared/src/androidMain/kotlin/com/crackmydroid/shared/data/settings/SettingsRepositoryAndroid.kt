@@ -6,8 +6,8 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import com.crackmydroid.shared.domain.model.AppTheme
 import com.crackmydroid.shared.domain.model.AppLanguage
+import com.crackmydroid.shared.domain.model.AppTheme
 import com.crackmydroid.shared.domain.model.ExportFormat
 import com.crackmydroid.shared.domain.repository.SettingsRepository
 import kotlinx.coroutines.flow.first
@@ -75,7 +75,8 @@ class SettingsRepositoryAndroid(private val context: Context) : SettingsReposito
 
     override suspend fun getExportFormat(): ExportFormat {
         val prefs = context.settingsDataStore.data.first()
-        return prefs[exportFormatKey]?.let { runCatching { ExportFormat.valueOf(it) }.getOrNull() } ?: ExportFormat.TXT
+        return prefs[exportFormatKey]?.let { runCatching { ExportFormat.valueOf(it) }.getOrNull() }
+            ?: ExportFormat.TXT
     }
 
     override suspend fun setExportFormat(format: ExportFormat) {
@@ -150,12 +151,31 @@ class SettingsRepositoryAndroid(private val context: Context) : SettingsReposito
         }
     }
 
-    override suspend fun getActivityFavorites() = context.settingsDataStore.data.first()[activityFavoritesKey].orEmpty()
-    override suspend fun setActivityFavorites(values: Set<String>) { context.settingsDataStore.edit { it[activityFavoritesKey] = values } }
-    override suspend fun getActivityPackageFavorites() = context.settingsDataStore.data.first()[activityPackageFavoritesKey].orEmpty()
-    override suspend fun setActivityPackageFavorites(values: Set<String>) { context.settingsDataStore.edit { it[activityPackageFavoritesKey] = values } }
-    override suspend fun getInstalledAppFavorites() = context.settingsDataStore.data.first()[installedAppFavoritesKey].orEmpty()
-    override suspend fun setInstalledAppFavorites(values: Set<String>) { context.settingsDataStore.edit { it[installedAppFavoritesKey] = values } }
-    override suspend fun getPermissionFavorites() = context.settingsDataStore.data.first()[permissionFavoritesKey].orEmpty()
-    override suspend fun setPermissionFavorites(values: Set<String>) { context.settingsDataStore.edit { it[permissionFavoritesKey] = values } }
+    override suspend fun getActivityFavorites() =
+        context.settingsDataStore.data.first()[activityFavoritesKey].orEmpty()
+
+    override suspend fun setActivityFavorites(values: Set<String>) {
+        context.settingsDataStore.edit { it[activityFavoritesKey] = values }
+    }
+
+    override suspend fun getActivityPackageFavorites() =
+        context.settingsDataStore.data.first()[activityPackageFavoritesKey].orEmpty()
+
+    override suspend fun setActivityPackageFavorites(values: Set<String>) {
+        context.settingsDataStore.edit { it[activityPackageFavoritesKey] = values }
+    }
+
+    override suspend fun getInstalledAppFavorites() =
+        context.settingsDataStore.data.first()[installedAppFavoritesKey].orEmpty()
+
+    override suspend fun setInstalledAppFavorites(values: Set<String>) {
+        context.settingsDataStore.edit { it[installedAppFavoritesKey] = values }
+    }
+
+    override suspend fun getPermissionFavorites() =
+        context.settingsDataStore.data.first()[permissionFavoritesKey].orEmpty()
+
+    override suspend fun setPermissionFavorites(values: Set<String>) {
+        context.settingsDataStore.edit { it[permissionFavoritesKey] = values }
+    }
 }

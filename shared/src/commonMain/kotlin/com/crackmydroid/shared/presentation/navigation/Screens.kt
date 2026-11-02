@@ -1,20 +1,23 @@
 package com.crackmydroid.shared.presentation.navigation
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Build
-import androidx.compose.material.icons.rounded.Info
+import androidx.compose.material.icons.automirrored.rounded.HelpOutline
 import androidx.compose.material.icons.automirrored.rounded.List
 import androidx.compose.material.icons.automirrored.rounded.ReceiptLong
+import androidx.compose.material.icons.rounded.Apps
+import androidx.compose.material.icons.rounded.Build
+import androidx.compose.material.icons.rounded.Home
+import androidx.compose.material.icons.rounded.Info
+import androidx.compose.material.icons.rounded.PrivacyTip
+import androidx.compose.material.icons.rounded.Security
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.rounded.VerifiedUser
-import androidx.compose.material.icons.rounded.Home
-import androidx.compose.material.icons.rounded.PrivacyTip
-import androidx.compose.material.icons.rounded.Apps
-import androidx.compose.material.icons.rounded.Security
-import androidx.compose.material.icons.automirrored.rounded.HelpOutline
 import androidx.compose.ui.graphics.vector.ImageVector
 
-sealed class Screen(val title: (com.crackmydroid.shared.i18n.Strings) -> String, val icon: ImageVector) {
+sealed class Screen(
+    val title: (com.crackmydroid.shared.i18n.Strings) -> String,
+    val icon: ImageVector
+) {
     object Home : Screen({ it.navHome }, Icons.Rounded.Home)
     object Activities : Screen({ it.navActivities }, Icons.AutoMirrored.Rounded.List)
     object Root : Screen({ it.navRoot }, Icons.Rounded.VerifiedUser)

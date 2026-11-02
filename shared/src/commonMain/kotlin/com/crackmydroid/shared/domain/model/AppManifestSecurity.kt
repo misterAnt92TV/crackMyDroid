@@ -120,21 +120,30 @@ object ManifestSecurityAnalyzer {
                 findings += ManifestSecurityFinding(
                     level = ManifestRiskLevel.Critical,
                     title = "Content provider esportati senza permesso ($providers)",
-                    detail = "Provider esportati e non protetti da permission possono esporre dati o SQL injection: ${unprotected.filter { it.type == AppComponentType.PROVIDER }.take(3).joinToString(", ") { it.name }}."
+                    detail = "Provider esportati e non protetti da permission possono esporre dati o SQL injection: ${
+                        unprotected.filter { it.type == AppComponentType.PROVIDER }.take(3)
+                            .joinToString(", ") { it.name }
+                    }."
                 )
             }
             if (services > 0) {
                 findings += ManifestSecurityFinding(
                     level = ManifestRiskLevel.High,
                     title = "Service esportati senza permesso ($services)",
-                    detail = "Service raggiungibili da altre app senza controllo permessi: ${unprotected.filter { it.type == AppComponentType.SERVICE }.take(3).joinToString(", ") { it.name }}."
+                    detail = "Service raggiungibili da altre app senza controllo permessi: ${
+                        unprotected.filter { it.type == AppComponentType.SERVICE }.take(3)
+                            .joinToString(", ") { it.name }
+                    }."
                 )
             }
             if (receivers > 0) {
                 findings += ManifestSecurityFinding(
                     level = ManifestRiskLevel.Medium,
                     title = "BroadcastReceiver esportati senza permesso ($receivers)",
-                    detail = "Receiver che accettano broadcast esterni senza permission: ${unprotected.filter { it.type == AppComponentType.RECEIVER }.take(3).joinToString(", ") { it.name }}."
+                    detail = "Receiver che accettano broadcast esterni senza permission: ${
+                        unprotected.filter { it.type == AppComponentType.RECEIVER }.take(3)
+                            .joinToString(", ") { it.name }
+                    }."
                 )
             }
         } else if (!info.supportsComponentAnalysis) {

@@ -5,8 +5,8 @@ import com.crackmydroid.shared.domain.model.InstalledAppEntry
 import com.crackmydroid.shared.domain.model.RootStatus
 import com.crackmydroid.shared.domain.repository.ActivityRepository
 import com.crackmydroid.shared.domain.repository.InstalledAppsRepository
-import com.crackmydroid.shared.domain.repository.RootCheckRepository
 import com.crackmydroid.shared.domain.repository.ReportFileRepository
+import com.crackmydroid.shared.domain.repository.RootCheckRepository
 import com.crackmydroid.shared.domain.usecase.reports.ExportReportUseCase
 import io.mockk.coEvery
 import io.mockk.coVerify

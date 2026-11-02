@@ -9,13 +9,13 @@
 
 ### Requisiti / Requirements
 
-| Tool | Versione minima | Note |
-|---|---|---|
-| JDK | 17 | Testate con Temurin/Eclipse Adoptium |
-| Android Studio | Koala (2024.1) o superiore | oppure IntelliJ IDEA con plugin KMP |
-| Android SDK | API 34 | `compileSdk=34`, `targetSdk=34` |
-| `adb` | qualsiasi | Solo per la desktop app |
-| Xcode | 15+ | Solo per build iOS |
+| Tool           | Versione minima            | Note                                 |
+|----------------|----------------------------|--------------------------------------|
+| JDK            | 17                         | Testate con Temurin/Eclipse Adoptium |
+| Android Studio | Koala (2024.1) o superiore | oppure IntelliJ IDEA con plugin KMP  |
+| Android SDK    | API 34                     | `compileSdk=34`, `targetSdk=34`      |
+| `adb`          | qualsiasi                  | Solo per la desktop app              |
+| Xcode          | 15+                        | Solo per build iOS                   |
 
 ### Clone e verifica build
 
@@ -261,14 +261,14 @@ val englishStrings = Strings(
 
 ### Naming
 
-| Tipo | Convenzione | Esempio |
-|---|---|---|
-| ViewModel | `<Feature>ViewModel` | `InstalledAppsViewModel` |
-| State | `<Feature>State` | `InstalledAppsState` |
-| UseCase | `<Verb><Noun>UseCase` | `ListPermissionsUseCase` |
-| Repository (interface) | `<Noun>Repository` | `ActivityRepository` |
+| Tipo                      | Convenzione               | Esempio                     |
+|---------------------------|---------------------------|-----------------------------|
+| ViewModel                 | `<Feature>ViewModel`      | `InstalledAppsViewModel`    |
+| State                     | `<Feature>State`          | `InstalledAppsState`        |
+| UseCase                   | `<Verb><Noun>UseCase`     | `ListPermissionsUseCase`    |
+| Repository (interface)    | `<Noun>Repository`        | `ActivityRepository`        |
 | Repository (impl Android) | `<Noun>RepositoryAndroid` | `ActivityRepositoryAndroid` |
-| Screen | `<Feature>Screen` | `ActivityListScreen` |
+| Screen                    | `<Feature>Screen`         | `ActivityListScreen`        |
 
 ### Compose
 
@@ -282,7 +282,8 @@ val englishStrings = Strings(
 
 ### `adb: command not found` (desktop app)
 
-Configura il percorso ADB dall'app: **Impostazioni → Percorso ADB** oppure aggiungi `platform-tools` al PATH:
+Configura il percorso ADB dall'app: **Impostazioni → Percorso ADB** oppure aggiungi `platform-tools`
+al PATH:
 
 ```bash
 export PATH="$PATH:/path/to/android-sdk/platform-tools"
@@ -304,8 +305,10 @@ org.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=512m
 
 ### MockK `Method not found` nei test
 
-Verifica che la versione di MockK sia compatibile con la versione Kotlin corrente (`1.13.13` per Kotlin `2.x`).
+Verifica che la versione di MockK sia compatibile con la versione Kotlin corrente (`1.13.13` per
+Kotlin `2.x`).
 
 ### Compose preview non funziona su Desktop
 
-Le preview Compose Multiplatform richiedono IntelliJ IDEA 2024.1+ con il plugin **Compose Multiplatform IDE Support** attivo.
+Le preview Compose Multiplatform richiedono IntelliJ IDEA 2024.1+ con il plugin **Compose
+Multiplatform IDE Support** attivo.
