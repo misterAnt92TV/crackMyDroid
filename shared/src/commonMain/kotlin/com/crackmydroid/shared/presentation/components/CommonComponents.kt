@@ -5,7 +5,6 @@ import androidx.compose.animation.Crossfade
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -32,13 +31,11 @@ import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.automirrored.filled.HelpOutline
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -46,7 +43,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -107,30 +103,19 @@ fun AppButton(
             onClick = onClick,
             enabled = enabled,
             modifier = buttonModifier,
-            shape = RoundedCornerShape(20.dp),
             contentPadding = PaddingValues(horizontal = 18.dp, vertical = if (prefs.largeText) 16.dp else 14.dp)
         ) { content() }
         ButtonVariant.Secondary -> OutlinedButton(
             onClick = onClick,
             enabled = enabled,
             modifier = buttonModifier,
-            shape = RoundedCornerShape(20.dp),
-            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
-            colors = ButtonDefaults.outlinedButtonColors(
-                contentColor = MaterialTheme.colorScheme.primary
-            ),
             contentPadding = PaddingValues(horizontal = 18.dp, vertical = if (prefs.largeText) 16.dp else 14.dp)
         ) { content() }
-        ButtonVariant.Tonal -> ElevatedButton(
+        ButtonVariant.Tonal -> FilledTonalButton(
             onClick = onClick,
             enabled = enabled,
             modifier = buttonModifier,
-            shape = RoundedCornerShape(20.dp),
-            contentPadding = PaddingValues(horizontal = 18.dp, vertical = if (prefs.largeText) 16.dp else 14.dp),
-            colors = ButtonDefaults.elevatedButtonColors(
-                containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                contentColor = MaterialTheme.colorScheme.onSecondaryContainer
-            )
+            contentPadding = PaddingValues(horizontal = 18.dp, vertical = if (prefs.largeText) 16.dp else 14.dp)
         ) { content() }
     }
 }
@@ -190,27 +175,16 @@ fun AppCard(
     contentPadding: PaddingValues = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
     content: @Composable ColumnScope.() -> Unit
 ) {
-    val shape = RoundedCornerShape(22.dp)
-    val colors = CardDefaults.elevatedCardColors(
-        containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp)
-    )
-    val elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp, pressedElevation = 6.dp)
     if (onClick != null) {
         ElevatedCard(
             onClick = onClick,
             modifier = modifier,
-            shape = shape,
-            elevation = elevation,
-            colors = colors
         ) {
             Column(modifier = Modifier.padding(contentPadding), content = content)
         }
     } else {
         ElevatedCard(
             modifier = modifier,
-            shape = shape,
-            elevation = elevation,
-            colors = colors
         ) {
             Column(modifier = Modifier.padding(contentPadding), content = content)
         }

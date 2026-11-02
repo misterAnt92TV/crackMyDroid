@@ -7,16 +7,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -24,9 +20,7 @@ import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.NavigationDrawerItem
-import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.Checkbox
@@ -44,11 +38,9 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -62,8 +54,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
-import androidx.compose.material3.surfaceColorAtElevation
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.runtime.rememberCoroutineScope
@@ -109,8 +99,8 @@ import com.crackmydroid.shared.presentation.components.LocalAccessibilityPrefs
 import com.crackmydroid.shared.presentation.components.AccessibilityPrefs
 import com.crackmydroid.shared.presentation.components.SearchHistoryStore
 import com.crackmydroid.shared.presentation.components.PackageIcon
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.setValue
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
@@ -232,15 +222,6 @@ fun CrackMyDroidApp() {
             LocalStrings provides strings,
             LocalAccessibilityPrefs provides accessibilityPrefs
         ) {
-            val gradient = if (darkTheme) {
-                listOf(Color(0xFF0F172A), Color(0xFF121B2F), Color(0xFF0F221A))
-            } else {
-                listOf(Color(0xFFE8F0FE), Color(0xFFF8FAFF), Color(0xFFE6F4EA))
-            }
-            val drawerVisual = drawerVisualStyle(
-                variant = ACTIVE_DRAWER_VISUAL_VARIANT,
-                darkTheme = darkTheme
-            )
             val navigateFromDrawer: (Screen) -> Unit = { target ->
                 scope.launch { drawerState.close() }
                 if (selected.value == target) {
@@ -258,113 +239,63 @@ fun CrackMyDroidApp() {
                 drawerState = drawerState,
                 drawerContent = {
                     ModalDrawerSheet(
-                        drawerContainerColor = drawerVisual.sheetColor
                     ) {
                         Column(
                             modifier = Modifier
-                                .padding(horizontal = 10.dp, vertical = 10.dp)
-                                .width(286.dp),
+                                .fillMaxSize()
+                                .padding(horizontal = 12.dp, vertical = 16.dp),
                             verticalArrangement = Arrangement.spacedBy(10.dp)
                         ) {
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.Center
+                                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .clip(RoundedCornerShape(24.dp))
-                                        .background(drawerVisual.headerGradient)
-                                        .padding(horizontal = 14.dp, vertical = 12.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Box(
-                                        modifier = Modifier
-                                            .size(56.dp)
-                                            .clip(CircleShape)
-                                            .background(drawerVisual.headerIconContainer),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        PackageIcon(
-                                            packageName = appPackageName(),
-                                            size = 42.dp,
-                                            backgroundColor = Color.Transparent,
-                                            contentPadding = 0.dp
-                                        )
-                                    }
-                                    Column(
-                                        modifier = Modifier.padding(start = 12.dp),
-                                        verticalArrangement = Arrangement.spacedBy(2.dp)
-                                    ) {
-                                        Text(
-                                            text = "CrackMyDroid",
-                                            style = MaterialTheme.typography.titleLarge,
-                                            fontWeight = FontWeight.SemiBold,
-                                            color = drawerVisual.headerTitleColor
-                                        )
-                                        Text(
-                                            text = "Toolkit Android per test rapidi di sicurezza",
-                                            style = MaterialTheme.typography.labelMedium,
-                                            color = drawerVisual.headerSubtitleColor,
-                                            maxLines = if (accessibilityPrefs.largeText) 3 else 2
-                                        )
-                                    }
+                                PackageIcon(
+                                    packageName = appPackageName(),
+                                    size = 40.dp,
+                                    contentPadding = 0.dp
+                                )
+                                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                                    Text(
+                                        text = "CrackMyDroid",
+                                        style = MaterialTheme.typography.titleLarge,
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                    Text(
+                                        text = "Toolkit Android per test rapidi di sicurezza",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        maxLines = if (accessibilityPrefs.largeText) 3 else 2
+                                    )
                                 }
                             }
+                            HorizontalDivider()
                             Column(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .weight(1f),
-                                verticalArrangement = Arrangement.SpaceEvenly
+                                verticalArrangement = Arrangement.spacedBy(2.dp)
                             ) {
                                 drawerScreens.forEach { screen ->
-                                    val isSelected = selected.value == screen
                                     NavigationDrawerItem(
                                         icon = { Icon(screen.icon, contentDescription = null) },
-                                        label = {
-                                            Column(verticalArrangement = Arrangement.spacedBy(1.dp)) {
-                                                Text(
-                                                    text = screen.title(strings),
-                                                    style = MaterialTheme.typography.titleSmall,
-                                                    fontWeight = FontWeight.Medium
-                                                )
-                                                Text(
-                                                    text = drawerMiniDescription(screen),
-                                                    style = MaterialTheme.typography.bodySmall,
-                                                    color = if (isSelected) {
-                                                        drawerVisual.selectedSubtitleColor
-                                                    } else {
-                                                        drawerVisual.unselectedSubtitleColor
-                                                    },
-                                                    maxLines = if (accessibilityPrefs.largeText) 2 else 1,
-                                                    overflow = TextOverflow.Ellipsis
-                                                )
-                                            }
-                                        },
-                                        selected = isSelected,
+                                        label = { Text(screen.title(strings)) },
+                                        selected = selected.value == screen,
                                         onClick = { navigateFromDrawer(screen) },
-                                        colors = NavigationDrawerItemDefaults.colors(
-                                            selectedContainerColor = drawerVisual.selectedContainerColor,
-                                            unselectedContainerColor = drawerVisual.unselectedContainerColor,
-                                            selectedIconColor = drawerVisual.selectedIconColor,
-                                            selectedTextColor = drawerVisual.selectedTextColor,
-                                            unselectedIconColor = drawerVisual.unselectedIconColor,
-                                            unselectedTextColor = drawerVisual.unselectedTextColor
-                                        ),
-                                        shape = RoundedCornerShape(16.dp),
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .heightIn(min = if (accessibilityPrefs.largeText) 74.dp else 62.dp)
-                                            .padding(horizontal = 4.dp, vertical = 1.dp)
+                                            .padding(vertical = 2.dp)
                                     )
                                 }
                             }
+                            HorizontalDivider()
                             Text(
                                 text = "Versione $androidAppVersionName",
                                 style = MaterialTheme.typography.labelMedium,
-                                color = drawerVisual.footerTextColor,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier
-                                    .padding(horizontal = 10.dp, vertical = 8.dp)
+                                    .padding(vertical = 8.dp)
                             )
                         }
                     }
@@ -376,20 +307,15 @@ fun CrackMyDroidApp() {
                     modifier = Modifier.fillMaxSize(),
                     bottomBar = {
                         if (showBottomBar) {
-                            val navShape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)
                             NavigationBar(
                                 modifier = Modifier
                                     .navigationBarsPadding()
-                                    .shadow(10.dp, shape = navShape, clip = false)
-                                    .clip(navShape)
                                     .height(navHeight),
                                 windowInsets = WindowInsets(0, 0, 0, 0),
-                                containerColor = MaterialTheme.colorScheme.surface.copy(alpha = if (darkTheme) 0.96f else 0.98f),
-                                tonalElevation = 6.dp
+                                tonalElevation = 3.dp
                             ) {
                                 val itemIconSize = 20.dp
                                 bottomScreens.forEach { screen ->
-                                    val accent = googleAccentForScreen(screen, darkTheme)
                                     NavigationBarItem(
                                         selected = selected.value == screen,
                                         onClick = { selected.value = screen },
@@ -401,13 +327,6 @@ fun CrackMyDroidApp() {
                                                 overflow = TextOverflow.Ellipsis
                                             )
                                         },
-                                        colors = NavigationBarItemDefaults.colors(
-                                            selectedIconColor = accent,
-                                            selectedTextColor = MaterialTheme.colorScheme.onSurface,
-                                            indicatorColor = accent.copy(alpha = if (darkTheme) 0.26f else 0.18f),
-                                            unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                                            unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
-                                        ),
                                         alwaysShowLabel = true
                                     )
                                 }
@@ -437,7 +356,7 @@ fun CrackMyDroidApp() {
                                     }
                                 }
                             }
-                            .background(Brush.verticalGradient(gradient))
+                            .background(MaterialTheme.colorScheme.background)
                     ) {
                         val reduceMotion = accessibilityPrefs.reduceMotion
                         AnimatedContent(
@@ -615,7 +534,6 @@ fun CrackMyDroidApp() {
         }
     }
 }
-
 @Composable
 inline fun <reified T : Any> rememberVM(): T {
     return remember { KoinPlatform.getKoin().get<T>() }
@@ -642,147 +560,5 @@ private fun sectionEntryHintText(strings: Strings, screen: Screen): String? {
         Screen.Root -> "Esegue un check rapido del root e della Play Integrity: usa RootBeer per rilevare tracce di rooting e verifica il nonce con Play Integrity."
         Screen.Trick -> "${strings.helpTrick}\n\nSuggerimento: conferma i comandi sensibili e controlla sempre output/exit code."
         else -> null
-    }
-}
-
-private enum class DrawerVisualVariant {
-    Clean,
-    Bold
-}
-
-private data class DrawerVisualStyle(
-    val sheetColor: Color,
-    val headerGradient: Brush,
-    val headerIconContainer: Color,
-    val headerIconTint: Color,
-    val headerTitleColor: Color,
-    val headerSubtitleColor: Color,
-    val selectedContainerColor: Color,
-    val unselectedContainerColor: Color,
-    val selectedIconColor: Color,
-    val selectedTextColor: Color,
-    val unselectedIconColor: Color,
-    val unselectedTextColor: Color,
-    val selectedSubtitleColor: Color,
-    val unselectedSubtitleColor: Color,
-    val footerTextColor: Color
-)
-
-private val ACTIVE_DRAWER_VISUAL_VARIANT = DrawerVisualVariant.Clean
-
-private fun googleAccentForScreen(screen: Screen, darkTheme: Boolean): Color {
-    return when (screen) {
-        Screen.Home -> if (darkTheme) Color(0xFFA8C7FA) else Color(0xFF1A73E8)
-        Screen.Info -> if (darkTheme) Color(0xFF81C995) else Color(0xFF188038)
-        Screen.Settings -> if (darkTheme) Color(0xFFFDD663) else Color(0xFFF9AB00)
-        Screen.InstalledApps -> if (darkTheme) Color(0xFFA8C7FA) else Color(0xFF1A73E8)
-        Screen.Pentest -> if (darkTheme) Color(0xFFFDD663) else Color(0xFFF9AB00)
-        Screen.Permissions -> if (darkTheme) Color(0xFFF28B82) else Color(0xFFD93025)
-        Screen.Activities -> if (darkTheme) Color(0xFF81C995) else Color(0xFF188038)
-        Screen.Root -> if (darkTheme) Color(0xFFF28B82) else Color(0xFFD93025)
-        Screen.Trick -> if (darkTheme) Color(0xFFA8C7FA) else Color(0xFF1A73E8)
-        Screen.Log -> if (darkTheme) Color(0xFF81C995) else Color(0xFF188038)
-    }
-}
-
-private fun drawerVisualStyle(
-    variant: DrawerVisualVariant,
-    darkTheme: Boolean
-): DrawerVisualStyle {
-    return when (variant) {
-        DrawerVisualVariant.Clean -> {
-            if (darkTheme) {
-                DrawerVisualStyle(
-                    sheetColor = Color(0xFF121C2B),
-                    headerGradient = Brush.linearGradient(listOf(Color(0xFF1A2C43), Color(0xFF1A4758))),
-                    headerIconContainer = Color(0x55FFFFFF),
-                    headerIconTint = Color(0xFFB7D7FF),
-                    headerTitleColor = Color.White,
-                    headerSubtitleColor = Color(0xFFE1EEFF),
-                    selectedContainerColor = Color(0xFF2A4A67),
-                    unselectedContainerColor = Color(0xFF1C2837),
-                    selectedIconColor = Color(0xFF9AC7FF),
-                    selectedTextColor = Color(0xFFE8F3FF),
-                    unselectedIconColor = Color(0xFF9EB3C8),
-                    unselectedTextColor = Color(0xFFD2DDE8),
-                    selectedSubtitleColor = Color(0xFFBFE0FF),
-                    unselectedSubtitleColor = Color(0xFF91A8BE),
-                    footerTextColor = Color(0xFF9CB1C7)
-                )
-            } else {
-                DrawerVisualStyle(
-                    sheetColor = Color(0xFFF6FAFF),
-                    headerGradient = Brush.linearGradient(listOf(Color(0xFFE8F3FF), Color(0xFFEAF8F2))),
-                    headerIconContainer = Color(0xD9FFFFFF),
-                    headerIconTint = Color(0xFF226AA1),
-                    headerTitleColor = Color(0xFF12314A),
-                    headerSubtitleColor = Color(0xFF335B77),
-                    selectedContainerColor = Color(0xFFDAECFF),
-                    unselectedContainerColor = Color(0xFFEFF4F9),
-                    selectedIconColor = Color(0xFF1B5D93),
-                    selectedTextColor = Color(0xFF12324A),
-                    unselectedIconColor = Color(0xFF5A6F84),
-                    unselectedTextColor = Color(0xFF243A4F),
-                    selectedSubtitleColor = Color(0xFF1F5D8A),
-                    unselectedSubtitleColor = Color(0xFF60798F),
-                    footerTextColor = Color(0xFF5D7489)
-                )
-            }
-        }
-
-        DrawerVisualVariant.Bold -> {
-            if (darkTheme) {
-                DrawerVisualStyle(
-                    sheetColor = Color(0xFF0E1724),
-                    headerGradient = Brush.linearGradient(listOf(Color(0xFF0E3155), Color(0xFF0D5A47))),
-                    headerIconContainer = Color(0x44FFFFFF),
-                    headerIconTint = Color.White,
-                    headerTitleColor = Color.White,
-                    headerSubtitleColor = Color(0xFFD9EEFF),
-                    selectedContainerColor = Color(0xFF14507D),
-                    unselectedContainerColor = Color(0xFF1A293A),
-                    selectedIconColor = Color.White,
-                    selectedTextColor = Color.White,
-                    unselectedIconColor = Color(0xFF96AEC8),
-                    unselectedTextColor = Color(0xFFD0DEEE),
-                    selectedSubtitleColor = Color(0xFFCCEBFF),
-                    unselectedSubtitleColor = Color(0xFF8FA7C0),
-                    footerTextColor = Color(0xFF97B2CC)
-                )
-            } else {
-                DrawerVisualStyle(
-                    sheetColor = Color(0xFFF3F7FF),
-                    headerGradient = Brush.linearGradient(listOf(Color(0xFF15558F), Color(0xFF1E7D5D))),
-                    headerIconContainer = Color(0x38FFFFFF),
-                    headerIconTint = Color.White,
-                    headerTitleColor = Color.White,
-                    headerSubtitleColor = Color(0xFFE4F3FF),
-                    selectedContainerColor = Color(0xFF1A5F9E),
-                    unselectedContainerColor = Color(0xFFDDE8F6),
-                    selectedIconColor = Color.White,
-                    selectedTextColor = Color.White,
-                    unselectedIconColor = Color(0xFF31557A),
-                    unselectedTextColor = Color(0xFF1E3E60),
-                    selectedSubtitleColor = Color(0xFFD9EEFF),
-                    unselectedSubtitleColor = Color(0xFF3E5F80),
-                    footerTextColor = Color(0xFF4A6886)
-                )
-            }
-        }
-    }
-}
-
-private fun drawerMiniDescription(screen: Screen): String {
-    return when (screen) {
-        Screen.InstalledApps -> "Lista app installate con azioni rapide su APK."
-        Screen.Pentest -> "Wizard guidato per test rapidi di hardening."
-        Screen.Permissions -> "Verifica permessi sensibili e rischi principali."
-        Screen.Activities -> "Esplora e filtra activity esportate e invocabili."
-        Screen.Root -> "Check root e integrita del dispositivo."
-        Screen.Trick -> "Tool tecnici e comandi utili per analisi rapida."
-        Screen.Log -> "Filtra log e condividi evidenze in pochi tap."
-        Screen.Home -> "Panoramica operativa del progetto."
-        Screen.Info -> "Dettagli tecnici e metadati dell'app target."
-        Screen.Settings -> "Preferenze UI, accessibilita e suggerimenti."
     }
 }

@@ -142,7 +142,6 @@ fun ActivityListScreen(
                             label = strings.filterActivities,
                             historyKey = "activities",
                             modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(18.dp),
                             showClearAction = true,
                             onCleared = {
                                 viewModel.setFilter("")

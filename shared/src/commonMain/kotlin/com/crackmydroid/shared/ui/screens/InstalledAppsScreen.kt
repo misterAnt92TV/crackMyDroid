@@ -147,7 +147,6 @@ fun InstalledAppsScreen(
                         label = strings.apkSearch,
                         historyKey = "installed_apps",
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(18.dp),
                         showClearAction = true,
                         onCleared = {
                             viewModel.setFilter("")

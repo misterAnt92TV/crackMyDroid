@@ -242,7 +242,6 @@ fun PermissionsScreen(
                         label = strings.permissionsSearch,
                         historyKey = "permissions",
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(18.dp),
                         showClearAction = true,
                         onCleared = {
                             viewModel.setFilter("")
