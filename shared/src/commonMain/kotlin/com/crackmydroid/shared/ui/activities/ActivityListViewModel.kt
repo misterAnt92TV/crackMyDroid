@@ -4,6 +4,7 @@ import com.crackmydroid.shared.domain.model.ActivityEntry
 import com.crackmydroid.shared.domain.model.ActivityIntentRiskAnalyzer
 import com.crackmydroid.shared.domain.model.ActivityIntentRiskLevel
 import com.crackmydroid.shared.domain.model.ActivityIntentRiskReport
+import com.crackmydroid.shared.domain.model.favoriteKey
 import com.crackmydroid.shared.domain.usecase.GetActivitiesUseCase
 import com.crackmydroid.shared.domain.usecase.LaunchActivityUseCase
 import com.crackmydroid.shared.domain.usecase.GetExportFormatUseCase
@@ -137,7 +138,7 @@ class ActivityListViewModel(
     }
 
     fun toggleFavorite(entry: ActivityEntry) {
-        val key = activityKey(entry)
+        val key = entry.favoriteKey()
         val favs = _state.value.favorites.toMutableSet()
         if (favs.contains(key)) favs.remove(key) else favs.add(key)
         recomputeAsync(_state.value.copy(favorites = favs))
@@ -207,7 +208,7 @@ class ActivityListViewModel(
         val guidedLaunchCount = activities.count { !it.launchableViaShell && it.hasGuidedLaunchMetadata() }
         val dumpOnlyCount = activities.count { !it.launchableViaShell && !it.hasGuidedLaunchMetadata() }
         val riskyActivitiesCount = riskReports.count { it.level != ActivityIntentRiskLevel.Low }
-        val favoriteActivitiesCount = activities.count { favorites.contains(activityKey(it)) }
+        val favoriteActivitiesCount = activities.count { favorites.contains(it.favoriteKey()) }
         val highestRiskLevel = ActivityIntentRiskAnalyzer.summarize(riskReports)
         val findings = buildList {
             if (dumpOnlyCount > 0) {
@@ -241,7 +242,7 @@ class ActivityListViewModel(
             .take(4)
 
         val highlights = riskReports.sortedWith(
-            compareByDescending<ActivityIntentRiskReport> { favorites.contains(activityKey(it.entry)) }
+            compareByDescending<ActivityIntentRiskReport> { favorites.contains(it.entry.favoriteKey()) }
                 .thenByDescending { it.score }
                 .thenBy { it.entry.activityName.lowercase() }
         ).take(10)
@@ -326,7 +327,7 @@ class ActivityListViewModel(
         val sorted = filtered.sortedWith(
             compareBy<ActivityEntry> {
                 if (state.favoritePackages.contains(it.packageName) ||
-                    state.favorites.contains(activityKey(it))
+                    state.favorites.contains(it.favoriteKey())
                 ) 0 else 1
             }
                 .thenBy { it.packageName }
@@ -360,8 +361,6 @@ class ActivityListViewModel(
         .trim()
         .replace(multiSpaceRegex, " ")
         .lowercase()
-
-    private fun activityKey(entry: ActivityEntry): String = "${entry.packageName}/${entry.activityName}"
 
     private fun buildHtmlReport(report: ActivityAppReport): String = buildString {
         appendLine("<!DOCTYPE html>")

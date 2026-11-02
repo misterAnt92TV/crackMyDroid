@@ -52,6 +52,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import com.crackmydroid.shared.domain.model.ActivityEntry
 import com.crackmydroid.shared.domain.model.ActivityIntentRiskAnalyzer
+import com.crackmydroid.shared.domain.model.favoriteKey
 import com.crackmydroid.shared.i18n.LocalStrings
 import com.crackmydroid.shared.presentation.components.AppAccordion
 import com.crackmydroid.shared.presentation.components.AppButton
@@ -318,7 +319,7 @@ fun ActivityListScreen(
                         .padding(vertical = 6.dp)
                 ) {
                     group.activities.forEach { activity ->
-                        val favKey = activity.packageName + activity.activityName
+                        val favKey = activity.favoriteKey()
                         val activityMeta = when {
                             !activity.launchableViaShell && activity.launchContextHint != null -> "intent required"
                             !activity.launchableViaShell -> "dump only"

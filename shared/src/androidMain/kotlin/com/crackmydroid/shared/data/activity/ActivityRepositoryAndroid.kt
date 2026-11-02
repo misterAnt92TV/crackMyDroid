@@ -8,6 +8,7 @@ import android.content.pm.PackageManager
 import com.crackmydroid.shared.domain.model.ActivityEntry
 import com.crackmydroid.shared.domain.model.AppComponent
 import com.crackmydroid.shared.domain.model.ComponentType
+import com.crackmydroid.shared.domain.model.classifyAndroidActivityLaunchability
 import com.crackmydroid.database.CacheDatabase
 import com.crackmydroid.shared.domain.repository.ActivityRepository
 import com.crackmydroid.shared.data.cache.CachingRepositoryDecorator
@@ -23,11 +24,17 @@ class ActivityRepositoryAndroid(
     private val cachingDecorator = CachingRepositoryDecorator()
     override suspend fun getActivities(): List<ActivityEntry> = withContext(Dispatchers.IO) {
         val cached = db.cacheDatabaseQueries.selectAllActivities().executeAsList().map {
+            val launchability = classifyAndroidActivityLaunchability(
+                exported = it.exported == 1L,
+                permission = it.permission
+            )
             ActivityEntry(
                 label = it.label,
                 appLabel = it.appLabel,
                 packageName = it.packageName,
                 activityName = it.activityName,
+                launchableViaShell = launchability.launchableViaShell,
+                launchabilityReason = launchability.launchabilityReason,
                 exported = it.exported == 1L,
                 permission = it.permission
             )
@@ -44,6 +51,10 @@ class ActivityRepositoryAndroid(
                 ?.takeIf { it.isNotBlank() }
                 ?: pkgInfo.packageName
             activities.map { activityInfo ->
+                val launchability = classifyAndroidActivityLaunchability(
+                    exported = activityInfo.exported,
+                    permission = activityInfo.permission
+                )
                 val label = activityInfo.loadLabel(pm).toString()
                     .ifBlank { activityInfo.name.substringAfterLast('.') }
                 ActivityEntry(
@@ -51,6 +62,8 @@ class ActivityRepositoryAndroid(
                     appLabel = appLabel,
                     packageName = pkgInfo.packageName,
                     activityName = activityInfo.name,
+                    launchableViaShell = launchability.launchableViaShell,
+                    launchabilityReason = launchability.launchabilityReason,
                     exported = activityInfo.exported,
                     permission = activityInfo.permission
                 )
