@@ -3,8 +3,10 @@ package com.crackmydroid.android
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.compose.setContent
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -19,6 +21,10 @@ import com.crackmydroid.shared.ui.CrackMyDroidApp
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            window.isNavigationBarContrastEnforced = false
+        }
         val packageInventoryAccess = packageInventoryAccess(
             sdkInt = android.os.Build.VERSION.SDK_INT,
             queryAllPackagesPermissionGranted = checkSelfPermission(

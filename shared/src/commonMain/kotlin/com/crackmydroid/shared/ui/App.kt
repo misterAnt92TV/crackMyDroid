@@ -12,13 +12,18 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.calculateEndPadding
-import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.windowInsetsTopHeight
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarDefaults
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.Scaffold
@@ -94,6 +99,7 @@ import com.crackmydroid.shared.ui.screens.LogScreen
 import com.crackmydroid.shared.ui.screens.PermissionsScreen
 import com.crackmydroid.shared.ui.screens.InstalledAppsScreen
 import com.crackmydroid.shared.ui.screens.PenTestingScreen
+import com.crackmydroid.shared.ui.screens.HelpScreen
 import org.koin.mp.KoinPlatform
 import com.crackmydroid.shared.presentation.components.LocalAccessibilityPrefs
 import com.crackmydroid.shared.presentation.components.AccessibilityPrefs
@@ -235,9 +241,10 @@ fun CrackMyDroidApp() {
                     selected.value = target
                 }
             }
-            ModalNavigationDrawer(
-                drawerState = drawerState,
-                drawerContent = {
+            Box(modifier = Modifier.fillMaxSize()) {
+                ModalNavigationDrawer(
+                    drawerState = drawerState,
+                    drawerContent = {
                     ModalDrawerSheet(
                     ) {
                         Column(
@@ -299,19 +306,19 @@ fun CrackMyDroidApp() {
                             )
                         }
                     }
-                }
-            ) {
+                    }
+                ) {
                 val showBottomBar = bottomScreens.contains(selected.value)
                 val navHeight = if (accessibilityPrefs.largeText) 68.dp else 56.dp
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
+                    contentWindowInsets = WindowInsets.safeDrawing,
                     bottomBar = {
                         if (showBottomBar) {
                             NavigationBar(
                                 modifier = Modifier
-                                    .navigationBarsPadding()
                                     .height(navHeight),
-                                windowInsets = WindowInsets(0, 0, 0, 0),
+                                windowInsets = NavigationBarDefaults.windowInsets,
                                 tonalElevation = 3.dp
                             ) {
                                 val itemIconSize = 20.dp
@@ -357,6 +364,7 @@ fun CrackMyDroidApp() {
                                 }
                             }
                             .background(MaterialTheme.colorScheme.background)
+                            .imePadding()
                     ) {
                         val reduceMotion = accessibilityPrefs.reduceMotion
                         AnimatedContent(
@@ -448,10 +456,23 @@ fun CrackMyDroidApp() {
                                     onHelp = { helpDialog.value = it },
                                     onMenu = openDrawer
                                 )
+                                Screen.Help -> HelpScreen(
+                                    padding = adjustedPadding,
+                                    onHelp = { helpDialog.value = it },
+                                    onMenu = openDrawer
+                                )
                             }
                         }
                     }
                 }
+                }
+                Spacer(
+                    modifier = Modifier
+                        .align(Alignment.TopCenter)
+                        .fillMaxWidth()
+                        .windowInsetsTopHeight(WindowInsets.statusBars)
+                        .background(MaterialTheme.colorScheme.background)
+                )
             }
         }
 

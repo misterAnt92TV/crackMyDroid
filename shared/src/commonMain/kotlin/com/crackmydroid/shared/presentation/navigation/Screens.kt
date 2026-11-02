@@ -11,6 +11,7 @@ import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.PrivacyTip
 import androidx.compose.material.icons.rounded.Apps
 import androidx.compose.material.icons.rounded.Security
+import androidx.compose.material.icons.automirrored.rounded.HelpOutline
 import androidx.compose.ui.graphics.vector.ImageVector
 
 sealed class Screen(val title: (com.crackmydroid.shared.i18n.Strings) -> String, val icon: ImageVector) {
@@ -24,6 +25,7 @@ sealed class Screen(val title: (com.crackmydroid.shared.i18n.Strings) -> String,
     object Permissions : Screen({ it.navPermissions }, Icons.Rounded.PrivacyTip)
     object InstalledApps : Screen({ it.navApk }, Icons.Rounded.Apps)
     object Pentest : Screen({ it.navPentest }, Icons.Rounded.Security)
+    object Help : Screen({ it.navHelp }, Icons.AutoMirrored.Rounded.HelpOutline)
 }
 
 val bottomScreens = listOf(
@@ -39,5 +41,6 @@ val drawerScreens = listOf(
     Screen.Activities,
     Screen.Root,
     Screen.Trick,
-    Screen.Log
+    Screen.Log,
+    Screen.Help
 )
