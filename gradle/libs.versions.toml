@@ -16,6 +16,7 @@ activityCompose = "1.8.2"
 junit = "4.13.2"
 sqldelight = "2.0.1"
 serialization = "1.6.3"
+kover = "0.9.1"
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
@@ -26,6 +27,7 @@ kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", versi
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 compose-mpp = { id = "org.jetbrains.compose", version.ref = "compose" }
 sqldelight = { id = "app.cash.sqldelight", version.ref = "sqldelight" }
+kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }
 
 [libraries]
 compose-runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose" }
