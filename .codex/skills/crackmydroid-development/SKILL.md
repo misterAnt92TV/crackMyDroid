@@ -29,6 +29,7 @@ Follow [references/feature-structure.md](references/feature-structure.md) for pa
 - Define repository contracts in `domain/repository`; inject implementations through Koin `platformModule()` or another composition root.
 - Add a mapper only for a meaningful boundary transformation. Do not create one-to-one wrappers with no domain or platform purpose.
 - Keep pure models in `domain/model`. Keep a `Params` data class nested in its UseCase only when it is private to that UseCase; otherwise create a dedicated model file.
+- Never hardcode user-visible strings in composables, ViewModels, UseCases, or UI models. Add every new UI string to `shared/src/commonMain/kotlin/com/crackmydroid/shared/i18n/Strings.kt` for all languages already supported by the project. Read strings from `LocalStrings.current` in Compose UI; pass or inject the `Strings` model into ViewModels, UseCases, and other non-composable logic according to the existing conventions. Update preview fixtures whenever a new user-visible string is introduced. Hardcoded technical constants that are not shown to users, such as identifiers, keys, codes, regular expressions, and protocol values, are allowed.
 - Use immutable state and explicit loading, success, empty, and error states when visible to the user. Use `BaseViewModel`, injectable dispatchers, and cancellable coroutines.
 
 ## Readability and comments
@@ -70,4 +71,5 @@ production code + meaningful unit tests + previews when applicable + Gradle vali
 - Use MockK and coroutine-test for JVM/Android collaborators; use platform-compatible fakes for Native and platform boundaries. Never require a real device, ADB instance, network, or user filesystem.
 - Run the narrowest applicable Gradle compile/test task from the platform matrix, then widen only for shared contract changes.
 - Before finishing, check preview fixtures, modified-file line counts, architectural dependency direction, meaningful comments for complex code, and `git diff --check`.
+- Verify that no new user-visible strings are hardcoded and that every new UI string is represented in `Strings.kt` for all currently supported languages.
 - Report production files and test files separately, chosen source set, dependencies/bindings added, test cases covered, test commands run, previews supplied, and any platform limitations.
