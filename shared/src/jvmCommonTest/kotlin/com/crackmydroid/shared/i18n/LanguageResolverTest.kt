@@ -3,6 +3,7 @@ package com.crackmydroid.shared.i18n
 import com.crackmydroid.shared.domain.model.AppLanguage
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class LanguageResolverTest {
     @Test
@@ -26,5 +27,44 @@ class LanguageResolverTest {
     fun unsupportedSystemLanguage_isPassedToStringsFallback() {
         assertEquals("xx", resolveLanguageCode(AppLanguage.SYSTEM, "xx-XX"))
         assertEquals("Settings", stringsFor(resolveLanguageCode(AppLanguage.SYSTEM, "xx-XX")).navSettings)
+    }
+
+    @Test
+    fun desktopStrings_areAvailableForEverySupportedLanguage() {
+        listOf("it", "en", "de", "es", "fr").forEach { languageCode ->
+            val strings = stringsFor(languageCode)
+
+            listOf(
+                strings.desktopAdbPickerTitle,
+                strings.desktopAdbPickerDescription,
+                strings.desktopAdbPathLabel,
+                strings.desktopAdbPathConfigured,
+                strings.desktopDetectDevices,
+                strings.desktopAdbSettings,
+                strings.desktopNoDevices,
+                strings.desktopSerialLabel,
+                strings.desktopStateLabel,
+                strings.desktopProductLabel,
+                strings.desktopDeviceLabel,
+                strings.desktopTransportLabel,
+                strings.desktopDeviceOffline,
+                strings.desktopDeviceUnauthorized,
+                strings.desktopDeviceNotReady,
+                strings.desktopChangeDevice,
+                strings.desktopRescan,
+                strings.desktopAdbSettingsDescription,
+                strings.desktopSave,
+                strings.desktopCancel
+            ).forEach { desktopString -> assertTrue(desktopString.isNotBlank()) }
+            assertTrue(strings.desktopDataSourceLabel.contains("%s"))
+        }
+    }
+
+    @Test
+    fun selectedLanguage_resolvesDesktopStringsImmediately() {
+        val strings = stringsFor(resolveLanguageCode(AppLanguage.GERMAN, "it-IT"))
+
+        assertEquals("ADB-Gerät auswählen", strings.desktopAdbPickerTitle)
+        assertEquals("Datenquelle: Snapshot", strings.desktopDataSourceLabel.format("Snapshot"))
     }
 }

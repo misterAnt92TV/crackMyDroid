@@ -59,6 +59,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.crackmydroid.shared.domain.model.AppTheme
+import com.crackmydroid.shared.domain.model.AppLanguage
 import com.crackmydroid.shared.domain.repository.OperationLogRepository
 import com.crackmydroid.shared.domain.usecase.GetIntroSeenUseCase
 import com.crackmydroid.shared.domain.usecase.SetIntroSeenUseCase
@@ -102,7 +103,7 @@ import org.koin.mp.KoinPlatform
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
-fun CrackMyDroidApp() {
+fun CrackMyDroidApp(onLanguageChanged: (AppLanguage) -> Unit = {}) {
     val selected: MutableState<Screen> = remember { mutableStateOf<Screen>(Screen.Home) }
     val drawerState: DrawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -154,6 +155,10 @@ fun CrackMyDroidApp() {
         if (!settingsState.value.featureHintsEnabled) {
             sectionHintDialog.value = null
         }
+    }
+
+    LaunchedEffect(settingsState.value.language) {
+        onLanguageChanged(settingsState.value.language)
     }
 
     val darkTheme = when (settingsState.value.theme) {

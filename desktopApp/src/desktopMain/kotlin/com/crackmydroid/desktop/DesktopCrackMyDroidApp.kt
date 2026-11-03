@@ -44,6 +44,7 @@ import com.crackmydroid.shared.domain.model.SnapshotMetadata
 import com.crackmydroid.shared.domain.repository.DeviceSessionController
 import com.crackmydroid.shared.domain.usecase.GetLanguageUseCase
 import com.crackmydroid.shared.i18n.LocalStrings
+import com.crackmydroid.shared.i18n.Strings
 import com.crackmydroid.shared.i18n.platformLanguage
 import com.crackmydroid.shared.i18n.resolveLanguageCode
 import com.crackmydroid.shared.i18n.stringsFor
@@ -131,7 +132,11 @@ fun DesktopCrackMyDroidApp() {
                         }
                     )
                     key(state.sessionVersion) {
-                        CrackMyDroidApp()
+                        CrackMyDroidApp(
+                            onLanguageChanged = { language ->
+                                strings = stringsFor(resolveLanguageCode(language, platformLanguage()))
+                            }
+                        )
                     }
                 }
             }
@@ -171,6 +176,7 @@ private fun DevicePickerContent(
     onRefresh: () -> Unit,
     onSelect: (ConnectedDevice) -> Unit
 ) {
+    val strings = LocalStrings.current
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -185,12 +191,12 @@ private fun DevicePickerContent(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Text(
-                text = "Seleziona device ADB",
+                text = strings.desktopAdbPickerTitle,
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold
             )
             Text(
-                text = "L'app desktop usa adb come bridge verso il dispositivo Android. Scegli prima il device, poi parte la scansione.",
+                text = strings.desktopAdbPickerDescription,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -198,25 +204,25 @@ private fun DevicePickerContent(
                 OutlinedTextField(
                     value = adbPath,
                     onValueChange = onAdbPathChange,
-                    label = { Text("Percorso adb") },
+                    label = { Text(strings.desktopAdbPathLabel) },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
             } else {
                 Text(
-                    text = "Il percorso adb è configurato. Puoi modificarlo solo da \"Impostazioni ADB\".",
+                    text = strings.desktopAdbPathConfigured,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 AppButton(
-                    text = "Rileva device",
+                    text = strings.desktopDetectDevices,
                     onClick = onRefresh,
                     leadingIcon = Icons.Filled.Refresh
                 )
                 AppButton(
-                    text = "Impostazioni ADB",
+                    text = strings.desktopAdbSettings,
                     onClick = onOpenAdbSettings,
                     variant = com.crackmydroid.shared.presentation.components.ButtonVariant.Tonal,
                     leadingIcon = Icons.Filled.Settings
@@ -245,7 +251,7 @@ private fun DevicePickerContent(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "Nessun device rilevato. Collega un device o avvia un emulator, poi premi \"Rileva device\".",
+                            text = strings.desktopNoDevices,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
@@ -281,11 +287,11 @@ private fun DevicePickerContent(
                                         fontWeight = FontWeight.SemiBold
                                     )
                                     Text(
-                                        text = "Serial: ${device.serial}",
+                                        text = "${strings.desktopSerialLabel}: ${device.serial}",
                                         style = MaterialTheme.typography.bodySmall
                                     )
                                     Text(
-                                        text = "State: ${device.state}",
+                                        text = "${strings.desktopStateLabel}: ${device.state}",
                                         style = MaterialTheme.typography.bodySmall,
                                         color = if (selectable) {
                                             MaterialTheme.colorScheme.primary
@@ -295,9 +301,9 @@ private fun DevicePickerContent(
                                     )
                                     Text(
                                         text = listOfNotNull(
-                                            device.product?.let { "Product: $it" },
-                                            device.device?.let { "Device: $it" },
-                                            device.transportId?.let { "Transport: $it" }
+                                            device.product?.let { "${strings.desktopProductLabel}: $it" },
+                                            device.device?.let { "${strings.desktopDeviceLabel}: $it" },
+                                            device.transportId?.let { "${strings.desktopTransportLabel}: $it" }
                                         ).joinToString("  |  "),
                                         style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -305,9 +311,9 @@ private fun DevicePickerContent(
                                     if (!selectable) {
                                         Text(
                                             text = when (device.state) {
-                                                "offline" -> "Il device e visibile ma offline."
-                                                "unauthorized" -> "Autorizza il computer sul device e riprova."
-                                                else -> "Stato non pronto per la scansione."
+                                                "offline" -> strings.desktopDeviceOffline
+                                                "unauthorized" -> strings.desktopDeviceUnauthorized
+                                                else -> strings.desktopDeviceNotReady
                                             },
                                             style = MaterialTheme.typography.bodySmall,
                                             color = MaterialTheme.colorScheme.error
@@ -333,6 +339,7 @@ private fun DesktopToolbarComponent(
     onChangeDevice: () -> Unit,
     onRescan: () -> Unit
 ) {
+    val strings = LocalStrings.current
     Surface(
         modifier = Modifier.fillMaxWidth(),
         tonalElevation = 3.dp
@@ -364,7 +371,7 @@ private fun DesktopToolbarComponent(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
-                        text = buildSourceLabel(dataSourceLabel, snapshotMetadata),
+                        text = buildSourceLabel(strings, dataSourceLabel, snapshotMetadata),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.primary
                     )
@@ -379,19 +386,19 @@ private fun DesktopToolbarComponent(
             }
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 AppButton(
-                    text = "Impostazioni ADB",
+                    text = strings.desktopAdbSettings,
                     onClick = onOpenAdbSettings,
                     variant = com.crackmydroid.shared.presentation.components.ButtonVariant.Tonal,
                     leadingIcon = Icons.Filled.Edit
                 )
                 AppButton(
-                    text = "Cambia device",
+                    text = strings.desktopChangeDevice,
                     onClick = onChangeDevice,
                     variant = com.crackmydroid.shared.presentation.components.ButtonVariant.Tonal,
                     leadingIcon = Icons.Filled.SwapHoriz
                 )
                 AppButton(
-                    text = "Riscansiona",
+                    text = strings.desktopRescan,
                     onClick = onRescan,
                     leadingIcon = Icons.Filled.Refresh
                 )
@@ -401,15 +408,16 @@ private fun DesktopToolbarComponent(
 }
 
 private fun buildSourceLabel(
+    strings: Strings,
     dataSourceLabel: String,
     snapshotMetadata: SnapshotMetadata?
 ): String {
-    if (snapshotMetadata == null) return "Sorgente dati: $dataSourceLabel"
+    if (snapshotMetadata == null) return strings.desktopDataSourceLabel.format(dataSourceLabel)
     val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
     val timestamp = Instant.ofEpochMilli(snapshotMetadata.createdAtEpochMs)
         .atZone(ZoneId.systemDefault())
         .format(formatter)
-    return "Sorgente dati: $dataSourceLabel • $timestamp • ${snapshotMetadata.sourceAppVersion}"
+    return "${strings.desktopDataSourceLabel.format(dataSourceLabel)} • $timestamp • ${snapshotMetadata.sourceAppVersion}"
 }
 
 @Composable
@@ -419,19 +427,20 @@ private fun AdbSettingsDialogComponent(
     onDismiss: () -> Unit,
     onSave: () -> Unit
 ) {
+    val strings = LocalStrings.current
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Impostazioni ADB") },
+        title = { Text(strings.desktopAdbSettings) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text(
-                    text = "Inserisci il percorso del binario adb da usare nella desktop app. Dopo il salvataggio il campo non verrà più mostrato nel picker iniziale.",
+                    text = strings.desktopAdbSettingsDescription,
                     style = MaterialTheme.typography.bodyMedium
                 )
                 OutlinedTextField(
                     value = adbPath,
                     onValueChange = onAdbPathChange,
-                    label = { Text("Percorso adb") },
+                    label = { Text(strings.desktopAdbPathLabel) },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
@@ -439,7 +448,7 @@ private fun AdbSettingsDialogComponent(
         },
         confirmButton = {
             AppButton(
-                text = "Salva",
+                text = strings.desktopSave,
                 onClick = onSave,
                 enabled = adbPath.isNotBlank(),
                 fullWidth = false
@@ -447,7 +456,7 @@ private fun AdbSettingsDialogComponent(
         },
         dismissButton = {
             AppButton(
-                text = "Annulla",
+                text = strings.desktopCancel,
                 onClick = onDismiss,
                 variant = com.crackmydroid.shared.presentation.components.ButtonVariant.Tonal,
                 fullWidth = false
