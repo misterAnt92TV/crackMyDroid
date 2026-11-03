@@ -60,7 +60,7 @@ dependencies {
     implementation(libs.koin.compose)
     implementation(libs.kermit)
     implementation(libs.rootbeer)
-    implementation("com.google.android.material:material:1.11.0")
+    implementation(libs.material)
     testImplementation(libs.junit4)
 }
 

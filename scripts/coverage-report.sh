@@ -15,8 +15,8 @@ Usage:
   scripts/coverage-report.sh [all|module1,module2,...] [--skip-tests]
 
 Moduli supportati:
-  shared      -> esegue test JVM/Desktop e Android Debug, con report Kover separati
-  androidApp  -> esegue Android unit test e report Kover Debug
+  shared      -> esegue test JVM/Desktop e Android Debug
+  androidApp  -> esegue Android unit test
 
 Esempi:
   scripts/coverage-report.sh all
@@ -26,7 +26,8 @@ Esempi:
 
 Output principali:
   - Report test per task: <modulo>/build/reports/tests/<task>/index.html
-  - Report coverage Kover: <modulo>/build/reports/kover/
+  - Report coverage Kover aggregato: build/reports/kover/html/index.html
+  - Report coverage XML aggregato: build/reports/kover/report.xml
   - Report summary: build/reports/coverage/coverage-summary.txt
 USAGE
 }
@@ -73,15 +74,15 @@ for module in $MODULES; do
     shared)
       TEST_TASKS="$TEST_TASKS :shared:desktopTest :shared:testDebugUnitTest"
       EXPECTED_REPORTS="$EXPECTED_REPORTS shared/build/reports/tests/desktopTest/index.html shared/build/reports/tests/testDebugUnitTest/index.html"
-      KOVER_TASKS="$KOVER_TASKS :shared:koverXmlReportJvm :shared:koverHtmlReportJvm :shared:koverXmlReportDebug :shared:koverHtmlReportDebug"
       ;;
     androidApp)
       TEST_TASKS="$TEST_TASKS :androidApp:testDebugUnitTest"
       EXPECTED_REPORTS="$EXPECTED_REPORTS androidApp/build/reports/tests/testDebugUnitTest/index.html"
-      KOVER_TASKS="$KOVER_TASKS :androidApp:koverXmlReportDebug :androidApp:koverHtmlReportDebug"
       ;;
   esac
 done
+
+KOVER_TASKS=":koverXmlReportCoverage :koverHtmlReportCoverage"
 
 SUMMARY_DIR="build/reports/coverage"
 SUMMARY_FILE="$SUMMARY_DIR/coverage-summary.txt"
@@ -183,12 +184,10 @@ apply_kover_html_theme() {
   fi
 }
 
-for module in $MODULES; do
-  for report in $(find "$module/build/reports/kover" -type f -name '*.html' 2>/dev/null); do
-    if ! apply_kover_html_theme "$report"; then
-      KOVER_EXIT=1
-    fi
-  done
+for report in $(find "build/reports/kover/html" -type f -name '*.html' 2>/dev/null); do
+  if ! apply_kover_html_theme "$report"; then
+    KOVER_EXIT=1
+  fi
 done
 
 {
@@ -214,48 +213,46 @@ append_if_dir_exists() {
   fi
 }
 
-append_kover_reports() {
-  label="$1"
-  dir="$2"
-  if [ -d "$dir" ]; then
-    echo "[$label] $dir" >> "$SUMMARY_FILE"
-    find "$dir" -maxdepth 1 -type f -name '*.xml' | sed 's#^#  - #' >> "$SUMMARY_FILE"
-    find "$dir" -mindepth 2 -maxdepth 2 -type f -name 'index.html' | sed 's#^#  - #' >> "$SUMMARY_FILE"
-    echo "" >> "$SUMMARY_FILE"
-  fi
-}
-
 for module in $MODULES; do
   append_if_dir_exists "$module tests" "$module/build/reports/tests"
-  append_kover_reports "$module kover" "$module/build/reports/kover"
 done
 
-COVERED_TOTAL=0
-MISSED_TOTAL=0
-XML_REPORTS_FOUND=0
+KOVER_HTML_REPORT="build/reports/kover/html/index.html"
+KOVER_XML_REPORT="build/reports/kover/report.xml"
 
-for module in $MODULES; do
-  for report in $(find "$module/build/reports/kover" -type f -name '*.xml' 2>/dev/null); do
-    COVERED="$(grep -o 'covered="[0-9]*"' "$report" | tail -n 1 | cut -d'"' -f2)"
-    MISSED="$(grep -o 'missed="[0-9]*"' "$report" | tail -n 1 | cut -d'"' -f2)"
-    if [ -n "$COVERED" ] && [ -n "$MISSED" ]; then
-      XML_REPORTS_FOUND=$((XML_REPORTS_FOUND + 1))
-      COVERED_TOTAL=$((COVERED_TOTAL + COVERED))
-      MISSED_TOTAL=$((MISSED_TOTAL + MISSED))
-      echo "  - $report (covered=$COVERED missed=$MISSED)" >> "$SUMMARY_FILE"
-    fi
-  done
-done
+{
+  echo "[kover aggregated]"
+  if [ -f "$KOVER_HTML_REPORT" ]; then
+    echo "  - OK   $KOVER_HTML_REPORT"
+  else
+    echo "  - MISS $KOVER_HTML_REPORT"
+  fi
+  if [ -f "$KOVER_XML_REPORT" ]; then
+    echo "  - OK   $KOVER_XML_REPORT"
+  else
+    echo "  - MISS $KOVER_XML_REPORT"
+  fi
+  echo ""
+} >> "$SUMMARY_FILE"
 
-TOTAL=$((COVERED_TOTAL + MISSED_TOTAL))
-if [ "$XML_REPORTS_FOUND" -eq 0 ] || [ "$TOTAL" -eq 0 ]; then
-  echo "ERRORE: nessun report Kover modulare con istruzioni rilevate." >&2
+COVERED_TOTAL="$(grep -o 'covered="[0-9]*"' "$KOVER_XML_REPORT" 2>/dev/null | tail -n 1 | cut -d'"' -f2)"
+MISSED_TOTAL="$(grep -o 'missed="[0-9]*"' "$KOVER_XML_REPORT" 2>/dev/null | tail -n 1 | cut -d'"' -f2)"
+
+if [ -z "$COVERED_TOTAL" ] || [ -z "$MISSED_TOTAL" ]; then
+  echo "ERRORE: report Kover aggregato senza istruzioni rilevate: $KOVER_XML_REPORT" >&2
   KOVER_EXIT=1
 else
+  TOTAL=$((COVERED_TOTAL + MISSED_TOTAL))
+  if [ "$TOTAL" -eq 0 ]; then
+    echo "ERRORE: report Kover aggregato senza istruzioni rilevate: $KOVER_XML_REPORT" >&2
+    KOVER_EXIT=1
+    exit "$KOVER_EXIT"
+  fi
   PCT=$(awk "BEGIN { printf \"%.2f\", ($COVERED_TOTAL/$TOTAL)*100 }")
   {
     echo ""
     echo "[coverage]"
+    echo "  - source: $KOVER_XML_REPORT"
     echo "  - covered instructions: $COVERED_TOTAL"
     echo "  - missed instructions: $MISSED_TOTAL"
     echo "  - instruction coverage: ${PCT}%"
