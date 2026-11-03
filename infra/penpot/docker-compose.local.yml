@@ -1,0 +1,7 @@
+services:
+  nginx:
+    profiles: ["disabled"]
+
+  penpot-frontend:
+    ports:
+      - "9001:8080"
