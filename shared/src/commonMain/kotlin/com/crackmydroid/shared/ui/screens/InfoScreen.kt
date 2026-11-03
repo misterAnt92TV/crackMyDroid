@@ -47,10 +47,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.crackmydroid.shared.i18n.LocalStrings
-import com.crackmydroid.shared.presentation.components.AppCard
-import com.crackmydroid.shared.presentation.components.AppText
 import com.crackmydroid.shared.presentation.components.ScrollToTopButton
 import com.crackmydroid.shared.presentation.components.SectionHeader
+import com.crackmydroid.shared.presentation.components.card.AppCard
+import com.crackmydroid.shared.presentation.components.text.AppText
 import com.crackmydroid.shared.ui.info.InfoViewModel
 import kotlinx.coroutines.launch
 

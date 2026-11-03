@@ -40,10 +40,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.crackmydroid.shared.i18n.LocalStrings
 import com.crackmydroid.shared.presentation.components.AppButton
-import com.crackmydroid.shared.presentation.components.AppText
-import com.crackmydroid.shared.presentation.components.ErrorDialog
+import com.crackmydroid.shared.presentation.components.ErrorDialogComponent
 import com.crackmydroid.shared.presentation.components.ScrollToTopButton
 import com.crackmydroid.shared.presentation.components.SectionHeader
+import com.crackmydroid.shared.presentation.components.text.AppText
 import com.crackmydroid.shared.ui.root.RootViewModel
 import kotlinx.coroutines.launch
 
@@ -276,5 +276,5 @@ fun RootScreen(
         }
     }
 
-    state.error?.let { ErrorDialog(it, viewModel::clearError) }
+    state.error?.let { ErrorDialogComponent(it, viewModel::clearError) }
 }

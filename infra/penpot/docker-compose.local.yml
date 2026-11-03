@@ -5,3 +5,7 @@ services:
   penpot-frontend:
     ports:
       - "9001:8080"
+
+  penpot-backend:
+    ports:
+      - "6060:6060"

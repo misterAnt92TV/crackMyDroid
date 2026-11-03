@@ -48,11 +48,11 @@ import androidx.compose.ui.unit.sp
 import com.crackmydroid.shared.i18n.LocalStrings
 import com.crackmydroid.shared.presentation.components.AppAccordion
 import com.crackmydroid.shared.presentation.components.AppButton
-import com.crackmydroid.shared.presentation.components.AppText
-import com.crackmydroid.shared.presentation.components.ErrorDialog
+import com.crackmydroid.shared.presentation.components.ErrorDialogComponent
 import com.crackmydroid.shared.presentation.components.ScrollToTopButton
-import com.crackmydroid.shared.presentation.components.SearchFieldWithHistory
+import com.crackmydroid.shared.presentation.components.SearchFieldWithHistoryComponent
 import com.crackmydroid.shared.presentation.components.SectionHeader
+import com.crackmydroid.shared.presentation.components.text.AppText
 import com.crackmydroid.shared.ui.logs.LogViewModel
 import kotlinx.coroutines.launch
 
@@ -102,7 +102,7 @@ fun LogScreen(
                     .padding(bottom = 8.dp)
             ) {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    SearchFieldWithHistory(
+                    SearchFieldWithHistoryComponent(
                         value = state.filter,
                         onValueChange = viewModel::setFilter,
                         onSubmit = viewModel::setFilter,
@@ -283,7 +283,7 @@ fun LogScreen(
         )
     }
 
-    state.error?.let { ErrorDialog(it, viewModel::clearError) }
+    state.error?.let { ErrorDialogComponent(it, viewModel::clearError) }
 }
 
 private fun extractLevel(line: String): Char? {

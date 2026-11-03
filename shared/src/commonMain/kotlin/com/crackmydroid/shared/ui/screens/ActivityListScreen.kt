@@ -55,16 +55,15 @@ import com.crackmydroid.shared.domain.model.favoriteKey
 import com.crackmydroid.shared.i18n.LocalStrings
 import com.crackmydroid.shared.presentation.components.AppAccordion
 import com.crackmydroid.shared.presentation.components.AppButton
-import com.crackmydroid.shared.presentation.components.AppCard
 import com.crackmydroid.shared.presentation.components.AppListItem
-import com.crackmydroid.shared.presentation.components.AppText
 import com.crackmydroid.shared.presentation.components.ButtonVariant
-import com.crackmydroid.shared.presentation.components.ErrorDialog
-import com.crackmydroid.shared.presentation.components.ExportDetailsCard
+import com.crackmydroid.shared.presentation.components.ErrorDialogComponent
 import com.crackmydroid.shared.presentation.components.PackageIcon
 import com.crackmydroid.shared.presentation.components.ScrollToTopButton
-import com.crackmydroid.shared.presentation.components.SearchFieldWithHistory
+import com.crackmydroid.shared.presentation.components.SearchFieldWithHistoryComponent
 import com.crackmydroid.shared.presentation.components.SectionHeader
+import com.crackmydroid.shared.presentation.components.card.AppCard
+import com.crackmydroid.shared.presentation.components.text.AppText
 import com.crackmydroid.shared.ui.activities.ActivityAppReport
 import com.crackmydroid.shared.ui.activities.ActivityListViewModel
 import kotlinx.coroutines.launch
@@ -133,7 +132,7 @@ fun ActivityListScreen(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        SearchFieldWithHistory(
+                        SearchFieldWithHistoryComponent(
                             value = state.filter,
                             onValueChange = { viewModel.setFilter(it) },
                             onSubmit = { viewModel.setFilter(it, trackUsage = true) },
@@ -391,7 +390,7 @@ fun ActivityListScreen(
     }
 
     state.error?.let {
-        ErrorDialog(message = it, onDismiss = viewModel::clearError)
+        ErrorDialogComponent(message = it, onDismiss = viewModel::clearError)
     }
 
     guidedLaunchTarget?.let { activity ->
@@ -628,4 +627,9 @@ private fun ActivityReportCard(
             }
         }
     }
+}
+
+@Composable
+fun ExportDetailsCard(path: String, title: String, summary: String, details: List<String>) {
+    TODO("Not yet implemented")
 }

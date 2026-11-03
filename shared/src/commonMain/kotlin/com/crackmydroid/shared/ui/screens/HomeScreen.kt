@@ -34,10 +34,10 @@ import com.crackmydroid.shared.domain.model.OperationEntry
 import com.crackmydroid.shared.domain.repository.OperationLogRepository
 import com.crackmydroid.shared.i18n.LocalStrings
 import com.crackmydroid.shared.presentation.components.AppAccordion
-import com.crackmydroid.shared.presentation.components.AppCard
-import com.crackmydroid.shared.presentation.components.AppText
 import com.crackmydroid.shared.presentation.components.PackageIcon
 import com.crackmydroid.shared.presentation.components.SectionHeader
+import com.crackmydroid.shared.presentation.components.card.AppCard
+import com.crackmydroid.shared.presentation.components.text.AppText
 
 @Composable
 fun HomeScreen(

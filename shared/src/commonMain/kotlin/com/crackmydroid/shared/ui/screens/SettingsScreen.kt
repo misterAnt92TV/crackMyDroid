@@ -40,13 +40,13 @@ import com.crackmydroid.shared.domain.model.AppLanguage
 import com.crackmydroid.shared.domain.model.AppTheme
 import com.crackmydroid.shared.i18n.LocalStrings
 import com.crackmydroid.shared.presentation.components.AppButton
-import com.crackmydroid.shared.presentation.components.AppText
 import com.crackmydroid.shared.presentation.components.ButtonVariant
-import com.crackmydroid.shared.presentation.components.CardBlock
-import com.crackmydroid.shared.presentation.components.ErrorDialog
+import com.crackmydroid.shared.presentation.components.ErrorDialogComponent
 import com.crackmydroid.shared.presentation.components.LocalAccessibilityPrefs
 import com.crackmydroid.shared.presentation.components.ScrollToTopButton
 import com.crackmydroid.shared.presentation.components.SectionHeader
+import com.crackmydroid.shared.presentation.components.card.CardBlock
+import com.crackmydroid.shared.presentation.components.text.AppText
 import com.crackmydroid.shared.ui.settings.SettingsActions
 import com.crackmydroid.shared.ui.settings.SettingsAppInfo
 import com.crackmydroid.shared.ui.settings.SettingsState
@@ -343,7 +343,7 @@ internal fun SettingsContent(
         )
     }
 
-    state.error?.let { ErrorDialog(it, actions.onClearError) }
+    state.error?.let { ErrorDialogComponent(it, actions.onClearError) }
 }
 
 @Composable

@@ -97,7 +97,7 @@ object SearchHistoryStore {
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun SearchFieldWithHistory(
+fun SearchFieldWithHistoryComponent(
     value: String,
     onValueChange: (String) -> Unit,
     onSubmit: (String) -> Unit,

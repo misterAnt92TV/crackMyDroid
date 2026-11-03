@@ -26,6 +26,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -41,6 +42,11 @@ import androidx.compose.ui.unit.dp
 import com.crackmydroid.shared.domain.model.ConnectedDevice
 import com.crackmydroid.shared.domain.model.SnapshotMetadata
 import com.crackmydroid.shared.domain.repository.DeviceSessionController
+import com.crackmydroid.shared.domain.usecase.GetLanguageUseCase
+import com.crackmydroid.shared.i18n.LocalStrings
+import com.crackmydroid.shared.i18n.platformLanguage
+import com.crackmydroid.shared.i18n.resolveLanguageCode
+import com.crackmydroid.shared.i18n.stringsFor
 import com.crackmydroid.shared.presentation.components.AppButton
 import com.crackmydroid.shared.ui.CrackMyDroidApp
 import kotlinx.coroutines.launch
@@ -54,10 +60,14 @@ fun DesktopCrackMyDroidApp() {
     val sessionController = remember {
         KoinPlatform.getKoin().get<DeviceSessionController>()
     }
+    val getLanguage = remember {
+        KoinPlatform.getKoin().get<GetLanguageUseCase>()
+    }
     val state by sessionController.state.collectAsState()
     val scope = rememberCoroutineScope()
     var adbPath by remember { mutableStateOf(state.adbPath) }
     var showAdbSettings by remember { mutableStateOf(false) }
+    var strings by remember { mutableStateOf(stringsFor(platformLanguage())) }
 
     LaunchedEffect(state.adbPath) {
         if (state.adbPath.isNotBlank() && adbPath != state.adbPath) {
@@ -66,15 +76,17 @@ fun DesktopCrackMyDroidApp() {
     }
 
     LaunchedEffect(Unit) {
+        strings = stringsFor(resolveLanguageCode(getLanguage(), platformLanguage()))
         if (state.availableDevices.isEmpty()) {
             sessionController.refreshDevices(null)
         }
     }
 
-    MaterialTheme {
+    CompositionLocalProvider(LocalStrings provides strings) {
+        MaterialTheme {
         Surface(modifier = Modifier.fillMaxSize()) {
             if (state.selectedDevice == null) {
-                DevicePickerScreen(
+                DevicePickerContent(
                     adbPath = adbPath,
                     adbPathConfigured = state.adbPathConfigured,
                     onAdbPathChange = { adbPath = it },
@@ -100,7 +112,7 @@ fun DesktopCrackMyDroidApp() {
                 )
             } else {
                 Column(modifier = Modifier.fillMaxSize()) {
-                    DesktopToolbar(
+                    DesktopToolbarComponent(
                         device = requireNotNull(state.selectedDevice),
                         dataSourceLabel = state.dataSourceLabel,
                         snapshotStatus = state.snapshotStatus,
@@ -126,7 +138,7 @@ fun DesktopCrackMyDroidApp() {
         }
 
         if (showAdbSettings) {
-            AdbSettingsDialog(
+            AdbSettingsDialogComponent(
                 adbPath = adbPath,
                 onAdbPathChange = { adbPath = it },
                 onDismiss = { showAdbSettings = false },
@@ -143,11 +155,12 @@ fun DesktopCrackMyDroidApp() {
                 }
             )
         }
+        }
     }
 }
 
 @Composable
-private fun DevicePickerScreen(
+private fun DevicePickerContent(
     adbPath: String,
     adbPathConfigured: Boolean,
     onAdbPathChange: (String) -> Unit,
@@ -311,7 +324,7 @@ private fun DevicePickerScreen(
 }
 
 @Composable
-private fun DesktopToolbar(
+private fun DesktopToolbarComponent(
     device: ConnectedDevice,
     dataSourceLabel: String,
     snapshotStatus: String?,
@@ -400,7 +413,7 @@ private fun buildSourceLabel(
 }
 
 @Composable
-private fun AdbSettingsDialog(
+private fun AdbSettingsDialogComponent(
     adbPath: String,
     onAdbPathChange: (String) -> Unit,
     onDismiss: () -> Unit,

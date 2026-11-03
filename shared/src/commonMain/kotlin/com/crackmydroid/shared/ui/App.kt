@@ -443,7 +443,7 @@ fun CrackMyDroidApp() {
                 var disableHintsForever by remember(target) { mutableStateOf(false) }
                 androidx.compose.material3.AlertDialog(
                     onDismissRequest = {},
-                    title = { Text("Suggerimenti • ${target.title(strings)}") },
+                    title = { Text(strings.sectionHintTitle.format(target.title(strings))) },
                     text = {
                         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                             Text(hint)
@@ -455,7 +455,7 @@ fun CrackMyDroidApp() {
                                     checked = disableHintsForever,
                                     onCheckedChange = { disableHintsForever = it }
                                 )
-                                Text("Non visualizzare più")
+                                Text(strings.sectionHintDisable)
                             }
                         }
                     },
@@ -469,7 +469,7 @@ fun CrackMyDroidApp() {
                                 sectionHintDialog.value = null
                             }
                         ) {
-                            Text("Ho capito")
+                            Text(strings.sectionHintConfirm)
                         }
                     },
                     dismissButton = {
