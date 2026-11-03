@@ -33,6 +33,21 @@ fun HelpScreen(
     onMenu: () -> Unit = {},
     onNavigate: (Screen) -> Unit
 ) {
+    HelpContent(
+        padding = padding,
+        onHelp = onHelp,
+        onMenu = onMenu,
+        onNavigate = onNavigate
+    )
+}
+
+@Composable
+internal fun HelpContent(
+    padding: androidx.compose.foundation.layout.PaddingValues,
+    onHelp: (String) -> Unit,
+    onMenu: () -> Unit = {},
+    onNavigate: (Screen) -> Unit
+) {
     val strings = LocalStrings.current
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
