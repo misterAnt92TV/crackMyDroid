@@ -1,0 +1,177 @@
+# CrackMyDroid — Specifica architetturale
+
+## 1. Scopo e principi
+
+CrackMyDroid è un'applicazione Kotlin Multiplatform per l'ispezione, l'analisi e il pen-testing di dispositivi Android. L'architettura deve permettere di condividere la logica di dominio e di presentazione mantenendo isolate le integrazioni con il sistema operativo, ADB e il filesystem.
+
+I principi guida sono:
+
+- **separazione delle responsabilità**: ogni layer ha un solo motivo principale per cambiare;
+- **dipendenze verso contratti**: il dominio usa interfacce, non implementazioni di piattaforma;
+- **common-first**: modelli, regole e use case restano condivisi quando non dipendono da API native;
+- **platform isolation**: Android, Desktop e iOS implementano gli adapter nei rispettivi source set;
+- **stato unidirezionale**: la UI invia azioni, il ViewModel aggiorna uno stato osservabile;
+- **testabilità**: le dipendenze esterne sono iniettate e sostituibili con fake o mock;
+- **nessuna dipendenza dalla UI nel dominio**: il dominio non conosce Compose, Activity o lifecycle Android.
+
+## 2. Moduli e source set
+
+| Modulo/source set | Responsabilità |
+|---|---|
+| `:shared` | Logica condivisa, dominio, UI Compose, contratti, DI e implementazioni platform-specific |
+| `:androidApp` | Entry point Android, lifecycle applicativo, Activity e integrazioni Android app-specific |
+| `:desktopApp` | Entry point JVM Desktop e composizione della finestra Desktop |
+| `iosApp` | Wrapper SwiftUI che ospita la UI condivisa |
+| `shared/src/commonMain` | Modelli, repository contract, use case, ViewModel, schermate e API comuni |
+| `shared/src/androidMain` | Repository Android, RootBeer, DataStore, Play Integrity, SQLDelight Android e adapter Android |
+| `shared/src/desktopMain` | ADB, processi JVM, import snapshot, filesystem e repository Desktop |
+| `shared/src/iosMain` | Adapter iOS, database driver e implementazioni `actual` |
+
+La struttura di test segue la stessa separazione: `commonTest` per logica portabile, `jvmCommonTest` per i test JVM condivisi, `desktopTest` per gli adapter Desktop e `androidApp/src/test`/`androidUnitTest` per Android.
+
+## 3. Layer logici
+
+### 3.1 Presentation
+
+Si trova principalmente in `com.crackmydroid.shared.ui` e `com.crackmydroid.shared.presentation`.
+
+Comprende:
+
+- schermate e componenti Compose;
+- ViewModel e relativo stato immutabile;
+- navigazione e gestione delle azioni UI;
+- operazioni di presentazione come log, tema e preferenze visuali.
+
+Il flusso è UDF/MVI:
+
+```text
+User interaction → Action/Event → ViewModel → State/StateFlow → Compose UI
+```
+
+I ViewModel usano `BaseViewModel` per possedere uno scope cancellabile. Il lavoro asincrono deve essere lanciato nello scope del ViewModel, con dispatcher forniti tramite `AppDispatchers`, e deve pubblicare stati coerenti per loading, successo ed errore.
+
+### 3.2 Domain
+
+Si trova in `com.crackmydroid.shared.domain` e contiene la logica indipendente dalla piattaforma:
+
+- `domain/model`: modelli, result wrapper, rischi e contratti dati;
+- `domain/repository`: interfacce dei repository;
+- `domain/usecase`: casi d'uso applicativi;
+- analizzatori e regole di classificazione.
+
+Un UseCase coordina una singola intenzione applicativa. Può validare input, chiamare uno o più repository, trasformare i dati e restituire un risultato di dominio. Non deve conoscere Compose, Koin, Activity, Context o API ADB.
+
+### 3.3 Data
+
+Il layer Data contiene adapter, persistenza, cache e accesso a sorgenti esterne. Le interfacce consumate dal dominio sono dichiarate in `commonMain`; le implementazioni sono selezionate per piattaforma.
+
+Esempi:
+
+- repository Android basati su PackageManager, DataStore, RootBeer, Play Integrity e SQLDelight;
+- repository Desktop alimentati da snapshot e ADB;
+- `RemoteDeviceSnapshotImporter` per convertire JSON in `DeviceScanSnapshot`;
+- `CachingRepositoryDecorator` e manutenzione cache;
+- repository di report, log, shell command e device info.
+
+Il Data layer traduce errori e formati esterni in tipi di dominio prima di esporli alla Presentation.
+
+### 3.4 Platform e infrastruttura
+
+Le integrazioni native sono confinate nei source set platform-specific e negli entry point applicativi. `expect/actual`, implementazioni Koin e adapter espliciti permettono di scegliere la variante senza contaminare il dominio.
+
+Le responsabilità trasversali includono:
+
+- Koin per la composizione delle dipendenze;
+- SQLDelight per il database locale;
+- kotlinx.serialization per snapshot e report JSON;
+- coroutines per concorrenza e cancellazione strutturata;
+- ADB e process bridge esclusivamente nel percorso Desktop/ADB.
+
+## 4. Flusso applicativo
+
+Il percorso nominale è:
+
+```text
+Compose Screen
+    ↓ evento pubblico
+ViewModel / StateFlow
+    ↓ invocazione
+UseCase
+    ↓ contratto
+Repository interface
+    ↓ implementazione Koin/expect-actual
+Platform adapter
+    ↓
+Android API, ADB, snapshot, SQLDelight o filesystem
+```
+
+La risposta percorre il cammino inverso sotto forma di risultato di dominio e nuovo stato. La UI non deve interrogare direttamente repository, database o API native.
+
+### Android
+
+Package Manager e servizi Android alimentano i repository Android. Cache e SQLDelight possono ridurre operazioni ripetute; `AndroidDeviceSnapshotCoordinator` produce lo snapshot condivisibile con Desktop.
+
+### Desktop
+
+La sessione seleziona un device tramite ADB, importa lo snapshot e costruisce i repository Desktop a partire dai dati disponibili. La Presentation e il Domain restano gli stessi dell'app condivisa.
+
+### iOS
+
+Il wrapper SwiftUI ospita la UI condivisa. Le integrazioni iOS restano negli adapter `iosMain`; la logica comune non deve assumere la presenza di API Android o JVM.
+
+## 5. Dependency Injection
+
+`shared/src/commonMain/kotlin/com/crackmydroid/shared/di/Koin.kt` compone:
+
+- `commonModule()` per gli UseCase comuni;
+- `presentationModule()` per dispatcher e ViewModel;
+- `platformModule()` come `expect`, con implementazioni nei source set di piattaforma.
+
+Le dipendenze devono essere costruite nel composition root e passate esplicitamente ai componenti. Un ViewModel non deve creare repository o avviare Koin autonomamente.
+
+## 6. Persistenza, cache e snapshot
+
+- SQLDelight fornisce il database locale tramite driver di piattaforma.
+- La cache è un'ottimizzazione e non deve cambiare il risultato funzionale quando è assente o invalidata.
+- Gli eventi di aggiornamento/rimozione pacchetto devono invalidare le cache interessate.
+- Gli snapshot sono serializzati con un contratto stabile e importati tramite un componente dedicato.
+- ADB è una boundary esterna: timeout, processo fallito, output non valido e device non disponibile devono essere trasformati in risultati o errori gestibili.
+
+## 7. Regole di dipendenza
+
+Sono consentite queste direzioni:
+
+```text
+Presentation → Domain
+Data implementation → Domain contracts
+Platform adapter → Data/Domain contracts
+Composition root → tutti i componenti concreti
+```
+
+Sono vietate:
+
+- Presentation → implementazione concreta Android/Desktop;
+- Domain → Compose, Android SDK, ADB, SQLDelight driver o filesystem;
+- UseCase → Koin globale;
+- Repository interface → dettagli del repository concreto;
+- modello di dominio → stato UI o annotazioni di framework non necessarie.
+
+## 8. Strategia di test
+
+| Area | Source set | Focus |
+|---|---|---|
+| Regole e modelli portabili | `commonTest` o `jvmCommonTest` | risultati, invarianti, serializzazione e casi limite |
+| ViewModel/UseCase JVM | `jvmCommonTest` | MockK, coroutine-test, stato e interazioni significative |
+| Adapter Desktop/ADB | `desktopTest` | parser, comandi, mapping errori e snapshot senza device reale |
+| Android app e adapter | `androidApp/src/test`/`androidUnitTest` | JUnit 4, MockK e contratti Android isolati |
+| iOS | `iosTest` | solo API compatibili Kotlin/Native |
+
+Ogni test deve proteggere un comportamento osservabile e coprire almeno il percorso nominale e un errore o limite rilevante. I test non devono dipendere da rete, device ADB reale o filesystem dell'utente.
+
+## 9. Decisioni e vincoli
+
+1. Il dominio condiviso è la fonte delle regole applicative; la piattaforma fornisce capacità, non decisioni di business.
+2. La cache non è una fonte di verità autonoma.
+3. Gli adapter esterni devono essere sostituibili nei test.
+4. Le modifiche a un contratto condiviso richiedono verifica di tutte le implementazioni platform-specific.
+5. Il codice iOS non eredita automaticamente le librerie JVM di test.

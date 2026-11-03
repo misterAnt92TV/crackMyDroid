@@ -13,6 +13,9 @@ Benvenuto nella documentazione tecnica di CrackMyDroid.
 | [`../README.md`](../README.md)             | Overview del progetto, quick start, stack tecnico (IT + EN)                                                                |
 | [`screens.md`](screens.md)                 | **Schermate UI** — mockup ASCII di tutte le schermate (Home, PenTesting, App, Permessi, Attività, Info, Settings, Desktop) |
 | [`architecture.md`](architecture.md)       | Architettura KMP, layer, flussi dati Android e Desktop, caching, DI, manifest analyzer                                     |
+| [`architecture-specification.md`](architecture-specification.md) | **Specifica architetturale** — principi, source set, layer, flussi, DI, persistenza, vincoli e strategia di test |
+| [`clean-code-structure.md`](clean-code-structure.md) | **Struttura Clean Code** — responsabilità, naming, SOLID, anti-pattern, workflow feature e checklist review |
+| [`clean-code-structure.drawio`](clean-code-structure.drawio) | Diagramma Draw.io della struttura Clean Code e delle dipendenze KMP |
 | [`developer-guide.md`](developer-guide.md) | Setup ambiente, comandi Gradle, struttura test, guida aggiunta feature, convenzioni, troubleshooting                       |
 | [`api-reference.md`](api-reference.md)     | Domain models, repository interfaces, use cases, ViewModels/state, caching API, utilities                                  |
 
@@ -43,6 +46,9 @@ Benvenuto nella documentazione tecnica di CrackMyDroid.
 ### Architettura e sviluppo
 
 - [Architettura KMP](architecture.md#visione-dinsieme--overview)
+- [Specifica architetturale](architecture-specification.md)
+- [Struttura Clean Code](clean-code-structure.md)
+- [Schema Clean Code Draw.io](clean-code-structure.drawio)
 - [Flusso dati Android](architecture.md#flusso-dati-android--android-data-flow)
 - [Flusso dati Desktop](architecture.md#flusso-dati-desktop--desktop-data-flow)
 - [Caching & Paginazione](architecture.md#caching--paginazione--caching--pagination)

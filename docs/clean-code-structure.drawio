@@ -1,0 +1,79 @@
+<mxfile host="app.diagrams.net" modified="2026-11-03T00:00:00.000Z" agent="Codex" version="24.7.17" type="device">
+  <diagram id="crackmydroid-clean-code" name="Clean Code Architecture">
+    <mxGraphModel dx="1600" dy="1000" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1000" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <mxCell id="title" value="CrackMyDroid — Clean Code / KMP Architecture" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=22;fontStyle=1;fontColor=#1F2937;" vertex="1" parent="1">
+          <mxGeometry x="40" y="20" width="700" height="40" as="geometry" />
+        </mxCell>
+
+        <mxCell id="android" value="Android Platform&#xa;androidApp + shared/androidMain&#xa;PackageManager · RootBeer · DataStore · SQLDelight" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DDEBFF;strokeColor=#4A86E8;fontColor=#1F2937;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="110" width="250" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="desktop" value="Desktop Platform&#xa;desktopApp + shared/desktopMain&#xa;ADB · process bridge · snapshot · filesystem" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DDEBFF;strokeColor=#4A86E8;fontColor=#1F2937;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="250" width="250" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="ios" value="iOS Platform&#xa;iosApp + shared/iosMain&#xa;SwiftUI wrapper · native adapters" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DDEBFF;strokeColor=#4A86E8;fontColor=#1F2937;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="390" width="250" height="100" as="geometry" />
+        </mxCell>
+
+        <mxCell id="presentation" value="Shared Presentation&#xa;commonMain/ui + presentation&#xa;Compose screens · ViewModel · StateFlow · UDF/MVI" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#34A853;fontColor=#1F2937;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="390" y="150" width="270" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="domain" value="Domain&#xa;commonMain/domain&#xa;Models · repository contracts · UseCases · analyzers" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontColor=#1F2937;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="760" y="150" width="270" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="data" value="Data / Platform Adapters&#xa;shared/androidMain + desktopMain + iosMain&#xa;Repository implementations · mappers · error translation" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4D6;strokeColor=#D79B00;fontColor=#1F2937;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="1130" y="150" width="300" height="120" as="geometry" />
+        </mxCell>
+
+        <mxCell id="infra" value="Infrastructure / Cross-cutting&#xa;Koin · AppDispatchers · SQLDelight · serialization&#xa;cache · logging · snapshot contracts" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDE7F6;strokeColor=#8E7CC3;fontColor=#1F2937;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="760" y="360" width="270" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="tests" value="Tests&#xa;commonTest · jvmCommonTest · desktopTest · androidUnitTest · iosTest&#xa;behavioral tests · MockK/JUnit where supported" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F4CCCC;strokeColor=#CC0000;fontColor=#1F2937;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="1130" y="360" width="300" height="110" as="geometry" />
+        </mxCell>
+
+        <mxCell id="androidToData" value="implements" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;strokeColor=#4A86E8;" edge="1" parent="1" source="android" target="data">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="desktopToData" value="implements" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;strokeColor=#4A86E8;" edge="1" parent="1" source="desktop" target="data">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="iosToData" value="implements" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;strokeColor=#4A86E8;" edge="1" parent="1" source="ios" target="data">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="presentationToDomain" value="uses" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;strokeColor=#34A853;" edge="1" parent="1" source="presentation" target="domain">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="dataToDomain" value="implements contracts" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;strokeColor=#D6B656;" edge="1" parent="1" source="data" target="domain">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="infraToPresentation" value="injects" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;strokeColor=#8E7CC3;dashed=1;" edge="1" parent="1" source="infra" target="presentation">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="infraToData" value="configures" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;strokeColor=#8E7CC3;dashed=1;" edge="1" parent="1" source="infra" target="data">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="testsToPresentation" value="verifies behavior" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;strokeColor=#CC0000;dashed=1;" edge="1" parent="1" source="tests" target="presentation">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="testsToDomain" value="verifies rules" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;strokeColor=#CC0000;dashed=1;" edge="1" parent="1" source="tests" target="domain">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="testsToData" value="isolates boundaries" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;strokeColor=#CC0000;dashed=1;" edge="1" parent="1" source="tests" target="data">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="legend" value="Legenda&#xa;Blu = piattaforma&#xa;Verde = presentation&#xa;Giallo = domain&#xa;Arancio = data/adapters&#xa;Viola tratteggiato = infrastruttura/DI&#xa;Rosso tratteggiato = test" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#666666;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="40" y="590" width="250" height="145" as="geometry" />
+        </mxCell>
+        <mxCell id="boundary" value="Dependency rule: Presentation → Domain ← Data implementations&#xa;Platform details stay outside the shared domain" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#666666;fontColor=#333333;fontStyle=2;" vertex="1" parent="1">
+          <mxGeometry x="390" y="590" width="1040" height="70" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
