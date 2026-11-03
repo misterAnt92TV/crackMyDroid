@@ -25,6 +25,21 @@ fun MoreScreen(
     headerHelp: String,
     onHelp: (String) -> Unit
 ) {
+    MoreContent(
+        padding = padding,
+        onNavigate = onNavigate,
+        headerHelp = headerHelp,
+        onHelp = onHelp
+    )
+}
+
+@Composable
+internal fun MoreContent(
+    padding: androidx.compose.foundation.layout.PaddingValues,
+    onNavigate: (Screen) -> Unit,
+    headerHelp: String,
+    onHelp: (String) -> Unit
+) {
     val strings = LocalStrings.current
     Column(
         modifier = Modifier

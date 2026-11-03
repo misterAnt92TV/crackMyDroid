@@ -53,6 +53,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.crackmydroid.shared.i18n.LocalStrings
 
 @Composable
 fun AppButton(
@@ -216,6 +217,7 @@ fun ExportDetailsCard(
         else -> normalizedPath.removeSuffix(fileName).trimEnd('/', '\\').ifBlank { "-" }
     }
 
+    val strings = LocalStrings.current
     AppCard(modifier = modifier.fillMaxWidth()) {
         AppText(
             text = title,
@@ -230,22 +232,22 @@ fun ExportDetailsCard(
             )
         }
         AppText(
-            text = "File: $fileName",
+            text = strings.exportFile.format(fileName),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurface
         )
         AppText(
-            text = "Formato: .$extension",
+            text = strings.exportFormat.format(extension),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.primary
         )
         AppText(
-            text = "Percorso: $normalizedPath",
+            text = strings.exportPath.format(normalizedPath),
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         AppText(
-            text = "Cartella: $directory",
+            text = strings.exportDirectory.format(directory),
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -509,7 +511,7 @@ fun SectionHeader(
                     .background(iconContainer),
                 colors = IconButtonDefaults.iconButtonColors(contentColor = MaterialTheme.colorScheme.primary)
             ) {
-                Icon(icon, contentDescription = "Help")
+                Icon(icon, contentDescription = LocalStrings.current.helpContentDescription)
             }
         },
         navigationIcon = {
@@ -522,7 +524,7 @@ fun SectionHeader(
                         .background(iconContainer),
                     colors = IconButtonDefaults.iconButtonColors(contentColor = MaterialTheme.colorScheme.primary)
                 ) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = LocalStrings.current.backContentDescription)
                 }
 
                 onMenu != null -> IconButton(
@@ -533,7 +535,7 @@ fun SectionHeader(
                         .background(iconContainer),
                     colors = IconButtonDefaults.iconButtonColors(contentColor = MaterialTheme.colorScheme.primary)
                 ) {
-                    Icon(Icons.Filled.Menu, contentDescription = "Menu")
+                    Icon(Icons.Filled.Menu, contentDescription = LocalStrings.current.menuContentDescription)
                 }
             }
         }
@@ -545,7 +547,7 @@ fun ErrorDialog(message: String, onDismiss: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
         confirmButton = {
-            Button(onClick = onDismiss) { Text("OK") }
+            Button(onClick = onDismiss) { Text(LocalStrings.current.confirm) }
         },
         text = { Text(message) }
     )
