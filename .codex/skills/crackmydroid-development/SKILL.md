@@ -46,6 +46,10 @@ Follow [references/feature-structure.md](references/feature-structure.md) for pa
 
 - For every new screen or material visual component, create deterministic preview data with no DI, real ViewModel, network, database, ADB, or filesystem dependency.
 - Use `CrackMyDroidTheme`, `LocalStrings`, and the existing `@AppScreenPreviews` annotation whenever applicable. It supplies phone/tablet and light/dark previews.
+- Keep each reusable component's `@AppComponentPreviews` functions in the same Kotlin file as the component they preview. Do not create package-level aggregate preview files; shared theme/local setup belongs in `presentation.preview.ComponentPreviewContainer`.
+- Use `@AppComponentPreviews` for isolated reusable components (light and dark variants) and reserve `@AppScreenPreviews` for complete screens (phone/tablet and light/dark variants). Keep preview functions private and place them after the production component.
+- When a KMP Android library declares previews, keep `ui-tooling-preview` available to its source set and add `debugImplementation(libs.compose.ui.tooling)` to that same module. The latter provides `ComposeViewAdapter` to Android Studio's renderer; an app module dependency alone does not cover previews opened from the library.
+- Preview fixtures must cover the normal state and every meaningful visual variant (for example expanded/collapsed, enabled/disabled, empty/error, accessibility preferences, or heterogeneous status values) while keeping callbacks no-op and data deterministic.
 - Add an explicit 7-inch preview (`widthDp = 600`, `heightDp = 960`) when the screen’s layout or behavior depends on that breakpoint.
 - Preview the normal state and each user-visible empty or error state. Keep preview functions separate from production screen logic when that improves readability.
 

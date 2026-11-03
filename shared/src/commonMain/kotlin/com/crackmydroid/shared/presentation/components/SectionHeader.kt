@@ -2,6 +2,7 @@ package com.crackmydroid.shared.presentation.components
 
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -27,6 +28,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.crackmydroid.shared.i18n.LocalStrings
+import com.crackmydroid.shared.presentation.preview.AppComponentPreviews
+import com.crackmydroid.shared.presentation.preview.ComponentPreviewContainer
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -118,4 +121,23 @@ fun SectionHeader(
             }
         }
     )
+}
+
+@AppComponentPreviews
+@Composable
+private fun SectionHeaderPreview() = ComponentPreviewContainer {
+    Column(verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(12.dp)) {
+        SectionHeader(
+            title = "Informazioni dispositivo",
+            help = "Mostra i dettagli hardware e software.",
+            onHelp = {},
+            onMenu = {}
+        )
+        SectionHeader(
+            title = "Dettagli analisi",
+            help = "Mostra il risultato dell'analisi.",
+            onHelp = {},
+            onBack = {}
+        )
+    }
 }

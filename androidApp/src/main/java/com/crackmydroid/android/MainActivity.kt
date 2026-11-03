@@ -17,6 +17,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
+import com.crackmydroid.shared.presentation.components.text.AppText
 import com.crackmydroid.shared.ui.CrackMyDroidApp
 
 class MainActivity : ComponentActivity() {
@@ -27,7 +28,7 @@ class MainActivity : ComponentActivity() {
             window.isNavigationBarContrastEnforced = false
         }
         val packageInventoryAccess = packageInventoryAccess(
-            sdkInt = android.os.Build.VERSION.SDK_INT,
+            sdkInt = Build.VERSION.SDK_INT,
             queryAllPackagesPermissionGranted = checkSelfPermission(
                 Manifest.permission.QUERY_ALL_PACKAGES
             ) == PackageManager.PERMISSION_GRANTED
@@ -71,15 +72,15 @@ class MainActivity : ComponentActivity() {
 private fun PackageInventoryDisclosure(onAcknowledge: () -> Unit) {
     AlertDialog(
         onDismissRequest = onAcknowledge,
-        title = { Text(stringResource(R.string.package_inventory_disclosure_title)) },
+        title = { AppText(stringResource(R.string.package_inventory_disclosure_title)) },
         text = {
-            Text(
+            AppText(
                 stringResource(R.string.package_inventory_disclosure_body)
             )
         },
         confirmButton = {
             Button(onClick = onAcknowledge) {
-                Text(stringResource(R.string.package_inventory_disclosure_confirm))
+                AppText(stringResource(R.string.package_inventory_disclosure_confirm))
             }
         }
     )
@@ -89,15 +90,15 @@ private fun PackageInventoryDisclosure(onAcknowledge: () -> Unit) {
 private fun PackageInventoryUnavailableDialog(onClose: () -> Unit) {
     AlertDialog(
         onDismissRequest = {},
-        title = { Text(stringResource(R.string.package_inventory_unavailable_title)) },
+        title = { AppText(stringResource(R.string.package_inventory_unavailable_title)) },
         text = {
-            Text(
+            AppText(
                 stringResource(R.string.package_inventory_unavailable_body)
             )
         },
         confirmButton = {
             Button(onClick = onClose) {
-                Text(stringResource(R.string.close))
+                AppText(stringResource(R.string.close))
             }
         }
     )

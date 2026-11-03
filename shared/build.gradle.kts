@@ -8,6 +8,10 @@ plugins {
     alias(libs.plugins.kover)
 }
 
+dependencies {
+    debugImplementation(libs.compose.ui.tooling)
+}
+
 kotlin {
     jvmToolchain(17)
     androidTarget()

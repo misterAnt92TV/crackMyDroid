@@ -7,6 +7,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import com.crackmydroid.shared.i18n.LocalStrings
 import com.crackmydroid.shared.presentation.components.text.AppText
+import com.crackmydroid.shared.presentation.preview.AppComponentPreviews
+import com.crackmydroid.shared.presentation.preview.ComponentPreviewContainer
 
 @Composable
 fun ExportDetailsCard(
@@ -67,4 +69,15 @@ fun ExportDetailsCard(
             )
         }
     }
+}
+
+@AppComponentPreviews
+@Composable
+private fun ExportDetailsCardPreview() = ComponentPreviewContainer {
+    ExportDetailsCard(
+        path = "/storage/emulated/0/Download/crackmydroid-report.txt",
+        title = "Dettagli export",
+        summary = "Report PenTest generato correttamente",
+        details = listOf("12 controlli eseguiti", "2 avvisi da verificare")
+    )
 }

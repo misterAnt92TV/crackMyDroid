@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -28,6 +29,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.crackmydroid.shared.presentation.components.card.AppCard
 import com.crackmydroid.shared.presentation.components.text.AppText
+import com.crackmydroid.shared.presentation.preview.AppComponentPreviews
+import com.crackmydroid.shared.presentation.preview.ComponentPreviewContainer
 
 @Composable
 fun AppAccordion(
@@ -122,4 +125,27 @@ fun AppAccordion(
             }
         }
     }
+}
+
+@AppComponentPreviews
+@Composable
+private fun AppAccordionPreview() = ComponentPreviewContainer {
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        AppAccordion(
+            title = "Controlli di sicurezza",
+            subtitle = "Verifica configurazioni e permessi",
+            meta = "3 risultati",
+            expanded = false,
+            onToggle = {},
+            leading = { Icon(Icons.Filled.Info, contentDescription = null) }
+        ) { AppText("Contenuto non visibile") }}
+        AppAccordion(
+            title = "Controlli di sicurezza",
+            subtitle = "Verifica configurazioni e permessi",
+            meta = "3 risultati",
+            expanded = true,
+            onToggle = {},
+            leading = { Icon(Icons.Filled.Info, contentDescription = null) }
+        ) { AppText("Il dispositivo non espone backup, debug o permessi inattesi.") }
+
 }

@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -16,6 +17,11 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.crackmydroid.shared.presentation.components.text.AppText
+import com.crackmydroid.shared.presentation.preview.AppComponentPreviews
+import com.crackmydroid.shared.presentation.preview.ComponentPreviewContainer
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.MoreVert
 
 @Composable
 fun AppListItem(
@@ -82,4 +88,17 @@ fun AppListItem(
         }
         trailing?.invoke()
     }
+}
+
+@AppComponentPreviews
+@Composable
+private fun AppListItemPreview() = ComponentPreviewContainer {
+    AppListItem(
+        title = "Configurazione di sicurezza con un titolo particolarmente lungo",
+        subtitle = "Descrizione del risultato disponibile per il dispositivo selezionato",
+        meta = "Aggiornato ora",
+        leading = { Icon(Icons.Filled.Info, contentDescription = null) },
+        trailing = { Icon(Icons.Filled.MoreVert, contentDescription = null) },
+        onClick = {}
+    )
 }

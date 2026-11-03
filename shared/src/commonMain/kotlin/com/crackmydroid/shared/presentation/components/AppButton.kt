@@ -15,6 +15,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
+import com.crackmydroid.shared.presentation.preview.AppComponentPreviews
+import com.crackmydroid.shared.presentation.preview.ComponentPreviewContainer
 
 
 @Composable
@@ -77,5 +81,18 @@ fun AppButton(
                 vertical = if (prefs.largeText) 16.dp else 14.dp
             )
         ) { content() }
+    }
+}
+
+@AppComponentPreviews
+@Composable
+private fun AppButtonPreview() = ComponentPreviewContainer {
+    androidx.compose.foundation.layout.Column(
+        verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(8.dp)
+    ) {
+        AppButton("Analizza dispositivo", onClick = {}, leadingIcon = Icons.Filled.Info)
+        AppButton("Azione secondaria", onClick = {}, variant = ButtonVariant.Secondary)
+        AppButton("Azione tonale", onClick = {}, variant = ButtonVariant.Tonal, fullWidth = false)
+        AppButton("Azione non disponibile", onClick = {}, enabled = false)
     }
 }
