@@ -7,6 +7,9 @@ import com.crackmydroid.shared.domain.model.ShellCommandResult
 import com.crackmydroid.shared.domain.repository.ActivityRepository
 import com.crackmydroid.shared.domain.repository.InstalledAppsRepository
 import com.crackmydroid.shared.domain.repository.ShellCommandRepository
+import com.crackmydroid.shared.domain.usecase.activities.GetActivitiesUseCase
+import com.crackmydroid.shared.domain.usecase.installedapps.ListInstalledAppsUseCase
+import com.crackmydroid.shared.domain.usecase.trick.ExecuteShellCommandUseCase
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk

@@ -5,7 +5,13 @@ services:
   penpot-frontend:
     ports:
       - "9001:8080"
+    environment:
+      # Local-only convenience: profiles become active without an SMTP verification email.
+      PENPOT_FLAGS: enable-registration enable-login-with-password disable-email-verification
 
   penpot-backend:
     ports:
       - "6060:6060"
+    environment:
+      # Never move this override to docker-compose.yml used by non-local deployments.
+      PENPOT_FLAGS: enable-registration enable-login-with-password disable-email-verification

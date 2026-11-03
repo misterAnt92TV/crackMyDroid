@@ -3,26 +3,26 @@ package com.crackmydroid.shared.ui.settings
 import com.crackmydroid.shared.domain.model.AppLanguage
 import com.crackmydroid.shared.domain.model.AppTheme
 import com.crackmydroid.shared.domain.model.ExportFormat
-import com.crackmydroid.shared.domain.usecase.GetExportFormatUseCase
-import com.crackmydroid.shared.domain.usecase.GetFeatureHintsEnabledUseCase
-import com.crackmydroid.shared.domain.usecase.GetHighContrastUseCase
-import com.crackmydroid.shared.domain.usecase.GetIntroSeenUseCase
-import com.crackmydroid.shared.domain.usecase.GetLanguageUseCase
-import com.crackmydroid.shared.domain.usecase.GetLargeTextUseCase
-import com.crackmydroid.shared.domain.usecase.GetReduceMotionUseCase
-import com.crackmydroid.shared.domain.usecase.GetSuggestionsEnabledUseCase
-import com.crackmydroid.shared.domain.usecase.GetThemeUseCase
-import com.crackmydroid.shared.domain.usecase.GetVerboseLogUseCase
-import com.crackmydroid.shared.domain.usecase.SetExportFormatUseCase
-import com.crackmydroid.shared.domain.usecase.SetFeatureHintsEnabledUseCase
-import com.crackmydroid.shared.domain.usecase.SetHighContrastUseCase
-import com.crackmydroid.shared.domain.usecase.SetIntroSeenUseCase
-import com.crackmydroid.shared.domain.usecase.SetLanguageUseCase
-import com.crackmydroid.shared.domain.usecase.SetLargeTextUseCase
-import com.crackmydroid.shared.domain.usecase.SetReduceMotionUseCase
-import com.crackmydroid.shared.domain.usecase.SetSuggestionsEnabledUseCase
-import com.crackmydroid.shared.domain.usecase.SetThemeUseCase
-import com.crackmydroid.shared.domain.usecase.SetVerboseLogUseCase
+import com.crackmydroid.shared.domain.usecase.settings.GetExportFormatUseCase
+import com.crackmydroid.shared.domain.usecase.settings.GetFeatureHintsEnabledUseCase
+import com.crackmydroid.shared.domain.usecase.settings.GetHighContrastUseCase
+import com.crackmydroid.shared.domain.usecase.settings.GetIntroSeenUseCase
+import com.crackmydroid.shared.domain.usecase.settings.GetLanguageUseCase
+import com.crackmydroid.shared.domain.usecase.settings.GetLargeTextUseCase
+import com.crackmydroid.shared.domain.usecase.settings.GetReduceMotionUseCase
+import com.crackmydroid.shared.domain.usecase.settings.GetSuggestionsEnabledUseCase
+import com.crackmydroid.shared.domain.usecase.settings.GetThemeUseCase
+import com.crackmydroid.shared.domain.usecase.settings.GetVerboseLogUseCase
+import com.crackmydroid.shared.domain.usecase.settings.SetExportFormatUseCase
+import com.crackmydroid.shared.domain.usecase.settings.SetFeatureHintsEnabledUseCase
+import com.crackmydroid.shared.domain.usecase.settings.SetHighContrastUseCase
+import com.crackmydroid.shared.domain.usecase.settings.SetIntroSeenUseCase
+import com.crackmydroid.shared.domain.usecase.settings.SetLanguageUseCase
+import com.crackmydroid.shared.domain.usecase.settings.SetLargeTextUseCase
+import com.crackmydroid.shared.domain.usecase.settings.SetReduceMotionUseCase
+import com.crackmydroid.shared.domain.usecase.settings.SetSuggestionsEnabledUseCase
+import com.crackmydroid.shared.domain.usecase.settings.SetThemeUseCase
+import com.crackmydroid.shared.domain.usecase.settings.SetVerboseLogUseCase
 import com.crackmydroid.shared.presentation.BaseViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -48,8 +48,8 @@ class SettingsViewModel(
     private val setFeatureHintsEnabled: SetFeatureHintsEnabledUseCase,
     private val getIntroSeen: GetIntroSeenUseCase,
     private val setIntroSeen: SetIntroSeenUseCase,
-    private val getLanguage: GetLanguageUseCase? = null,
-    private val setLanguage: SetLanguageUseCase? = null
+    private val getLanguage: GetLanguageUseCase,
+    private val setLanguage: SetLanguageUseCase
 ) : BaseViewModel() {
     private val _state = MutableStateFlow(SettingsState())
     val state: StateFlow<SettingsState> = _state
@@ -60,7 +60,7 @@ class SettingsViewModel(
             _state.update { it.copy(loading = true, error = null) }
             runCatching {
                 LoadedSettings(
-                    language = getLanguage?.invoke() ?: AppLanguage.SYSTEM,
+                    language = getLanguage(),
                     theme = getTheme(),
                     verbose = getVerbose(),
                     format = getExportFormat(),
@@ -102,7 +102,7 @@ class SettingsViewModel(
 
     fun selectLanguage(language: AppLanguage) {
         scope.launch {
-            runCatching { setLanguage?.invoke(language) }
+            runCatching { setLanguage(language) }
                 .onSuccess { _state.update { it.copy(language = language, error = null) } }
                 .onFailure { err -> _state.update { it.copy(error = err.message) } }
         }

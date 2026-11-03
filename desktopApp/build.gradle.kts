@@ -25,5 +25,6 @@ kotlin {
 compose.desktop {
     application {
         mainClass = "com.crackmydroid.desktop.MainKt"
+        jvmArgs += "--enable-native-access=ALL-UNNAMED"
     }
 }

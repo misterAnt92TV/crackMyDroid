@@ -2,12 +2,12 @@ package com.crackmydroid.shared.ui.permissions
 
 import com.crackmydroid.shared.domain.model.AppPermissionEntry
 import com.crackmydroid.shared.domain.model.PermissionRiskReport
-import com.crackmydroid.shared.domain.usecase.GetPermissionFavoritesUseCase
-import com.crackmydroid.shared.domain.usecase.ListPermissionsUseCase
-import com.crackmydroid.shared.domain.usecase.SetPermissionFavoritesUseCase
+import com.crackmydroid.shared.domain.usecase.permissions.ListPermissionsUseCase
+import com.crackmydroid.shared.domain.usecase.settings.SetPermissionFavoritesUseCase
 import com.crackmydroid.shared.domain.usecase.permissions.AnalyzePermissionRisksUseCase
 import com.crackmydroid.shared.domain.usecase.permissions.BuildPermissionsReportUseCase
 import com.crackmydroid.shared.domain.usecase.reports.ExportReportUseCase
+import com.crackmydroid.shared.domain.usecase.settings.GetPermissionFavoritesUseCase
 import com.crackmydroid.shared.presentation.BaseViewModel
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
@@ -22,8 +22,8 @@ class PermissionsViewModel(
     private val analyzePermissionRisks: AnalyzePermissionRisksUseCase,
     private val buildPermissionsReport: BuildPermissionsReportUseCase,
     private val reportExporter: ExportReportUseCase,
-    private val getFavorites: GetPermissionFavoritesUseCase? = null,
-    private val setFavorites: SetPermissionFavoritesUseCase? = null
+    private val getFavorites: GetPermissionFavoritesUseCase,
+    private val setFavorites: SetPermissionFavoritesUseCase
 ) : BaseViewModel() {
     private val _state = MutableStateFlow(PermissionsState())
     val state: StateFlow<PermissionsState> = _state
@@ -35,7 +35,7 @@ class PermissionsViewModel(
         cancelAutoRiskScan()
         scope.launch {
             runCatching {
-                getFavorites?.invoke().orEmpty()
+                getFavorites()
             }.onSuccess { favorites -> _state.update { it.copy(favorites = favorites) } }
             _state.update {
                 it.copy(
@@ -142,7 +142,7 @@ class PermissionsViewModel(
             )
             it.copy(favorites = favorites)
         }
-        scope.launch { setFavorites?.invoke(_state.value.favorites) }
+        scope.launch { setFavorites(_state.value.favorites) }
     }
 
     fun shareSingle(packageName: String) {

@@ -1,4 +1,4 @@
-package com.crackmydroid.shared.domain.usecase
+package com.crackmydroid.shared.domain.usecase.log
 
 import com.crackmydroid.shared.domain.repository.LogRepository
 

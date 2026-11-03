@@ -61,8 +61,8 @@ import androidx.compose.ui.unit.dp
 import com.crackmydroid.shared.domain.model.AppTheme
 import com.crackmydroid.shared.domain.model.AppLanguage
 import com.crackmydroid.shared.domain.repository.OperationLogRepository
-import com.crackmydroid.shared.domain.usecase.GetIntroSeenUseCase
-import com.crackmydroid.shared.domain.usecase.SetIntroSeenUseCase
+import com.crackmydroid.shared.domain.usecase.settings.GetIntroSeenUseCase
+import com.crackmydroid.shared.domain.usecase.settings.SetIntroSeenUseCase
 import com.crackmydroid.shared.i18n.LocalStrings
 import com.crackmydroid.shared.i18n.Strings
 import com.crackmydroid.shared.i18n.platformLanguage

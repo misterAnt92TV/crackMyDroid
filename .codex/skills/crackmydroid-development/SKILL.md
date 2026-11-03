@@ -25,6 +25,7 @@ Read [docs/architecture-specification.md](../../../docs/architecture-specificati
 Follow [references/feature-structure.md](references/feature-structure.md) for package layout and file organization.
 
 - Presentation invokes UseCases through a ViewModel; composables receive state and callbacks only.
+- Every ViewModel constructor dependency, including every UseCase, must be non-null and must not use a `null` default. Model optional behavior with an explicit non-null dependency; configure test fakes and mocks explicitly rather than omitting dependencies.
 - UseCases own business decisions, validation, and orchestration. Repository implementations own external access and error translation.
 - Define repository contracts in `domain/repository`; inject implementations through Koin `platformModule()` or another composition root.
 - Add a mapper only for a meaningful boundary transformation. Do not create one-to-one wrappers with no domain or platform purpose.

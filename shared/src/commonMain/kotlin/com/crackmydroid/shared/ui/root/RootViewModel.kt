@@ -1,7 +1,8 @@
 package com.crackmydroid.shared.ui.root
 
-import com.crackmydroid.shared.domain.usecase.CheckRootUseCase
+import com.crackmydroid.shared.domain.usecase.root.CheckRootUseCase
 import com.crackmydroid.shared.domain.usecase.reports.ExportReportUseCase
+import com.crackmydroid.shared.domain.usecase.root.CheckPlayIntegrityUseCase
 import com.crackmydroid.shared.i18n.Strings
 import com.crackmydroid.shared.presentation.BaseViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -11,7 +12,7 @@ import kotlinx.coroutines.launch
 
 class RootViewModel(
     private val checkRoot: CheckRootUseCase,
-    private val checkPlayIntegrity: com.crackmydroid.shared.domain.usecase.CheckPlayIntegrityUseCase,
+    private val checkPlayIntegrity: CheckPlayIntegrityUseCase,
     private val reportExporter: ExportReportUseCase
 ) : BaseViewModel() {
     private val _state = MutableStateFlow(RootState())

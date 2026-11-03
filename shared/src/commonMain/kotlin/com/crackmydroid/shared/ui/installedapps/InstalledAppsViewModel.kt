@@ -3,12 +3,12 @@ package com.crackmydroid.shared.ui.installedapps
 import com.crackmydroid.shared.domain.model.ExportFormat
 import com.crackmydroid.shared.domain.model.InstalledAppEntry
 import com.crackmydroid.shared.domain.repository.OperationLogRepository
-import com.crackmydroid.shared.domain.usecase.ExportApkUseCase
-import com.crackmydroid.shared.domain.usecase.GetExportFormatUseCase
-import com.crackmydroid.shared.domain.usecase.GetInstalledAppFavoritesUseCase
-import com.crackmydroid.shared.domain.usecase.ListInstalledAppsUseCase
-import com.crackmydroid.shared.domain.usecase.SetInstalledAppFavoritesUseCase
-import com.crackmydroid.shared.domain.usecase.ShareApkUseCase
+import com.crackmydroid.shared.domain.usecase.installedapps.ExportApkUseCase
+import com.crackmydroid.shared.domain.usecase.settings.GetExportFormatUseCase
+import com.crackmydroid.shared.domain.usecase.settings.GetInstalledAppFavoritesUseCase
+import com.crackmydroid.shared.domain.usecase.installedapps.ListInstalledAppsUseCase
+import com.crackmydroid.shared.domain.usecase.settings.SetInstalledAppFavoritesUseCase
+import com.crackmydroid.shared.domain.usecase.installedapps.ShareApkUseCase
 import com.crackmydroid.shared.domain.usecase.reports.ExportReportUseCase
 import com.crackmydroid.shared.presentation.BaseViewModel
 import com.crackmydroid.shared.presentation.operations.NoOpOperationLogRepository
@@ -23,8 +23,8 @@ class InstalledAppsViewModel(
     private val shareUseCase: ShareApkUseCase,
     private val getExportFormat: GetExportFormatUseCase,
     private val reportExporter: ExportReportUseCase,
-    private val getFavorites: GetInstalledAppFavoritesUseCase? = null,
-    private val setFavorites: SetInstalledAppFavoritesUseCase? = null,
+    private val getFavorites: GetInstalledAppFavoritesUseCase,
+    private val setFavorites: SetInstalledAppFavoritesUseCase,
     private val operationLogs: OperationLogRepository = NoOpOperationLogRepository
 ) : BaseViewModel() {
     private val _state = MutableStateFlow(InstalledAppsState())
@@ -35,7 +35,7 @@ class InstalledAppsViewModel(
     fun refresh() {
         scope.launch {
             runCatching {
-                getFavorites?.invoke().orEmpty()
+                getFavorites()
             }.onSuccess { favorites -> _state.update { it.copy(favorites = favorites) } }
             _state.update { it.copy(loading = true, error = null) }
             runCatching { listUseCase() }
@@ -166,7 +166,7 @@ class InstalledAppsViewModel(
             if (favs.contains(packageName)) favs.remove(packageName) else favs.add(packageName)
             it.copy(favorites = favs)
         }
-        scope.launch { setFavorites?.invoke(_state.value.favorites) }
+        scope.launch { setFavorites(_state.value.favorites) }
     }
 
     private suspend fun buildListReport(baseName: String): GeneratedReport {

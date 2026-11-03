@@ -4,10 +4,14 @@ import com.crackmydroid.shared.domain.model.ActivityEntry
 import com.crackmydroid.shared.domain.model.ActivityIntentRiskLevel
 import com.crackmydroid.shared.domain.model.ExportFormat
 import com.crackmydroid.shared.domain.repository.ReportFileRepository
-import com.crackmydroid.shared.domain.usecase.GetActivitiesUseCase
-import com.crackmydroid.shared.domain.usecase.GetExportFormatUseCase
-import com.crackmydroid.shared.domain.usecase.LaunchActivityUseCase
+import com.crackmydroid.shared.domain.usecase.activities.GetActivitiesUseCase
+import com.crackmydroid.shared.domain.usecase.settings.GetActivityFavoritesUseCase
+import com.crackmydroid.shared.domain.usecase.settings.GetActivityPackageFavoritesUseCase
+import com.crackmydroid.shared.domain.usecase.settings.GetExportFormatUseCase
+import com.crackmydroid.shared.domain.usecase.activities.LaunchActivityUseCase
 import com.crackmydroid.shared.domain.usecase.reports.ExportReportUseCase
+import com.crackmydroid.shared.domain.usecase.settings.SetActivityFavoritesUseCase
+import com.crackmydroid.shared.domain.usecase.settings.SetActivityPackageFavoritesUseCase
 import com.crackmydroid.shared.ui.activities.ActivityListViewModel
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -31,6 +35,33 @@ class ActivityListViewModelTest {
     private val dispatcher = StandardTestDispatcher()
     private fun reportExporter() = ExportReportUseCase(mockk<ReportFileRepository>(relaxed = true))
 
+    private fun activityViewModel(
+        getActivities: GetActivitiesUseCase,
+        launchActivity: LaunchActivityUseCase,
+        getExportFormat: GetExportFormatUseCase
+    ) = ActivityListViewModel(
+        getActivities = getActivities,
+        launchActivity = launchActivity,
+        getExportFormat = getExportFormat,
+        getFavorites = emptyActivityFavorites(),
+        setFavorites = mockk<SetActivityFavoritesUseCase>(relaxed = true),
+        getPackageFavorites = emptyPackageFavorites(),
+        setPackageFavorites = mockk<SetActivityPackageFavoritesUseCase>(relaxed = true),
+        reportExporter = reportExporter()
+    )
+
+    private fun emptyActivityFavorites(): GetActivityFavoritesUseCase {
+        val getFavorites = mockk<GetActivityFavoritesUseCase>()
+        coEvery { getFavorites() } returns emptySet()
+        return getFavorites
+    }
+
+    private fun emptyPackageFavorites(): GetActivityPackageFavoritesUseCase {
+        val getFavorites = mockk<GetActivityPackageFavoritesUseCase>()
+        coEvery { getFavorites() } returns emptySet()
+        return getFavorites
+    }
+
     @BeforeTest
     fun setUp() {
         Dispatchers.setMain(dispatcher)
@@ -48,7 +79,7 @@ class ActivityListViewModelTest {
         val format = mockk<GetExportFormatUseCase>()
         coEvery { get() } returns listOf(ActivityEntry("Label", "App", "pkg", "Act"))
         coEvery { format() } returns ExportFormat.TXT
-        val vm = ActivityListViewModel(get, launch, format, reportExporter = reportExporter())
+        val vm = activityViewModel(get, launch, format)
 
         vm.refresh()
         advanceUntilIdle()
@@ -72,7 +103,7 @@ class ActivityListViewModelTest {
             )
         )
         coEvery { format() } returns ExportFormat.TXT
-        val vm = ActivityListViewModel(get, launch, format, reportExporter = reportExporter())
+        val vm = activityViewModel(get, launch, format)
 
         vm.refresh()
         advanceUntilIdle()
@@ -91,7 +122,7 @@ class ActivityListViewModelTest {
         val format = mockk<GetExportFormatUseCase>()
         coEvery { get() } returns listOf(ActivityEntry("Label", "App", "pkg", "Act"))
         coEvery { format() } returns ExportFormat.TXT
-        val vm = ActivityListViewModel(get, launch, format, reportExporter = reportExporter())
+        val vm = activityViewModel(get, launch, format)
 
         vm.refresh()
         advanceUntilIdle()
@@ -128,7 +159,7 @@ class ActivityListViewModelTest {
             )
         } returns Result.success(Unit)
         coEvery { format() } returns ExportFormat.TXT
-        val vm = ActivityListViewModel(get, launch, format, reportExporter = reportExporter())
+        val vm = activityViewModel(get, launch, format)
 
         vm.refresh()
         advanceUntilIdle()
@@ -184,7 +215,7 @@ class ActivityListViewModelTest {
                 activityName = "com.other.app.MainActivity"
             )
         )
-        val vm = ActivityListViewModel(get, launch, format, reportExporter = reportExporter())
+        val vm = activityViewModel(get, launch, format)
 
         vm.refresh()
         advanceUntilIdle()

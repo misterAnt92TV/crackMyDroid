@@ -2,8 +2,8 @@ package com.crackmydroid.shared.ui.info
 
 import com.crackmydroid.shared.domain.model.DeviceInfo
 import com.crackmydroid.shared.domain.model.RootStatus
-import com.crackmydroid.shared.domain.usecase.CheckRootUseCase
-import com.crackmydroid.shared.domain.usecase.GetDeviceInfoUseCase
+import com.crackmydroid.shared.domain.usecase.root.CheckRootUseCase
+import com.crackmydroid.shared.domain.usecase.info.GetDeviceInfoUseCase
 import com.crackmydroid.shared.domain.usecase.reports.ExportReportUseCase
 import com.crackmydroid.shared.presentation.BaseViewModel
 import kotlinx.coroutines.flow.MutableStateFlow

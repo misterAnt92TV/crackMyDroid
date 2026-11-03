@@ -4,8 +4,8 @@ import com.crackmydroid.shared.domain.model.PlayIntegrityResult
 import com.crackmydroid.shared.domain.model.RootStatus
 import com.crackmydroid.shared.domain.repository.ReportFileRepository
 import com.crackmydroid.shared.domain.repository.RootCheckRepository
-import com.crackmydroid.shared.domain.usecase.CheckPlayIntegrityUseCase
-import com.crackmydroid.shared.domain.usecase.CheckRootUseCase
+import com.crackmydroid.shared.domain.usecase.root.CheckPlayIntegrityUseCase
+import com.crackmydroid.shared.domain.usecase.root.CheckRootUseCase
 import com.crackmydroid.shared.domain.usecase.reports.ExportReportUseCase
 import com.crackmydroid.shared.i18n.stringsFor
 import com.crackmydroid.shared.ui.root.RootViewModel

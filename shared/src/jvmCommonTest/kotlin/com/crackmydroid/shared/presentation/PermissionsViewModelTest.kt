@@ -2,12 +2,16 @@ package com.crackmydroid.shared.presentation
 
 import com.crackmydroid.shared.domain.model.AppPermissionEntry
 import com.crackmydroid.shared.domain.repository.ReportFileRepository
-import com.crackmydroid.shared.domain.usecase.ListPermissionsUseCase
+import com.crackmydroid.shared.domain.usecase.permissions.ListPermissionsUseCase
 import com.crackmydroid.shared.domain.usecase.permissions.AnalyzePermissionRisksUseCase
 import com.crackmydroid.shared.domain.usecase.permissions.BuildPermissionsReportUseCase
 import com.crackmydroid.shared.domain.usecase.reports.ExportReportUseCase
+import com.crackmydroid.shared.domain.usecase.settings.GetPermissionFavoritesUseCase
+import com.crackmydroid.shared.domain.usecase.settings.SetPermissionFavoritesUseCase
 import com.crackmydroid.shared.ui.permissions.PermissionsViewModel
 import io.mockk.coEvery
+import io.mockk.coJustRun
+import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -25,6 +29,12 @@ import kotlin.test.assertEquals
 class PermissionsViewModelTest {
     private val dispatcher = StandardTestDispatcher()
     private fun reportExporter() = ExportReportUseCase(mockk<ReportFileRepository>(relaxed = true))
+
+    private fun emptyFavorites(): GetPermissionFavoritesUseCase {
+        val getFavorites = mockk<GetPermissionFavoritesUseCase>()
+        coEvery { getFavorites() } returns emptySet()
+        return getFavorites
+    }
 
     @BeforeTest
     fun setUp() {
@@ -48,7 +58,9 @@ class PermissionsViewModelTest {
             listPermissions,
             analyzePermissionRisks,
             buildPermissionsReport,
-            reportExporter()
+            reportExporter(),
+            emptyFavorites(),
+            mockk(relaxed = true)
         )
 
         vm.refresh()
@@ -78,7 +90,9 @@ class PermissionsViewModelTest {
             listPermissions,
             analyzePermissionRisks,
             buildPermissionsReport,
-            reportExporter()
+            reportExporter(),
+            emptyFavorites(),
+            mockk(relaxed = true)
         )
 
         vm.refresh()
@@ -90,6 +104,34 @@ class PermissionsViewModelTest {
         val filtered = vm.filtered()
         assertEquals(1, filtered.size)
         assertEquals("pkg.risky", filtered.first().packageName)
+        vm.onCleared()
+    }
+
+    @Test
+    fun refreshLoadsFavoritesAndTogglePersistsThem() = runTest(dispatcher) {
+        val listPermissions = mockk<ListPermissionsUseCase>()
+        val getFavorites = mockk<GetPermissionFavoritesUseCase>()
+        val setFavorites = mockk<SetPermissionFavoritesUseCase>()
+        coEvery { listPermissions() } returns emptyList()
+        coEvery { getFavorites() } returns setOf("pkg.favorite")
+        coJustRun { setFavorites(any()) }
+        val analyzePermissionRisks = AnalyzePermissionRisksUseCase()
+        val vm = PermissionsViewModel(
+            listPermissions,
+            analyzePermissionRisks,
+            BuildPermissionsReportUseCase(analyzePermissionRisks),
+            reportExporter(),
+            getFavorites,
+            setFavorites
+        )
+
+        vm.refresh()
+        advanceUntilIdle()
+        vm.toggleFavorite("pkg.favorite")
+        advanceUntilIdle()
+
+        assertEquals(emptySet(), vm.state.value.favorites)
+        coVerify { setFavorites(emptySet()) }
         vm.onCleared()
     }
 }

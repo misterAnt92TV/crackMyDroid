@@ -35,7 +35,9 @@ Per generare una secret:
 openssl rand -hex 32
 ```
 
-In locale SMTP è opzionale (serve solo per inviti/reset password via email).
+In locale SMTP è opzionale. L'override `docker-compose.local.yml` disabilita la
+verifica email soltanto per `localhost`, così gli account appena creati diventano
+subito attivi. Non usare questo override in un deploy raggiungibile in rete.
 
 ## 2) Avvio con un solo comando
 
@@ -77,7 +79,42 @@ Log frontend:
 docker compose -f docker-compose.yml -f docker-compose.local.yml logs -f penpot-frontend
 ```
 
-## 6) Troubleshooting rapido
+Stato aggregato degli account locali (non stampa email o password):
+
+```bash
+./check-local-auth.sh
+```
+
+## Recupero di un account locale inattivo
+
+Se un account creato prima dell'override mostra `Email or password incorrect`,
+riattivalo senza resettare volumi o design:
+
+```bash
+./activate-local-account.sh you@example.com
+```
+
+Lo script modifica un solo profilo, solo se esiste, è inattivo, non bloccato,
+non eliminato e dispone di password. Non stampa email o credenziali.
+
+Se non ricordi l'indirizzo registrato, usa `--only-inactive` solo quando
+`./check-local-auth.sh` mostra esattamente un profilo inattivo:
+
+```bash
+./activate-local-account.sh --only-inactive
+```
+
+## 6) Applicare il nuovo profilo locale
+
+Dopo aver aggiornato questa configurazione, ricrea soltanto frontend e backend:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.local.yml up -d --force-recreate penpot-frontend penpot-backend
+```
+
+Poi esegui `./check-local-auth.sh` e accedi con la password già impostata.
+
+## 7) Troubleshooting rapido
 
 1. Verifica Docker Desktop avviato.
 2. Se `localhost:9001` è occupata:
@@ -89,7 +126,7 @@ lsof -i :9001
 3. Cambia porta in `docker-compose.local.yml` (es. `9010:8080`) e aggiorna `PENPOT_PUBLIC_URI` in `.env`.
 4. Riavvia con `./stop-local.sh && ./start-local.sh`.
 
-## 7) Backup locale (opzionale)
+## 8) Backup locale (opzionale)
 
 ```bash
 chmod +x scripts/*.sh

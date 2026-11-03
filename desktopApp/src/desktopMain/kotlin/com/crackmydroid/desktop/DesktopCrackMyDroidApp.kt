@@ -43,7 +43,7 @@ import com.crackmydroid.shared.domain.model.ConnectedDevice
 import com.crackmydroid.shared.domain.model.DeviceSessionSource
 import com.crackmydroid.shared.domain.model.SnapshotMetadata
 import com.crackmydroid.shared.domain.repository.DeviceSessionController
-import com.crackmydroid.shared.domain.usecase.GetLanguageUseCase
+import com.crackmydroid.shared.domain.usecase.settings.GetLanguageUseCase
 import com.crackmydroid.shared.i18n.LocalStrings
 import com.crackmydroid.shared.i18n.Strings
 import com.crackmydroid.shared.i18n.platformLanguage

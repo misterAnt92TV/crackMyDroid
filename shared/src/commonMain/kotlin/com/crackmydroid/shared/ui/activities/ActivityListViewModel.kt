@@ -8,13 +8,13 @@ import com.crackmydroid.shared.domain.model.ActivityIntentRiskLevel
 import com.crackmydroid.shared.domain.model.ActivityIntentRiskReport
 import com.crackmydroid.shared.domain.model.favoriteKey
 import com.crackmydroid.shared.domain.repository.OperationLogRepository
-import com.crackmydroid.shared.domain.usecase.GetActivitiesUseCase
-import com.crackmydroid.shared.domain.usecase.GetActivityFavoritesUseCase
-import com.crackmydroid.shared.domain.usecase.GetActivityPackageFavoritesUseCase
-import com.crackmydroid.shared.domain.usecase.GetExportFormatUseCase
-import com.crackmydroid.shared.domain.usecase.LaunchActivityUseCase
-import com.crackmydroid.shared.domain.usecase.SetActivityFavoritesUseCase
-import com.crackmydroid.shared.domain.usecase.SetActivityPackageFavoritesUseCase
+import com.crackmydroid.shared.domain.usecase.activities.GetActivitiesUseCase
+import com.crackmydroid.shared.domain.usecase.settings.GetActivityFavoritesUseCase
+import com.crackmydroid.shared.domain.usecase.settings.GetActivityPackageFavoritesUseCase
+import com.crackmydroid.shared.domain.usecase.settings.GetExportFormatUseCase
+import com.crackmydroid.shared.domain.usecase.activities.LaunchActivityUseCase
+import com.crackmydroid.shared.domain.usecase.settings.SetActivityFavoritesUseCase
+import com.crackmydroid.shared.domain.usecase.settings.SetActivityPackageFavoritesUseCase
 import com.crackmydroid.shared.domain.usecase.reports.ExportReportUseCase
 import com.crackmydroid.shared.presentation.BaseViewModel
 import com.crackmydroid.shared.presentation.operations.NoOpOperationLogRepository
@@ -31,10 +31,10 @@ class ActivityListViewModel(
     private val getActivities: GetActivitiesUseCase,
     private val launchActivity: LaunchActivityUseCase,
     private val getExportFormat: GetExportFormatUseCase,
-    private val getFavorites: GetActivityFavoritesUseCase? = null,
-    private val setFavorites: SetActivityFavoritesUseCase? = null,
-    private val getPackageFavorites: GetActivityPackageFavoritesUseCase? = null,
-    private val setPackageFavorites: SetActivityPackageFavoritesUseCase? = null,
+    private val getFavorites: GetActivityFavoritesUseCase,
+    private val setFavorites: SetActivityFavoritesUseCase,
+    private val getPackageFavorites: GetActivityPackageFavoritesUseCase,
+    private val setPackageFavorites: SetActivityPackageFavoritesUseCase,
     private val reportExporter: ExportReportUseCase,
     private val operationLogs: OperationLogRepository = NoOpOperationLogRepository
 ) : BaseViewModel() {
@@ -48,7 +48,7 @@ class ActivityListViewModel(
     fun refresh() {
         scope.launch {
             runCatching {
-                getFavorites?.invoke().orEmpty() to getPackageFavorites?.invoke().orEmpty()
+                getFavorites() to getPackageFavorites()
             }.onSuccess { (favorites, packages) ->
                 _state.update { it.copy(favorites = favorites, favoritePackages = packages) }
             }
@@ -154,14 +154,14 @@ class ActivityListViewModel(
         val favs = _state.value.favorites.toMutableSet()
         if (favs.contains(key)) favs.remove(key) else favs.add(key)
         recomputeAsync(_state.value.copy(favorites = favs))
-        scope.launch { setFavorites?.invoke(favs) }
+        scope.launch { setFavorites(favs) }
     }
 
     fun toggleFavoritePackage(packageName: String) {
         val favs = _state.value.favoritePackages.toMutableSet()
         if (favs.contains(packageName)) favs.remove(packageName) else favs.add(packageName)
         recomputeAsync(_state.value.copy(favoritePackages = favs))
-        scope.launch { setPackageFavorites?.invoke(favs) }
+        scope.launch { setPackageFavorites(favs) }
     }
 
     fun toggleExpanded(packageName: String) {

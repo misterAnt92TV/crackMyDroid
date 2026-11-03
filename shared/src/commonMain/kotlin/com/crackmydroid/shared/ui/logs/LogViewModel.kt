@@ -1,7 +1,7 @@
 package com.crackmydroid.shared.ui.logs
 
-import com.crackmydroid.shared.domain.usecase.ExportLogsUseCase
-import com.crackmydroid.shared.domain.usecase.GetLogsUseCase
+import com.crackmydroid.shared.domain.usecase.log.ExportLogsUseCase
+import com.crackmydroid.shared.domain.usecase.log.GetLogsUseCase
 import com.crackmydroid.shared.presentation.AppDispatchers
 import com.crackmydroid.shared.presentation.BaseViewModel
 import com.crackmydroid.shared.presentation.DefaultAppDispatchers

@@ -1,4 +1,4 @@
-package com.crackmydroid.shared.domain.usecase
+package com.crackmydroid.shared.domain.usecase.settings
 
 import com.crackmydroid.shared.domain.model.AppTheme
 import com.crackmydroid.shared.domain.repository.SettingsRepository

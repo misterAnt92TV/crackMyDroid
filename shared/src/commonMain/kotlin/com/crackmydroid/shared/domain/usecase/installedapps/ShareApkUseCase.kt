@@ -1,4 +1,4 @@
-package com.crackmydroid.shared.domain.usecase
+package com.crackmydroid.shared.domain.usecase.installedapps
 
 import com.crackmydroid.shared.domain.repository.InstalledAppsRepository
 

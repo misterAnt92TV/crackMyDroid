@@ -5,8 +5,8 @@ import com.crackmydroid.shared.domain.model.RootStatus
 import com.crackmydroid.shared.domain.repository.ReportFileRepository
 import com.crackmydroid.shared.domain.repository.DeviceInfoRepository
 import com.crackmydroid.shared.domain.repository.RootCheckRepository
-import com.crackmydroid.shared.domain.usecase.CheckRootUseCase
-import com.crackmydroid.shared.domain.usecase.GetDeviceInfoUseCase
+import com.crackmydroid.shared.domain.usecase.root.CheckRootUseCase
+import com.crackmydroid.shared.domain.usecase.info.GetDeviceInfoUseCase
 import com.crackmydroid.shared.domain.usecase.reports.ExportReportUseCase
 import com.crackmydroid.shared.ui.info.InfoViewModel
 import io.mockk.coEvery

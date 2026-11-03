@@ -1,4 +1,4 @@
-package com.crackmydroid.shared.domain.usecase
+package com.crackmydroid.shared.domain.usecase.root
 
 import com.crackmydroid.shared.domain.model.RootStatus
 import com.crackmydroid.shared.domain.repository.RootCheckRepository

@@ -1,4 +1,4 @@
-package com.crackmydroid.shared.domain.usecase
+package com.crackmydroid.shared.domain.usecase.trick
 
 import com.crackmydroid.shared.domain.model.ShellCommand
 import com.crackmydroid.shared.domain.repository.ShellCommandRepository
