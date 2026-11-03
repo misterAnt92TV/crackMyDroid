@@ -36,6 +36,7 @@ Follow [references/feature-structure.md](references/feature-structure.md) for pa
 ## Readability and comments
 
 - Name classes, functions, properties, parameters, and files by their domain intent and responsibility. Prefer `AnalyzePermissionRisksUseCase`, `loadInstalledApps`, and `isSnapshotAvailable` to ambiguous names such as `data`, `value`, `item`, `helper`, or `manager`.
+- Do not introduce fixed values as mutable variables or generic global `Constants`. Represent reused stable values with `const val`, a focused constants object, or an enum, and keep that declaration next to the contract or boundary that defines it (for example preference keys beside the settings contract and protocol identifiers beside the adapter). Do not extract one-off literals merely to reduce line length.
 - Prefer short functions, guard clauses, clear expressions, and well-named intermediate values over deep nesting or implicit transformations.
 - Extract a private function when it gives a non-trivial business, mapping, validation, or platform step a recognizable name.
 - Add comments for the **why** of complex logic: security invariants, algorithmic choices, cache behavior, concurrency, platform limitations, interoperability, and workarounds.
