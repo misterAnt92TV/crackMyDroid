@@ -101,7 +101,7 @@ fun InstalledAppsScreen(
                         ) {
                             Icon(
                                 imageVector = Icons.Filled.Refresh,
-                                contentDescription = "Aggiorna lista app"
+                                contentDescription = strings.refreshAppsContentDescription
                             )
                         }
                         IconButton(
@@ -111,7 +111,7 @@ fun InstalledAppsScreen(
                         ) {
                             Icon(
                                 imageVector = Icons.Filled.Share,
-                                contentDescription = "Condividi lista app"
+                                contentDescription = strings.shareAppsContentDescription
                             )
                         }
                     },
@@ -290,14 +290,14 @@ fun InstalledAppsScreen(
                         IconButton(onClick = { viewModel.share(app.packageName, false) }) {
                             Icon(
                                 imageVector = Icons.Filled.Share,
-                                contentDescription = "Condividi APK",
+                                contentDescription = strings.shareApkContentDescription,
                                 tint = MaterialTheme.colorScheme.primary
                             )
                         }
                         IconButton(onClick = { viewModel.toggleFavorite(app.packageName) }) {
                             Icon(
                                 imageVector = if (isFavorite) Icons.Filled.Star else Icons.Filled.StarBorder,
-                                contentDescription = "Preferito",
+                                contentDescription = strings.favoriteContentDescription,
                                 tint = if (isFavorite) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }

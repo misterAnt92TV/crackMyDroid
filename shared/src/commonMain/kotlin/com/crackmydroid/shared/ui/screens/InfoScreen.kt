@@ -47,6 +47,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.crackmydroid.shared.i18n.LocalStrings
+import com.crackmydroid.shared.i18n.Strings
 import com.crackmydroid.shared.presentation.components.ScrollToTopButton
 import com.crackmydroid.shared.presentation.components.SectionHeader
 import com.crackmydroid.shared.presentation.components.card.AppCard
@@ -56,22 +57,23 @@ import kotlinx.coroutines.launch
 
 private fun buildInfoContent(
     info: com.crackmydroid.shared.domain.model.DeviceInfo,
-    root: com.crackmydroid.shared.domain.model.RootStatus?
+    root: com.crackmydroid.shared.domain.model.RootStatus?,
+    strings: Strings,
 ): String =
     buildString {
-        val brand = info.brand ?: "n/d"
-        val device = info.device ?: "n/d"
-        val product = info.product ?: "n/d"
-        val buildId = info.buildId ?: "n/d"
-        val display = info.buildDisplay ?: "n/d"
-        val fingerprint = info.buildFingerprint ?: "n/d"
-        val radio = info.radio ?: "n/d"
-        val kernel = info.kernelVersion ?: "n/d"
-        val battery = info.batteryLevel?.let { "$it%" } ?: "n/d"
-        val screen = info.screenResolution ?: "n/d"
-        val density = info.densityDpi?.toString() ?: "n/d"
-        val imei = info.imei ?: "n/d"
-        val serial = info.serial ?: "n/d"
+        val brand = info.brand ?: strings.notAvailable
+        val device = info.device ?: strings.notAvailable
+        val product = info.product ?: strings.notAvailable
+        val buildId = info.buildId ?: strings.notAvailable
+        val display = info.buildDisplay ?: strings.notAvailable
+        val fingerprint = info.buildFingerprint ?: strings.notAvailable
+        val radio = info.radio ?: strings.notAvailable
+        val kernel = info.kernelVersion ?: strings.notAvailable
+        val battery = info.batteryLevel?.let { "$it%" } ?: strings.notAvailable
+        val screen = info.screenResolution ?: strings.notAvailable
+        val density = info.densityDpi?.toString() ?: strings.notAvailable
+        val imei = info.imei ?: strings.notAvailable
+        val serial = info.serial ?: strings.notAvailable
 
         appendLine("Device info")
         appendLine("Produttore: ${info.manufacturer}")
@@ -104,7 +106,7 @@ private fun buildInfoContent(
         appendLine("Serial: $serial")
         if (!info.systemPropDump.isNullOrBlank()) {
             appendLine()
-            appendLine("System properties source: ${info.systemPropSource ?: "n/d"}")
+        appendLine("System properties source: ${info.systemPropSource ?: strings.notAvailable}")
             appendLine("System properties dump:")
             appendLine(info.systemPropDump)
         }
@@ -176,7 +178,7 @@ fun InfoScreen(
                             IconButton(
                                 onClick = {
                                     state.info?.let { info ->
-                                        val content = buildInfoContent(info, root)
+                                        val content = buildInfoContent(info, root, strings)
                                         clipboard.setText(AnnotatedString(content))
                                         viewModel.share(content)
                                     }
@@ -184,18 +186,18 @@ fun InfoScreen(
                             ) {
                                 Icon(
                                     Icons.Filled.Share,
-                                    contentDescription = "Condividi info dispositivo",
+                                    contentDescription = strings.shareDeviceInfoContentDescription,
                                     tint = MaterialTheme.colorScheme.primary
                                 )
                             }
                         }
-                        InfoRow("Produttore", info.manufacturer)
-                        InfoRow("Modello", info.model)
-                        InfoRow("Brand", info.brand ?: "n/d")
-                        InfoRow("Device", info.device ?: "n/d")
-                        InfoRow("Prodotto", info.product ?: "n/d")
-                        InfoRow("IMEI", info.imei ?: "n/d")
-                        InfoRow("Serial", info.serial ?: "n/d")
+                        InfoRow("Produttore", info.manufacturer ?: strings.notAvailable)
+                        InfoRow("Modello", info.model ?: strings.notAvailable)
+                        InfoRow("Brand", info.brand ?: strings.notAvailable)
+                        InfoRow("Device", info.device ?: strings.notAvailable)
+                        InfoRow("Prodotto", info.product ?: strings.notAvailable)
+                        InfoRow("IMEI", info.imei ?: strings.notAvailable)
+                        InfoRow("Serial", info.serial ?: strings.notAvailable)
 
                         HorizontalDivider()
                         Row(
@@ -214,15 +216,15 @@ fun InfoScreen(
                                 fontWeight = FontWeight.SemiBold
                             )
                         }
-                        InfoRow("Android", info.androidVersion)
-                        InfoRow("Patch", info.securityPatch)
-                        InfoRow("Build ID", info.buildId ?: "n/d")
-                        InfoRow("Display", info.buildDisplay ?: "n/d")
-                        InfoRow("Fingerprint", info.buildFingerprint ?: "n/d")
-                        InfoRow("Radio", info.radio ?: "n/d")
-                        InfoRow("Kernel", info.kernelVersion ?: "n/d")
-                        InfoRow(strings.hardware, info.hardware)
-                        InfoRow("Bootloader", info.bootloader)
+                        InfoRow("Android", info.androidVersion ?: strings.notAvailable)
+                        InfoRow("Patch", info.securityPatch ?: strings.notAvailable)
+                        InfoRow("Build ID", info.buildId ?: strings.notAvailable)
+                        InfoRow("Display", info.buildDisplay ?: strings.notAvailable)
+                        InfoRow("Fingerprint", info.buildFingerprint ?: strings.notAvailable)
+                        InfoRow("Radio", info.radio ?: strings.notAvailable)
+                        InfoRow("Kernel", info.kernelVersion ?: strings.notAvailable)
+                        InfoRow(strings.hardware, info.hardware ?: strings.notAvailable)
+                        InfoRow("Bootloader", info.bootloader ?: strings.notAvailable)
 
                         HorizontalDivider()
                         Row(
@@ -241,7 +243,7 @@ fun InfoScreen(
                                 fontWeight = FontWeight.SemiBold
                             )
                         }
-                        InfoRow("Rete", info.networkType)
+                        InfoRow("Rete", info.networkType ?: strings.notAvailable)
                         InfoRow("USB Debug", if (info.adbEnabled) "Attivo" else "Disattivo")
                         InfoRow(
                             "Opzioni sviluppatore",
@@ -271,15 +273,15 @@ fun InfoScreen(
                                 fontWeight = FontWeight.SemiBold
                             )
                         }
-                        InfoRow("Schermo", info.screenResolution ?: "n/d")
-                        InfoRow("Densità", info.densityDpi?.let { "${it} dpi" } ?: "n/d")
+                        InfoRow("Schermo", info.screenResolution ?: strings.notAvailable)
+                        InfoRow("Densità", info.densityDpi?.let { "${it} dpi" } ?: strings.notAvailable)
                         InfoRow(
                             "RAM totale",
-                            info.totalMemory?.let { "${it / 1024 / 1024} MB" } ?: "n/d")
+                            info.totalMemory?.let { "${it / 1024 / 1024} MB" } ?: strings.notAvailable)
                         InfoRow(
                             "RAM libera",
-                            info.freeMemory?.let { "${it / 1024 / 1024} MB" } ?: "n/d")
-                        InfoRow("Batteria", info.batteryLevel?.let { "$it%" } ?: "n/d")
+                            info.freeMemory?.let { "${it / 1024 / 1024} MB" } ?: strings.notAvailable)
+                        InfoRow("Batteria", info.batteryLevel?.let { "$it%" } ?: strings.notAvailable)
                         Spacer(modifier = Modifier.height(16.dp))
                     }
                 }
@@ -292,7 +294,7 @@ fun InfoScreen(
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.SemiBold
                             )
-                            InfoRow("Sorgente", info.systemPropSource ?: "n/d")
+                            InfoRow("Sorgente", info.systemPropSource ?: strings.notAvailable)
                             SelectionContainer {
                                 Column(
                                     modifier = Modifier

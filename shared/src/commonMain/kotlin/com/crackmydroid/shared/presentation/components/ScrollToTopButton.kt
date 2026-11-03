@@ -11,6 +11,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import com.crackmydroid.shared.i18n.LocalStrings
 import com.crackmydroid.shared.presentation.preview.AppComponentPreviews
 import com.crackmydroid.shared.presentation.preview.ComponentPreviewContainer
 
@@ -19,9 +20,10 @@ fun ScrollToTopButton(
     visible: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    contentDescription: String = "Torna all'inizio"
+    contentDescription: String? = null
 ) {
     val reduceMotion = LocalAccessibilityPrefs.current.reduceMotion
+    val strings = LocalStrings.current
     AnimatedVisibility(
         visible = visible,
         modifier = modifier,
@@ -35,7 +37,7 @@ fun ScrollToTopButton(
         ) {
             Icon(
                 imageVector = Icons.Filled.KeyboardArrowUp,
-                contentDescription = contentDescription
+                contentDescription = contentDescription ?: strings.scrollToTopContentDescription
             )
         }
     }

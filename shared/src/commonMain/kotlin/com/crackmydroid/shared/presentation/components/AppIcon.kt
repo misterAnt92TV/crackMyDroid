@@ -27,7 +27,8 @@ fun PackageIcon(
     modifier: Modifier = Modifier,
     size: Dp = 44.dp,
     backgroundColor: androidx.compose.ui.graphics.Color = MaterialTheme.colorScheme.secondaryContainer,
-    contentPadding: Dp = 8.dp
+    contentPadding: Dp = 8.dp,
+    contentDescription: String? = packageName
 ) {
     val painter = rememberPackageIcon(packageName)
     val tint = MaterialTheme.colorScheme.onSurfaceVariant
@@ -40,7 +41,7 @@ fun PackageIcon(
         if (painter != null) {
             Image(
                 painter = painter,
-                contentDescription = packageName,
+                contentDescription = contentDescription,
                 modifier = Modifier
                     .padding(contentPadding)
                     .size(size - contentPadding * 2)
@@ -48,7 +49,7 @@ fun PackageIcon(
         } else {
             androidx.compose.material3.Icon(
                 imageVector = Icons.Filled.Android,
-                contentDescription = packageName,
+                contentDescription = contentDescription,
                 tint = tint,
                 modifier = Modifier
                     .padding(contentPadding)

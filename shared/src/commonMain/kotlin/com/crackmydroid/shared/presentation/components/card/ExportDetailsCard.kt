@@ -14,7 +14,7 @@ import com.crackmydroid.shared.presentation.preview.ComponentPreviewContainer
 fun ExportDetailsCard(
     path: String,
     modifier: Modifier = Modifier,
-    title: String = "Dettagli export",
+    title: String? = null,
     summary: String? = null,
     details: List<String> = emptyList()
 ) {
@@ -30,7 +30,7 @@ fun ExportDetailsCard(
     val strings = LocalStrings.current
     AppCard(modifier = modifier.fillMaxWidth()) {
         AppText(
-            text = title,
+            text = title ?: strings.exportDetailsTitle,
             style = MaterialTheme.typography.titleSmall,
             fontWeight = FontWeight.SemiBold
         )

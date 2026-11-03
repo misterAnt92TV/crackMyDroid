@@ -4,13 +4,28 @@ import com.crackmydroid.shared.domain.model.AppLanguage
 import com.crackmydroid.shared.domain.model.AppTheme
 import com.crackmydroid.shared.domain.model.ExportFormat
 import com.crackmydroid.shared.domain.repository.SettingsRepository
+import com.crackmydroid.shared.data.settings.SettingsPreferenceKeys.ADB_PATH
+import com.crackmydroid.shared.data.settings.SettingsPreferenceKeys.ACTIVITY_FAVORITES
+import com.crackmydroid.shared.data.settings.SettingsPreferenceKeys.ACTIVITY_PACKAGE_FAVORITES
+import com.crackmydroid.shared.data.settings.SettingsPreferenceKeys.EXPORT_FORMAT
+import com.crackmydroid.shared.data.settings.SettingsPreferenceKeys.FEATURE_HINTS_ENABLED
+import com.crackmydroid.shared.data.settings.SettingsPreferenceKeys.HIGH_CONTRAST
+import com.crackmydroid.shared.data.settings.SettingsPreferenceKeys.INSTALLED_APP_FAVORITES
+import com.crackmydroid.shared.data.settings.SettingsPreferenceKeys.INTRO_SEEN
+import com.crackmydroid.shared.data.settings.SettingsPreferenceKeys.LARGE_TEXT
+import com.crackmydroid.shared.data.settings.SettingsPreferenceKeys.LANGUAGE
+import com.crackmydroid.shared.data.settings.SettingsPreferenceKeys.PERMISSION_FAVORITES
+import com.crackmydroid.shared.data.settings.SettingsPreferenceKeys.REDUCE_MOTION
+import com.crackmydroid.shared.data.settings.SettingsPreferenceKeys.SUGGESTIONS_ENABLED
+import com.crackmydroid.shared.data.settings.SettingsPreferenceKeys.THEME
+import com.crackmydroid.shared.data.settings.SettingsPreferenceKeys.VERBOSE_LOG
 import java.util.prefs.Preferences
 
 class SettingsRepositoryDesktop : SettingsRepository {
     private val prefs = Preferences.userRoot().node("com.crackmydroid.desktop")
-    override suspend fun getLanguage() = AppLanguage.fromCode(prefs.get("language", AppLanguage.SYSTEM.code))
+    override suspend fun getLanguage() = AppLanguage.fromCode(prefs.get(LANGUAGE, AppLanguage.SYSTEM.code))
     override suspend fun setLanguage(language: AppLanguage) {
-        prefs.put("language", language.code)
+        prefs.put(LANGUAGE, language.code)
     }
 
     private fun getSet(key: String) =
@@ -21,84 +36,84 @@ class SettingsRepositoryDesktop : SettingsRepository {
     }
 
     override suspend fun getTheme(): AppTheme =
-        prefs.get("theme", AppTheme.SYSTEM.name).toAppTheme()
+        prefs.get(THEME, AppTheme.SYSTEM.name).toAppTheme()
 
     override suspend fun setTheme(theme: AppTheme) {
-        prefs.put("theme", theme.name)
+        prefs.put(THEME, theme.name)
     }
 
-    override suspend fun isVerboseLog(): Boolean = prefs.getBoolean("verbose_log", false)
+    override suspend fun isVerboseLog(): Boolean = prefs.getBoolean(VERBOSE_LOG, false)
 
     override suspend fun setVerboseLog(enabled: Boolean) {
-        prefs.putBoolean("verbose_log", enabled)
+        prefs.putBoolean(VERBOSE_LOG, enabled)
     }
 
-    override suspend fun isIntroSeen(): Boolean = prefs.getBoolean("intro_seen", false)
+    override suspend fun isIntroSeen(): Boolean = prefs.getBoolean(INTRO_SEEN, false)
 
     override suspend fun setIntroSeen(seen: Boolean) {
-        prefs.putBoolean("intro_seen", seen)
+        prefs.putBoolean(INTRO_SEEN, seen)
     }
 
     override suspend fun getExportFormat(): ExportFormat =
-        prefs.get("export_format", ExportFormat.TXT.name).toExportFormat()
+        prefs.get(EXPORT_FORMAT, ExportFormat.TXT.name).toExportFormat()
 
     override suspend fun setExportFormat(format: ExportFormat) {
-        prefs.put("export_format", format.name)
+        prefs.put(EXPORT_FORMAT, format.name)
     }
 
-    override suspend fun isHighContrast(): Boolean = prefs.getBoolean("high_contrast", false)
+    override suspend fun isHighContrast(): Boolean = prefs.getBoolean(HIGH_CONTRAST, false)
 
     override suspend fun setHighContrast(enabled: Boolean) {
-        prefs.putBoolean("high_contrast", enabled)
+        prefs.putBoolean(HIGH_CONTRAST, enabled)
     }
 
-    override suspend fun isReduceMotion(): Boolean = prefs.getBoolean("reduce_motion", false)
+    override suspend fun isReduceMotion(): Boolean = prefs.getBoolean(REDUCE_MOTION, false)
 
     override suspend fun setReduceMotion(enabled: Boolean) {
-        prefs.putBoolean("reduce_motion", enabled)
+        prefs.putBoolean(REDUCE_MOTION, enabled)
     }
 
-    override suspend fun isLargeText(): Boolean = prefs.getBoolean("large_text", false)
+    override suspend fun isLargeText(): Boolean = prefs.getBoolean(LARGE_TEXT, false)
 
     override suspend fun setLargeText(enabled: Boolean) {
-        prefs.putBoolean("large_text", enabled)
+        prefs.putBoolean(LARGE_TEXT, enabled)
     }
 
     override suspend fun isSuggestionsEnabled(): Boolean =
-        prefs.getBoolean("suggestions_enabled", true)
+        prefs.getBoolean(SUGGESTIONS_ENABLED, true)
 
     override suspend fun setSuggestionsEnabled(enabled: Boolean) {
-        prefs.putBoolean("suggestions_enabled", enabled)
+        prefs.putBoolean(SUGGESTIONS_ENABLED, enabled)
     }
 
     override suspend fun isFeatureHintsEnabled(): Boolean =
-        prefs.getBoolean("feature_hints_enabled", true)
+        prefs.getBoolean(FEATURE_HINTS_ENABLED, true)
 
     override suspend fun setFeatureHintsEnabled(enabled: Boolean) {
-        prefs.putBoolean("feature_hints_enabled", enabled)
+        prefs.putBoolean(FEATURE_HINTS_ENABLED, enabled)
     }
 
-    override suspend fun getAdbPath(): String = prefs.get("adb_path", "")
+    override suspend fun getAdbPath(): String = prefs.get(ADB_PATH, "")
 
     override suspend fun setAdbPath(path: String) {
-        prefs.put("adb_path", path)
+        prefs.put(ADB_PATH, path)
     }
 
-    override suspend fun getActivityFavorites() = getSet("activity_favorites")
+    override suspend fun getActivityFavorites() = getSet(ACTIVITY_FAVORITES)
     override suspend fun setActivityFavorites(values: Set<String>) =
-        setSet("activity_favorites", values)
+        setSet(ACTIVITY_FAVORITES, values)
 
-    override suspend fun getActivityPackageFavorites() = getSet("activity_package_favorites")
+    override suspend fun getActivityPackageFavorites() = getSet(ACTIVITY_PACKAGE_FAVORITES)
     override suspend fun setActivityPackageFavorites(values: Set<String>) =
-        setSet("activity_package_favorites", values)
+        setSet(ACTIVITY_PACKAGE_FAVORITES, values)
 
-    override suspend fun getInstalledAppFavorites() = getSet("installed_app_favorites")
+    override suspend fun getInstalledAppFavorites() = getSet(INSTALLED_APP_FAVORITES)
     override suspend fun setInstalledAppFavorites(values: Set<String>) =
-        setSet("installed_app_favorites", values)
+        setSet(INSTALLED_APP_FAVORITES, values)
 
-    override suspend fun getPermissionFavorites() = getSet("permission_favorites")
+    override suspend fun getPermissionFavorites() = getSet(PERMISSION_FAVORITES)
     override suspend fun setPermissionFavorites(values: Set<String>) =
-        setSet("permission_favorites", values)
+        setSet(PERMISSION_FAVORITES, values)
 
     private fun String.toAppTheme(): AppTheme =
         runCatching { AppTheme.valueOf(this) }.getOrDefault(AppTheme.SYSTEM)

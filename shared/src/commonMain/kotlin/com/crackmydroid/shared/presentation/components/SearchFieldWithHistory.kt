@@ -33,9 +33,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
+import com.crackmydroid.shared.i18n.LocalStrings
 import com.crackmydroid.shared.presentation.preview.AppComponentPreviews
 import com.crackmydroid.shared.presentation.preview.ComponentPreviewContainer
 
@@ -56,6 +60,7 @@ fun SearchFieldWithHistoryComponent(
     var hasFocus by remember { mutableStateOf(false) }
     var showSuggestions by remember { mutableStateOf(false) }
     val focusManager = LocalFocusManager.current
+    val strings = LocalStrings.current
     val suggestions = remember(value, historyKey, historyVersion) {
         SearchHistoryStore.suggestions(historyKey, value)
     }
@@ -114,7 +119,7 @@ fun SearchFieldWithHistoryComponent(
                     }) {
                         Icon(
                             imageVector = Icons.Filled.Close,
-                            contentDescription = null,
+                            contentDescription = strings.clearSearchContentDescription,
                             tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
@@ -165,7 +170,8 @@ fun SearchFieldWithHistoryComponent(
                                 },
                                 onLongClick = {
                                     removeFromHistoryAndRefresh(suggestion)
-                                }
+                                },
+                                onLongClickLabel = strings.removeSearchHistoryContentDescription.format(suggestion)
                             ),
                             label = { Text(suggestion) },
                             leadingIcon = {
@@ -186,6 +192,10 @@ fun SearchFieldWithHistoryComponent(
                         color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier
                             .padding(horizontal = 4.dp)
+                            .semantics {
+                                role = androidx.compose.ui.semantics.Role.Button
+                                contentDescription = strings.clearSearchHistoryContentDescription
+                            }
                             .combinedClickable(
                                 onClick = { clearHistoryAndRefresh() },
                                 onLongClick = { clearHistoryAndRefresh() }

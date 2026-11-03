@@ -57,6 +57,30 @@ class LanguageResolverTest {
                 strings.desktopCancel
             ).forEach { desktopString -> assertTrue(desktopString.isNotBlank()) }
             assertTrue(strings.desktopDataSourceLabel.contains("%s"))
+            listOf(
+                strings.refreshActivitiesContentDescription,
+                strings.refreshPermissionsContentDescription,
+                strings.refreshAppsContentDescription,
+                strings.shareActivitiesContentDescription,
+                strings.sharePermissionsContentDescription,
+                strings.shareAppsContentDescription,
+                strings.shareApkContentDescription,
+                strings.reportActivitiesContentDescription,
+                strings.favoriteContentDescription,
+                strings.shellUnavailableContentDescription,
+                strings.shareDeviceInfoContentDescription,
+                strings.clearSearchContentDescription,
+                strings.clearSearchHistoryContentDescription,
+                strings.scrollToTopContentDescription,
+                strings.expandedStateDescription,
+                strings.collapsedStateDescription,
+                strings.penTestSuccessContentDescription,
+                strings.penTestErrorContentDescription,
+                strings.penTestQueuedContentDescription,
+                strings.penTestPendingContentDescription
+            ).forEach { accessibilityString -> assertTrue(accessibilityString.isNotBlank()) }
+            assertTrue(strings.removeSearchHistoryContentDescription.contains("%s"))
+            assertTrue(strings.penTestProgressSummary.contains("%1${'$'}d"))
         }
     }
 

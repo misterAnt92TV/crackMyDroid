@@ -113,7 +113,7 @@ fun ActivityListScreen(
                         IconButton(onClick = viewModel::refresh) {
                             Icon(
                                 imageVector = Icons.Filled.Refresh,
-                                contentDescription = "Aggiorna attività",
+                                contentDescription = strings.refreshActivitiesContentDescription,
                                 tint = MaterialTheme.colorScheme.primary
                             )
                         }
@@ -289,7 +289,7 @@ fun ActivityListScreen(
                         }) {
                             Icon(
                                 imageVector = Icons.Filled.Description,
-                                contentDescription = "Mostra report activity app",
+                                contentDescription = strings.reportActivitiesContentDescription,
                                 tint = if (selectedReportPackage == group.packageName) {
                                     MaterialTheme.colorScheme.primary
                                 } else {
@@ -307,14 +307,14 @@ fun ActivityListScreen(
                         }) {
                             Icon(
                                 imageVector = Icons.Filled.Share,
-                                contentDescription = "Condividi attività app",
+                                contentDescription = strings.shareActivitiesContentDescription,
                                 tint = MaterialTheme.colorScheme.primary
                             )
                         }
                         IconButton(onClick = { viewModel.toggleFavoritePackage(group.packageName) }) {
                             Icon(
                                 imageVector = if (favPkg) Icons.Filled.Star else Icons.Filled.StarBorder,
-                                contentDescription = "Preferito app",
+                                contentDescription = strings.favoriteContentDescription,
                                 tint = if (favPkg) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
@@ -352,7 +352,7 @@ fun ActivityListScreen(
                                     if (!activity.launchableViaShell) {
                                         Icon(
                                             imageVector = Icons.Filled.Warning,
-                                            contentDescription = "Non avviabile via shell",
+                                            contentDescription = strings.shellUnavailableContentDescription,
                                             tint = MaterialTheme.colorScheme.error,
                                             modifier = Modifier.padding(end = 4.dp)
                                         )
@@ -360,7 +360,7 @@ fun ActivityListScreen(
                                     IconButton(onClick = { viewModel.toggleFavorite(activity) }) {
                                         Icon(
                                             imageVector = if (state.favorites.contains(favKey)) Icons.Filled.Star else Icons.Filled.StarBorder,
-                                            contentDescription = "Preferito",
+                                            contentDescription = strings.favoriteContentDescription,
                                             tint = if (state.favorites.contains(favKey)) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
                                         )
                                     }

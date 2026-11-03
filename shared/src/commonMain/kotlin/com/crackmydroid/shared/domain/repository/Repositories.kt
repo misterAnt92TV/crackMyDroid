@@ -5,6 +5,7 @@ import com.crackmydroid.shared.domain.model.AppLanguage
 import com.crackmydroid.shared.domain.model.AppTheme
 import com.crackmydroid.shared.domain.model.ConnectedDevice
 import com.crackmydroid.shared.domain.model.DeviceInfo
+import com.crackmydroid.shared.domain.model.DeviceSessionSource
 import com.crackmydroid.shared.domain.model.ExportFormat
 import com.crackmydroid.shared.domain.model.InstalledAppEntry
 import com.crackmydroid.shared.domain.model.RootStatus
@@ -132,7 +133,7 @@ data class DeviceSessionState(
     val selectedDevice: ConnectedDevice? = null,
     val loading: Boolean = false,
     val error: String? = null,
-    val dataSourceLabel: String = "ADB live",
+    val dataSource: DeviceSessionSource = DeviceSessionSource.ADB,
     val snapshotStatus: String? = null,
     val snapshotMetadata: SnapshotMetadata? = null,
     val sessionVersion: Int = 0

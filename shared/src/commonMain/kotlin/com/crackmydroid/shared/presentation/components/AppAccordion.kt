@@ -25,12 +25,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.crackmydroid.shared.presentation.components.card.AppCard
 import com.crackmydroid.shared.presentation.components.text.AppText
 import com.crackmydroid.shared.presentation.preview.AppComponentPreviews
 import com.crackmydroid.shared.presentation.preview.ComponentPreviewContainer
+import com.crackmydroid.shared.i18n.LocalStrings
 
 @Composable
 fun AppAccordion(
@@ -46,11 +49,19 @@ fun AppAccordion(
 ) {
     val prefs = LocalAccessibilityPrefs.current
     val reduceMotion = LocalAccessibilityPrefs.current.reduceMotion
+    val strings = LocalStrings.current
     AppCard(modifier = modifier) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable(role = Role.Button, onClick = onToggle)
+                .semantics {
+                    stateDescription = if (expanded) {
+                        strings.expandedStateDescription
+                    } else {
+                        strings.collapsedStateDescription
+                    }
+                }
                 .padding(vertical = 2.dp),
             horizontalArrangement = Arrangement.spacedBy(10.dp),
             verticalAlignment = if (prefs.largeText) Alignment.Top else Alignment.CenterVertically

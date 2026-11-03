@@ -3,6 +3,7 @@ package com.crackmydroid.shared.data.device
 import com.crackmydroid.shared.data.DesktopScanCache
 import com.crackmydroid.shared.data.snapshot.RemoteDeviceSnapshotImporter
 import com.crackmydroid.shared.domain.model.ConnectedDevice
+import com.crackmydroid.shared.domain.model.DeviceSessionSource
 import com.crackmydroid.shared.domain.repository.AdbBridge
 import com.crackmydroid.shared.domain.repository.DeviceSessionController
 import com.crackmydroid.shared.domain.repository.DeviceSessionState
@@ -80,7 +81,7 @@ class DeviceSessionControllerDesktop(
                     adbPathConfigured = it.adbPathConfigured || configured,
                     selectedDevice = device,
                     error = null,
-                    dataSourceLabel = if (snapshotOutcome?.usedSnapshot == true) "Snapshot Android" else "ADB live",
+                    dataSource = if (snapshotOutcome?.usedSnapshot == true) DeviceSessionSource.SNAPSHOT else DeviceSessionSource.ADB,
                     snapshotStatus = snapshotOutcome?.message,
                     snapshotMetadata = snapshotOutcome?.metadata,
                     sessionVersion = it.sessionVersion + 1
@@ -95,7 +96,7 @@ class DeviceSessionControllerDesktop(
             it.copy(
                 selectedDevice = null,
                 error = null,
-                dataSourceLabel = "ADB live",
+                dataSource = DeviceSessionSource.ADB,
                 snapshotStatus = null,
                 snapshotMetadata = null
             )
@@ -109,7 +110,7 @@ class DeviceSessionControllerDesktop(
         _state.update {
             it.copy(
                 error = null,
-                dataSourceLabel = if (snapshotOutcome?.usedSnapshot == true) "Snapshot Android" else "ADB live",
+                dataSource = if (snapshotOutcome?.usedSnapshot == true) DeviceSessionSource.SNAPSHOT else DeviceSessionSource.ADB,
                 snapshotStatus = snapshotOutcome?.message,
                 snapshotMetadata = snapshotOutcome?.metadata,
                 sessionVersion = it.sessionVersion + 1

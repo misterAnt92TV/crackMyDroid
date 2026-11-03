@@ -154,7 +154,14 @@ internal fun SettingsContent(
             CardBlock(strings.languageTitle, leadingIcon = Icons.Filled.Settings) {
                 AppText(strings.languageDescription, style = MaterialTheme.typography.bodySmall)
                 AppLanguage.entries.forEach { language ->
-                    val label = if (language == AppLanguage.SYSTEM) strings.system else language.displayName
+                    val label = when (language) {
+                        AppLanguage.SYSTEM -> strings.system
+                        AppLanguage.ENGLISH -> strings.languageEnglish
+                        AppLanguage.ITALIAN -> strings.languageItalian
+                        AppLanguage.GERMAN -> strings.languageGerman
+                        AppLanguage.FRENCH -> strings.languageFrench
+                        AppLanguage.SPANISH -> strings.languageSpanish
+                    }
                     AppButton(
                         text = if (state.language == language) "✔︎ $label" else label,
                         onClick = { actions.onSelectLanguage(language) },

@@ -23,12 +23,12 @@ class RootViewModel(
         _state.value.status?.let { status ->
             appendLine("${strings.verifyRoot}: ${if (status.isRooted) strings.rootDetected else strings.rootNotDetected}")
             appendLine("Dettagli root: ${status.details}")
-        } ?: appendLine("${strings.verifyRoot}: n/d")
+        } ?: appendLine("${strings.verifyRoot}: ${strings.notAvailable}")
         _state.value.playIntegrity?.let { pi ->
             appendLine()
             appendLine(strings.playIntegrityTitle)
-            appendLine("${strings.playIntegrityBasic}: ${pi.basicIntegrity ?: "n/d"}")
-            appendLine("${strings.playIntegrityDevice}: ${pi.deviceIntegrity ?: "n/d"}")
+            appendLine("${strings.playIntegrityBasic}: ${pi.basicIntegrity ?: strings.notAvailable}")
+            appendLine("${strings.playIntegrityDevice}: ${pi.deviceIntegrity ?: strings.notAvailable}")
             appendLine("${strings.playIntegrityDetails}: ${pi.details}")
         }
     }

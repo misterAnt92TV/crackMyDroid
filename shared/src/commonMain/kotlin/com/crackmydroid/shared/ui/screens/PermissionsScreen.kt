@@ -135,7 +135,7 @@ fun PermissionsScreen(
                         IconButton(onClick = viewModel::refresh) {
                             Icon(
                                 imageVector = Icons.Filled.Refresh,
-                                contentDescription = "Aggiorna permessi",
+                                contentDescription = strings.refreshPermissionsContentDescription,
                                 tint = MaterialTheme.colorScheme.primary
                             )
                         }
@@ -430,14 +430,14 @@ fun PermissionsScreen(
                         }) {
                             Icon(
                                 imageVector = Icons.Filled.Share,
-                                contentDescription = "Condividi permessi",
+                                contentDescription = strings.sharePermissionsContentDescription,
                                 tint = MaterialTheme.colorScheme.primary
                             )
                         }
                         IconButton(onClick = { viewModel.toggleFavorite(app.packageName) }) {
                             Icon(
                                 imageVector = if (isFavorite) Icons.Filled.Star else Icons.Filled.StarBorder,
-                                contentDescription = "Preferito",
+                                contentDescription = strings.favoriteContentDescription,
                                 tint = if (isFavorite) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }

@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import com.crackmydroid.shared.domain.model.OperationEntry
 import com.crackmydroid.shared.domain.repository.OperationLogRepository
 import com.crackmydroid.shared.i18n.LocalStrings
+import com.crackmydroid.shared.i18n.renderOperation
 import com.crackmydroid.shared.presentation.components.AppAccordion
 import com.crackmydroid.shared.presentation.components.PackageIcon
 import com.crackmydroid.shared.presentation.components.SectionHeader
@@ -160,7 +161,12 @@ internal fun HomeContent(
                         )
                     }
                     Column {
-                        AppText(entry.description, style = MaterialTheme.typography.bodyMedium)
+                        AppText(
+                            entry.event?.let(strings::renderOperation)
+                                ?: entry.legacyDescription
+                                ?: entry.description,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
                         AppText(
                             entry.details ?: if (entry.success) "Successo" else "Fallita",
                             style = MaterialTheme.typography.labelSmall,

@@ -232,8 +232,8 @@ fun RootScreen(
                                         )
                                     }
                                 }
-                                AppText("${strings.playIntegrityBasic}: ${pi.basicIntegrity ?: "n/d"}")
-                                AppText("${strings.playIntegrityDevice}: ${pi.deviceIntegrity ?: "n/d"}")
+                                AppText("${strings.playIntegrityBasic}: ${pi.basicIntegrity ?: strings.notAvailable}")
+                                AppText("${strings.playIntegrityDevice}: ${pi.deviceIntegrity ?: strings.notAvailable}")
                                 SelectionContainer {
                                     AppText(
                                         "${strings.playIntegrityDetails}: ${pi.details}",

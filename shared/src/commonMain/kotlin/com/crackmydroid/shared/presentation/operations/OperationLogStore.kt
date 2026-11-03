@@ -1,6 +1,7 @@
 package com.crackmydroid.shared.presentation.operations
 
 import com.crackmydroid.shared.domain.model.OperationEntry
+import com.crackmydroid.shared.domain.model.OperationEvent
 import com.crackmydroid.shared.domain.repository.OperationLogRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -41,15 +42,25 @@ class DefaultOperationLogRepository(
     }
 
     override fun record(description: String, success: Boolean, details: String?) {
+        appendEntry(OperationEntry(description, success, details, currentTimeMillis()))
+    }
+
+    override fun record(event: OperationEvent, success: Boolean, details: String?) {
+        appendEntry(
+            OperationEntry(
+                description = event.key,
+                success = success,
+                details = details,
+                timestamp = currentTimeMillis(),
+                event = event,
+                legacyDescription = null,
+            )
+        )
+    }
+
+    private fun appendEntry(entry: OperationEntry) {
         _entries.update { list ->
-            (listOf(
-                OperationEntry(
-                    description,
-                    success,
-                    details,
-                    currentTimeMillis()
-                )
-            ) + list).take(maxEntries)
+            (listOf(entry) + list).take(maxEntries)
         }
         persist()
     }
@@ -65,4 +76,6 @@ object NoOpOperationLogRepository : OperationLogRepository {
     override val entries: StateFlow<List<OperationEntry>> = emptyEntries
 
     override fun record(description: String, success: Boolean, details: String?) = Unit
+
+    override fun record(event: OperationEvent, success: Boolean, details: String?) = Unit
 }

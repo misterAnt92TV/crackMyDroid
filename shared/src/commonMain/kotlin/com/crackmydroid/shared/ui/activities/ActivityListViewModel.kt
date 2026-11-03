@@ -1,6 +1,8 @@
 package com.crackmydroid.shared.ui.activities
 
 import com.crackmydroid.shared.domain.model.ActivityEntry
+import com.crackmydroid.shared.domain.model.OperationEvent
+import com.crackmydroid.shared.domain.model.OperationEventKey
 import com.crackmydroid.shared.domain.model.ActivityIntentRiskAnalyzer
 import com.crackmydroid.shared.domain.model.ActivityIntentRiskLevel
 import com.crackmydroid.shared.domain.model.ActivityIntentRiskReport
@@ -54,12 +56,15 @@ class ActivityListViewModel(
             runCatching { getActivities() }
                 .onSuccess { list ->
                     recomputeAsync(_state.value.copy(activities = list, loading = false))
-                    operationLogs.record("Caricate ${list.size} activity", success = true)
+                    operationLogs.record(
+                        OperationEvent(OperationEventKey.ACTIVITY_LOAD, listOf(list.size.toString())),
+                        success = true
+                    )
                 }
                 .onFailure { err ->
                     _state.update { it.copy(error = err.message ?: "Errore", loading = false) }
                     operationLogs.record(
-                        "Caricamento activity",
+                        OperationEvent(OperationEventKey.ACTIVITY_LOAD),
                         success = false,
                         details = err.message
                     )

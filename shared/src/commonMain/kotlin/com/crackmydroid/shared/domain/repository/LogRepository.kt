@@ -1,6 +1,7 @@
 package com.crackmydroid.shared.domain.repository
 
 import com.crackmydroid.shared.domain.model.OperationEntry
+import com.crackmydroid.shared.domain.model.OperationEvent
 import kotlinx.coroutines.flow.StateFlow
 
 interface LogRepository {
@@ -12,6 +13,8 @@ interface OperationLogRepository {
     val entries: StateFlow<List<OperationEntry>>
 
     fun record(description: String, success: Boolean, details: String? = null)
+
+    fun record(event: OperationEvent, success: Boolean, details: String? = null)
 }
 
 interface PermissionsRepository {

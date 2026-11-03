@@ -40,6 +40,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.crackmydroid.shared.domain.model.ConnectedDevice
+import com.crackmydroid.shared.domain.model.DeviceSessionSource
 import com.crackmydroid.shared.domain.model.SnapshotMetadata
 import com.crackmydroid.shared.domain.repository.DeviceSessionController
 import com.crackmydroid.shared.domain.usecase.GetLanguageUseCase
@@ -115,7 +116,7 @@ fun DesktopCrackMyDroidApp() {
                 Column(modifier = Modifier.fillMaxSize()) {
                     DesktopToolbarComponent(
                         device = requireNotNull(state.selectedDevice),
-                        dataSourceLabel = state.dataSourceLabel,
+                        dataSource = state.dataSource,
                         snapshotStatus = state.snapshotStatus,
                         snapshotMetadata = state.snapshotMetadata,
                         onOpenAdbSettings = { showAdbSettings = true },
@@ -332,7 +333,7 @@ private fun DevicePickerContent(
 @Composable
 private fun DesktopToolbarComponent(
     device: ConnectedDevice,
-    dataSourceLabel: String,
+    dataSource: DeviceSessionSource,
     snapshotStatus: String?,
     snapshotMetadata: SnapshotMetadata?,
     onOpenAdbSettings: () -> Unit,
@@ -371,7 +372,7 @@ private fun DesktopToolbarComponent(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
-                        text = buildSourceLabel(strings, dataSourceLabel, snapshotMetadata),
+                        text = buildSourceLabel(strings, dataSource, snapshotMetadata),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.primary
                     )
@@ -409,15 +410,19 @@ private fun DesktopToolbarComponent(
 
 private fun buildSourceLabel(
     strings: Strings,
-    dataSourceLabel: String,
+    dataSource: DeviceSessionSource,
     snapshotMetadata: SnapshotMetadata?
 ): String {
-    if (snapshotMetadata == null) return strings.desktopDataSourceLabel.format(dataSourceLabel)
+    val sourceLabel = when (dataSource) {
+        DeviceSessionSource.ADB -> strings.desktopAdbSource
+        DeviceSessionSource.SNAPSHOT -> strings.desktopSnapshotSource
+    }
+    if (snapshotMetadata == null) return strings.desktopDataSourceLabel.format(sourceLabel)
     val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
     val timestamp = Instant.ofEpochMilli(snapshotMetadata.createdAtEpochMs)
         .atZone(ZoneId.systemDefault())
         .format(formatter)
-    return "${strings.desktopDataSourceLabel.format(dataSourceLabel)} • $timestamp • ${snapshotMetadata.sourceAppVersion}"
+    return "${strings.desktopDataSourceLabel.format(sourceLabel)} • $timestamp • ${snapshotMetadata.sourceAppVersion}"
 }
 
 @Composable
