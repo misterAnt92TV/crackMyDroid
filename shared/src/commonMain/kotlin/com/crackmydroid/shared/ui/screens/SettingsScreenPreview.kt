@@ -20,7 +20,7 @@ private fun SettingsScreenPreview() {
         CompositionLocalProvider(LocalStrings provides stringsFor("it")) {
             SettingsContent(
                 state = SettingsState(
-                    language = AppLanguage.ITALIAN,
+                    language = AppLanguage.SYSTEM,
                     theme = AppTheme.SYSTEM,
                     suggestionsEnabled = true,
                     featureHintsEnabled = true

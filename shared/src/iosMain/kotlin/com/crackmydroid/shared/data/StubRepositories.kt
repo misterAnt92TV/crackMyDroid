@@ -84,7 +84,7 @@ class ShellCommandRepositoryIos : ShellCommandRepository {
 }
 
 class SettingsRepositoryIos : SettingsRepository {
-    private var language = AppLanguage.ENGLISH
+    private var language = AppLanguage.SYSTEM
     private var theme: AppTheme = AppTheme.SYSTEM
     private var verbose = false
     private var introSeen = false

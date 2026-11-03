@@ -64,6 +64,8 @@ import com.crackmydroid.shared.domain.usecase.GetIntroSeenUseCase
 import com.crackmydroid.shared.domain.usecase.SetIntroSeenUseCase
 import com.crackmydroid.shared.i18n.LocalStrings
 import com.crackmydroid.shared.i18n.Strings
+import com.crackmydroid.shared.i18n.platformLanguage
+import com.crackmydroid.shared.i18n.resolveLanguageCode
 import com.crackmydroid.shared.i18n.stringsFor
 import com.crackmydroid.shared.presentation.components.AccessibilityPrefs
 import com.crackmydroid.shared.presentation.components.LocalAccessibilityPrefs
@@ -120,7 +122,9 @@ fun CrackMyDroidApp() {
     val introSeenUse = remember { KoinPlatform.getKoin().get<GetIntroSeenUseCase>() }
     val setIntroSeenUse = remember { KoinPlatform.getKoin().get<SetIntroSeenUseCase>() }
     val settingsState = settingsVm.state.collectAsState()
-    val strings = stringsFor(settingsState.value.language.code)
+    val strings = stringsFor(
+        resolveLanguageCode(settingsState.value.language, platformLanguage())
+    )
     val showIntro = remember { mutableStateOf(true) }
     val sectionHintDialog = remember { mutableStateOf<Screen?>(null) }
     val accessibilityPrefs = AccessibilityPrefs(

@@ -27,6 +27,7 @@ import com.crackmydroid.shared.presentation.components.SearchHistoryStore
 import com.crackmydroid.shared.ui.settings.SettingsViewModel
 import io.mockk.coEvery
 import io.mockk.coJustRun
+import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -137,6 +138,20 @@ class SettingsViewModelTest {
 
         assertEquals(ExportFormat.JSON, viewModel.state.value.exportFormat)
         assertEquals(null, viewModel.state.value.error)
+        viewModel.onCleared()
+    }
+
+    @Test
+    fun selectSystemLanguage_persistsAndUpdatesState() = runTest(dispatcher) {
+        val setLanguage = mockk<SetLanguageUseCase>()
+        coJustRun { setLanguage(AppLanguage.SYSTEM) }
+        val viewModel = viewModel(setLanguage = setLanguage)
+
+        viewModel.selectLanguage(AppLanguage.SYSTEM)
+        advanceUntilIdle()
+
+        assertEquals(AppLanguage.SYSTEM, viewModel.state.value.language)
+        coVerify(exactly = 1) { setLanguage(AppLanguage.SYSTEM) }
         viewModel.onCleared()
     }
 

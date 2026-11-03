@@ -8,7 +8,7 @@ import java.util.prefs.Preferences
 
 class SettingsRepositoryDesktop : SettingsRepository {
     private val prefs = Preferences.userRoot().node("com.crackmydroid.desktop")
-    override suspend fun getLanguage() = AppLanguage.fromCode(prefs.get("language", "en"))
+    override suspend fun getLanguage() = AppLanguage.fromCode(prefs.get("language", AppLanguage.SYSTEM.code))
     override suspend fun setLanguage(language: AppLanguage) {
         prefs.put("language", language.code)
     }

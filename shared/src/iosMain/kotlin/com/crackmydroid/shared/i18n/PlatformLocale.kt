@@ -1,3 +1,5 @@
 package com.crackmydroid.shared.i18n
 
-actual fun platformLanguage(): String = "en"
+import platform.Foundation.NSLocale
+
+actual fun platformLanguage(): String = NSLocale.currentLocale.languageCode ?: "en"

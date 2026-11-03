@@ -69,6 +69,7 @@ class SettingsUseCasesTest {
         coJustRun { repository.setPermissionFavorites(any()) }
 
         SetLanguageUseCase(repository)(AppLanguage.GERMAN)
+        SetLanguageUseCase(repository)(AppLanguage.SYSTEM)
         SetThemeUseCase(repository)(AppTheme.LIGHT)
         SetVerboseLogUseCase(repository)(true)
         SetIntroSeenUseCase(repository)(false)
@@ -84,6 +85,7 @@ class SettingsUseCasesTest {
         SetPermissionFavoritesUseCase(repository)(setOf("permission"))
 
         coVerify { repository.setLanguage(AppLanguage.GERMAN) }
+        coVerify { repository.setLanguage(AppLanguage.SYSTEM) }
         coVerify { repository.setTheme(AppTheme.LIGHT) }
         coVerify { repository.setExportFormat(ExportFormat.JSON) }
         coVerify { repository.setPermissionFavorites(setOf("permission")) }

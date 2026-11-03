@@ -16,6 +16,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.res.stringResource
 import com.crackmydroid.shared.ui.CrackMyDroidApp
 
 class MainActivity : ComponentActivity() {
@@ -70,18 +71,15 @@ class MainActivity : ComponentActivity() {
 private fun PackageInventoryDisclosure(onAcknowledge: () -> Unit) {
     AlertDialog(
         onDismissRequest = onAcknowledge,
-        title = { Text("Scansione app installate") },
+        title = { Text(stringResource(R.string.package_inventory_disclosure_title)) },
         text = {
             Text(
-                "CrackMyDroid legge localmente l'inventario delle app installate per mostrare APK, " +
-                        "activity, componenti e permessi. Non viene mostrato un dialogo di sistema: " +
-                        "l'accesso alla visibilita dei package e dichiarato nel manifest. " +
-                        "L'esportazione o la condivisione di un APK avviene solo quando la avvii tu."
+                stringResource(R.string.package_inventory_disclosure_body)
             )
         },
         confirmButton = {
             Button(onClick = onAcknowledge) {
-                Text("Ho capito")
+                Text(stringResource(R.string.package_inventory_disclosure_confirm))
             }
         }
     )
@@ -91,17 +89,15 @@ private fun PackageInventoryDisclosure(onAcknowledge: () -> Unit) {
 private fun PackageInventoryUnavailableDialog(onClose: () -> Unit) {
     AlertDialog(
         onDismissRequest = {},
-        title = { Text("Scansione completa non disponibile") },
+        title = { Text(stringResource(R.string.package_inventory_unavailable_title)) },
         text = {
             Text(
-                "Questa installazione non dispone della visibilita completa delle app. " +
-                        "Per evitare risultati parziali, la scansione non viene avviata. Reinstalla un APK " +
-                        "che dichiari QUERY_ALL_PACKAGES nel manifest."
+                stringResource(R.string.package_inventory_unavailable_body)
             )
         },
         confirmButton = {
             Button(onClick = onClose) {
-                Text("Chiudi")
+                Text(stringResource(R.string.close))
             }
         }
     )

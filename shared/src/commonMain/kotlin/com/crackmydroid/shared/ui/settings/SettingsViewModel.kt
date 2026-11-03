@@ -60,7 +60,7 @@ class SettingsViewModel(
             _state.update { it.copy(loading = true, error = null) }
             runCatching {
                 LoadedSettings(
-                    language = getLanguage?.invoke() ?: AppLanguage.ENGLISH,
+                    language = getLanguage?.invoke() ?: AppLanguage.SYSTEM,
                     theme = getTheme(),
                     verbose = getVerbose(),
                     format = getExportFormat(),
