@@ -7,8 +7,8 @@ import com.crackmydroid.shared.domain.usecase.settings.GetExportFormatUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetFeatureHintsEnabledUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetHighContrastUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetIntroSeenUseCase
-import com.crackmydroid.shared.domain.usecase.GetLanguageUseCase
-import com.crackmydroid.shared.domain.usecase.GetLargeTextUseCase
+import com.crackmydroid.shared.domain.usecase.settings.GetLanguageUseCase
+import com.crackmydroid.shared.domain.usecase.settings.GetLargeTextUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetReduceMotionUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetSuggestionsEnabledUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetThemeUseCase
@@ -138,6 +138,7 @@ class SettingsViewModelTest {
 
         assertEquals(ExportFormat.JSON, viewModel.state.value.exportFormat)
         assertEquals(null, viewModel.state.value.error)
+        coVerify(exactly = 1) { setFormat(ExportFormat.JSON) }
         viewModel.onCleared()
     }
 
@@ -156,7 +157,7 @@ class SettingsViewModelTest {
     }
 
     private fun viewModel(
-        getLanguage: GetLanguageUseCase? = null,
+        getLanguage: GetLanguageUseCase = mockk(relaxed = true),
         getTheme: GetThemeUseCase = mockk(relaxed = true),
         getVerbose: GetVerboseLogUseCase = mockk(relaxed = true),
         getFormat: GetExportFormatUseCase = mockk(relaxed = true),
@@ -175,7 +176,7 @@ class SettingsViewModelTest {
         setSuggestions: SetSuggestionsEnabledUseCase = mockk(relaxed = true),
         setHints: SetFeatureHintsEnabledUseCase = mockk(relaxed = true),
         setIntro: SetIntroSeenUseCase = mockk(relaxed = true),
-        setLanguage: SetLanguageUseCase? = null
+        setLanguage: SetLanguageUseCase = mockk(relaxed = true)
     ) = SettingsViewModel(
         getTheme, setTheme, getVerbose, setVerbose, getFormat, setFormat,
         getHighContrast, setHighContrast, getReduceMotion, setReduceMotion,

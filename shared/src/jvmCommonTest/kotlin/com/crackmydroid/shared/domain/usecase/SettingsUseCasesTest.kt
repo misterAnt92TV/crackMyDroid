@@ -11,6 +11,9 @@ import com.crackmydroid.shared.domain.usecase.settings.GetFeatureHintsEnabledUse
 import com.crackmydroid.shared.domain.usecase.settings.GetHighContrastUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetInstalledAppFavoritesUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetIntroSeenUseCase
+import com.crackmydroid.shared.domain.usecase.settings.GetLanguageUseCase
+import com.crackmydroid.shared.domain.usecase.settings.GetLargeTextUseCase
+import com.crackmydroid.shared.domain.usecase.settings.GetPermissionFavoritesUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetReduceMotionUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetSuggestionsEnabledUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetThemeUseCase

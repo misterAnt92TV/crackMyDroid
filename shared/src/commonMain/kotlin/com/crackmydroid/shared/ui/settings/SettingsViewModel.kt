@@ -117,21 +117,21 @@ class SettingsViewModel(
 
     fun setHighContrast(enabled: Boolean) {
         scope.launch {
-            setHighContrast(enabled)
+            setHighContrast.invoke(enabled)
             _state.update { it.copy(highContrast = enabled) }
         }
     }
 
     fun setReduceMotion(enabled: Boolean) {
         scope.launch {
-            setReduceMotion(enabled)
+            setReduceMotion.invoke(enabled)
             _state.update { it.copy(reduceMotion = enabled) }
         }
     }
 
     fun setLargeText(enabled: Boolean) {
         scope.launch {
-            setLargeText(enabled)
+            setLargeText.invoke(enabled)
             _state.update { it.copy(largeText = enabled) }
         }
     }
@@ -142,7 +142,7 @@ class SettingsViewModel(
 
     fun setSuggestionsEnabled(enabled: Boolean) {
         scope.launch {
-            setSuggestionsEnabled(enabled)
+            setSuggestionsEnabled.invoke(enabled)
             _state.update { it.copy(suggestionsEnabled = enabled) }
             com.crackmydroid.shared.presentation.components.SearchHistoryStore.setEnabled(enabled)
         }
@@ -150,7 +150,7 @@ class SettingsViewModel(
 
     fun setFeatureHintsEnabled(enabled: Boolean) {
         scope.launch {
-            setFeatureHintsEnabled(enabled)
+            setFeatureHintsEnabled.invoke(enabled)
             _state.update { it.copy(featureHintsEnabled = enabled) }
         }
     }
@@ -171,7 +171,7 @@ class SettingsViewModel(
         if (savingFormat) return
         savingFormat = true
         scope.launch {
-            runCatching { setExportFormat(format) }
+            runCatching { setExportFormat.invoke(format) }
                 .onSuccess { _state.update { it.copy(exportFormat = format, error = null) } }
                 .onFailure { err -> _state.update { it.copy(error = err.message) } }
             savingFormat = false
