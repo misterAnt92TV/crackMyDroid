@@ -63,3 +63,11 @@ dependencies {
     implementation("com.google.android.material:material:1.11.0")
     testImplementation(libs.junit4)
 }
+
+kover {
+    currentProject {
+        createVariant("coverage") {
+            add("debug")
+        }
+    }
+}

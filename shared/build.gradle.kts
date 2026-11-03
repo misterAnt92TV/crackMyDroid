@@ -128,3 +128,12 @@ sqldelight {
         }
     }
 }
+
+kover {
+    currentProject {
+        createVariant("coverage") {
+            add("debug")
+            add("jvm")
+        }
+    }
+}
