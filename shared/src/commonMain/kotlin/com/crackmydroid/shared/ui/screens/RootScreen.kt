@@ -28,12 +28,10 @@ import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -53,6 +51,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.crackmydroid.shared.i18n.LocalStrings
 import com.crackmydroid.shared.presentation.components.AppButton
+import com.crackmydroid.shared.presentation.components.AppProgressIndicator
+import com.crackmydroid.shared.presentation.components.AppTextField
 import com.crackmydroid.shared.presentation.components.ErrorDialogComponent
 import com.crackmydroid.shared.presentation.components.ScrollToTopButton
 import com.crackmydroid.shared.presentation.components.SectionHeader
@@ -145,13 +145,11 @@ fun RootScreen(
                         fullWidth = true
                     )
 
-                    OutlinedTextField(
+                    AppTextField(
                         value = nonceInput,
                         onValueChange = { nonceInput = it },
-                        label = { androidx.compose.material3.Text(strings.nonceLabel) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 4.dp)
+                        label = strings.nonceLabel,
+                        modifier = Modifier.padding(top = 4.dp)
                     )
                     AppButton(
                         text = strings.verifyPlayIntegrity,
@@ -163,19 +161,10 @@ fun RootScreen(
             }
 
             if (state.loading) {
-                if (accessibilityPrefs.reduceMotion) {
-                    AppText(
-                        text = strings.rootChecking,
-                        modifier = Modifier.padding(top = 12.dp),
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                } else {
-                    androidx.compose.material3.LinearProgressIndicator(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 12.dp)
-                    )
-                }
+                AppProgressIndicator(
+                    label = strings.rootChecking,
+                    modifier = Modifier.padding(top = 12.dp)
+                )
             }
 
             AnimatedVisibility(

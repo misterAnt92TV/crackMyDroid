@@ -18,12 +18,14 @@ import com.crackmydroid.shared.presentation.preview.ComponentPreviewContainer
 fun AppCard(
     modifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null,
+    enabled: Boolean = true,
     contentPadding: PaddingValues = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
     content: @Composable ColumnScope.() -> Unit
 ) {
     if (onClick != null) {
         ElevatedCard(
             onClick = onClick,
+            enabled = enabled,
             modifier = modifier,
         ) {
             Column(modifier = Modifier.padding(contentPadding), content = content)

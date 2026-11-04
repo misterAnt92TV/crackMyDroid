@@ -19,10 +19,7 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.SwapHoriz
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -35,6 +32,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -44,12 +42,20 @@ import com.crackmydroid.shared.domain.model.DeviceSessionSource
 import com.crackmydroid.shared.domain.model.scansnapshot.SnapshotMetadata
 import com.crackmydroid.shared.domain.repository.DeviceSessionController
 import com.crackmydroid.shared.domain.usecase.settings.GetLanguageUseCase
+import com.crackmydroid.shared.domain.usecase.settings.GetThemeUseCase
+import com.crackmydroid.shared.domain.model.app.AppTheme
 import com.crackmydroid.shared.i18n.LocalStrings
 import com.crackmydroid.shared.i18n.Strings
 import com.crackmydroid.shared.i18n.platformLanguage
 import com.crackmydroid.shared.i18n.resolveLanguageCode
 import com.crackmydroid.shared.i18n.stringsFor
 import com.crackmydroid.shared.presentation.components.AppButton
+import com.crackmydroid.shared.presentation.components.AppDialog
+import com.crackmydroid.shared.presentation.components.AppProgressIndicator
+import com.crackmydroid.shared.presentation.components.AppTextField
+import com.crackmydroid.shared.presentation.components.card.AppCard
+import com.crackmydroid.shared.presentation.components.text.AppText
+import com.crackmydroid.shared.presentation.theme.CrackMyDroidTheme
 import com.crackmydroid.shared.ui.CrackMyDroidApp
 import kotlinx.coroutines.launch
 import org.koin.mp.KoinPlatform
@@ -65,11 +71,13 @@ fun DesktopCrackMyDroidApp() {
     val getLanguage = remember {
         KoinPlatform.getKoin().get<GetLanguageUseCase>()
     }
+    val getTheme = remember { KoinPlatform.getKoin().get<GetThemeUseCase>() }
     val state by sessionController.state.collectAsState()
     val scope = rememberCoroutineScope()
     var adbPath by remember { mutableStateOf(state.adbPath) }
     var showAdbSettings by remember { mutableStateOf(false) }
     var strings by remember { mutableStateOf(stringsFor(platformLanguage())) }
+    var appTheme by remember { mutableStateOf(AppTheme.SYSTEM) }
 
     LaunchedEffect(state.adbPath) {
         if (state.adbPath.isNotBlank() && adbPath != state.adbPath) {
@@ -79,13 +87,18 @@ fun DesktopCrackMyDroidApp() {
 
     LaunchedEffect(Unit) {
         strings = stringsFor(resolveLanguageCode(getLanguage(), platformLanguage()))
+        appTheme = getTheme()
         if (state.availableDevices.isEmpty()) {
             sessionController.refreshDevices(null)
         }
     }
 
     CompositionLocalProvider(LocalStrings provides strings) {
-        MaterialTheme {
+        CrackMyDroidTheme(darkTheme = when (appTheme) {
+            AppTheme.DARK -> true
+            AppTheme.LIGHT -> false
+            AppTheme.SYSTEM -> isSystemInDarkTheme()
+        }) {
         Surface(modifier = Modifier.fillMaxSize()) {
             if (state.selectedDevice == null) {
                 DevicePickerContent(
@@ -202,11 +215,10 @@ private fun DevicePickerContent(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             if (!adbPathConfigured) {
-                OutlinedTextField(
+                AppTextField(
                     value = adbPath,
                     onValueChange = onAdbPathChange,
-                    label = { Text(strings.desktopAdbPathLabel) },
-                    modifier = Modifier.fillMaxWidth(),
+                    label = strings.desktopAdbPathLabel,
                     singleLine = true
                 )
             } else {
@@ -229,7 +241,7 @@ private fun DevicePickerContent(
                     leadingIcon = Icons.Filled.Settings
                 )
                 if (loading) {
-                    CircularProgressIndicator(modifier = Modifier.size(26.dp))
+                    AppProgressIndicator(strings.desktopDetectDevices, modifier = Modifier.size(26.dp))
                 }
             }
             error?.let {
@@ -239,10 +251,8 @@ private fun DevicePickerContent(
                     style = MaterialTheme.typography.bodySmall
                 )
             }
-            Surface(
+            AppCard(
                 modifier = Modifier.fillMaxWidth(),
-                tonalElevation = 2.dp,
-                shape = RoundedCornerShape(16.dp)
             ) {
                 if (devices.isEmpty() && !loading) {
                     Box(
@@ -264,17 +274,10 @@ private fun DevicePickerContent(
                     ) {
                         items(devices) { device ->
                             val selectable = device.state == "device"
-                            Surface(
+                            AppCard(
                                 modifier = Modifier.fillMaxWidth(),
-                                color = if (selectable) {
-                                    MaterialTheme.colorScheme.surface
-                                } else {
-                                    MaterialTheme.colorScheme.surfaceVariant
-                                },
-                                shape = RoundedCornerShape(14.dp),
-                                onClick = {
-                                    if (selectable) onSelect(device)
-                                }
+                                enabled = selectable,
+                                onClick = { onSelect(device) }
                             ) {
                                 Column(
                                     modifier = Modifier
@@ -341,10 +344,7 @@ private fun DesktopToolbarComponent(
     onRescan: () -> Unit
 ) {
     val strings = LocalStrings.current
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        tonalElevation = 3.dp
-    ) {
+    AppCard(modifier = Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -433,39 +433,26 @@ private fun AdbSettingsDialogComponent(
     onSave: () -> Unit
 ) {
     val strings = LocalStrings.current
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(strings.desktopAdbSettings) },
-        text = {
+    AppDialog(
+        title = strings.desktopAdbSettings,
+        onDismiss = onDismiss,
+        confirmLabel = strings.desktopSave,
+        onConfirm = onSave,
+        confirmEnabled = adbPath.isNotBlank(),
+        dismissLabel = strings.desktopCancel,
+        onDismissAction = onDismiss
+    ) {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Text(
-                    text = strings.desktopAdbSettingsDescription,
+                AppText(
+                    strings.desktopAdbSettingsDescription,
                     style = MaterialTheme.typography.bodyMedium
                 )
-                OutlinedTextField(
+                AppTextField(
                     value = adbPath,
                     onValueChange = onAdbPathChange,
-                    label = { Text(strings.desktopAdbPathLabel) },
-                    modifier = Modifier.fillMaxWidth(),
+                    label = strings.desktopAdbPathLabel,
                     singleLine = true
                 )
             }
-        },
-        confirmButton = {
-            AppButton(
-                text = strings.desktopSave,
-                onClick = onSave,
-                enabled = adbPath.isNotBlank(),
-                fullWidth = false
-            )
-        },
-        dismissButton = {
-            AppButton(
-                text = strings.desktopCancel,
-                onClick = onDismiss,
-                variant = com.crackmydroid.shared.presentation.components.ButtonVariant.Tonal,
-                fullWidth = false
-            )
-        }
-    )
+    }
 }

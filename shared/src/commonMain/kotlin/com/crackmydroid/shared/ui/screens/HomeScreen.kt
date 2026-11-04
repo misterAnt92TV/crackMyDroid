@@ -122,7 +122,7 @@ internal fun HomeContent(
                             fontWeight = FontWeight.SemiBold
                         )
                         AppText(
-                            "Material look con palette Google per un flusso piu rapido e leggibile.",
+                            strings.homeDescription,
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -132,7 +132,7 @@ internal fun HomeContent(
         }
         item {
             AppText(
-                "Ultime operazioni",
+                strings.homeLatestOperations,
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(top = 12.dp, bottom = 4.dp),
                 fontWeight = FontWeight.SemiBold
@@ -168,7 +168,7 @@ internal fun HomeContent(
                             style = MaterialTheme.typography.bodyMedium
                         )
                         AppText(
-                            entry.details ?: if (entry.success) "Successo" else "Fallita",
+                            entry.details ?: if (entry.success) strings.operationSuccess else strings.operationFailed,
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
