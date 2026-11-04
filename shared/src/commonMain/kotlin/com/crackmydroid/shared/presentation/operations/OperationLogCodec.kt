@@ -10,9 +10,9 @@ object OperationLogCodec {
 
     fun decode(raw: String, now: () -> Long): List<OperationEntry> = raw.lines()
         .filter(String::isNotBlank)
-        .mapNotNull { line ->
+        .mapIndexedNotNull { index, line ->
             val parts = line.split(SEPARATOR)
-            if (parts.size < 3) return@mapNotNull null
+            if (parts.size < 3) return@mapIndexedNotNull null
             val event = parts.getOrNull(4)?.takeIf(String::isNotBlank)?.let { key ->
                 OperationEvent(key, parts.getOrNull(5).orEmpty().split(ARGUMENT_SEPARATOR).filter(String::isNotEmpty))
             }
@@ -23,6 +23,9 @@ object OperationLogCodec {
                 timestamp = parts.getOrNull(3)?.toLongOrNull() ?: now(),
                 event = event,
                 legacyDescription = if (event == null) parts[0] else null,
+                operationId = parts.getOrNull(6)?.takeIf(String::isNotBlank)
+                    ?: "legacy-$index-${line.hashCode()}",
+                hiddenFromRecent = parts.getOrNull(7) == "1",
             )
         }
 
@@ -35,6 +38,8 @@ object OperationLogCodec {
             entry.timestamp.toString(),
             event?.key.orEmpty(),
             event?.arguments.orEmpty().joinToString(ARGUMENT_SEPARATOR, transform = ::sanitize),
+            sanitize(entry.operationId),
+            if (entry.hiddenFromRecent) "1" else "0",
         ).joinToString(SEPARATOR)
     }
 

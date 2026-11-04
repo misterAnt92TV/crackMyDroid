@@ -21,7 +21,27 @@ private fun HomeScreenPreview() {
                 ),
                 padding = PaddingValues(),
                 headerHelp = "Panoramica delle funzioni principali.",
-                onHelp = {}
+                onHelp = {},
+                onRemove = {},
+                languageCode = "it"
+            )
+        }
+    }
+}
+
+@AppScreenPreviews
+@Composable
+private fun HomeScreenEmptyHistoryPreview() {
+    CrackMyDroidTheme {
+        CompositionLocalProvider(LocalStrings provides stringsFor("it")) {
+            HomeContent(
+                history = emptyList(),
+                padding = PaddingValues(),
+                headerHelp = "Panoramica delle funzioni principali.",
+                onHelp = {},
+                onRemove = {},
+                initiallyExpandedHistory = true,
+                languageCode = "it"
             )
         }
     }

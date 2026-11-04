@@ -77,7 +77,8 @@ class LanguageResolverTest {
                 strings.penTestSuccessContentDescription,
                 strings.penTestErrorContentDescription,
                 strings.penTestQueuedContentDescription,
-                strings.penTestPendingContentDescription
+                strings.penTestPendingContentDescription,
+                strings.hideRecentOperationContentDescription
             ).forEach { accessibilityString -> assertTrue(accessibilityString.isNotBlank()) }
             assertTrue(strings.removeSearchHistoryContentDescription.contains("%s"))
             assertTrue(strings.penTestProgressSummary.contains("%1${'$'}d"))
@@ -90,5 +91,22 @@ class LanguageResolverTest {
 
         assertEquals("ADB-Gerät auswählen", strings.desktopAdbPickerTitle)
         assertEquals("Datenquelle: Snapshot", strings.desktopDataSourceLabel.format("Snapshot"))
+    }
+
+    @Test
+    fun operationResultLabel_isAvailableForEverySupportedLanguage() {
+        listOf("it", "en", "de", "es", "fr").forEach { languageCode ->
+            val strings = stringsFor(languageCode)
+            assertTrue(strings.operationResultLabel.isNotBlank())
+            assertTrue(strings.homeLatestOperationsEmpty.isNotBlank())
+            assertTrue(strings.homeOperationHistoryTitle.isNotBlank())
+            assertTrue(strings.homeOperationHistoryTitleWithCount.contains("%d"))
+            assertTrue(strings.homeOperationHistoryTitleWithCount.format(0).contains("0"))
+            assertTrue(strings.homeOperationHistoryTitleWithCount.format(3).contains("3"))
+            assertEquals(
+                "Demo App · com.example.demo",
+                strings.permissionsExpandedAppLabel.format("Demo App", "com.example.demo")
+            )
+        }
     }
 }

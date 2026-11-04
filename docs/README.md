@@ -2,6 +2,13 @@
 
 Benvenuto nella documentazione tecnica di CrackMyDroid.
 
+Per una lettura funzionale in **italiano e inglese**, partire dalla
+[guida delle sezioni e dei casi d'uso](functional-guide.md) e dal
+[flowchart Draw.io modificabile](functional-flows.drawio).
+For a functional overview in **Italian and English**, start with the
+[section and workflow guide](functional-guide.md#english) and the
+[editable Draw.io flowchart](functional-flows.drawio). Both describe implemented features only.
+
 ---
 
 ## Documenti disponibili
@@ -11,6 +18,8 @@ Benvenuto nella documentazione tecnica di CrackMyDroid.
 | File                                       | Descrizione                                                                                                                |
 |--------------------------------------------|----------------------------------------------------------------------------------------------------------------------------|
 | [`../README.md`](../README.md)             | Overview del progetto, quick start, stack tecnico (IT + EN)                                                                |
+| [`functional-guide.md`](functional-guide.md) | **Guida funzionale IT/EN** — sezioni, azioni, casi d'uso supportati, prerequisiti e limiti Android/Desktop/iOS |
+| [`functional-flows.drawio`](functional-flows.drawio) | **Flowchart IT/EN** — sei pagine modificabili: mappa funzionale, flussi operativi e Desktop/piattaforme |
 | [`screens.md`](screens.md)                 | **Schermate UI** — mockup ASCII di tutte le schermate (Home, PenTesting, App, Permessi, Attività, Info, Settings, Desktop) |
 | [`architecture.md`](architecture.md)       | Architettura KMP, layer, flussi dati Android e Desktop, caching, DI, manifest analyzer                                     |
 | [`architecture-specification.md`](architecture-specification.md) | **Specifica architetturale** — principi, source set, layer, flussi, DI, persistenza, vincoli e strategia di test |
@@ -35,6 +44,9 @@ Benvenuto nella documentazione tecnica di CrackMyDroid.
 
 ### Funzionalità
 
+- [Guida funzionale — Italiano](functional-guide.md#italiano)
+- [Functional guide — English](functional-guide.md#english)
+- [Flowchart Draw.io IT/EN](functional-flows.drawio)
 - [Home Screen](screens.md#2-home)
 - [PenTesting Wizard](screens.md#5-pentesting-wizard-4-step)
 - [App installate](screens.md#6-app-installate--installed-apps)
@@ -42,6 +54,7 @@ Benvenuto nella documentazione tecnica di CrackMyDroid.
 - [Attività](screens.md#7-attività--activities)
 - [Info dispositivo](screens.md#3-info-dispositivo--device-info)
 - [Desktop App screens](screens.md#desktop-app--schermate-specifiche)
+- [Aiuto / Help](screens.md#12-aiuto--help)
 
 ### Architettura e sviluppo
 

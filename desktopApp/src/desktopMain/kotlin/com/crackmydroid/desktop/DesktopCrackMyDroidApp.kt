@@ -228,17 +228,25 @@ private fun DevicePickerContent(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 AppButton(
                     text = strings.desktopDetectDevices,
                     onClick = onRefresh,
-                    leadingIcon = Icons.Filled.Refresh
+                    leadingIcon = Icons.Filled.Refresh,
+                    fullWidth = false
                 )
                 AppButton(
                     text = strings.desktopAdbSettings,
                     onClick = onOpenAdbSettings,
                     variant = com.crackmydroid.shared.presentation.components.ButtonVariant.Tonal,
-                    leadingIcon = Icons.Filled.Settings
+                    leadingIcon = Icons.Filled.Settings,
+                    fullWidth = false
                 )
                 if (loading) {
                     AppProgressIndicator(strings.desktopDetectDevices, modifier = Modifier.size(26.dp))
@@ -349,10 +357,11 @@ private fun DesktopToolbarComponent(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 12.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Row(
+                modifier = Modifier.weight(1f),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -360,7 +369,7 @@ private fun DesktopToolbarComponent(
                     imageVector = Icons.Filled.Devices,
                     contentDescription = null
                 )
-                Column {
+                Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = device.model ?: device.serial,
                         style = MaterialTheme.typography.titleMedium,
@@ -385,23 +394,30 @@ private fun DesktopToolbarComponent(
                     }
                 }
             }
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            Row(
+                modifier = Modifier.padding(start = 4.dp),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 AppButton(
                     text = strings.desktopAdbSettings,
                     onClick = onOpenAdbSettings,
                     variant = com.crackmydroid.shared.presentation.components.ButtonVariant.Tonal,
-                    leadingIcon = Icons.Filled.Edit
+                    leadingIcon = Icons.Filled.Edit,
+                    fullWidth = false
                 )
                 AppButton(
                     text = strings.desktopChangeDevice,
                     onClick = onChangeDevice,
                     variant = com.crackmydroid.shared.presentation.components.ButtonVariant.Tonal,
-                    leadingIcon = Icons.Filled.SwapHoriz
+                    leadingIcon = Icons.Filled.SwapHoriz,
+                    fullWidth = false
                 )
                 AppButton(
                     text = strings.desktopRescan,
                     onClick = onRescan,
-                    leadingIcon = Icons.Filled.Refresh
+                    leadingIcon = Icons.Filled.Refresh,
+                    fullWidth = false
                 )
             }
         }

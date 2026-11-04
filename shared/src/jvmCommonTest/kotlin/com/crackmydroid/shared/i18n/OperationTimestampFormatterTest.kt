@@ -1,0 +1,22 @@
+package com.crackmydroid.shared.i18n
+
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNotEquals
+import kotlin.test.assertFalse
+
+class OperationTimestampFormatterTest {
+    @Test
+    fun invalidTimestampUsesStableFallback() {
+        assertEquals("—", formatOperationTimestamp(0L, "it"))
+    }
+
+    @Test
+    fun supportedAppLanguagesProduceVisibleDateAndTime() {
+        listOf("it", "en", "de", "es", "fr").forEach { languageCode ->
+            val formatted = formatOperationTimestamp(1_700_000_000_000L, languageCode)
+            assertNotEquals("—", formatted)
+            assertFalse(formatted.isBlank())
+        }
+    }
+}

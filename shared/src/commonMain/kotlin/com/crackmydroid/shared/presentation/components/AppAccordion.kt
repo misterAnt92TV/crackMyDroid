@@ -25,6 +25,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.style.TextOverflow
@@ -37,12 +38,13 @@ import com.crackmydroid.shared.i18n.LocalStrings
 
 @Composable
 fun AppAccordion(
-    title: String,
+    title: String?,
     subtitle: String? = null,
     meta: String? = null,
     expanded: Boolean,
     onToggle: () -> Unit,
     modifier: Modifier = Modifier,
+    accessibilityLabel: String? = null,
     leading: @Composable (() -> Unit)? = null,
     actions: @Composable RowScope.() -> Unit = {},
     content: @Composable () -> Unit
@@ -56,6 +58,7 @@ fun AppAccordion(
                 .fillMaxWidth()
                 .clickable(role = Role.Button, onClick = onToggle)
                 .semantics {
+                    contentDescription = accessibilityLabel ?: title.orEmpty()
                     stateDescription = if (expanded) {
                         strings.expandedStateDescription
                     } else {
@@ -73,12 +76,14 @@ fun AppAccordion(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(2.dp)
             ) {
-                AppText(
-                    title,
-                    style = MaterialTheme.typography.titleMedium,
-                    maxLines = if (prefs.largeText) 3 else 1,
-                    overflow = TextOverflow.Ellipsis
-                )
+                title?.let {
+                    AppText(
+                        it,
+                        style = MaterialTheme.typography.titleMedium,
+                        maxLines = if (prefs.largeText) 3 else 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
                 subtitle?.let {
                     AppText(
                         it,

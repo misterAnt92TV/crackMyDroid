@@ -18,15 +18,15 @@ docker compose version
 
 ```bash
 cd infra/penpot
-cp .env.example .env
+cp .env.local.example .env
 ```
 
 Apri `.env` e imposta almeno questi valori:
 
 ```env
 PENPOT_PUBLIC_URI=http://localhost:9001
-PENPOT_SECRET_KEY=METTI_UNA_SECRET_RANDOM_LUNGA
-POSTGRES_PASSWORD=METTI_UNA_PASSWORD_FORTE
+PENPOT_SECRET_KEY=<secret generata con openssl rand -hex 32>
+POSTGRES_PASSWORD=<password forte>
 ```
 
 Per generare una secret:
@@ -34,6 +34,10 @@ Per generare una secret:
 ```bash
 openssl rand -hex 32
 ```
+
+Non usare `https://penpot.app`, `CHANGE_ME`, `REPLACE_WITH` o le credenziali
+SMTP di esempio nel profilo locale. SMTP può restare vuoto perché il profilo
+locale disabilita la verifica email.
 
 In locale SMTP è opzionale. L'override `docker-compose.local.yml` disabilita la
 verifica email soltanto per `localhost`, così gli account appena creati diventano
@@ -65,6 +69,12 @@ Stato servizi:
 
 ```bash
 docker compose -f docker-compose.yml -f docker-compose.local.yml ps
+```
+
+Per mantenere lo stesso `.env` usato dallo script:
+
+```bash
+docker compose --env-file .env -f docker-compose.yml -f docker-compose.local.yml ps
 ```
 
 Log backend:

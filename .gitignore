@@ -103,6 +103,7 @@ deploymentTargetSelector.xml
 *.env
 .env.*
 !scripts/penpot/.env.penpot.example
+!infra/penpot/.env.local.example
 secrets.properties
 signing.properties
 release-keystore.jks

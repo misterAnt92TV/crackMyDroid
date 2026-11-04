@@ -30,8 +30,12 @@ if command -v docker >/dev/null 2>&1; then
 fi
 
 if command -v docker >/dev/null 2>&1; then
+  DOCKER_CONTEXT="$(docker context show 2>/dev/null || true)"
+  if [[ -n "$DOCKER_CONTEXT" ]]; then
+    info "Docker context: $DOCKER_CONTEXT"
+  fi
   if ! docker info >/dev/null 2>&1; then
-    warn "Docker Engine non raggiungibile. Avvia Docker Desktop e riprova."
+    warn "Docker Engine non raggiungibile sul contesto ${DOCKER_CONTEXT:-corrente}. Avvia Docker Desktop o verifica il socket Docker, poi riprova."
     MISSING=1
   else
     ok "Docker Engine attivo"
@@ -51,7 +55,8 @@ else
     MISSING=1
   elif [[ "$PUB_URI" != "http://localhost:9001" ]]; then
     warn "PENPOT_PUBLIC_URI attuale: $PUB_URI"
-    warn "Per setup locale consigliato: PENPOT_PUBLIC_URI=http://localhost:9001"
+    warn "Il profilo locale richiede: PENPOT_PUBLIC_URI=http://localhost:9001"
+    MISSING=1
   else
     ok "PENPOT_PUBLIC_URI impostata per uso locale"
   fi
@@ -65,11 +70,22 @@ else
     warn "POSTGRES_PASSWORD è ancora placeholder. Imposta una password forte."
     MISSING=1
   fi
+
+  if grep -Eq '^PENPOT_(SECRET_KEY|MCP_KEY)=(CHANGE_ME|REPLACE_WITH)' .env 2>/dev/null; then
+    warn "Un valore Penpot è ancora un placeholder. Genera/configura i segreti prima dell'avvio."
+    MISSING=1
+  fi
+
+  if grep -Eq '^(PENPOT_SMTP_(DEFAULT_FROM|DEFAULT_REPLY_TO|HOST|USERNAME|PASSWORD))=(smtp\.example\.com|your_smtp_user|your_smtp_password|no-reply@example\.com)' .env 2>/dev/null; then
+    warn "Le credenziali SMTP sono ancora di esempio. Lasciale vuote nel profilo locale oppure configurale con valori reali."
+    MISSING=1
+  fi
 fi
 
 if command -v lsof >/dev/null 2>&1; then
   if lsof -i :9001 >/dev/null 2>&1; then
     warn "La porta 9001 risulta occupata. Cambia mapping in docker-compose.local.yml o libera la porta."
+    MISSING=1
   else
     ok "Porta 9001 libera"
   fi

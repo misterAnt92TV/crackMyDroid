@@ -3,8 +3,13 @@
 > Documentazione visiva delle schermate principali dell'app.
 > Visual documentation of the main app screens.
 >
-> *Nota: le schermate seguenti sono mockup ASCII che riproducono fedelmente la UI Compose
-Multiplatform. Le schermate reali possono differire leggermente in base al tema e al device.*
+> *Nota: le schermate seguenti sono mockup ASCII illustrativi della UI Compose Multiplatform,
+> non screenshot né specifiche eseguibili. Valori e layout possono differire dal device reale.*
+>
+> Per azioni disponibili, prerequisiti e limiti consultare la [guida funzionale IT/EN](functional-guide.md)
+> e il [flowchart Draw.io IT/EN](functional-flows.drawio).
+> For available actions, prerequisites and limitations, see the [English functional guide](functional-guide.md#english)
+> and the [IT/EN Draw.io flowchart](functional-flows.drawio).
 
 ---
 
@@ -21,6 +26,7 @@ Multiplatform. Le schermate reali possono differire leggermente in base al tema 
 9. [Shell / Trick](#9-shell--trick)
 10. [Log](#10-log)
 11. [Impostazioni](#11-impostazioni--settings)
+12. [Aiuto / Help](#12-aiuto--help)
 
 ---
 
@@ -61,6 +67,7 @@ funzionalità avanzate.
 │  🛡️  Root / Play Integrity   │
 │  💻  Shell / Trick           │
 │  📄  Log                     │
+│  ❓  Aiuto                   │
 │                              │
 └──────────────────────────────┘
 ```
@@ -115,7 +122,9 @@ La schermata di benvenuto mostra le ultime operazioni eseguite e una sezione FAQ
 
 - `[≡]` apre il Navigation Drawer
 - `[?]` mostra un dialog di aiuto contestuale
-- Le righe delle operazioni sono cliccabili per dettagli
+- Sono visibili fino a cinque operazioni recenti distinte per descrizione/esito
+- La cronologia espandibile mostra le voci disponibili; il pulsante dedicato rimuove una voce
+- Le voci non sono collegamenti ai report delle altre sezioni
 - Gli accordions FAQ si espandono/contraggono con animazione
 
 ---
@@ -191,6 +200,12 @@ Panoramica completa dell'hardware e software del device, con ogni riga copiabile
 
 ## 4. Root / Play Integrity
 
+La verifica passiva mostra indicatori; la prova di accesso privilegiato è un'azione esplicita separata.
+La richiesta Play Integrity attuale restituisce dettagli del token o un errore, non verdetti verificati:
+non è implementata la verifica lato server.
+Passive checks show indicators; privileged-access probing is a separate explicit action.
+The current Play Integrity request returns token details or an error, not server-verified verdicts.
+
 ```
 ┌─────────────────────────────────────────────────┐
 │ ←  Root / Play Integrity                   [?]  │
@@ -224,11 +239,11 @@ Panoramica completa dell'hardware e software del device, con ogni riga copiabile
 │  ║                                         ║    │
 │  ║  [ Avvia controllo Play Integrity ]     ║    │
 │  ║                                         ║    │
-│  ║  Risultato: ✅ PASSES_DEVICE_INTEGRITY ║    │
+│  ║  Risultato: dettagli token / errore     ║    │
 │  ║                                         ║    │
-│  ║  MEETS_DEVICE_INTEGRITY     ✅ OK       ║    │
-│  ║  MEETS_BASIC_INTEGRITY      ✅ OK       ║    │
-│  ║  MEETS_STRONG_INTEGRITY     ✅ OK       ║    │
+│  ║  Device integrity: sconosciuto         ║    │
+│  ║  Basic integrity: sconosciuto          ║    │
+│  ║  Nessuna verifica server dei verdetti  ║    │
 │  ╚═════════════════════════════════════════╝    │
 │                                                 │
 ├─────────────────────────────────────────────────┤
@@ -241,6 +256,13 @@ Panoramica completa dell'hardware e software del device, con ogni riga copiabile
 ## 5. PenTesting (Wizard 4-step)
 
 Il PenTesting è organizzato come un wizard a 4 step con una progress card persistente in cima.
+
+I nomi dei check non implicano scansioni complete: rete, librerie e file sono valutati con
+euristiche su permessi, activity e root. Anomalie e indisponibilità richiedono lettura dei dettagli;
+«OK» non certifica la sicurezza. Cronologia e snapshot del wizard restano in memoria del ViewModel.
+Check names do not imply full network, dependency or filesystem scanning. Results are heuristic;
+read details and export reports for retention beyond the in-memory ViewModel session.
+Vedere [limiti / limitations](functional-guide.md#it-limits).
 
 ### Step 1 — Selezione target
 
@@ -474,8 +496,8 @@ Il PenTesting è organizzato come un wizard a 4 step con una progress card persi
 ┌─────────────────────────────────────────────────┐
 │ ←  App installate     [🔄 Refresh]  [📤 Share]  │
 ├─────────────────────────────────────────────────┤
-│  Elenca e analizza le app installate.           │
-│  Estrai APK e verifica la sicurezza manifest.   │
+│  Elenca e cerca le app installate.              │
+│  Mostra package/percorso, estrai/condividi APK.  │
 │                                                 │
 │  ╔═════════════════════════════════════════╗    │
 │  ║ ▶ Cerca app    Preferiti: 3  [cerca ▼] ║    │
@@ -519,29 +541,17 @@ Il PenTesting è organizzato come un wizard a 4 step con una progress card persi
 └─────────────────────────────────────────────────┘
 ```
 
-### Analisi sicurezza manifest (espansa)
+### Perimetro della schermata / Screen scope
 
-```
-│  ╔═════════════════════════════════════════╗    │
-│  ║ ▼  [📦] Dangerous App  [📤] [★]   [↑] ║    │
-│  ╠═════════════════════════════════════════╣    │
-│  ║  com.dangerous.app                      ║    │
-│  ║  ─────────────────────────────────────  ║    │
-│  ║  🔴 RISCHIO CRITICO  Score: 13          ║    │
-│  ║                                         ║    │
-│  ║  🔴 android:debuggable=true             ║    │
-│  ║     L'app è compilata in debug mode.   ║    │
-│  ║  🟠 allowBackup=true                   ║    │
-│  ║     I dati possono essere estratti…   ║    │
-│  ║  🔴 ContentProvider esposto (no perm.) ║    │
-│  ║     com.dangerous.app.DataProvider     ║    │
-│  ║                                         ║    │
-│  ║  APK: /data/app/com.dangerous.app/…   ║    │
-│  ║  ┌─────────────────┐  ┌──────────────┐ ║    │
-│  ║  │  📦 Estrai APK  │  │ 📤 Condividi │ ║    │
-│  ║  └─────────────────┘  └──────────────┘ ║    │
-│  ╚═════════════════════════════════════════╝    │
-```
+L'espansione mostra percorso APK e azioni di estrazione/condivisione. L'analizzatore manifest
+presente nei repository non è collegato a questa schermata: non viene mostrata una scheda con
+score e rilievi manifest. Il check «Manifest flags» nel wizard è un'euristica distinta.
+La condivisione dall'intestazione include tutte le app caricate, non solo il filtro corrente.
+
+Expanded entries show the APK path and extraction/sharing actions. The repository-level manifest
+analyzer is not wired into this screen: it does not display a manifest score/findings card.
+The wizard's “Manifest flags” check is a separate heuristic.
+Header sharing includes all loaded apps, not just the current filter.
 
 ---
 
@@ -863,6 +873,34 @@ Il PenTesting è organizzato come un wizard a 4 step con una progress card persi
 
 ---
 
+## 12. Aiuto / Help
+
+Accesso dal menu dell'intestazione. La schermata mostra una descrizione degli strumenti e
+schede selezionabili per Home, App installate, PenTesting, Permessi, Attività, Root, Shell,
+Log, Info e Impostazioni. Toccare una scheda apre direttamente la sezione corrispondente.
+Il pulsante `?` nelle intestazioni resta l'accesso all'aiuto contestuale.
+
+Open Help from the header menu. It contains tool summaries and selectable cards for Home,
+Installed apps, PenTesting, Permissions, Activities, Root, Shell, Log, Info and Settings.
+Selecting a card opens that section directly. Header `?` buttons provide contextual help.
+This is not a conversational chat.
+
+```text
+┌──────────────────────────────────────────────┐
+│ ≡  Aiuto / Help                         [?]  │
+├──────────────────────────────────────────────┤
+│ Descrizione degli strumenti / Tool overview │
+│ [ Home             · riepilogo / summary  →]│
+│ [ App / APK        · inventario / inventory→]│
+│ [ PenTesting       · checklist             →]│
+│ [ Altre sezioni / Other sections           →]│
+├──────────────────────────────────────────────┤
+│ Home            Info            Settings    │
+└──────────────────────────────────────────────┘
+```
+
+---
+
 ## Desktop App — Schermate specifiche
 
 ### Device Picker
@@ -908,22 +946,27 @@ La schermata iniziale della desktop app per selezionare il device Android via AD
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│  📱 Pixel 7 (2B041JEG209053)  │ 🟢 Live  │ 10:24:32  │ [🔄][⚙️][⇄]│
+│  📱 Pixel 7 (2B041JEG209053)  │ Snapshot │ 10:24:32  │ [🔄][⚙️][⇄]│
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                 │
-│               [  UI identica all'app Android  ]                 │
+│       [ UI condivisa; capacità secondo la sorgente dati ]        │
 │                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 
 Legenda toolbar:
   📱 Pixel 7          → modello device
   (2B041JEG209053)    → serial number
-  🟢 Live             → dati live (snapshot aggiornato)
-  10:24:32            → timestamp ultimo snapshot
-  [🔄]                → forza rescan / pull nuovo snapshot
+  Snapshot / ADB      → sorgente dati della sessione
+  10:24:32            → data di creazione dello snapshot importato
+  [🔄]                → svuota cache Desktop / ritenta import snapshot
   [⚙️]                → impostazioni ADB (percorso binario)
   [⇄]                 → cambia device (torna al picker)
 ```
+
+Importare nuovamente lo snapshot non forza una nuova raccolta Android; controllarne la data.
+Se alcune sezioni mancano, i repository possono recuperare i dati via ADB.
+Reimporting a snapshot does not force fresh Android collection; check its creation time.
+Repositories can use ADB for sections missing from the imported snapshot.
 
 ### Stato "Snapshot non disponibile"
 

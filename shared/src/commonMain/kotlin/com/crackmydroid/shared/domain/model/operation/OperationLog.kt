@@ -7,4 +7,6 @@ data class OperationEntry(
     val timestamp: Long,
     val event: OperationEvent? = null,
     val legacyDescription: String? = description,
+    val operationId: String = "",
+    val hiddenFromRecent: Boolean = false,
 )

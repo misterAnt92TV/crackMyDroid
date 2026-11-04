@@ -447,7 +447,14 @@ fun PermissionsScreen(
                         .padding(vertical = 6.dp)
                 ) {
                     AppText(
-                        if (expanded) strings.close else strings.helpPermissions,
+                        if (expanded) {
+                            strings.permissionsExpandedAppLabel.format(
+                                app.appLabel,
+                                app.packageName
+                            )
+                        } else {
+                            strings.helpPermissions
+                        },
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.primary
                     )

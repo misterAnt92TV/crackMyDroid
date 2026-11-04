@@ -10,4 +10,8 @@ interface OperationLogRepository {
     fun record(description: String, success: Boolean, details: String? = null)
 
     fun record(event: OperationEvent, success: Boolean, details: String? = null)
+
+    fun hideFromRecent(entry: OperationEntry)
+
+    fun remove(entry: OperationEntry)
 }

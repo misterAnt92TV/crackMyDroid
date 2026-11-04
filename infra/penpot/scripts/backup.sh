@@ -20,7 +20,7 @@ source .env
 set +a
 
 echo "[1/3] Backup PostgreSQL dump..."
-docker compose exec -T postgres pg_dump -U "$POSTGRES_USER" -d "$POSTGRES_DB" | gzip > "$BACKUP_DIR/$TS/postgres.sql.gz"
+docker compose --env-file .env exec -T postgres pg_dump -U "$POSTGRES_USER" -d "$POSTGRES_DB" | gzip > "$BACKUP_DIR/$TS/postgres.sql.gz"
 
 echo "[2/3] Backup named volumes..."
 docker run --rm \
