@@ -10,6 +10,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 interface OperationLogPersistence {
     suspend fun load(): List<OperationEntry>
@@ -31,13 +33,18 @@ class DefaultOperationLogRepository(
     private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 ) : OperationLogRepository {
     private val maxEntries = 50
+    private val persistenceMutex = Mutex()
     private val _entries = MutableStateFlow<List<OperationEntry>>(emptyList())
     override val entries: StateFlow<List<OperationEntry>> = _entries
 
     init {
         scope.launch {
             runCatching { persistence.load() }
-                .onSuccess { loaded -> _entries.value = loaded.take(maxEntries) }
+                .onSuccess { loaded ->
+                    _entries.update { current ->
+                        if (current.isEmpty()) loaded.take(maxEntries) else current
+                    }
+                }
         }
     }
 
@@ -66,8 +73,11 @@ class DefaultOperationLogRepository(
     }
 
     private fun persist() {
-        val current = _entries.value
-        scope.launch { runCatching { persistence.save(current) } }
+        scope.launch {
+            persistenceMutex.withLock {
+                runCatching { persistence.save(_entries.value) }
+            }
+        }
     }
 }
 

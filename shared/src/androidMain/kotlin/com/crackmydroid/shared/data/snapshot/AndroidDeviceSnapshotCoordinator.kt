@@ -14,10 +14,6 @@ import com.crackmydroid.shared.domain.repository.InstalledAppsRepository
 import com.crackmydroid.shared.domain.repository.log.LogRepository
 import com.crackmydroid.shared.domain.repository.PermissionsRepository
 import com.crackmydroid.shared.domain.repository.RootCheckRepository
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
 import java.io.File
 import java.util.concurrent.atomic.AtomicBoolean
@@ -32,19 +28,7 @@ class AndroidDeviceSnapshotCoordinator(
     private val permissionsRepository: PermissionsRepository,
     private val installedAppsRepository: InstalledAppsRepository
 ) {
-    private val started = AtomicBoolean(false)
     private val running = AtomicBoolean(false)
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
-
-    fun start() {
-        if (!started.compareAndSet(false, true)) return
-        scope.launch {
-            runCatching { runSnapshotIfIdle() }
-                .onFailure { error ->
-                    AppLogger.logger.e(error) { "Snapshot Android non scritto" }
-                }
-        }
-    }
 
     suspend fun runSnapshotIfIdle(): Boolean {
         if (!running.compareAndSet(false, true)) {

@@ -22,7 +22,8 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -51,7 +52,8 @@ dependencies {
     implementation(project(":shared"))
     implementation(libs.compose.ui)
     implementation(libs.compose.material3)
-    implementation(libs.compose.ui.tooling)
+    debugImplementation(libs.compose.ui.tooling)
+    debugImplementation(libs.leakcanary.android)
     implementation(libs.compose.ui.tooling.preview)
     implementation(libs.compose.icons)
     implementation(libs.activity.compose)
@@ -61,7 +63,9 @@ dependencies {
     implementation(libs.kermit)
     implementation(libs.rootbeer)
     implementation(libs.material)
+    implementation(libs.work.runtime.ktx)
     testImplementation(libs.junit4)
+    testImplementation(libs.coroutines.test)
 }
 
 kover {
