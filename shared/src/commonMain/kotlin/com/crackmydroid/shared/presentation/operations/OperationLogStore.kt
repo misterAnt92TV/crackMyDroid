@@ -1,8 +1,8 @@
 package com.crackmydroid.shared.presentation.operations
 
-import com.crackmydroid.shared.domain.model.OperationEntry
-import com.crackmydroid.shared.domain.model.OperationEvent
-import com.crackmydroid.shared.domain.repository.OperationLogRepository
+import com.crackmydroid.shared.domain.model.operation.OperationEntry
+import com.crackmydroid.shared.domain.model.operation.OperationEvent
+import com.crackmydroid.shared.domain.repository.log.OperationLogRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob

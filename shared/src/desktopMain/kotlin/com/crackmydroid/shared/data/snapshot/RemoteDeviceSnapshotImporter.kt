@@ -2,12 +2,12 @@ package com.crackmydroid.shared.data.snapshot
 
 import com.crackmydroid.shared.data.DesktopScanCache
 import com.crackmydroid.shared.domain.model.ConnectedDevice
-import com.crackmydroid.shared.domain.model.DeviceScanSnapshot
-import com.crackmydroid.shared.domain.model.DeviceScanSnapshotContract
-import com.crackmydroid.shared.domain.model.DeviceScanSnapshotJson
+import com.crackmydroid.shared.domain.model.scansnapshot.DeviceScanSnapshot
+import com.crackmydroid.shared.domain.model.scansnapshot.DeviceScanSnapshotContract
+import com.crackmydroid.shared.domain.model.scansnapshot.DeviceScanSnapshotJson
 import com.crackmydroid.shared.domain.model.PlayIntegrityResult
-import com.crackmydroid.shared.domain.model.SnapshotMetadata
-import com.crackmydroid.shared.domain.model.SnapshotSectionState
+import com.crackmydroid.shared.domain.model.scansnapshot.SnapshotMetadata
+import com.crackmydroid.shared.domain.model.scansnapshot.SnapshotSectionState
 import com.crackmydroid.shared.domain.repository.AdbBridge
 import com.crackmydroid.shared.util.DesktopPaths
 import java.io.File

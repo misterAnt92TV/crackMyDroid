@@ -8,12 +8,12 @@ import androidx.core.content.FileProvider
 import com.crackmydroid.database.CacheDatabase
 import com.crackmydroid.shared.data.cache.CachingRepositoryDecorator
 import com.crackmydroid.shared.data.cache.PaginationHelper
-import com.crackmydroid.shared.domain.model.AppComponentType
-import com.crackmydroid.shared.domain.model.AppManifestSecurity
-import com.crackmydroid.shared.domain.model.ExposedComponentInfo
+import com.crackmydroid.shared.domain.model.app.AppComponentType
+import com.crackmydroid.shared.domain.model.app.AppManifestSecurity
+import com.crackmydroid.shared.domain.model.app.ExposedComponentInfo
 import com.crackmydroid.shared.domain.model.InstalledAppEntry
-import com.crackmydroid.shared.domain.model.ManifestSecurityAnalyzer
-import com.crackmydroid.shared.domain.model.ManifestSecurityReport
+import com.crackmydroid.shared.domain.model.app.ManifestSecurityAnalyzer
+import com.crackmydroid.shared.domain.model.app.ManifestSecurityReport
 import com.crackmydroid.shared.domain.repository.InstalledAppsRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

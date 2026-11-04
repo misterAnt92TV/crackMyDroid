@@ -1,4 +1,4 @@
-package com.crackmydroid.shared.domain.model
+package com.crackmydroid.shared.domain.model.app
 
 enum class AppLanguage(val code: String) {
     SYSTEM("system"),

@@ -4,7 +4,7 @@ import com.crackmydroid.shared.data.DesktopScanCache
 import com.crackmydroid.shared.domain.model.ConnectedDevice
 import com.crackmydroid.shared.domain.repository.AdbBridge
 import com.crackmydroid.shared.domain.repository.DeviceSessionController
-import com.crackmydroid.shared.domain.repository.DeviceSessionState
+import com.crackmydroid.shared.domain.model.DeviceSessionState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.runTest

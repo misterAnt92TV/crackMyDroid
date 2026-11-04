@@ -2,8 +2,8 @@ package com.crackmydroid.shared.data.shell
 
 import android.os.Build
 import com.crackmydroid.shared.AppLogger
-import com.crackmydroid.shared.domain.model.ShellCommand
-import com.crackmydroid.shared.domain.model.ShellCommandResult
+import com.crackmydroid.shared.domain.model.shell.ShellCommand
+import com.crackmydroid.shared.domain.model.shell.ShellCommandResult
 import com.crackmydroid.shared.domain.repository.ShellCommandRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

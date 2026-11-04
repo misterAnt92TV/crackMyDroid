@@ -1,6 +1,6 @@
 package com.crackmydroid.shared.domain.usecase.activities
 
-import com.crackmydroid.shared.domain.model.ActivityEntry
+import com.crackmydroid.shared.domain.model.activity.ActivityEntry
 import com.crackmydroid.shared.domain.repository.ActivityRepository
 
 class LaunchActivityUseCase(private val repository: ActivityRepository) {

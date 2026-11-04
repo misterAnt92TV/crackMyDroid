@@ -21,8 +21,8 @@ import com.crackmydroid.shared.domain.repository.CacheMaintenance
 import com.crackmydroid.shared.domain.repository.DeviceInfoRepository
 import com.crackmydroid.shared.domain.repository.DeviceSessionController
 import com.crackmydroid.shared.domain.repository.InstalledAppsRepository
-import com.crackmydroid.shared.domain.repository.LogRepository
-import com.crackmydroid.shared.domain.repository.OperationLogRepository
+import com.crackmydroid.shared.domain.repository.log.LogRepository
+import com.crackmydroid.shared.domain.repository.log.OperationLogRepository
 import com.crackmydroid.shared.domain.repository.PermissionsRepository
 import com.crackmydroid.shared.domain.repository.RemotePackageManager
 import com.crackmydroid.shared.domain.repository.ReportFileRepository

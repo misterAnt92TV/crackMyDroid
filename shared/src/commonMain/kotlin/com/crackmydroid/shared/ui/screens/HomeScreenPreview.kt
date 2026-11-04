@@ -3,7 +3,7 @@ package com.crackmydroid.shared.ui.screens
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import com.crackmydroid.shared.domain.model.OperationEntry
+import com.crackmydroid.shared.domain.model.operation.OperationEntry
 import com.crackmydroid.shared.i18n.LocalStrings
 import com.crackmydroid.shared.i18n.stringsFor
 import com.crackmydroid.shared.presentation.preview.AppScreenPreviews

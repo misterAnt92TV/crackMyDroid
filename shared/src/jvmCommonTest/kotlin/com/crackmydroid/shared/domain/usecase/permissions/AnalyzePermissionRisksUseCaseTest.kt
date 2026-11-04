@@ -1,6 +1,6 @@
 package com.crackmydroid.shared.domain.usecase.permissions
 
-import com.crackmydroid.shared.domain.model.AppPermissionEntry
+import com.crackmydroid.shared.domain.model.app.AppPermissionEntry
 import com.crackmydroid.shared.domain.model.PermissionRiskLevel
 import kotlin.test.Test
 import kotlin.test.assertEquals

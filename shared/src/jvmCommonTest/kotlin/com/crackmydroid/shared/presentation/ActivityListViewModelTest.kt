@@ -1,7 +1,7 @@
 package com.crackmydroid.shared.presentation
 
-import com.crackmydroid.shared.domain.model.ActivityEntry
-import com.crackmydroid.shared.domain.model.ActivityIntentRiskLevel
+import com.crackmydroid.shared.domain.model.activity.ActivityEntry
+import com.crackmydroid.shared.domain.model.activity.ActivityIntentRiskLevel
 import com.crackmydroid.shared.domain.model.ExportFormat
 import com.crackmydroid.shared.domain.repository.ReportFileRepository
 import com.crackmydroid.shared.domain.usecase.activities.GetActivitiesUseCase

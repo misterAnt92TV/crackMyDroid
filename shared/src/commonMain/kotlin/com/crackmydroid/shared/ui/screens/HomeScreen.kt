@@ -30,8 +30,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.crackmydroid.shared.domain.model.OperationEntry
-import com.crackmydroid.shared.domain.repository.OperationLogRepository
+import com.crackmydroid.shared.domain.model.operation.OperationEntry
+import com.crackmydroid.shared.domain.repository.log.OperationLogRepository
 import com.crackmydroid.shared.i18n.LocalStrings
 import com.crackmydroid.shared.i18n.renderOperation
 import com.crackmydroid.shared.presentation.components.AppAccordion

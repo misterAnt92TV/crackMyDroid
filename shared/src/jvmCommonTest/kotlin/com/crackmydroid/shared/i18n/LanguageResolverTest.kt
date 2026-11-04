@@ -1,6 +1,6 @@
 package com.crackmydroid.shared.i18n
 
-import com.crackmydroid.shared.domain.model.AppLanguage
+import com.crackmydroid.shared.domain.model.app.AppLanguage
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue

@@ -41,7 +41,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.crackmydroid.shared.domain.model.ConnectedDevice
 import com.crackmydroid.shared.domain.model.DeviceSessionSource
-import com.crackmydroid.shared.domain.model.SnapshotMetadata
+import com.crackmydroid.shared.domain.model.scansnapshot.SnapshotMetadata
 import com.crackmydroid.shared.domain.repository.DeviceSessionController
 import com.crackmydroid.shared.domain.usecase.settings.GetLanguageUseCase
 import com.crackmydroid.shared.i18n.LocalStrings

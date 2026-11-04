@@ -4,7 +4,7 @@ import com.crackmydroid.shared.data.DesktopAdbRepositorySupport
 import com.crackmydroid.shared.data.DesktopScanCache
 import com.crackmydroid.shared.data.adb.AdbParsers
 import com.crackmydroid.shared.data.cache.PaginationHelper
-import com.crackmydroid.shared.domain.model.AppPermissionEntry
+import com.crackmydroid.shared.domain.model.app.AppPermissionEntry
 import com.crackmydroid.shared.domain.repository.AdbBridge
 import com.crackmydroid.shared.domain.repository.DeviceSessionController
 import com.crackmydroid.shared.domain.repository.PermissionsRepository

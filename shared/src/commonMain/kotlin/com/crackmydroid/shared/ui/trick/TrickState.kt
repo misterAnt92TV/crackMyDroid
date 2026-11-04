@@ -1,7 +1,7 @@
 package com.crackmydroid.shared.ui.trick
 
-import com.crackmydroid.shared.domain.model.ShellCommand
-import com.crackmydroid.shared.domain.model.ShellCommandResult
+import com.crackmydroid.shared.domain.model.shell.ShellCommand
+import com.crackmydroid.shared.domain.model.shell.ShellCommandResult
 
 data class TrickState(
     val commands: List<ShellCommand> = emptyList(),

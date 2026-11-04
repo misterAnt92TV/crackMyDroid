@@ -1,5 +1,12 @@
-package com.crackmydroid.shared.domain.model
+package com.crackmydroid.shared.domain.model.scansnapshot
 
+import com.crackmydroid.shared.domain.model.activity.ActivityEntry
+import com.crackmydroid.shared.domain.model.app.AppPermissionEntry
+import com.crackmydroid.shared.domain.model.DeviceInfo
+import com.crackmydroid.shared.domain.model.InstalledAppEntry
+import com.crackmydroid.shared.domain.model.app.ManifestSecurityReport
+import com.crackmydroid.shared.domain.model.PlayIntegrityResult
+import com.crackmydroid.shared.domain.model.RootStatus
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -19,7 +26,7 @@ data class DeviceScanSnapshot(
     val permissions: SnapshotSection<List<AppPermissionEntry>>,
     val activities: SnapshotSection<List<ActivityEntry>>,
     val logs: SnapshotSection<List<String>>,
-    val manifestSecurityReports: SnapshotSection<List<com.crackmydroid.shared.domain.model.ManifestSecurityReport>> = SnapshotSection.skipped(
+    val manifestSecurityReports: SnapshotSection<List<ManifestSecurityReport>> = SnapshotSection.skipped(
         "Manifest security reports not generated"
     )
 ) {

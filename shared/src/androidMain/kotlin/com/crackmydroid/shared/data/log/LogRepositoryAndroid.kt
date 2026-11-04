@@ -1,7 +1,7 @@
 package com.crackmydroid.shared.data.log
 
 import android.content.Context
-import com.crackmydroid.shared.domain.repository.LogRepository
+import com.crackmydroid.shared.domain.repository.log.LogRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File

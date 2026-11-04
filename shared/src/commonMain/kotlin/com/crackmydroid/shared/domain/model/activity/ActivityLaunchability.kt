@@ -1,4 +1,4 @@
-package com.crackmydroid.shared.domain.model
+package com.crackmydroid.shared.domain.model.activity
 
 internal data class ActivityLaunchability(
     val launchableViaShell: Boolean,

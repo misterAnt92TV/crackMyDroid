@@ -58,9 +58,9 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.crackmydroid.shared.domain.model.AppTheme
-import com.crackmydroid.shared.domain.model.AppLanguage
-import com.crackmydroid.shared.domain.repository.OperationLogRepository
+import com.crackmydroid.shared.domain.model.app.AppTheme
+import com.crackmydroid.shared.domain.model.app.AppLanguage
+import com.crackmydroid.shared.domain.repository.log.OperationLogRepository
 import com.crackmydroid.shared.domain.usecase.settings.GetIntroSeenUseCase
 import com.crackmydroid.shared.domain.usecase.settings.SetIntroSeenUseCase
 import com.crackmydroid.shared.i18n.LocalStrings

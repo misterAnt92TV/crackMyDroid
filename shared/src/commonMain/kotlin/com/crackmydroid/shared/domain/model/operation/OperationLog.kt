@@ -1,4 +1,4 @@
-package com.crackmydroid.shared.domain.model
+package com.crackmydroid.shared.domain.model.operation
 
 data class OperationEntry(
     val description: String,

@@ -1,8 +1,8 @@
 package com.crackmydroid.shared.data.device
 
 import com.crackmydroid.shared.data.DesktopScanCache
-import com.crackmydroid.shared.domain.model.AppLanguage
-import com.crackmydroid.shared.domain.model.AppTheme
+import com.crackmydroid.shared.domain.model.app.AppLanguage
+import com.crackmydroid.shared.domain.model.app.AppTheme
 import com.crackmydroid.shared.domain.model.ConnectedDevice
 import com.crackmydroid.shared.domain.model.ExportFormat
 import com.crackmydroid.shared.domain.repository.AdbBridge

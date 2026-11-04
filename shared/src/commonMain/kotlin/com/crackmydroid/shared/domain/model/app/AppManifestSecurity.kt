@@ -1,4 +1,4 @@
-package com.crackmydroid.shared.domain.model
+package com.crackmydroid.shared.domain.model.app
 
 import kotlinx.serialization.Serializable
 

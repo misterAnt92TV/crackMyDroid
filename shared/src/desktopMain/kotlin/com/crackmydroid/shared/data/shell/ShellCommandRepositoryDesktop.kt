@@ -2,8 +2,8 @@ package com.crackmydroid.shared.data.shell
 
 import com.crackmydroid.shared.data.DesktopAdbRepositorySupport
 import com.crackmydroid.shared.data.DesktopScanCache
-import com.crackmydroid.shared.domain.model.ShellCommand
-import com.crackmydroid.shared.domain.model.ShellCommandResult
+import com.crackmydroid.shared.domain.model.shell.ShellCommand
+import com.crackmydroid.shared.domain.model.shell.ShellCommandResult
 import com.crackmydroid.shared.domain.repository.AdbBridge
 import com.crackmydroid.shared.domain.repository.DeviceSessionController
 import com.crackmydroid.shared.domain.repository.ShellCommandRepository

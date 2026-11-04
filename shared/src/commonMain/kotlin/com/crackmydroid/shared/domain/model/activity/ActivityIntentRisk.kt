@@ -1,4 +1,4 @@
-package com.crackmydroid.shared.domain.model
+package com.crackmydroid.shared.domain.model.activity
 
 enum class ActivityIntentRiskLevel {
     Low,

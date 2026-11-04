@@ -8,10 +8,10 @@ import android.net.Uri
 import com.crackmydroid.database.CacheDatabase
 import com.crackmydroid.shared.data.cache.CachingRepositoryDecorator
 import com.crackmydroid.shared.data.cache.PaginationHelper
-import com.crackmydroid.shared.domain.model.ActivityEntry
-import com.crackmydroid.shared.domain.model.AppComponent
+import com.crackmydroid.shared.domain.model.activity.ActivityEntry
+import com.crackmydroid.shared.domain.model.app.AppComponent
 import com.crackmydroid.shared.domain.model.ComponentType
-import com.crackmydroid.shared.domain.model.classifyAndroidActivityLaunchability
+import com.crackmydroid.shared.domain.model.activity.classifyAndroidActivityLaunchability
 import com.crackmydroid.shared.domain.repository.ActivityRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

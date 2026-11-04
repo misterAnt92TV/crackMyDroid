@@ -1,4 +1,4 @@
-package com.crackmydroid.shared.domain.model
+package com.crackmydroid.shared.domain.model.scansnapshot
 
 object DeviceScanSnapshotContract {
     const val SNAPSHOT_DIRECTORY: String = "desktop_snapshot"

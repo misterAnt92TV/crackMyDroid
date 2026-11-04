@@ -1,4 +1,4 @@
-package com.crackmydroid.shared.domain.model
+package com.crackmydroid.shared.domain.model.operation
 
 object OperationEventKey {
     const val ACTIVITY_LOAD = "activity.load"

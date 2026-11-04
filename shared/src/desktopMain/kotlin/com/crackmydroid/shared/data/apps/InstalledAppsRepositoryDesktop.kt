@@ -5,8 +5,8 @@ import com.crackmydroid.shared.data.DesktopScanCache
 import com.crackmydroid.shared.data.adb.AdbParsers
 import com.crackmydroid.shared.data.cache.PaginationHelper
 import com.crackmydroid.shared.domain.model.InstalledAppEntry
-import com.crackmydroid.shared.domain.model.ManifestSecurityAnalyzer
-import com.crackmydroid.shared.domain.model.ManifestSecurityReport
+import com.crackmydroid.shared.domain.model.app.ManifestSecurityAnalyzer
+import com.crackmydroid.shared.domain.model.app.ManifestSecurityReport
 import com.crackmydroid.shared.domain.repository.AdbBridge
 import com.crackmydroid.shared.domain.repository.DeviceSessionController
 import com.crackmydroid.shared.domain.repository.InstalledAppsRepository

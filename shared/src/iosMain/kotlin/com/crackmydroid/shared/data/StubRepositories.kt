@@ -1,21 +1,22 @@
 package com.crackmydroid.shared.data
 
-import com.crackmydroid.shared.domain.model.ActivityEntry
-import com.crackmydroid.shared.domain.model.AppComponent
-import com.crackmydroid.shared.domain.model.AppLanguage
-import com.crackmydroid.shared.domain.model.AppTheme
+import com.crackmydroid.shared.domain.model.activity.ActivityEntry
+import com.crackmydroid.shared.domain.model.app.AppComponent
+import com.crackmydroid.shared.domain.model.app.AppLanguage
+import com.crackmydroid.shared.domain.model.app.AppTheme
 import com.crackmydroid.shared.domain.model.DeviceInfo
 import com.crackmydroid.shared.domain.model.ExportFormat
 import com.crackmydroid.shared.domain.model.InstalledAppEntry
-import com.crackmydroid.shared.domain.model.ManifestSecurityReport
+import com.crackmydroid.shared.domain.model.app.ManifestSecurityReport
 import com.crackmydroid.shared.domain.model.RootStatus
-import com.crackmydroid.shared.domain.model.ShellCommand
-import com.crackmydroid.shared.domain.model.ShellCommandResult
+import com.crackmydroid.shared.domain.model.app.AppPermissionEntry
+import com.crackmydroid.shared.domain.model.shell.ShellCommand
+import com.crackmydroid.shared.domain.model.shell.ShellCommandResult
 import com.crackmydroid.shared.domain.repository.ActivityRepository
 import com.crackmydroid.shared.domain.repository.CacheMaintenance
 import com.crackmydroid.shared.domain.repository.DeviceInfoRepository
 import com.crackmydroid.shared.domain.repository.InstalledAppsRepository
-import com.crackmydroid.shared.domain.repository.LogRepository
+import com.crackmydroid.shared.domain.repository.log.LogRepository
 import com.crackmydroid.shared.domain.repository.PermissionsRepository
 import com.crackmydroid.shared.domain.repository.RootCheckRepository
 import com.crackmydroid.shared.domain.repository.SettingsRepository
@@ -167,13 +168,13 @@ class LogRepositoryIos : LogRepository {
 }
 
 class PermissionsRepositoryIos : PermissionsRepository {
-    override suspend fun listAppPermissions(): List<com.crackmydroid.shared.domain.model.AppPermissionEntry> =
+    override suspend fun listAppPermissions(): List<AppPermissionEntry> =
         emptyList()
 
     override suspend fun listAppPermissionsPaginated(
         offset: Int,
         limit: Int
-    ): List<com.crackmydroid.shared.domain.model.AppPermissionEntry> = emptyList()
+    ): List<AppPermissionEntry> = emptyList()
 }
 
 class InstalledAppsRepositoryIos : InstalledAppsRepository {

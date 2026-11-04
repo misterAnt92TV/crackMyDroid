@@ -1,4 +1,4 @@
-package com.crackmydroid.shared.domain.model
+package com.crackmydroid.shared.domain.model.shell
 
 data class ShellCommandResult(
     val success: Boolean,

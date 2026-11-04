@@ -1,5 +1,10 @@
 package com.crackmydroid.shared.domain.model
 
+import com.crackmydroid.shared.domain.model.activity.ActivityEntry
+import com.crackmydroid.shared.domain.model.scansnapshot.DeviceScanSnapshot
+import com.crackmydroid.shared.domain.model.scansnapshot.DeviceScanSnapshotJson
+import com.crackmydroid.shared.domain.model.scansnapshot.SnapshotSection
+import com.crackmydroid.shared.domain.model.scansnapshot.SnapshotSectionState
 import kotlinx.serialization.encodeToString
 import kotlin.test.Test
 import kotlin.test.assertEquals

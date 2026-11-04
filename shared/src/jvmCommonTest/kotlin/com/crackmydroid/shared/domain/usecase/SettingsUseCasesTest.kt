@@ -1,7 +1,7 @@
 package com.crackmydroid.shared.domain.usecase
 
-import com.crackmydroid.shared.domain.model.AppLanguage
-import com.crackmydroid.shared.domain.model.AppTheme
+import com.crackmydroid.shared.domain.model.app.AppLanguage
+import com.crackmydroid.shared.domain.model.app.AppTheme
 import com.crackmydroid.shared.domain.model.ExportFormat
 import com.crackmydroid.shared.domain.repository.SettingsRepository
 import com.crackmydroid.shared.domain.usecase.settings.GetActivityFavoritesUseCase

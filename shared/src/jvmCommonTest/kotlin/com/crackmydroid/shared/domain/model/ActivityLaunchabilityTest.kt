@@ -1,5 +1,8 @@
 package com.crackmydroid.shared.domain.model
 
+import com.crackmydroid.shared.domain.model.activity.ActivityEntry
+import com.crackmydroid.shared.domain.model.activity.classifyAndroidActivityLaunchability
+import com.crackmydroid.shared.domain.model.activity.favoriteKey
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse

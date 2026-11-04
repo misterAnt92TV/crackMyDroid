@@ -1,6 +1,6 @@
 package com.crackmydroid.shared.ui.trick
 
-import com.crackmydroid.shared.domain.model.ShellCommand
+import com.crackmydroid.shared.domain.model.shell.ShellCommand
 import com.crackmydroid.shared.domain.usecase.trick.ExecuteShellCommandUseCase
 import com.crackmydroid.shared.domain.usecase.trick.ListShellCommandsUseCase
 import com.crackmydroid.shared.presentation.BaseViewModel

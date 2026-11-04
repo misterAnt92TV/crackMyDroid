@@ -1,10 +1,10 @@
 package com.crackmydroid.shared.data.adb
 
-import com.crackmydroid.shared.domain.model.ActivityEntry
-import com.crackmydroid.shared.domain.model.AppComponentType
-import com.crackmydroid.shared.domain.model.AppManifestSecurity
+import com.crackmydroid.shared.domain.model.activity.ActivityEntry
+import com.crackmydroid.shared.domain.model.app.AppComponentType
+import com.crackmydroid.shared.domain.model.app.AppManifestSecurity
 import com.crackmydroid.shared.domain.model.ConnectedDevice
-import com.crackmydroid.shared.domain.model.ExposedComponentInfo
+import com.crackmydroid.shared.domain.model.app.ExposedComponentInfo
 import com.crackmydroid.shared.domain.model.InstalledAppEntry
 
 internal object AdbParsers {

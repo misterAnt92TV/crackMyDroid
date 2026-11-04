@@ -4,7 +4,7 @@ import android.content.Context
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import com.crackmydroid.shared.domain.model.OperationEntry
+import com.crackmydroid.shared.domain.model.operation.OperationEntry
 import kotlinx.coroutines.flow.first
 
 private val Context.operationLogDataStore by preferencesDataStore(name = "operation_log")

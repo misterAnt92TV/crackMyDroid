@@ -1,13 +1,13 @@
 package com.crackmydroid.shared.ui.activities
 
-import com.crackmydroid.shared.domain.model.ActivityEntry
-import com.crackmydroid.shared.domain.model.OperationEvent
-import com.crackmydroid.shared.domain.model.OperationEventKey
-import com.crackmydroid.shared.domain.model.ActivityIntentRiskAnalyzer
-import com.crackmydroid.shared.domain.model.ActivityIntentRiskLevel
-import com.crackmydroid.shared.domain.model.ActivityIntentRiskReport
-import com.crackmydroid.shared.domain.model.favoriteKey
-import com.crackmydroid.shared.domain.repository.OperationLogRepository
+import com.crackmydroid.shared.domain.model.activity.ActivityEntry
+import com.crackmydroid.shared.domain.model.operation.OperationEvent
+import com.crackmydroid.shared.domain.model.operation.OperationEventKey
+import com.crackmydroid.shared.domain.model.activity.ActivityIntentRiskAnalyzer
+import com.crackmydroid.shared.domain.model.activity.ActivityIntentRiskLevel
+import com.crackmydroid.shared.domain.model.activity.ActivityIntentRiskReport
+import com.crackmydroid.shared.domain.model.activity.favoriteKey
+import com.crackmydroid.shared.domain.repository.log.OperationLogRepository
 import com.crackmydroid.shared.domain.usecase.activities.GetActivitiesUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetActivityFavoritesUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetActivityPackageFavoritesUseCase

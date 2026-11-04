@@ -1,6 +1,6 @@
 package com.crackmydroid.shared.domain.usecase.settings
 
-import com.crackmydroid.shared.domain.model.AppLanguage
+import com.crackmydroid.shared.domain.model.app.AppLanguage
 import com.crackmydroid.shared.domain.repository.SettingsRepository
 
 class SetLanguageUseCase(private val repository: SettingsRepository) {

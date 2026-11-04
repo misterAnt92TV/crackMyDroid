@@ -4,7 +4,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import com.crackmydroid.database.CacheDatabase
 import com.crackmydroid.shared.data.cache.PaginationHelper
-import com.crackmydroid.shared.domain.model.AppPermissionEntry
+import com.crackmydroid.shared.domain.model.app.AppPermissionEntry
 import com.crackmydroid.shared.domain.repository.PermissionsRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

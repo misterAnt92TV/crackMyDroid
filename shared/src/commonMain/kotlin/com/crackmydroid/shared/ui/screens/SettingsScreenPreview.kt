@@ -3,8 +3,8 @@ package com.crackmydroid.shared.ui.screens
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import com.crackmydroid.shared.domain.model.AppLanguage
-import com.crackmydroid.shared.domain.model.AppTheme
+import com.crackmydroid.shared.domain.model.app.AppLanguage
+import com.crackmydroid.shared.domain.model.app.AppTheme
 import com.crackmydroid.shared.i18n.LocalStrings
 import com.crackmydroid.shared.i18n.stringsFor
 import com.crackmydroid.shared.presentation.preview.AppScreenPreviews
