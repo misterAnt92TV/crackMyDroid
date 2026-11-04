@@ -69,6 +69,7 @@ import com.crackmydroid.shared.i18n.platformLanguage
 import com.crackmydroid.shared.i18n.resolveLanguageCode
 import com.crackmydroid.shared.i18n.stringsFor
 import com.crackmydroid.shared.presentation.components.AccessibilityPrefs
+import com.crackmydroid.shared.presentation.components.effectiveReduceMotion
 import com.crackmydroid.shared.presentation.components.LocalAccessibilityPrefs
 import com.crackmydroid.shared.presentation.components.PackageIcon
 import com.crackmydroid.shared.presentation.components.SearchHistoryStore
@@ -103,7 +104,10 @@ import org.koin.mp.KoinPlatform
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
-fun CrackMyDroidApp(onLanguageChanged: (AppLanguage) -> Unit = {}) {
+fun CrackMyDroidApp(
+    onLanguageChanged: (AppLanguage) -> Unit = {},
+    systemMotionReductionEnabled: Boolean = false
+) {
     val selected: MutableState<Screen> = remember { mutableStateOf<Screen>(Screen.Home) }
     val drawerState: DrawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -130,7 +134,10 @@ fun CrackMyDroidApp(onLanguageChanged: (AppLanguage) -> Unit = {}) {
     val sectionHintDialog = remember { mutableStateOf<Screen?>(null) }
     val accessibilityPrefs = AccessibilityPrefs(
         highContrast = settingsState.value.highContrast,
-        reduceMotion = settingsState.value.reduceMotion,
+        reduceMotion = effectiveReduceMotion(
+            preferenceEnabled = settingsState.value.reduceMotion,
+            systemMotionReductionEnabled = systemMotionReductionEnabled
+        ),
         largeText = settingsState.value.largeText
     )
 

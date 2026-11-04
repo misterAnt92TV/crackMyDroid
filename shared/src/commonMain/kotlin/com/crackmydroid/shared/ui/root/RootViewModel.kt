@@ -1,6 +1,7 @@
 package com.crackmydroid.shared.ui.root
 
 import com.crackmydroid.shared.domain.usecase.root.CheckRootUseCase
+import com.crackmydroid.shared.domain.model.root.RootCheckMode
 import com.crackmydroid.shared.domain.usecase.reports.ExportReportUseCase
 import com.crackmydroid.shared.domain.usecase.root.CheckPlayIntegrityUseCase
 import com.crackmydroid.shared.i18n.Strings
@@ -35,9 +36,17 @@ class RootViewModel(
     }
 
     fun verify() {
+        verify(RootCheckMode.PASSIVE)
+    }
+
+    fun verifyRootAccess() {
+        verify(RootCheckMode.PRIVILEGE_ACCESS)
+    }
+
+    private fun verify(mode: RootCheckMode) {
         scope.launch {
             _state.update { it.copy(loading = true, error = null) }
-            runCatching { checkRoot() }
+            runCatching { checkRoot(mode) }
                 .onSuccess { status -> _state.update { it.copy(status = status, loading = false) } }
                 .onFailure { err ->
                     _state.update {

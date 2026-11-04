@@ -12,6 +12,14 @@ interface AdbBridge {
         asRoot: Boolean = false
     ): Result<String>
 
+    suspend fun shellWithTimeout(
+        serial: String,
+        command: String,
+        configuredPath: String? = null,
+        asRoot: Boolean = false,
+        timeoutMs: Long = 60_000L
+    ): Result<String> = shell(serial, command, configuredPath, asRoot)
+
     suspend fun pull(
         serial: String,
         remotePath: String,

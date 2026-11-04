@@ -8,4 +8,9 @@ data class AccessibilityPrefs(
     val largeText: Boolean = false
 )
 
+fun effectiveReduceMotion(
+    preferenceEnabled: Boolean,
+    systemMotionReductionEnabled: Boolean
+): Boolean = preferenceEnabled || systemMotionReductionEnabled
+
 val LocalAccessibilityPrefs = staticCompositionLocalOf { AccessibilityPrefs() }

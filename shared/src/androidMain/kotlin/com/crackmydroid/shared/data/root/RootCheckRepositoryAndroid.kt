@@ -4,6 +4,10 @@ import android.content.Context
 import android.os.Build
 import android.provider.Settings
 import com.crackmydroid.shared.domain.model.RootStatus
+import com.crackmydroid.shared.domain.model.root.RootCheck
+import com.crackmydroid.shared.domain.model.root.RootCheckId
+import com.crackmydroid.shared.domain.model.root.RootCheckMode
+import com.crackmydroid.shared.domain.model.root.RootCheckOutcome
 import com.crackmydroid.shared.domain.repository.RootCheckRepository
 import com.crackmydroid.shared.i18n.platformLanguage
 import com.crackmydroid.shared.i18n.stringsFor
@@ -30,9 +34,9 @@ class RootCheckRepositoryAndroid(private val context: Context) : RootCheckReposi
         val exitCode: Int?
     )
 
-    override suspend fun checkRoot(): RootStatus = withContext(Dispatchers.Default) {
+    override suspend fun checkRoot(mode: RootCheckMode): RootStatus = withContext(Dispatchers.Default) {
         val rootBeer = RootBeer(context)
-        val rootSignals = mutableListOf<RootSignal>()
+        val checks = mutableListOf<RootCheck>()
         val hardeningSignals = mutableListOf<RootSignal>()
 
         val suPaths = listOf(
@@ -44,38 +48,15 @@ class RootCheckRepositoryAndroid(private val context: Context) : RootCheckReposi
             "/system/priv-app/Superuser.apk"
         )
         val suBinaryFound = suPaths.any { path -> File(path).exists() }
-        rootSignals += RootSignal(
-            label = "Su binary paths",
-            detected = suBinaryFound,
-            detail = if (suBinaryFound) {
-                "Trovato in path noti (${suPaths.count { File(it).exists() }} match)."
-            } else {
-                "Nessun binario su nei path noti."
-            }
-        )
-
         val whichSu = runShellCommand("which su")
         val whichSuDetected = whichSu.success && whichSu.stdout.isNotBlank()
-        rootSignals += RootSignal(
-            label = "which su",
-            detected = whichSuDetected,
-            detail = if (whichSuDetected) {
-                "Comando disponibile: ${whichSu.stdout.lineSequence().firstOrNull() ?: "su"}"
-            } else {
-                "Comando su non trovato nella shell."
-            }
-        )
-
-        val suExec = runShellCommand("su -c id", timeoutMs = 700L)
-        val suExecDetected = suExec.success && (suExec.stdout + suExec.stderr).contains("uid=0")
-        rootSignals += RootSignal(
-            label = "su -c id",
-            detected = suExecDetected,
-            detail = if (suExecDetected) {
-                "Esecuzione privilegiata confermata (${suExec.stdout.ifBlank { "uid=0" }})."
-            } else {
-                "Nessuna esecuzione root confermata (${suExec.stderr.ifBlank { "accesso negato/timeout" }})."
-            }
+        checks += RootCheck(
+            RootCheckId.SU_BINARY,
+            if (suBinaryFound || whichSuDetected) RootCheckOutcome.DETECTED else RootCheckOutcome.NOT_DETECTED,
+            listOf(
+                if (suBinaryFound) "${suPaths.count { File(it).exists() }} path match" else "nessun path noto",
+                whichSu.stdout.lineSequence().firstOrNull().orEmpty()
+            ).filter { it.isNotBlank() }.joinToString("; ")
         )
 
         val magiskPaths = listOf(
@@ -86,14 +67,10 @@ class RootCheckRepositoryAndroid(private val context: Context) : RootCheckReposi
             "/data/adb/modules"
         )
         val magiskFound = magiskPaths.any { path -> File(path).exists() }
-        rootSignals += RootSignal(
-            label = "Magisk/KernelSU traces",
-            detected = magiskFound,
-            detail = if (magiskFound) {
-                "Tracce trovate in filesystem (${magiskPaths.count { File(it).exists() }} match)."
-            } else {
-                "Nessuna traccia Magisk/KernelSU rilevata."
-            }
+        checks += RootCheck(
+            RootCheckId.MAGISK_TRACES,
+            if (magiskFound) RootCheckOutcome.DETECTED else RootCheckOutcome.NOT_DETECTED,
+            "${magiskPaths.count { File(it).exists() }} path match"
         )
 
         val rootManagers = listOf(
@@ -107,50 +84,75 @@ class RootCheckRepositoryAndroid(private val context: Context) : RootCheckReposi
             "me.weishu.kernelsu"
         )
         val detectedManagers = rootManagers.filter { pkg -> isPackageInstalled(pkg) }
-        rootSignals += RootSignal(
-            label = "Root manager apps",
-            detected = detectedManagers.isNotEmpty(),
-            detail = if (detectedManagers.isNotEmpty()) {
-                "App rilevate: ${detectedManagers.joinToString(", ")}"
-            } else {
-                "Nessun root manager noto rilevato."
-            }
+        checks += RootCheck(
+            RootCheckId.ROOT_MANAGER,
+            if (detectedManagers.isNotEmpty()) RootCheckOutcome.DETECTED else RootCheckOutcome.NOT_DETECTED,
+            detectedManagers.joinToString(", ")
         )
 
-        val busyBoxDetected = runCatching { rootBeer.checkForBusyBoxBinary() }.getOrDefault(false)
-        rootSignals += RootSignal(
-            label = "BusyBox",
-            detected = busyBoxDetected,
-            detail = if (busyBoxDetected) "BusyBox presente." else "BusyBox non rilevato."
+        val busyBoxDetected = runCatching { rootBeer.checkForBusyBoxBinary() }.getOrDefault(false) ||
+            runShellCommand("command -v busybox").stdout.isNotBlank()
+        val busyBoxList = runShellCommand("busybox --list")
+        checks += RootCheck(
+            RootCheckId.BUSYBOX,
+            if (busyBoxDetected) RootCheckOutcome.DETECTED else RootCheckOutcome.NOT_DETECTED,
+            if (busyBoxDetected) "${busyBoxList.stdout.lineSequence().count { it.isNotBlank() }} applet lines" else ""
         )
+
+        val sudo = runShellCommand("command -v sudo")
+        val sudoProbe = if (sudo.success && sudo.stdout.isNotBlank()) {
+            runShellCommand("sudo -n id", timeoutMs = 700L)
+        } else null
+        checks += RootCheck(
+            RootCheckId.SUDO,
+            when {
+                sudoProbe?.stdout?.contains("uid=0") == true -> RootCheckOutcome.DETECTED
+                sudo.success && sudo.stdout.isNotBlank() -> RootCheckOutcome.DENIED
+                else -> RootCheckOutcome.NOT_DETECTED
+            },
+            listOf(sudo.stdout, sudoProbe?.stderr.orEmpty()).filter { it.isNotBlank() }.joinToString(" ")
+        )
+
+        if (mode == RootCheckMode.PRIVILEGE_ACCESS) {
+            val suExec = runShellCommand("su -c id", timeoutMs = 5_000L)
+            val output = suExec.stdout + suExec.stderr
+            val outcome = when {
+                output.contains("uid=0") -> RootCheckOutcome.DETECTED
+                suExec.stderr.contains("timeout", ignoreCase = true) -> RootCheckOutcome.TIMEOUT
+                else -> RootCheckOutcome.DENIED
+            }
+            checks += RootCheck(RootCheckId.ROOT_ACCESS, outcome, output.take(240))
+        } else {
+            checks += RootCheck(
+                RootCheckId.ROOT_ACCESS,
+                RootCheckOutcome.UNAVAILABLE,
+                "prova esplicita non eseguita"
+            )
+        }
 
         val testKeys = Build.TAGS?.contains("test-keys") == true
-        rootSignals += RootSignal(
-            label = "Build test-keys",
-            detected = testKeys,
-            detail = if (testKeys) "Build firmata con test-keys." else "Build release-keys o tag non sospetti."
-        )
 
         val dangerousProps = runCatching { rootBeer.checkForDangerousProps() }.getOrDefault(false)
-        rootSignals += RootSignal(
+        hardeningSignals += RootSignal(
             label = "Dangerous props",
             detected = dangerousProps,
             detail = if (dangerousProps) "Proprieta sistema sospette rilevate." else "Nessuna proprieta sospetta rilevata."
         )
 
         val rwPaths = runCatching { rootBeer.checkForRWPaths() }.getOrDefault(false)
-        rootSignals += RootSignal(
+        hardeningSignals += RootSignal(
             label = "RW system paths",
             detected = rwPaths,
             detail = if (rwPaths) "Path di sistema montati RW." else "Path di sistema non RW (o non rilevati)."
         )
 
         val rootBeerAggregate = runCatching { rootBeer.isRooted }.getOrDefault(false)
-        rootSignals += RootSignal(
-            label = "RootBeer aggregate",
-            detected = rootBeerAggregate,
-            detail = if (rootBeerAggregate) "RootBeer segnala rooting." else "RootBeer non segnala rooting."
+        checks += RootCheck(
+            RootCheckId.ROOTBEER,
+            if (rootBeerAggregate) RootCheckOutcome.DETECTED else RootCheckOutcome.NOT_DETECTED,
+            "RootBeer aggregate"
         )
+        hardeningSignals += RootSignal("Build test-keys", testKeys, "test-keys=$testKeys")
 
         val selinuxFlag = readFirstLine("/sys/fs/selinux/enforce")
         val selinuxPermissive = selinuxFlag == "0"
@@ -197,18 +199,14 @@ class RootCheckRepositoryAndroid(private val context: Context) : RootCheckReposi
             }
         )
 
-        val rooted = rootSignals.any { signal -> signal.detected }
-        val positiveRootSignals = rootSignals.count { signal -> signal.detected }
+        val rooted = checks.any { it.id == RootCheckId.ROOT_ACCESS && it.outcome == RootCheckOutcome.DETECTED }
+        val positiveRootSignals = checks.count { it.outcome == RootCheckOutcome.DETECTED }
         val strings = stringsFor(platformLanguage())
         val details = buildString {
             appendLine(if (rooted) strings.rootDetectedDetails else strings.rootNotDetectedDetails)
-            appendLine("Indicatori root positivi: $positiveRootSignals/${rootSignals.size}")
+            appendLine("Indicatori root rilevati: $positiveRootSignals/${checks.size}")
             appendLine()
-            appendLine("Segnali root:")
-            rootSignals.forEach { signal ->
-                val marker = if (signal.detected) "[ALERT]" else "[OK]"
-                appendLine("$marker ${signal.label}: ${signal.detail}")
-            }
+            checks.forEach { check -> appendLine("${check.id}: ${check.outcome} ${check.evidence}") }
             appendLine()
             appendLine("Hardening dispositivo:")
             hardeningSignals.forEach { signal ->
@@ -216,7 +214,7 @@ class RootCheckRepositoryAndroid(private val context: Context) : RootCheckReposi
                 appendLine("$marker ${signal.label}: ${signal.detail}")
             }
         }
-        RootStatus(rooted, details.trim())
+        RootStatus(rooted, details.trim(), checks)
     }
 
     override suspend fun checkPlayIntegrity(nonce: String): com.crackmydroid.shared.domain.model.PlayIntegrityResult =

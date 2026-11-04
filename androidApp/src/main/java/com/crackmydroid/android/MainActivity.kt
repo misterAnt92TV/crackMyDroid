@@ -40,7 +40,7 @@ class MainActivity : ComponentActivity() {
             Surface {
                 when (packageInventoryAccess) {
                     PackageInventoryAccess.Full -> {
-                        CrackMyDroidApp()
+                        CrackMyDroidApp(systemMotionReductionEnabled = rememberSystemMotionReduction())
                         var showDisclosure by remember { mutableStateOf(!disclosureSeen) }
                         if (showDisclosure) {
                             PackageInventoryDisclosure(

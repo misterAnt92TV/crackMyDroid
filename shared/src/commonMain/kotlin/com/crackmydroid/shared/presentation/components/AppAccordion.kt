@@ -120,20 +120,21 @@ fun AppAccordion(
             }
         }
 
-        AnimatedVisibility(
-            visible = expanded,
-            enter = if (reduceMotion) fadeIn() else fadeIn(
-                animationSpec = androidx.compose.animation.core.tween(
-                    220
-                )
-            ) + slideInVertically { it / 8 },
-            exit = fadeOut()
-        ) {
+        val accordionContent: @Composable () -> Unit = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 androidx.compose.material3.HorizontalDivider()
                 Spacer(modifier = Modifier.height(4.dp))
                 content()
             }
+        }
+        if (reduceMotion) {
+            if (expanded) accordionContent()
+        } else {
+            AnimatedVisibility(
+                visible = expanded,
+                enter = fadeIn(animationSpec = androidx.compose.animation.core.tween(220)) + slideInVertically { it / 8 },
+                exit = fadeOut()
+            ) { accordionContent() }
         }
     }
 }

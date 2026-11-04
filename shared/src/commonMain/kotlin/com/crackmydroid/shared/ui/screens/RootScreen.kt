@@ -1,6 +1,15 @@
 package com.crackmydroid.shared.ui.screens
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -36,6 +45,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.crackmydroid.shared.i18n.LocalStrings
@@ -43,6 +56,7 @@ import com.crackmydroid.shared.presentation.components.AppButton
 import com.crackmydroid.shared.presentation.components.ErrorDialogComponent
 import com.crackmydroid.shared.presentation.components.ScrollToTopButton
 import com.crackmydroid.shared.presentation.components.SectionHeader
+import com.crackmydroid.shared.presentation.components.LocalAccessibilityPrefs
 import com.crackmydroid.shared.presentation.components.text.AppText
 import com.crackmydroid.shared.ui.root.RootViewModel
 import kotlinx.coroutines.launch
@@ -60,6 +74,7 @@ fun RootScreen(
     val state by viewModel.state.collectAsState()
     var nonceInput by remember { mutableStateOf("sample-nonce") }
     val strings = LocalStrings.current
+    val accessibilityPrefs = LocalAccessibilityPrefs.current
     val resultBringIntoView = remember { BringIntoViewRequester() }
 
     val scrollState = rememberScrollState()
@@ -108,7 +123,7 @@ fun RootScreen(
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.SemiBold
                         )
-                        IconButton(onClick = { viewModel.verify() }) {
+                        IconButton(onClick = { viewModel.verify() }, enabled = !state.loading) {
                             Icon(
                                 Icons.Filled.Refresh,
                                 contentDescription = strings.verifyRoot,
@@ -119,6 +134,14 @@ fun RootScreen(
                     AppButton(
                         text = strings.verifyRoot,
                         onClick = { viewModel.verify() },
+                        enabled = !state.loading,
+                        fullWidth = true
+                    )
+                    AppText(strings.rootPassiveHint, style = MaterialTheme.typography.bodySmall)
+                    AppButton(
+                        text = strings.rootPrivilegeTest,
+                        onClick = { viewModel.verifyRootAccess() },
+                        enabled = !state.loading,
                         fullWidth = true
                     )
 
@@ -133,20 +156,38 @@ fun RootScreen(
                     AppButton(
                         text = strings.verifyPlayIntegrity,
                         onClick = { viewModel.verifyPlayIntegrity(nonceInput.ifBlank { "sample-nonce" }) },
+                        enabled = !state.loading,
                         fullWidth = true
                     )
                 }
             }
 
             if (state.loading) {
-                CircularProgressIndicator(modifier = Modifier.padding(top = 12.dp))
+                if (accessibilityPrefs.reduceMotion) {
+                    AppText(
+                        text = strings.rootChecking,
+                        modifier = Modifier.padding(top = 12.dp),
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                } else {
+                    androidx.compose.material3.LinearProgressIndicator(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 12.dp)
+                    )
+                }
             }
 
-            if (state.status != null || state.playIntegrity != null) {
+            AnimatedVisibility(
+                visible = state.status != null || state.playIntegrity != null,
+                enter = if (accessibilityPrefs.reduceMotion) EnterTransition.None else fadeIn(tween(180)) + expandVertically(tween(180)),
+                exit = if (accessibilityPrefs.reduceMotion) ExitTransition.None else fadeOut(tween(120))
+            ) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .bringIntoViewRequester(resultBringIntoView),
+                        .bringIntoViewRequester(resultBringIntoView)
+                        .semantics { liveRegion = LiveRegionMode.Polite },
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     state.status?.let { status ->
@@ -169,21 +210,33 @@ fun RootScreen(
                                     horizontalArrangement = Arrangement.SpaceBetween,
                                     verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
                                 ) {
-                                    Row(
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
-                                    ) {
-                                        Icon(
-                                            imageVector = if (status.isRooted) Icons.Filled.Warning else Icons.Filled.CheckCircle,
-                                            contentDescription = null,
-                                            tint = onBg
-                                        )
-                                        Text(
-                                            text = if (status.isRooted) strings.rootDetected else strings.rootNotDetected,
-                                            style = MaterialTheme.typography.titleMedium,
-                                            color = onBg,
-                                            fontWeight = FontWeight.SemiBold
-                                        )
+                                    val statusContent: @Composable (Boolean) -> Unit = { rooted ->
+                                        Row(
+                                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+                                        ) {
+                                            Icon(
+                                                imageVector = if (rooted) Icons.Filled.Warning else Icons.Filled.CheckCircle,
+                                                contentDescription = null,
+                                                tint = onBg
+                                            )
+                                            Text(
+                                                text = if (rooted) strings.rootDetected else strings.rootNotDetected,
+                                                style = MaterialTheme.typography.titleMedium,
+                                                color = onBg,
+                                                fontWeight = FontWeight.SemiBold,
+                                                modifier = Modifier.semantics { heading() }
+                                            )
+                                        }
+                                    }
+                                    if (accessibilityPrefs.reduceMotion) {
+                                        statusContent(status.isRooted)
+                                    } else {
+                                        AnimatedContent(
+                                            targetState = status.isRooted,
+                                            transitionSpec = { fadeIn(tween(160)) togetherWith fadeOut(tween(120)) },
+                                            label = "rootStatus"
+                                        ) { statusContent(it) }
                                     }
                                     IconButton(onClick = { viewModel.shareReport(strings) }) {
                                         Icon(
@@ -199,6 +252,23 @@ fun RootScreen(
                                     style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
                                     color = onBg
                                 )
+                                if (status.checks.isNotEmpty()) {
+                                    Text(
+                                        text = strings.rootChecksTitle,
+                                        style = MaterialTheme.typography.titleSmall,
+                                        color = onBg,
+                                        fontWeight = FontWeight.SemiBold
+                                    )
+                                    status.checks.forEach { check ->
+                                        val label = strings.rootCheckLabels[check.id.name] ?: check.id.name
+                                        val outcome = strings.rootOutcomeLabels[check.outcome.name] ?: check.outcome.name
+                                        AppText(
+                                            text = "$label: $outcome${check.evidence.takeIf { it.isNotBlank() }?.let { " — $it" } ?: ""}",
+                                            color = onBg,
+                                            style = MaterialTheme.typography.bodySmall
+                                        )
+                                    }
+                                }
                             }
                         }
                     }
@@ -259,7 +329,11 @@ fun RootScreen(
 
         ScrollToTopButton(
             visible = showScrollTop,
-            onClick = { scope.launch { scrollState.animateScrollTo(0) } },
+            onClick = {
+                scope.launch {
+                    if (accessibilityPrefs.reduceMotion) scrollState.scrollTo(0) else scrollState.animateScrollTo(0)
+                }
+            },
             modifier = Modifier
                 .align(androidx.compose.ui.Alignment.BottomEnd)
                 .padding(12.dp)
@@ -271,7 +345,7 @@ fun RootScreen(
     }
 
     LaunchedEffect(state.status, state.playIntegrity) {
-        if (state.status != null || state.playIntegrity != null) {
+        if (!accessibilityPrefs.reduceMotion && (state.status != null || state.playIntegrity != null)) {
             resultBringIntoView.bringIntoView()
         }
     }

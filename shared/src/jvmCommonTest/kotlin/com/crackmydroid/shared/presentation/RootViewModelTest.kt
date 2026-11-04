@@ -2,6 +2,7 @@ package com.crackmydroid.shared.presentation
 
 import com.crackmydroid.shared.domain.model.PlayIntegrityResult
 import com.crackmydroid.shared.domain.model.RootStatus
+import com.crackmydroid.shared.domain.model.root.RootCheckMode
 import com.crackmydroid.shared.domain.repository.ReportFileRepository
 import com.crackmydroid.shared.domain.repository.RootCheckRepository
 import com.crackmydroid.shared.domain.usecase.root.CheckPlayIntegrityUseCase
@@ -84,6 +85,24 @@ class RootViewModelTest {
 
         assertEquals(false, viewModel.state.value.loading)
         assertEquals("root service unavailable", viewModel.state.value.error)
+        viewModel.onCleared()
+    }
+
+    @Test
+    fun verifyRootAccess_isExplicitAndPublishesPrivilegeResult() = runTest(dispatcher) {
+        val repository = mockk<RootCheckRepository>()
+        coEvery { repository.checkRoot(RootCheckMode.PRIVILEGE_ACCESS) } returns RootStatus(
+            isRooted = true,
+            details = "uid=0(root)",
+        )
+        val viewModel = viewModel(repository)
+
+        viewModel.verifyRootAccess()
+        advanceUntilIdle()
+
+        assertEquals(true, viewModel.state.value.status?.isRooted)
+        assertEquals("uid=0(root)", viewModel.state.value.status?.details)
+        coVerify(exactly = 1) { repository.checkRoot(RootCheckMode.PRIVILEGE_ACCESS) }
         viewModel.onCleared()
     }
 

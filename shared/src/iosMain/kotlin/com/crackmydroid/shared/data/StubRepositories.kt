@@ -9,6 +9,7 @@ import com.crackmydroid.shared.domain.model.ExportFormat
 import com.crackmydroid.shared.domain.model.InstalledAppEntry
 import com.crackmydroid.shared.domain.model.app.ManifestSecurityReport
 import com.crackmydroid.shared.domain.model.RootStatus
+import com.crackmydroid.shared.domain.model.root.RootCheckMode
 import com.crackmydroid.shared.domain.model.app.AppPermissionEntry
 import com.crackmydroid.shared.domain.model.shell.ShellCommand
 import com.crackmydroid.shared.domain.model.shell.ShellCommandResult
@@ -39,7 +40,7 @@ class ActivityRepositoryIos : ActivityRepository {
 }
 
 class RootCheckRepositoryIos : RootCheckRepository {
-    override suspend fun checkRoot(): RootStatus = RootStatus(false, "Non supportato su iOS")
+    override suspend fun checkRoot(mode: RootCheckMode): RootStatus = RootStatus(false, "Non supportato su iOS")
     override suspend fun checkPlayIntegrity(nonce: String): com.crackmydroid.shared.domain.model.PlayIntegrityResult =
         com.crackmydroid.shared.domain.model.PlayIntegrityResult(
             basicIntegrity = null,

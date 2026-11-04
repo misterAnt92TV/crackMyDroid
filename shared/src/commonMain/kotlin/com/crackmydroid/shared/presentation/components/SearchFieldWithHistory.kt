@@ -135,11 +135,8 @@ fun SearchFieldWithHistoryComponent(
             )
         )
 
-        AnimatedVisibility(
-            visible = suggestionsVisible,
-            enter = fadeIn(),
-            exit = fadeOut()
-        ) {
+        val preferences = LocalAccessibilityPrefs.current
+        val suggestionsContent: @Composable () -> Unit = {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -203,6 +200,15 @@ fun SearchFieldWithHistoryComponent(
                     )
                 }
             }
+        }
+        if (preferences.reduceMotion) {
+            if (suggestionsVisible) suggestionsContent()
+        } else {
+            AnimatedVisibility(
+                visible = suggestionsVisible,
+                enter = fadeIn(),
+                exit = fadeOut()
+            ) { suggestionsContent() }
         }
     }
 }
