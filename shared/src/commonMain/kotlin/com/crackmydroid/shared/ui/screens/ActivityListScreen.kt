@@ -275,6 +275,12 @@ fun ActivityListScreen(
                     meta = strings.activityUi.activityCount.format(group.activities.size),
                     expanded = expanded,
                     onToggle = { viewModel.toggleExpanded(group.packageName) },
+                    titleMaxLines = 3,
+                    subtitleMaxLines = 3,
+                    textOverflow = androidx.compose.ui.text.style.TextOverflow.Clip,
+                    headerVerticalPadding = 10.dp,
+                    headerMinHeight = 88.dp,
+                    actionsBelowHeader = true,
                     leading = {
                         PackageIcon(
                             packageName = group.packageName,
@@ -345,6 +351,9 @@ fun ActivityListScreen(
 
                                 else -> null
                             },
+                            titleMaxLines = 3,
+                            subtitleMaxLines = 4,
+                            textOverflow = androidx.compose.ui.text.style.TextOverflow.Clip,
                             trailing = {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     if (!activity.launchableViaShell) {
