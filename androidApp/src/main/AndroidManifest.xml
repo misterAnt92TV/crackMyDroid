@@ -4,7 +4,7 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <!-- Required to list and audit installed apps, which is core app functionality. -->
+    <!-- Install-time normal permission required for the local full-inventory APK scan. -->
     <uses-permission
         android:name="android.permission.QUERY_ALL_PACKAGES"
         tools:ignore="QueryAllPackagesPermission" />
@@ -19,8 +19,8 @@
     <application
         android:name=".CrackMyDroidApp"
         android:allowBackup="true"
-        android:label="CrackMyDroid"
         android:icon="@mipmap/ic_launcher"
+        android:label="CrackMyDroid"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.CrackMyDroid">
@@ -51,6 +51,7 @@
                 <action android:name="android.intent.action.PACKAGE_ADDED" />
                 <action android:name="android.intent.action.PACKAGE_REPLACED" />
                 <action android:name="android.intent.action.PACKAGE_REMOVED" />
+
                 <data android:scheme="package" />
             </intent-filter>
         </receiver>

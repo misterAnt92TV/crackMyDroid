@@ -1,6 +1,13 @@
 package com.crackmydroid.shared.domain.model
 
-import kotlinx.serialization.decodeFromString
+import com.crackmydroid.shared.domain.model.activity.ActivityEntry
+import com.crackmydroid.shared.domain.model.scansnapshot.DeviceScanSnapshot
+import com.crackmydroid.shared.domain.model.scansnapshot.DeviceScanSnapshotJson
+import com.crackmydroid.shared.domain.model.scansnapshot.SnapshotSection
+import com.crackmydroid.shared.domain.model.scansnapshot.SnapshotSectionState
+import com.crackmydroid.shared.domain.model.root.RootCheck
+import com.crackmydroid.shared.domain.model.root.RootCheckId
+import com.crackmydroid.shared.domain.model.root.RootCheckOutcome
 import kotlinx.serialization.encodeToString
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -35,7 +42,10 @@ class DeviceScanSnapshotJsonTest {
             rootStatus = SnapshotSection.ready(
                 RootStatus(
                     isRooted = false,
-                    details = "Nessuna traccia di root"
+                    details = "Nessuna traccia di root",
+                    checks = listOf(
+                        RootCheck(RootCheckId.BUSYBOX, RootCheckOutcome.NOT_DETECTED)
+                    )
                 )
             ),
             playIntegrity = SnapshotSection.skipped(
@@ -65,6 +75,7 @@ class DeviceScanSnapshotJsonTest {
         assertEquals("Permessi non disponibili", decoded.permissions.error)
         assertEquals(SnapshotSectionState.SKIPPED, decoded.playIntegrity.state)
         assertEquals("I/Test: ok", decoded.logs.data?.first())
+        assertEquals(RootCheckOutcome.NOT_DETECTED, decoded.rootStatus.data?.checks?.single()?.outcome)
     }
 
     @Test

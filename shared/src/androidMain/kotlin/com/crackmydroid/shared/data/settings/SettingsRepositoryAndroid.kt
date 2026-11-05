@@ -6,31 +6,46 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import com.crackmydroid.shared.domain.model.AppTheme
-import com.crackmydroid.shared.domain.model.AppLanguage
+import com.crackmydroid.shared.domain.model.app.AppLanguage
+import com.crackmydroid.shared.domain.model.app.AppTheme
 import com.crackmydroid.shared.domain.model.ExportFormat
 import com.crackmydroid.shared.domain.repository.SettingsRepository
+import com.crackmydroid.shared.data.settings.SettingsPreferenceKeys.ADB_PATH
+import com.crackmydroid.shared.data.settings.SettingsPreferenceKeys.ACTIVITY_FAVORITES
+import com.crackmydroid.shared.data.settings.SettingsPreferenceKeys.ACTIVITY_PACKAGE_FAVORITES
+import com.crackmydroid.shared.data.settings.SettingsPreferenceKeys.EXPORT_FORMAT
+import com.crackmydroid.shared.data.settings.SettingsPreferenceKeys.FEATURE_HINTS_ENABLED
+import com.crackmydroid.shared.data.settings.SettingsPreferenceKeys.HIGH_CONTRAST
+import com.crackmydroid.shared.data.settings.SettingsPreferenceKeys.INSTALLED_APP_FAVORITES
+import com.crackmydroid.shared.data.settings.SettingsPreferenceKeys.INTRO_SEEN
+import com.crackmydroid.shared.data.settings.SettingsPreferenceKeys.LARGE_TEXT
+import com.crackmydroid.shared.data.settings.SettingsPreferenceKeys.LANGUAGE
+import com.crackmydroid.shared.data.settings.SettingsPreferenceKeys.PERMISSION_FAVORITES
+import com.crackmydroid.shared.data.settings.SettingsPreferenceKeys.REDUCE_MOTION
+import com.crackmydroid.shared.data.settings.SettingsPreferenceKeys.SUGGESTIONS_ENABLED
+import com.crackmydroid.shared.data.settings.SettingsPreferenceKeys.THEME
+import com.crackmydroid.shared.data.settings.SettingsPreferenceKeys.VERBOSE_LOG
 import kotlinx.coroutines.flow.first
 
 private val Context.settingsDataStore by preferencesDataStore(name = "settings")
 
 class SettingsRepositoryAndroid(private val context: Context) : SettingsRepository {
 
-    private val themeKey = stringPreferencesKey("theme")
-    private val languageKey = stringPreferencesKey("language")
-    private val verboseKey = booleanPreferencesKey("verbose_log")
-    private val introKey = booleanPreferencesKey("intro_seen")
-    private val exportFormatKey = stringPreferencesKey("export_format")
-    private val highContrastKey = booleanPreferencesKey("high_contrast")
-    private val reduceMotionKey = booleanPreferencesKey("reduce_motion")
-    private val largeTextKey = booleanPreferencesKey("large_text")
-    private val suggestionsKey = booleanPreferencesKey("suggestions_enabled")
-    private val featureHintsKey = booleanPreferencesKey("feature_hints_enabled")
-    private val adbPathKey = stringPreferencesKey("adb_path")
-    private val activityFavoritesKey = stringSetPreferencesKey("activity_favorites")
-    private val activityPackageFavoritesKey = stringSetPreferencesKey("activity_package_favorites")
-    private val installedAppFavoritesKey = stringSetPreferencesKey("installed_app_favorites")
-    private val permissionFavoritesKey = stringSetPreferencesKey("permission_favorites")
+    private val themeKey = stringPreferencesKey(THEME)
+    private val languageKey = stringPreferencesKey(LANGUAGE)
+    private val verboseKey = booleanPreferencesKey(VERBOSE_LOG)
+    private val introKey = booleanPreferencesKey(INTRO_SEEN)
+    private val exportFormatKey = stringPreferencesKey(EXPORT_FORMAT)
+    private val highContrastKey = booleanPreferencesKey(HIGH_CONTRAST)
+    private val reduceMotionKey = booleanPreferencesKey(REDUCE_MOTION)
+    private val largeTextKey = booleanPreferencesKey(LARGE_TEXT)
+    private val suggestionsKey = booleanPreferencesKey(SUGGESTIONS_ENABLED)
+    private val featureHintsKey = booleanPreferencesKey(FEATURE_HINTS_ENABLED)
+    private val adbPathKey = stringPreferencesKey(ADB_PATH)
+    private val activityFavoritesKey = stringSetPreferencesKey(ACTIVITY_FAVORITES)
+    private val activityPackageFavoritesKey = stringSetPreferencesKey(ACTIVITY_PACKAGE_FAVORITES)
+    private val installedAppFavoritesKey = stringSetPreferencesKey(INSTALLED_APP_FAVORITES)
+    private val permissionFavoritesKey = stringSetPreferencesKey(PERMISSION_FAVORITES)
 
     override suspend fun getTheme(): AppTheme {
         val prefs = context.settingsDataStore.data.first()
@@ -75,7 +90,8 @@ class SettingsRepositoryAndroid(private val context: Context) : SettingsReposito
 
     override suspend fun getExportFormat(): ExportFormat {
         val prefs = context.settingsDataStore.data.first()
-        return prefs[exportFormatKey]?.let { runCatching { ExportFormat.valueOf(it) }.getOrNull() } ?: ExportFormat.TXT
+        return prefs[exportFormatKey]?.let { runCatching { ExportFormat.valueOf(it) }.getOrNull() }
+            ?: ExportFormat.TXT
     }
 
     override suspend fun setExportFormat(format: ExportFormat) {
@@ -150,12 +166,31 @@ class SettingsRepositoryAndroid(private val context: Context) : SettingsReposito
         }
     }
 
-    override suspend fun getActivityFavorites() = context.settingsDataStore.data.first()[activityFavoritesKey].orEmpty()
-    override suspend fun setActivityFavorites(values: Set<String>) { context.settingsDataStore.edit { it[activityFavoritesKey] = values } }
-    override suspend fun getActivityPackageFavorites() = context.settingsDataStore.data.first()[activityPackageFavoritesKey].orEmpty()
-    override suspend fun setActivityPackageFavorites(values: Set<String>) { context.settingsDataStore.edit { it[activityPackageFavoritesKey] = values } }
-    override suspend fun getInstalledAppFavorites() = context.settingsDataStore.data.first()[installedAppFavoritesKey].orEmpty()
-    override suspend fun setInstalledAppFavorites(values: Set<String>) { context.settingsDataStore.edit { it[installedAppFavoritesKey] = values } }
-    override suspend fun getPermissionFavorites() = context.settingsDataStore.data.first()[permissionFavoritesKey].orEmpty()
-    override suspend fun setPermissionFavorites(values: Set<String>) { context.settingsDataStore.edit { it[permissionFavoritesKey] = values } }
+    override suspend fun getActivityFavorites() =
+        context.settingsDataStore.data.first()[activityFavoritesKey].orEmpty()
+
+    override suspend fun setActivityFavorites(values: Set<String>) {
+        context.settingsDataStore.edit { it[activityFavoritesKey] = values }
+    }
+
+    override suspend fun getActivityPackageFavorites() =
+        context.settingsDataStore.data.first()[activityPackageFavoritesKey].orEmpty()
+
+    override suspend fun setActivityPackageFavorites(values: Set<String>) {
+        context.settingsDataStore.edit { it[activityPackageFavoritesKey] = values }
+    }
+
+    override suspend fun getInstalledAppFavorites() =
+        context.settingsDataStore.data.first()[installedAppFavoritesKey].orEmpty()
+
+    override suspend fun setInstalledAppFavorites(values: Set<String>) {
+        context.settingsDataStore.edit { it[installedAppFavoritesKey] = values }
+    }
+
+    override suspend fun getPermissionFavorites() =
+        context.settingsDataStore.data.first()[permissionFavoritesKey].orEmpty()
+
+    override suspend fun setPermissionFavorites(values: Set<String>) {
+        context.settingsDataStore.edit { it[permissionFavoritesKey] = values }
+    }
 }

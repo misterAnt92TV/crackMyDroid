@@ -5,6 +5,11 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.compose.mpp)
     alias(libs.plugins.sqldelight)
+    alias(libs.plugins.kover)
+}
+
+dependencies {
+    debugImplementation(libs.compose.ui.tooling)
 }
 
 kotlin {
@@ -22,6 +27,7 @@ kotlin {
                 implementation(libs.compose.foundation)
                 implementation(libs.compose.material3)
                 implementation(libs.compose.icons)
+                implementation(libs.compose.ui.tooling.preview)
                 implementation(libs.koin.core)
                 implementation(libs.kermit)
                 implementation(libs.coroutines.core)
@@ -119,6 +125,15 @@ sqldelight {
     databases {
         create("CacheDatabase") {
             packageName.set("com.crackmydroid.database")
+        }
+    }
+}
+
+kover {
+    currentProject {
+        createVariant("coverage") {
+            add("debug")
+            add("jvm")
         }
     }
 }

@@ -27,26 +27,28 @@ class DeviceInfoRepositoryDesktop(
         val memInfo = shell("cat /proc/meminfo")
         val kernel = shell("uname -a")
         val adbEnabled = shell("settings get global adb_enabled").trim() == "1"
-        val developerOptions = shell("settings get global development_settings_enabled").trim() == "1"
+        val developerOptions =
+            shell("settings get global development_settings_enabled").trim() == "1"
 
         val (totalMemory, freeMemory) = AdbParsers.parseMemInfo(memInfo)
         val info = DeviceInfo(
-            manufacturer = props["ro.product.manufacturer"] ?: props["ro.product.vendor.manufacturer"] ?: "unknown",
-            model = props["ro.product.model"] ?: device.model ?: "unknown",
+            manufacturer = props["ro.product.manufacturer"]
+                ?: props["ro.product.vendor.manufacturer"],
+            model = props["ro.product.model"] ?: device.model,
             brand = props["ro.product.brand"],
             device = props["ro.product.device"] ?: device.device,
             product = props["ro.product.name"] ?: device.product,
-            androidVersion = props["ro.build.version.release"] ?: "unknown",
-            securityPatch = props["ro.build.version.security_patch"] ?: "unknown",
+            androidVersion = props["ro.build.version.release"],
+            securityPatch = props["ro.build.version.security_patch"],
             buildId = props["ro.build.id"],
             buildDisplay = props["ro.build.display.id"],
             buildFingerprint = props["ro.build.fingerprint"],
             radio = props["gsm.version.baseband"] ?: props["ril.sw_ver"],
             kernelVersion = kernel.ifBlank { null },
-            hardware = props["ro.hardware"] ?: "n/a",
-            bootloader = props["ro.bootloader"] ?: "n/a",
+            hardware = props["ro.hardware"],
+            bootloader = props["ro.bootloader"],
             batteryLevel = AdbParsers.parseBatteryLevel(battery),
-            networkType = props["gsm.network.type"] ?: props["wifi.interface"] ?: "unknown",
+            networkType = props["gsm.network.type"] ?: props["wifi.interface"],
             totalMemory = totalMemory,
             freeMemory = freeMemory,
             screenResolution = AdbParsers.parseWmSize(wmSize),

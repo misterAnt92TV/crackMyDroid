@@ -1,0 +1,8 @@
+<resources>
+    <string name="package_inventory_disclosure_title">Scansione app installate</string>
+    <string name="package_inventory_disclosure_body">CrackMyDroid legge localmente l\'inventario delle app installate per mostrare APK, activity, componenti e permessi. Non viene mostrato un dialogo di sistema: l\'accesso alla visibilità dei package è dichiarato nel manifest. L\'esportazione o la condivisione di un APK avviene solo quando la avvii tu.</string>
+    <string name="package_inventory_disclosure_confirm">Ho capito</string>
+    <string name="package_inventory_unavailable_title">Scansione completa non disponibile</string>
+    <string name="package_inventory_unavailable_body">Questa installazione non dispone della visibilità completa delle app. Per evitare risultati parziali, la scansione non viene avviata. Reinstalla un APK che dichiari QUERY_ALL_PACKAGES nel manifest.</string>
+    <string name="close">Chiudi</string>
+</resources>

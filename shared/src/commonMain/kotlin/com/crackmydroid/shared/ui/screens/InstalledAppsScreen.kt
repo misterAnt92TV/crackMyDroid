@@ -1,5 +1,7 @@
 package com.crackmydroid.shared.ui.screens
 
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -10,54 +12,50 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.StarBorder
-import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Snackbar
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.combinedClickable
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.launch
-import androidx.compose.runtime.rememberCoroutineScope
 import com.crackmydroid.shared.i18n.LocalStrings
 import com.crackmydroid.shared.presentation.components.AppAccordion
-import com.crackmydroid.shared.presentation.components.AppCard
 import com.crackmydroid.shared.presentation.components.AppButton
 import com.crackmydroid.shared.presentation.components.ButtonVariant
-import com.crackmydroid.shared.presentation.components.AppText
-import com.crackmydroid.shared.presentation.components.ErrorDialog
-import com.crackmydroid.shared.presentation.components.ExportDetailsCard
-import com.crackmydroid.shared.presentation.components.SectionHeader
+import com.crackmydroid.shared.presentation.components.ErrorDialogComponent
 import com.crackmydroid.shared.presentation.components.PackageIcon
-import com.crackmydroid.shared.presentation.components.SearchFieldWithHistory
 import com.crackmydroid.shared.presentation.components.ScrollToTopButton
+import com.crackmydroid.shared.presentation.components.SearchFieldWithHistoryComponent
+import com.crackmydroid.shared.presentation.components.SectionHeader
+import com.crackmydroid.shared.presentation.components.card.ExportDetailsCard
+import com.crackmydroid.shared.presentation.components.text.AppText
 import com.crackmydroid.shared.ui.installedapps.InstalledAppsViewModel
+import kotlinx.coroutines.launch
 
 @Composable
 fun InstalledAppsScreen(
@@ -82,16 +80,13 @@ fun InstalledAppsScreen(
     }
 
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(padding)
-            .padding(horizontal = 16.dp, vertical = 10.dp)
+        modifier = Modifier.fillMaxSize()
     ) {
         LazyColumn(
             state = listState,
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(10.dp),
-            contentPadding = androidx.compose.foundation.layout.PaddingValues(bottom = 30.dp)
+            contentPadding = screenContentPadding(padding, horizontal = 16.dp, vertical = 10.dp)
         ) {
             item {
                 SectionHeader(
@@ -106,7 +101,7 @@ fun InstalledAppsScreen(
                         ) {
                             Icon(
                                 imageVector = Icons.Filled.Refresh,
-                                contentDescription = "Aggiorna lista app"
+                                contentDescription = strings.refreshAppsContentDescription
                             )
                         }
                         IconButton(
@@ -116,7 +111,7 @@ fun InstalledAppsScreen(
                         ) {
                             Icon(
                                 imageVector = Icons.Filled.Share,
-                                contentDescription = "Condividi lista app"
+                                contentDescription = strings.shareAppsContentDescription
                             )
                         }
                     },
@@ -140,14 +135,13 @@ fun InstalledAppsScreen(
                     onToggle = { searchToolsExpanded = !searchToolsExpanded },
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    SearchFieldWithHistory(
+                    SearchFieldWithHistoryComponent(
                         value = state.filter,
                         onValueChange = { viewModel.setFilter(it) },
                         onSubmit = { viewModel.setFilter(it, trackUsage = true) },
                         label = strings.apkSearch,
                         historyKey = "installed_apps",
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(18.dp),
                         showClearAction = true,
                         onCleared = {
                             viewModel.setFilter("")
@@ -165,7 +159,9 @@ fun InstalledAppsScreen(
                         LazyRow(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(6.dp),
-                            contentPadding = androidx.compose.foundation.layout.PaddingValues(vertical = 4.dp)
+                            contentPadding = androidx.compose.foundation.layout.PaddingValues(
+                                vertical = 4.dp
+                            )
                         ) {
                             items(favoriteQueries, key = { it }) { fav ->
                                 @OptIn(ExperimentalFoundationApi::class)
@@ -294,14 +290,14 @@ fun InstalledAppsScreen(
                         IconButton(onClick = { viewModel.share(app.packageName, false) }) {
                             Icon(
                                 imageVector = Icons.Filled.Share,
-                                contentDescription = "Condividi APK",
+                                contentDescription = strings.shareApkContentDescription,
                                 tint = MaterialTheme.colorScheme.primary
                             )
                         }
                         IconButton(onClick = { viewModel.toggleFavorite(app.packageName) }) {
                             Icon(
                                 imageVector = if (isFavorite) Icons.Filled.Star else Icons.Filled.StarBorder,
-                                contentDescription = "Preferito",
+                                contentDescription = strings.favoriteContentDescription,
                                 tint = if (isFavorite) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
@@ -361,5 +357,10 @@ fun InstalledAppsScreen(
         )
     }
 
-    state.error?.let { ErrorDialog(it, viewModel::clearError) }
+    state.error?.let { ErrorDialogComponent(it, viewModel::clearError) }
+}
+
+@Composable
+fun AppCard(modifier: Modifier, content: @Composable () -> Unit) {
+    TODO("Not yet implemented")
 }

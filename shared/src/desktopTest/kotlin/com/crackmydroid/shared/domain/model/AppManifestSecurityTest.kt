@@ -1,5 +1,10 @@
 package com.crackmydroid.shared.domain.model
 
+import com.crackmydroid.shared.domain.model.app.AppComponentType
+import com.crackmydroid.shared.domain.model.app.AppManifestSecurity
+import com.crackmydroid.shared.domain.model.app.ExposedComponentInfo
+import com.crackmydroid.shared.domain.model.app.ManifestRiskLevel
+import com.crackmydroid.shared.domain.model.app.ManifestSecurityAnalyzer
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue

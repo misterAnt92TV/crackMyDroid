@@ -1,8 +1,8 @@
 package com.crackmydroid.shared.ui.activities
 
-import com.crackmydroid.shared.domain.model.ActivityEntry
-import com.crackmydroid.shared.domain.model.ActivityIntentRiskLevel
-import com.crackmydroid.shared.domain.model.ActivityIntentRiskReport
+import com.crackmydroid.shared.domain.model.activity.ActivityEntry
+import com.crackmydroid.shared.domain.model.activity.ActivityIntentRiskLevel
+import com.crackmydroid.shared.domain.model.activity.ActivityIntentRiskReport
 
 data class ActivityListState(
     val activities: List<ActivityEntry> = emptyList(),

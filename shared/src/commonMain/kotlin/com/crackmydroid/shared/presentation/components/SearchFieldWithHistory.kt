@@ -3,13 +3,16 @@ package com.crackmydroid.shared.presentation.components
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.History
@@ -23,90 +26,33 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
-
-private const val MAX_HISTORY = 8
-private const val MAX_VISIBLE_SUGGESTIONS = 6
-
-object SearchHistoryStore {
-    private val histories = mutableMapOf<String, ArrayDeque<String>>()
-    private var enabled: Boolean = true
-    private val multiSpaceRegex = Regex("\\s+")
-
-    fun setEnabled(value: Boolean) {
-        enabled = value
-    }
-
-    fun add(key: String, query: String) {
-        if (!enabled) return
-        val normalized = normalizeQuery(query)
-        if (normalized.isEmpty()) return
-        val deque = histories.getOrPut(key) { ArrayDeque() }
-        val existing = deque.firstOrNull { it.equals(normalized, ignoreCase = true) }
-        if (existing != null) {
-            deque.remove(existing)
-        }
-        deque.addFirst(normalized)
-        while (deque.size > MAX_HISTORY) deque.removeLast()
-    }
-
-    fun remove(key: String, query: String) {
-        val normalized = normalizeQuery(query)
-        histories[key]?.removeAll { it.equals(normalized, ignoreCase = true) }
-    }
-
-    fun clear(key: String) {
-        histories[key]?.clear()
-    }
-
-    fun suggestions(key: String, prefix: String = ""): List<String> {
-        if (!enabled) return emptyList()
-        val deque = histories[key] ?: return emptyList()
-        val normalizedPrefix = normalizeQuery(prefix)
-        if (normalizedPrefix.isBlank()) {
-            return deque.take(MAX_VISIBLE_SUGGESTIONS)
-        }
-        return deque.asSequence()
-            .filter { it.contains(normalizedPrefix, ignoreCase = true) }
-            .filterNot { it.equals(normalizedPrefix, ignoreCase = true) }
-            .sortedBy { if (it.startsWith(normalizedPrefix, ignoreCase = true)) 0 else 1 }
-            .take(MAX_VISIBLE_SUGGESTIONS)
-            .toList()
-    }
-
-    fun clearAll() {
-        histories.clear()
-    }
-
-    private fun normalizeQuery(query: String): String = query
-        .trim()
-        .replace(multiSpaceRegex, " ")
-}
+import com.crackmydroid.shared.i18n.LocalStrings
+import com.crackmydroid.shared.presentation.preview.AppComponentPreviews
+import com.crackmydroid.shared.presentation.preview.ComponentPreviewContainer
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun SearchFieldWithHistory(
+fun SearchFieldWithHistoryComponent(
     value: String,
     onValueChange: (String) -> Unit,
     onSubmit: (String) -> Unit,
     label: String,
     historyKey: String,
     modifier: Modifier = Modifier,
-    shape: Shape = RoundedCornerShape(18.dp),
+    shape: androidx.compose.ui.graphics.Shape = TextFieldDefaults.shape,
     showClearAction: Boolean = false,
     onCleared: (() -> Unit)? = null
 ) {
@@ -114,6 +60,7 @@ fun SearchFieldWithHistory(
     var hasFocus by remember { mutableStateOf(false) }
     var showSuggestions by remember { mutableStateOf(false) }
     val focusManager = LocalFocusManager.current
+    val strings = LocalStrings.current
     val suggestions = remember(value, historyKey, historyVersion) {
         SearchHistoryStore.suggestions(historyKey, value)
     }
@@ -172,7 +119,7 @@ fun SearchFieldWithHistory(
                     }) {
                         Icon(
                             imageVector = Icons.Filled.Close,
-                            contentDescription = null,
+                            contentDescription = strings.clearSearchContentDescription,
                             tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
@@ -188,11 +135,8 @@ fun SearchFieldWithHistory(
             )
         )
 
-        AnimatedVisibility(
-            visible = suggestionsVisible,
-            enter = fadeIn(),
-            exit = fadeOut()
-        ) {
+        val preferences = LocalAccessibilityPrefs.current
+        val suggestionsContent: @Composable () -> Unit = {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -223,7 +167,8 @@ fun SearchFieldWithHistory(
                                 },
                                 onLongClick = {
                                     removeFromHistoryAndRefresh(suggestion)
-                                }
+                                },
+                                onLongClickLabel = strings.removeSearchHistoryContentDescription.format(suggestion)
                             ),
                             label = { Text(suggestion) },
                             leadingIcon = {
@@ -244,6 +189,10 @@ fun SearchFieldWithHistory(
                         color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier
                             .padding(horizontal = 4.dp)
+                            .semantics {
+                                role = androidx.compose.ui.semantics.Role.Button
+                                contentDescription = strings.clearSearchHistoryContentDescription
+                            }
                             .combinedClickable(
                                 onClick = { clearHistoryAndRefresh() },
                                 onLongClick = { clearHistoryAndRefresh() }
@@ -252,5 +201,37 @@ fun SearchFieldWithHistory(
                 }
             }
         }
+        if (preferences.reduceMotion) {
+            if (suggestionsVisible) suggestionsContent()
+        } else {
+            AnimatedVisibility(
+                visible = suggestionsVisible,
+                enter = fadeIn(),
+                exit = fadeOut()
+            ) { suggestionsContent() }
+        }
+    }
+}
+
+@AppComponentPreviews
+@Composable
+private fun SearchFieldWithHistoryComponentPreview() = ComponentPreviewContainer {
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        SearchFieldWithHistoryComponent(
+            value = "",
+            onValueChange = {},
+            onSubmit = {},
+            label = "Cerca applicazioni",
+            historyKey = "component-preview-empty"
+        )
+        SearchFieldWithHistoryComponent(
+            value = "crack",
+            onValueChange = {},
+            onSubmit = {},
+            label = "Cerca applicazioni",
+            historyKey = "component-preview-filled",
+            showClearAction = true,
+            onCleared = {}
+        )
     }
 }

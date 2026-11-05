@@ -1,18 +1,21 @@
 package com.crackmydroid.shared.ui.activities
 
-import com.crackmydroid.shared.domain.model.ActivityEntry
-import com.crackmydroid.shared.domain.model.ActivityIntentRiskAnalyzer
-import com.crackmydroid.shared.domain.model.ActivityIntentRiskLevel
-import com.crackmydroid.shared.domain.model.ActivityIntentRiskReport
-import com.crackmydroid.shared.domain.usecase.GetActivitiesUseCase
-import com.crackmydroid.shared.domain.usecase.LaunchActivityUseCase
-import com.crackmydroid.shared.domain.usecase.GetExportFormatUseCase
-import com.crackmydroid.shared.domain.usecase.GetActivityFavoritesUseCase
-import com.crackmydroid.shared.domain.usecase.SetActivityFavoritesUseCase
-import com.crackmydroid.shared.domain.usecase.GetActivityPackageFavoritesUseCase
-import com.crackmydroid.shared.domain.usecase.SetActivityPackageFavoritesUseCase
+import com.crackmydroid.shared.domain.model.activity.ActivityEntry
+import com.crackmydroid.shared.domain.model.operation.OperationEvent
+import com.crackmydroid.shared.domain.model.operation.OperationEventKey
+import com.crackmydroid.shared.domain.model.activity.ActivityIntentRiskAnalyzer
+import com.crackmydroid.shared.domain.model.activity.ActivityIntentRiskLevel
+import com.crackmydroid.shared.domain.model.activity.ActivityIntentRiskReport
+import com.crackmydroid.shared.domain.model.activity.favoriteKey
+import com.crackmydroid.shared.domain.repository.log.OperationLogRepository
+import com.crackmydroid.shared.domain.usecase.activities.GetActivitiesUseCase
+import com.crackmydroid.shared.domain.usecase.settings.GetActivityFavoritesUseCase
+import com.crackmydroid.shared.domain.usecase.settings.GetActivityPackageFavoritesUseCase
+import com.crackmydroid.shared.domain.usecase.settings.GetExportFormatUseCase
+import com.crackmydroid.shared.domain.usecase.activities.LaunchActivityUseCase
+import com.crackmydroid.shared.domain.usecase.settings.SetActivityFavoritesUseCase
+import com.crackmydroid.shared.domain.usecase.settings.SetActivityPackageFavoritesUseCase
 import com.crackmydroid.shared.domain.usecase.reports.ExportReportUseCase
-import com.crackmydroid.shared.domain.repository.OperationLogRepository
 import com.crackmydroid.shared.presentation.BaseViewModel
 import com.crackmydroid.shared.presentation.operations.NoOpOperationLogRepository
 import kotlinx.coroutines.Job
@@ -28,10 +31,10 @@ class ActivityListViewModel(
     private val getActivities: GetActivitiesUseCase,
     private val launchActivity: LaunchActivityUseCase,
     private val getExportFormat: GetExportFormatUseCase,
-    private val getFavorites: GetActivityFavoritesUseCase? = null,
-    private val setFavorites: SetActivityFavoritesUseCase? = null,
-    private val getPackageFavorites: GetActivityPackageFavoritesUseCase? = null,
-    private val setPackageFavorites: SetActivityPackageFavoritesUseCase? = null,
+    private val getFavorites: GetActivityFavoritesUseCase,
+    private val setFavorites: SetActivityFavoritesUseCase,
+    private val getPackageFavorites: GetActivityPackageFavoritesUseCase,
+    private val setPackageFavorites: SetActivityPackageFavoritesUseCase,
     private val reportExporter: ExportReportUseCase,
     private val operationLogs: OperationLogRepository = NoOpOperationLogRepository
 ) : BaseViewModel() {
@@ -44,18 +47,27 @@ class ActivityListViewModel(
 
     fun refresh() {
         scope.launch {
-            runCatching { getFavorites?.invoke().orEmpty() to getPackageFavorites?.invoke().orEmpty() }.onSuccess { (favorites, packages) ->
+            runCatching {
+                getFavorites() to getPackageFavorites()
+            }.onSuccess { (favorites, packages) ->
                 _state.update { it.copy(favorites = favorites, favoritePackages = packages) }
             }
             _state.update { it.copy(loading = true, error = null) }
             runCatching { getActivities() }
                 .onSuccess { list ->
                     recomputeAsync(_state.value.copy(activities = list, loading = false))
-                    operationLogs.record("Caricate ${list.size} activity", success = true)
+                    operationLogs.record(
+                        OperationEvent(OperationEventKey.ACTIVITY_LOAD, listOf(list.size.toString())),
+                        success = true
+                    )
                 }
                 .onFailure { err ->
                     _state.update { it.copy(error = err.message ?: "Errore", loading = false) }
-                    operationLogs.record("Caricamento activity", success = false, details = err.message)
+                    operationLogs.record(
+                        OperationEvent(OperationEventKey.ACTIVITY_LOAD),
+                        success = false,
+                        details = err.message
+                    )
                 }
         }
     }
@@ -99,7 +111,8 @@ class ActivityListViewModel(
         val normalizedAction = action?.trim().orEmpty().ifBlank { null }
         val normalizedData = dataUri?.trim().orEmpty().ifBlank { null }
         val normalizedMimeType = mimeType?.trim().orEmpty().ifBlank { null }
-        val hasGuidedIntent = normalizedAction != null || normalizedData != null || normalizedMimeType != null
+        val hasGuidedIntent =
+            normalizedAction != null || normalizedData != null || normalizedMimeType != null
         if (!entry.launchableViaShell && !hasGuidedIntent) {
             val msg = entry.launchabilityReason ?: "Activity non avviabile via am start -n"
             _state.update { it.copy(error = msg) }
@@ -137,23 +150,25 @@ class ActivityListViewModel(
     }
 
     fun toggleFavorite(entry: ActivityEntry) {
-        val key = activityKey(entry)
+        val key = entry.favoriteKey()
         val favs = _state.value.favorites.toMutableSet()
         if (favs.contains(key)) favs.remove(key) else favs.add(key)
         recomputeAsync(_state.value.copy(favorites = favs))
-        scope.launch { setFavorites?.invoke(favs) }
+        scope.launch { setFavorites(favs) }
     }
 
     fun toggleFavoritePackage(packageName: String) {
         val favs = _state.value.favoritePackages.toMutableSet()
         if (favs.contains(packageName)) favs.remove(packageName) else favs.add(packageName)
         recomputeAsync(_state.value.copy(favoritePackages = favs))
-        scope.launch { setPackageFavorites?.invoke(favs) }
+        scope.launch { setPackageFavorites(favs) }
     }
 
     fun toggleExpanded(packageName: String) {
         val expanded = _state.value.expandedPackages.toMutableSet()
-        if (expanded.contains(packageName)) expanded.remove(packageName) else expanded.add(packageName)
+        if (expanded.contains(packageName)) expanded.remove(packageName) else expanded.add(
+            packageName
+        )
         _state.update { it.copy(expandedPackages = expanded) }
     }
 
@@ -165,7 +180,11 @@ class ActivityListViewModel(
                     operationLogs.record("Export attività", success = true, details = path)
                 }.onFailure { error ->
                     _state.update { it.copy(error = error.message) }
-                    operationLogs.record("Export attività", success = false, details = error.message)
+                    operationLogs.record(
+                        "Export attività",
+                        success = false,
+                        details = error.message
+                    )
                 }
         }
     }
@@ -174,18 +193,31 @@ class ActivityListViewModel(
         val acts = _state.value.activities.filter { it.packageName == packageName }
         if (acts.isEmpty()) {
             _state.update { it.copy(error = "Nessuna activity per $packageName") }
-            operationLogs.record("Export attività $packageName", success = false, details = "Nessuna activity")
+            operationLogs.record(
+                "Export attività $packageName",
+                success = false,
+                details = "Nessuna activity"
+            )
             return
         }
         scope.launch {
             val content = buildExportContent(acts)
-            val fileName = "activities_${packageName.replace('.', '_')}" + extensionForCurrentFormat()
+            val fileName =
+                "activities_${packageName.replace('.', '_')}" + extensionForCurrentFormat()
             reportExporter.share(fileName, content)
                 .onSuccess { path ->
-                    operationLogs.record("Export attività $packageName", success = true, details = path)
+                    operationLogs.record(
+                        "Export attività $packageName",
+                        success = true,
+                        details = path
+                    )
                 }.onFailure { error ->
                     _state.update { it.copy(error = error.message) }
-                    operationLogs.record("Export attività $packageName", success = false, details = error.message)
+                    operationLogs.record(
+                        "Export attività $packageName",
+                        success = false,
+                        details = error.message
+                    )
                 }
         }
     }
@@ -204,10 +236,12 @@ class ActivityListViewModel(
         val riskReports = activities.map(ActivityIntentRiskAnalyzer::analyze)
         val shellLaunchableCount = activities.count { it.launchableViaShell }
         val contextualLaunchCount = activities.count { it.hasGuidedLaunchMetadata() }
-        val guidedLaunchCount = activities.count { !it.launchableViaShell && it.hasGuidedLaunchMetadata() }
-        val dumpOnlyCount = activities.count { !it.launchableViaShell && !it.hasGuidedLaunchMetadata() }
+        val guidedLaunchCount =
+            activities.count { !it.launchableViaShell && it.hasGuidedLaunchMetadata() }
+        val dumpOnlyCount =
+            activities.count { !it.launchableViaShell && !it.hasGuidedLaunchMetadata() }
         val riskyActivitiesCount = riskReports.count { it.level != ActivityIntentRiskLevel.Low }
-        val favoriteActivitiesCount = activities.count { favorites.contains(activityKey(it)) }
+        val favoriteActivitiesCount = activities.count { favorites.contains(it.favoriteKey()) }
         val highestRiskLevel = ActivityIntentRiskAnalyzer.summarize(riskReports)
         val findings = buildList {
             if (dumpOnlyCount > 0) {
@@ -226,7 +260,13 @@ class ActivityListViewModel(
                 add("$favoriteActivitiesCount activity sono state segnate come preferite per analisi ripetute.")
             }
             if (riskyActivitiesCount > 0) {
-                add("$riskyActivitiesCount activity espongono superfici intent/deeplink con rischio ${ActivityIntentRiskAnalyzer.formatLevel(highestRiskLevel)}.")
+                add(
+                    "$riskyActivitiesCount activity espongono superfici intent/deeplink con rischio ${
+                        ActivityIntentRiskAnalyzer.formatLevel(
+                            highestRiskLevel
+                        )
+                    }."
+                )
             }
             if (isEmpty()) {
                 add("Tutte le activity rilevate risultano avviabili via shell senza metadati aggiuntivi.")
@@ -241,7 +281,7 @@ class ActivityListViewModel(
             .take(4)
 
         val highlights = riskReports.sortedWith(
-            compareByDescending<ActivityIntentRiskReport> { favorites.contains(activityKey(it.entry)) }
+            compareByDescending<ActivityIntentRiskReport> { favorites.contains(it.entry.favoriteKey()) }
                 .thenByDescending { it.score }
                 .thenBy { it.entry.activityName.lowercase() }
         ).take(10)
@@ -277,7 +317,11 @@ class ActivityListViewModel(
                 operationLogs.record("Report activity $packageName", success = true, details = path)
             }.onFailure { error ->
                 _state.update { it.copy(error = error.message) }
-                operationLogs.record("Report activity $packageName", success = false, details = error.message)
+                operationLogs.record(
+                    "Report activity $packageName",
+                    success = false,
+                    details = error.message
+                )
             }
     }
 
@@ -294,11 +338,16 @@ class ActivityListViewModel(
                     appendLine("Activity: ${act.activityName}")
                     appendLine("Launch mode: ${risk.launchMode}")
                     appendLine("Rischio: ${ActivityIntentRiskAnalyzer.formatLevel(risk.level)}")
-                    act.launchIntentAction?.takeIf { it.isNotBlank() }?.let { appendLine("Action: $it") }
-                    act.launchIntentData?.takeIf { it.isNotBlank() }?.let { appendLine("Data: $it") }
-                    act.launchIntentMimeType?.takeIf { it.isNotBlank() }?.let { appendLine("MIME: $it") }
-                    act.launchContextHint?.takeIf { it.isNotBlank() }?.let { appendLine("Hint: $it") }
-                    act.launchabilityReason?.takeIf { it.isNotBlank() }?.let { appendLine("Motivo: $it") }
+                    act.launchIntentAction?.takeIf { it.isNotBlank() }
+                        ?.let { appendLine("Action: $it") }
+                    act.launchIntentData?.takeIf { it.isNotBlank() }
+                        ?.let { appendLine("Data: $it") }
+                    act.launchIntentMimeType?.takeIf { it.isNotBlank() }
+                        ?.let { appendLine("MIME: $it") }
+                    act.launchContextHint?.takeIf { it.isNotBlank() }
+                        ?.let { appendLine("Hint: $it") }
+                    act.launchabilityReason?.takeIf { it.isNotBlank() }
+                        ?.let { appendLine("Motivo: $it") }
                     if (risk.findings.isNotEmpty()) {
                         appendLine("Finding:")
                         risk.findings.forEach { finding ->
@@ -318,15 +367,15 @@ class ActivityListViewModel(
         } else {
             state.activities.filter {
                 it.label.contains(state.filter, ignoreCase = true) ||
-                    it.appLabel.contains(state.filter, ignoreCase = true) ||
-                    it.activityName.contains(state.filter, ignoreCase = true) ||
-                    it.packageName.contains(state.filter, ignoreCase = true)
+                        it.appLabel.contains(state.filter, ignoreCase = true) ||
+                        it.activityName.contains(state.filter, ignoreCase = true) ||
+                        it.packageName.contains(state.filter, ignoreCase = true)
             }
         }
         val sorted = filtered.sortedWith(
             compareBy<ActivityEntry> {
                 if (state.favoritePackages.contains(it.packageName) ||
-                    state.favorites.contains(activityKey(it))
+                    state.favorites.contains(it.favoriteKey())
                 ) 0 else 1
             }
                 .thenBy { it.packageName }
@@ -360,8 +409,6 @@ class ActivityListViewModel(
         .trim()
         .replace(multiSpaceRegex, " ")
         .lowercase()
-
-    private fun activityKey(entry: ActivityEntry): String = "${entry.packageName}/${entry.activityName}"
 
     private fun buildHtmlReport(report: ActivityAppReport): String = buildString {
         appendLine("<!DOCTYPE html>")
@@ -425,7 +472,13 @@ class ActivityListViewModel(
         appendLine("      </section>")
         appendLine("      <section class=\"card\">")
         appendLine("        <h2>Profilo vulnerabilita</h2>")
-        appendLine("        <p>Severita massima rilevata: <strong>${ActivityIntentRiskAnalyzer.formatLevel(report.highestRiskLevel)}</strong></p>")
+        appendLine(
+            "        <p>Severita massima rilevata: <strong>${
+                ActivityIntentRiskAnalyzer.formatLevel(
+                    report.highestRiskLevel
+                )
+            }</strong></p>"
+        )
         if (report.recommendations.isNotEmpty()) {
             appendLine("        <ul>")
             report.recommendations.forEach { recommendation ->
@@ -447,7 +500,11 @@ class ActivityListViewModel(
             appendLine("              <td><code>${activity.entry.activityName.htmlEscape()}</code></td>")
             appendLine("              <td>${activity.launchModeBadge()}</td>")
             appendLine("              <td>${activity.riskBadge()}</td>")
-            appendLine("              <td class=\"muted\">${activity.reportHint().htmlEscape()}</td>")
+            appendLine(
+                "              <td class=\"muted\">${
+                    activity.reportHint().htmlEscape()
+                }</td>"
+            )
             appendLine("            </tr>")
         }
         appendLine("          </tbody>")
@@ -469,7 +526,11 @@ class ActivityListViewModel(
                 appendLine("              <td><code>${activity.entry.activityName.htmlEscape()}</code></td>")
                 appendLine("              <td>${activity.launchModeBadge()}</td>")
                 appendLine("              <td>${activity.riskBadge()}</td>")
-                appendLine("              <td class=\"muted\">${activity.reportHint().htmlEscape()}</td>")
+                appendLine(
+                    "              <td class=\"muted\">${
+                        activity.reportHint().htmlEscape()
+                    }</td>"
+                )
                 appendLine("            </tr>")
             }
         appendLine("          </tbody>")
@@ -483,9 +544,9 @@ class ActivityListViewModel(
 
     private fun ActivityEntry.hasGuidedLaunchMetadata(): Boolean =
         !launchContextHint.isNullOrBlank() ||
-            !launchIntentAction.isNullOrBlank() ||
-            !launchIntentData.isNullOrBlank() ||
-            !launchIntentMimeType.isNullOrBlank()
+                !launchIntentAction.isNullOrBlank() ||
+                !launchIntentData.isNullOrBlank() ||
+                !launchIntentMimeType.isNullOrBlank()
 
     private fun ActivityEntry.reportHint(): String =
         launchabilityReason

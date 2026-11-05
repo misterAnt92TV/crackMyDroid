@@ -15,6 +15,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.crackmydroid.shared.presentation.preview.AppComponentPreviews
+import com.crackmydroid.shared.presentation.preview.ComponentPreviewContainer
 
 @Composable
 expect fun rememberPackageIcon(packageName: String): Painter?
@@ -25,7 +27,8 @@ fun PackageIcon(
     modifier: Modifier = Modifier,
     size: Dp = 44.dp,
     backgroundColor: androidx.compose.ui.graphics.Color = MaterialTheme.colorScheme.secondaryContainer,
-    contentPadding: Dp = 8.dp
+    contentPadding: Dp = 8.dp,
+    contentDescription: String? = packageName
 ) {
     val painter = rememberPackageIcon(packageName)
     val tint = MaterialTheme.colorScheme.onSurfaceVariant
@@ -38,7 +41,7 @@ fun PackageIcon(
         if (painter != null) {
             Image(
                 painter = painter,
-                contentDescription = packageName,
+                contentDescription = contentDescription,
                 modifier = Modifier
                     .padding(contentPadding)
                     .size(size - contentPadding * 2)
@@ -46,7 +49,7 @@ fun PackageIcon(
         } else {
             androidx.compose.material3.Icon(
                 imageVector = Icons.Filled.Android,
-                contentDescription = packageName,
+                contentDescription = contentDescription,
                 tint = tint,
                 modifier = Modifier
                     .padding(contentPadding)
@@ -54,4 +57,10 @@ fun PackageIcon(
             )
         }
     }
+}
+
+@AppComponentPreviews
+@Composable
+private fun PackageIconPreview() = ComponentPreviewContainer {
+    PackageIcon(packageName = "com.crackmydroid.preview", size = 64.dp)
 }

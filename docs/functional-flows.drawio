@@ -1,0 +1,894 @@
+<mxfile host="app.diagrams.net" type="device">
+  <diagram id="it-map" name="IT - Mappa funzionale">
+    <mxGraphModel dx="1600" dy="1200" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1200" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" value="CrackMyDroid — Mappa delle funzionalità implementate" style="text;html=0;align=left;fontSize=26;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="20" width="1500" height="45" as="geometry" />
+        </mxCell>
+        <object id="entry" label="Avvio → introduzione, se prevista → Home&#10;Desktop: prima selezionare un Android via ADB" link="functional-guide.md#it-navigation">
+          <mxCell style="rounded=1;whiteSpace=wrap;html=0;fontSize=16;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+            <mxGeometry x="620" y="90" width="360" height="80" as="geometry" />
+          </mxCell>
+        </object>
+        <mxCell id="bottom" value="Barra inferiore&#10;Selezionare una sezione" style="rounded=1;whiteSpace=wrap;html=0;fontSize=18;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="140" y="240" width="350" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="menu" value="Menu nell'intestazione&#10;Confermare il suggerimento, se previsto" style="rounded=1;whiteSpace=wrap;html=0;fontSize=18;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="1050" y="240" width="440" height="80" as="geometry" />
+        </mxCell>
+        <object id="home" label="Home&#10;FAQ, operazioni recenti e cronologia&#10;Consultare o rimuovere una voce" link="functional-guide.md#it-sections">
+          <mxCell style="rounded=1;whiteSpace=wrap;html=0;fontSize=17;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+            <mxGeometry x="40" y="390" width="450" height="110" as="geometry" />
+          </mxCell>
+        </object>
+        <object id="info" label="Info dispositivo&#10;Hardware, sistema e stato debug&#10;Copiare righe / condividere il report" link="functional-guide.md#it-sections">
+          <mxCell style="rounded=1;whiteSpace=wrap;html=0;fontSize=17;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+            <mxGeometry x="40" y="560" width="450" height="110" as="geometry" />
+          </mxCell>
+        </object>
+        <object id="settings" label="Impostazioni&#10;Tema, lingua, suggerimenti, accessibilità&#10;Log, introduzione e formato export supportato" link="functional-guide.md#it-sections">
+          <mxCell style="rounded=1;whiteSpace=wrap;html=0;fontSize=17;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+            <mxGeometry x="40" y="730" width="450" height="110" as="geometry" />
+          </mxCell>
+        </object>
+        <object id="apps" label="App installate / APK&#10;Cercare, preferiti, leggere package/percorso&#10;Estrarre APK / condividere inventario" link="functional-guide.md#it-sections">
+          <mxCell style="rounded=1;whiteSpace=wrap;html=0;fontSize=17;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+            <mxGeometry x="650" y="390" width="380" height="110" as="geometry" />
+          </mxCell>
+        </object>
+        <object id="pentest" label="PenTesting&#10;Target o tutte le app → controlli → esecuzione&#10;Dettagli, report e snapshot in memoria" link="functional-guide.md#it-workflows">
+          <mxCell style="rounded=1;whiteSpace=wrap;html=0;fontSize=17;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+            <mxGeometry x="1130" y="390" width="380" height="110" as="geometry" />
+          </mxCell>
+        </object>
+        <object id="permissions" label="Permessi&#10;Ricerca, preferiti e scansione del rischio&#10;Dettagli e report della singola app" link="functional-guide.md#it-sections">
+          <mxCell style="rounded=1;whiteSpace=wrap;html=0;fontSize=17;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+            <mxGeometry x="650" y="560" width="380" height="110" as="geometry" />
+          </mxCell>
+        </object>
+        <object id="activities" label="Attività&#10;Ricerca, intent/deep link e report rischi&#10;Avvio diretto/guidato dove consentito" link="functional-guide.md#it-sections">
+          <mxCell style="rounded=1;whiteSpace=wrap;html=0;fontSize=17;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+            <mxGeometry x="1130" y="560" width="380" height="110" as="geometry" />
+          </mxCell>
+        </object>
+        <object id="root" label="Root / Play Integrity&#10;Indicatori e prova esplicita di accesso root&#10;Richiesta token ≠ verdetto verificato" link="functional-guide.md#it-limits">
+          <mxCell style="rounded=1;whiteSpace=wrap;html=0;fontSize=17;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+            <mxGeometry x="650" y="730" width="380" height="110" as="geometry" />
+          </mxCell>
+        </object>
+        <object id="shell" label="Shell / Trick&#10;Comandi predefiniti e requisiti privilegi&#10;Conferma se prevista → output / exit code" link="functional-guide.md#it-sections">
+          <mxCell style="rounded=1;whiteSpace=wrap;html=0;fontSize=17;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+            <mxGeometry x="1130" y="730" width="380" height="110" as="geometry" />
+          </mxCell>
+        </object>
+        <object id="log" label="Log&#10;Aggiornare, filtrare testo e livelli, esportare&#10;Solo dati accessibili alla piattaforma" link="functional-guide.md#it-sections">
+          <mxCell style="rounded=1;whiteSpace=wrap;html=0;fontSize=17;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+            <mxGeometry x="650" y="900" width="380" height="110" as="geometry" />
+          </mxCell>
+        </object>
+        <object id="help" label="Aiuto&#10;Riepiloghi e accesso diretto alle sezioni&#10;Il pulsante ? offre aiuto contestuale" link="functional-guide.md#it-navigation">
+          <mxCell style="rounded=1;whiteSpace=wrap;html=0;fontSize=17;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+            <mxGeometry x="1130" y="900" width="380" height="110" as="geometry" />
+          </mxCell>
+        </object>
+        <mxCell id="return" value="Per cambiare strumento usare menu o barra inferiore.&#10;La freccia indietro delle sezioni avanzate torna alla Home.&#10;Non esiste un trasferimento automatico del filtro fra sezioni." style="rounded=1;whiteSpace=wrap;html=0;fontSize=17;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="40" y="900" width="450" height="130" as="geometry" />
+        </mxCell>
+        <object id="legend" label="Blu: accesso/sezione · Giallo: scelta/prerequisito · Verde: risultato · Rosso: limite/errore&#10;Frecce = azioni utente. Solo funzioni implementate; risultati euristici, non certificazione. Usare soltanto con autorizzazione." link="functional-guide.md#it-purpose">
+          <mxCell style="rounded=1;whiteSpace=wrap;html=0;fontSize=16;fillColor=#ffffff;strokeColor=#666666;" vertex="1" parent="1">
+            <mxGeometry x="40" y="1080" width="1470" height="80" as="geometry" />
+          </mxCell>
+        </object>
+        <mxCell id="e1" value="apri" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;fontSize=15;" edge="1" parent="1" source="entry" target="bottom">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" value="apri menu" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;fontSize=15;" edge="1" parent="1" source="entry" target="menu">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;exitX=1;exitY=0.5;entryX=1;entryY=0.5;" edge="1" parent="1" source="bottom" target="home">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="540" y="280" />
+              <mxPoint x="540" y="445" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e4" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;exitX=1;exitY=0.5;entryX=1;entryY=0.5;" edge="1" parent="1" source="bottom" target="info">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="540" y="280" />
+              <mxPoint x="540" y="615" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e5" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;exitX=1;exitY=0.5;entryX=1;entryY=0.5;" edge="1" parent="1" source="bottom" target="settings">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="540" y="280" />
+              <mxPoint x="540" y="785" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e6" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;exitX=0;exitY=0.5;entryX=1;entryY=0.5;" edge="1" parent="1" source="menu" target="apps">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1090" y="350" />
+              <mxPoint x="1090" y="445" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e7" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;exitX=0;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="menu" target="pentest">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1090" y="350" />
+              <mxPoint x="1090" y="445" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e8" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;exitX=0;exitY=0.5;entryX=1;entryY=0.5;" edge="1" parent="1" source="menu" target="permissions">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1090" y="350" />
+              <mxPoint x="1090" y="615" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e9" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;exitX=0;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="menu" target="activities">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1090" y="350" />
+              <mxPoint x="1090" y="615" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e10" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;exitX=0;exitY=0.5;entryX=1;entryY=0.5;" edge="1" parent="1" source="menu" target="root">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1090" y="350" />
+              <mxPoint x="1090" y="785" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e11" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;exitX=0;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="menu" target="shell">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1090" y="350" />
+              <mxPoint x="1090" y="785" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e12" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;exitX=0;exitY=0.5;entryX=1;entryY=0.5;" edge="1" parent="1" source="menu" target="log">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1090" y="350" />
+              <mxPoint x="1090" y="955" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e13" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;exitX=0;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="menu" target="help">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1090" y="350" />
+              <mxPoint x="1090" y="955" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="en-map" name="EN - Feature map">
+    <mxGraphModel dx="1600" dy="1200" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1200" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" value="CrackMyDroid — Implemented feature map" style="text;html=0;align=left;fontSize=26;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="20" width="1500" height="45" as="geometry" />
+        </mxCell>
+        <object id="entry" label="Launch → introduction, if applicable → Home&#10;Desktop: first select an Android device over ADB" link="functional-guide.md#en-navigation">
+          <mxCell style="rounded=1;whiteSpace=wrap;html=0;fontSize=16;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+            <mxGeometry x="620" y="90" width="360" height="80" as="geometry" />
+          </mxCell>
+        </object>
+        <mxCell id="bottom" value="Bottom bar&#10;Select a section" style="rounded=1;whiteSpace=wrap;html=0;fontSize=18;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="140" y="240" width="350" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="menu" value="Header menu&#10;Confirm the entry hint, if applicable" style="rounded=1;whiteSpace=wrap;html=0;fontSize=18;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="1050" y="240" width="440" height="80" as="geometry" />
+        </mxCell>
+        <object id="home" label="Home&#10;FAQs, recent operations and history&#10;Review or remove an entry" link="functional-guide.md#en-sections">
+          <mxCell style="rounded=1;whiteSpace=wrap;html=0;fontSize=17;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+            <mxGeometry x="40" y="390" width="450" height="110" as="geometry" />
+          </mxCell>
+        </object>
+        <object id="info" label="Device info&#10;Hardware, system and debugging status&#10;Copy rows / share the report" link="functional-guide.md#en-sections">
+          <mxCell style="rounded=1;whiteSpace=wrap;html=0;fontSize=17;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+            <mxGeometry x="40" y="560" width="450" height="110" as="geometry" />
+          </mxCell>
+        </object>
+        <object id="settings" label="Settings&#10;Theme, language, hints, accessibility&#10;Logs, introduction and supported export format" link="functional-guide.md#en-sections">
+          <mxCell style="rounded=1;whiteSpace=wrap;html=0;fontSize=17;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+            <mxGeometry x="40" y="730" width="450" height="110" as="geometry" />
+          </mxCell>
+        </object>
+        <object id="apps" label="Installed apps / APK&#10;Search, favorites, package/path details&#10;Extract APK / share inventory" link="functional-guide.md#en-sections">
+          <mxCell style="rounded=1;whiteSpace=wrap;html=0;fontSize=17;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+            <mxGeometry x="650" y="390" width="380" height="110" as="geometry" />
+          </mxCell>
+        </object>
+        <object id="pentest" label="PenTesting&#10;Target or all apps → checks → execution&#10;Details, reports and in-memory snapshots" link="functional-guide.md#en-workflows">
+          <mxCell style="rounded=1;whiteSpace=wrap;html=0;fontSize=17;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+            <mxGeometry x="1130" y="390" width="380" height="110" as="geometry" />
+          </mxCell>
+        </object>
+        <object id="permissions" label="Permissions&#10;Search, favorites and risk scanning&#10;Details and single-app reports" link="functional-guide.md#en-sections">
+          <mxCell style="rounded=1;whiteSpace=wrap;html=0;fontSize=17;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+            <mxGeometry x="650" y="560" width="380" height="110" as="geometry" />
+          </mxCell>
+        </object>
+        <object id="activities" label="Activities&#10;Search, intent/deep-link risks and reports&#10;Direct/guided launch where permitted" link="functional-guide.md#en-sections">
+          <mxCell style="rounded=1;whiteSpace=wrap;html=0;fontSize=17;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+            <mxGeometry x="1130" y="560" width="380" height="110" as="geometry" />
+          </mxCell>
+        </object>
+        <object id="root" label="Root / Play Integrity&#10;Indicators and explicit root-access probe&#10;Token request ≠ verified verdict" link="functional-guide.md#en-limits">
+          <mxCell style="rounded=1;whiteSpace=wrap;html=0;fontSize=17;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+            <mxGeometry x="650" y="730" width="380" height="110" as="geometry" />
+          </mxCell>
+        </object>
+        <object id="shell" label="Shell / Trick&#10;Predefined commands and privilege requirements&#10;Confirm if applicable → output / exit code" link="functional-guide.md#en-sections">
+          <mxCell style="rounded=1;whiteSpace=wrap;html=0;fontSize=17;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+            <mxGeometry x="1130" y="730" width="380" height="110" as="geometry" />
+          </mxCell>
+        </object>
+        <object id="log" label="Log&#10;Refresh, filter text/levels, export&#10;Only data accessible to the platform" link="functional-guide.md#en-sections">
+          <mxCell style="rounded=1;whiteSpace=wrap;html=0;fontSize=17;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+            <mxGeometry x="650" y="900" width="380" height="110" as="geometry" />
+          </mxCell>
+        </object>
+        <object id="help" label="Help&#10;Summaries and direct section navigation&#10;The ? button opens contextual help" link="functional-guide.md#en-navigation">
+          <mxCell style="rounded=1;whiteSpace=wrap;html=0;fontSize=17;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+            <mxGeometry x="1130" y="900" width="380" height="110" as="geometry" />
+          </mxCell>
+        </object>
+        <mxCell id="return" value="Switch tools using the menu or bottom bar.&#10;The back arrow in advanced sections returns to Home.&#10;Search filters are not transferred automatically between sections." style="rounded=1;whiteSpace=wrap;html=0;fontSize=17;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="40" y="900" width="450" height="130" as="geometry" />
+        </mxCell>
+        <object id="legend" label="Blue: entry/section · Yellow: decision/prerequisite · Green: output · Red: limitation/error&#10;Arrows = user actions. Implemented features only; heuristic results, not certification. Authorized use only." link="functional-guide.md#en-purpose">
+          <mxCell style="rounded=1;whiteSpace=wrap;html=0;fontSize=16;fillColor=#ffffff;strokeColor=#666666;" vertex="1" parent="1">
+            <mxGeometry x="40" y="1080" width="1470" height="80" as="geometry" />
+          </mxCell>
+        </object>
+        <mxCell id="e1" value="open" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;fontSize=15;" edge="1" parent="1" source="entry" target="bottom">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" value="open menu" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;fontSize=15;" edge="1" parent="1" source="entry" target="menu">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;exitX=1;exitY=0.5;entryX=1;entryY=0.5;" edge="1" parent="1" source="bottom" target="home">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="540" y="280" />
+              <mxPoint x="540" y="445" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e4" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;exitX=1;exitY=0.5;entryX=1;entryY=0.5;" edge="1" parent="1" source="bottom" target="info">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="540" y="280" />
+              <mxPoint x="540" y="615" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e5" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;exitX=1;exitY=0.5;entryX=1;entryY=0.5;" edge="1" parent="1" source="bottom" target="settings">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="540" y="280" />
+              <mxPoint x="540" y="785" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e6" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;exitX=0;exitY=0.5;entryX=1;entryY=0.5;" edge="1" parent="1" source="menu" target="apps">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1090" y="350" />
+              <mxPoint x="1090" y="445" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e7" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;exitX=0;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="menu" target="pentest">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1090" y="350" />
+              <mxPoint x="1090" y="445" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e8" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;exitX=0;exitY=0.5;entryX=1;entryY=0.5;" edge="1" parent="1" source="menu" target="permissions">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1090" y="350" />
+              <mxPoint x="1090" y="615" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e9" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;exitX=0;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="menu" target="activities">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1090" y="350" />
+              <mxPoint x="1090" y="615" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e10" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;exitX=0;exitY=0.5;entryX=1;entryY=0.5;" edge="1" parent="1" source="menu" target="root">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1090" y="350" />
+              <mxPoint x="1090" y="785" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e11" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;exitX=0;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="menu" target="shell">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1090" y="350" />
+              <mxPoint x="1090" y="785" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e12" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;exitX=0;exitY=0.5;entryX=1;entryY=0.5;" edge="1" parent="1" source="menu" target="log">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1090" y="350" />
+              <mxPoint x="1090" y="955" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e13" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;exitX=0;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="menu" target="help">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1090" y="350" />
+              <mxPoint x="1090" y="955" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="it-flows" name="IT - Flussi operativi">
+    <mxGraphModel dx="1600" dy="1400" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1400" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" value="CrackMyDroid — Ispezione app e checklist PenTesting" style="text;html=0;align=left;fontSize=26;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="20" width="1500" height="45" as="geometry" />
+        </mxCell>
+        <object id="apps" label="Menu → App installate&#10;Cercare nome / package / percorso" link="functional-guide.md#it-workflows">
+          <mxCell style="rounded=1;whiteSpace=wrap;html=0;fontSize=17;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+            <mxGeometry x="60" y="110" width="360" height="90" as="geometry" />
+          </mxCell>
+        </object>
+        <mxCell id="available" value="App e dati&#10;disponibili?" style="rhombus;whiteSpace=wrap;html=0;fontSize=17;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="90" y="280" width="300" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="inspect" value="Leggere package e percorso APK&#10;Aprire Permessi / Attività dal menu&#10;Cercare di nuovo lo stesso package" style="rounded=1;whiteSpace=wrap;html=0;fontSize=17;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="60" y="480" width="360" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="evidence" value="Consultare rischi e dettagli&#10;Estrarre/condividere APK o report&#10;Avviare solo activity consentite" style="rounded=1;whiteSpace=wrap;html=0;fontSize=17;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="60" y="700" width="360" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="empty" value="Nessun risultato / errore&#10;Controllare filtro, sorgente e permessi&#10;Rimuovere filtro / aggiornare" style="rounded=1;whiteSpace=wrap;html=0;fontSize=17;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="60" y="920" width="360" height="110" as="geometry" />
+        </mxCell>
+        <object id="mode" label="1. PenTesting&#10;Quale modalità?" link="functional-guide.md#it-workflows">
+          <mxCell style="rhombus;whiteSpace=wrap;html=0;fontSize=18;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+            <mxGeometry x="850" y="100" width="300" height="120" as="geometry" />
+          </mxCell>
+        </object>
+        <mxCell id="single" value="Singolo target&#10;Selezionare un'app caricata" style="rounded=1;whiteSpace=wrap;html=0;fontSize=17;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="600" y="290" width="300" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="auto" value="Auto scan&#10;Tutte le app caricate" style="rounded=1;whiteSpace=wrap;html=0;fontSize=17;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="1150" y="290" width="300" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="checks" value="2. Selezionare i controlli&#10;Permessi, manifest/intenti, file, rete, librerie" style="rounded=1;whiteSpace=wrap;html=0;fontSize=17;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="800" y="460" width="400" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="run" value="3. Avviare e monitorare&#10;Contatori, app corrente, esiti e dettagli" style="rounded=1;whiteSpace=wrap;html=0;fontSize=17;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="800" y="620" width="400" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="decision" value="Completare o&#10;interrompere auto scan?" style="rhombus;whiteSpace=wrap;html=0;fontSize=17;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="850" y="780" width="300" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="cancel" value="Interrompere auto scan&#10;Controlli incompleti ≠ superati&#10;Leggere i risultati parziali" style="rounded=1;whiteSpace=wrap;html=0;fontSize=17;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="560" y="980" width="310" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="report" value="4. Leggere report e dettagli&#10;Rischio, indisponibilità o limite?&#10;Esito OK ≠ sicurezza dimostrata" style="rounded=1;whiteSpace=wrap;html=0;fontSize=17;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="1120" y="980" width="370" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="export" value="Esportare / condividere il report&#10;Leggere percorso restituito o errore&#10;Verificare contenuto e destinatario" style="rounded=1;whiteSpace=wrap;html=0;fontSize=17;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="1120" y="1180" width="370" height="100" as="geometry" />
+        </mxCell>
+        <object id="limits" label="Controlli euristici, non scansioni complete&#10;Rete: combinazioni di permessi, non pacchetti&#10;Librerie: priorità di verifica, non CVE&#10;File: root/storage, non lettura sandbox" link="functional-guide.md#it-limits">
+          <mxCell style="rounded=1;whiteSpace=wrap;html=0;fontSize=16;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+            <mxGeometry x="60" y="1100" width="440" height="140" as="geometry" />
+          </mxCell>
+        </object>
+        <object id="history" label="Riesecuzione/reset: risultato precedente archiviabile&#10;Fino a 240 eventi correnti e 12 snapshot&#10;Solo memoria ViewModel: esportare per conservarli" link="functional-guide.md#it-sections">
+          <mxCell style="rounded=1;whiteSpace=wrap;html=0;fontSize=16;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+            <mxGeometry x="560" y="1180" width="490" height="100" as="geometry" />
+          </mxCell>
+        </object>
+        <mxCell id="legend" value="Blu: accesso/azione · Giallo: scelta/prerequisito · Verde: risultato · Rosso: limite/errore · Le frecce descrivono passi utente, non dipendenze software" style="rounded=1;whiteSpace=wrap;html=0;fontSize=15;fillColor=#ffffff;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="40" y="1320" width="1470" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;" edge="1" parent="1" source="apps" target="available">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" value="sì" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;fontSize=15;" edge="1" parent="1" source="available" target="inspect">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" value="no" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;exitX=0;exitY=0.5;entryX=0;entryY=0.5;fontSize=15;" edge="1" parent="1" source="available" target="empty">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="30" y="340" />
+              <mxPoint x="30" y="975" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e4" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;" edge="1" parent="1" source="inspect" target="evidence">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" value="correggere e riprovare" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;exitX=1;exitY=0.5;entryX=1;entryY=0.5;fontSize=15;" edge="1" parent="1" source="empty" target="apps">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="480" y="975" />
+              <mxPoint x="480" y="155" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e6" value="singola app" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;fontSize=15;" edge="1" parent="1" source="mode" target="single">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e7" value="tutte" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;fontSize=15;" edge="1" parent="1" source="mode" target="auto">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;" edge="1" parent="1" source="single" target="checks">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e9" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;" edge="1" parent="1" source="auto" target="checks">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e10" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;" edge="1" parent="1" source="checks" target="run">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e11" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;" edge="1" parent="1" source="run" target="decision">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e12" value="interrompi" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;fontSize=15;" edge="1" parent="1" source="decision" target="cancel">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e13" value="completato" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;fontSize=15;" edge="1" parent="1" source="decision" target="report">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e14" value="consultare" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;fontSize=15;" edge="1" parent="1" source="cancel" target="report">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e15" value="salvare evidenze" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;fontSize=15;" edge="1" parent="1" source="report" target="export">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e16" value="riesegui / modifica controlli" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;exitX=1;exitY=0.5;entryX=1;entryY=0.5;fontSize=15;" edge="1" parent="1" source="report" target="checks">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1540" y="1035" />
+              <mxPoint x="1540" y="505" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="en-flows" name="EN - User flows">
+    <mxGraphModel dx="1600" dy="1400" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1400" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" value="CrackMyDroid — App inspection and PenTesting checklist" style="text;html=0;align=left;fontSize=26;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="20" width="1500" height="45" as="geometry" />
+        </mxCell>
+        <object id="apps" label="Menu → Installed apps&#10;Search name / package / path" link="functional-guide.md#en-workflows">
+          <mxCell style="rounded=1;whiteSpace=wrap;html=0;fontSize=17;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+            <mxGeometry x="60" y="110" width="360" height="90" as="geometry" />
+          </mxCell>
+        </object>
+        <mxCell id="available" value="App and data&#10;available?" style="rhombus;whiteSpace=wrap;html=0;fontSize=17;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="90" y="280" width="300" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="inspect" value="Read package and APK path&#10;Open Permissions / Activities from menu&#10;Search for the same package again" style="rounded=1;whiteSpace=wrap;html=0;fontSize=17;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="60" y="480" width="360" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="evidence" value="Review risks and details&#10;Extract/share APK or reports&#10;Launch only permitted activities" style="rounded=1;whiteSpace=wrap;html=0;fontSize=17;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="60" y="700" width="360" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="empty" value="No results / error&#10;Check filter, source and permissions&#10;Clear filter / refresh" style="rounded=1;whiteSpace=wrap;html=0;fontSize=17;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="60" y="920" width="360" height="110" as="geometry" />
+        </mxCell>
+        <object id="mode" label="1. PenTesting&#10;Which mode?" link="functional-guide.md#en-workflows">
+          <mxCell style="rhombus;whiteSpace=wrap;html=0;fontSize=18;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+            <mxGeometry x="850" y="100" width="300" height="120" as="geometry" />
+          </mxCell>
+        </object>
+        <mxCell id="single" value="Single target&#10;Select a loaded app" style="rounded=1;whiteSpace=wrap;html=0;fontSize=17;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="600" y="290" width="300" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="auto" value="Auto scan&#10;All loaded apps" style="rounded=1;whiteSpace=wrap;html=0;fontSize=17;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="1150" y="290" width="300" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="checks" value="2. Select checks&#10;Permissions, manifest/intents, files, network, libraries" style="rounded=1;whiteSpace=wrap;html=0;fontSize=17;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="800" y="460" width="400" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="run" value="3. Run and monitor&#10;Counters, current app, outcomes and details" style="rounded=1;whiteSpace=wrap;html=0;fontSize=17;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="800" y="620" width="400" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="decision" value="Finish or&#10;cancel auto scan?" style="rhombus;whiteSpace=wrap;html=0;fontSize=17;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="850" y="780" width="300" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="cancel" value="Cancel auto scan&#10;Unfinished checks ≠ passed checks&#10;Review partial results" style="rounded=1;whiteSpace=wrap;html=0;fontSize=17;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="560" y="980" width="310" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="report" value="4. Read report and details&#10;Risk, unavailable data or limitation?&#10;OK ≠ proven security" style="rounded=1;whiteSpace=wrap;html=0;fontSize=17;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="1120" y="980" width="370" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="export" value="Export / share report&#10;Read returned path or error&#10;Review contents and recipient" style="rounded=1;whiteSpace=wrap;html=0;fontSize=17;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="1120" y="1180" width="370" height="100" as="geometry" />
+        </mxCell>
+        <object id="limits" label="Heuristic checks, not complete scans&#10;Network: permission combinations, not packets&#10;Libraries: review priority, not CVEs&#10;Files: root/storage, not sandbox reading" link="functional-guide.md#en-limits">
+          <mxCell style="rounded=1;whiteSpace=wrap;html=0;fontSize=16;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+            <mxGeometry x="60" y="1100" width="440" height="140" as="geometry" />
+          </mxCell>
+        </object>
+        <object id="history" label="Rerun/reset may archive the previous result&#10;Up to 240 current events and 12 snapshots&#10;ViewModel memory only: export for retention" link="functional-guide.md#en-sections">
+          <mxCell style="rounded=1;whiteSpace=wrap;html=0;fontSize=16;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+            <mxGeometry x="560" y="1180" width="490" height="100" as="geometry" />
+          </mxCell>
+        </object>
+        <mxCell id="legend" value="Blue: entry/action · Yellow: decision/prerequisite · Green: output · Red: limitation/error · Arrows represent user steps, not software dependencies" style="rounded=1;whiteSpace=wrap;html=0;fontSize=15;fillColor=#ffffff;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="40" y="1320" width="1470" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;" edge="1" parent="1" source="apps" target="available">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" value="yes" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;fontSize=15;" edge="1" parent="1" source="available" target="inspect">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" value="no" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;exitX=0;exitY=0.5;entryX=0;entryY=0.5;fontSize=15;" edge="1" parent="1" source="available" target="empty">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="30" y="340" />
+              <mxPoint x="30" y="975" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e4" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;" edge="1" parent="1" source="inspect" target="evidence">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" value="correct and retry" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;exitX=1;exitY=0.5;entryX=1;entryY=0.5;fontSize=15;" edge="1" parent="1" source="empty" target="apps">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="480" y="975" />
+              <mxPoint x="480" y="155" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e6" value="single app" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;fontSize=15;" edge="1" parent="1" source="mode" target="single">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e7" value="all" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;fontSize=15;" edge="1" parent="1" source="mode" target="auto">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;" edge="1" parent="1" source="single" target="checks">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e9" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;" edge="1" parent="1" source="auto" target="checks">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e10" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;" edge="1" parent="1" source="checks" target="run">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e11" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;" edge="1" parent="1" source="run" target="decision">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e12" value="cancel" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;fontSize=15;" edge="1" parent="1" source="decision" target="cancel">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e13" value="finished" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;fontSize=15;" edge="1" parent="1" source="decision" target="report">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e14" value="review" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;fontSize=15;" edge="1" parent="1" source="cancel" target="report">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e15" value="save evidence" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;fontSize=15;" edge="1" parent="1" source="report" target="export">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e16" value="rerun / change checks" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;exitX=1;exitY=0.5;entryX=1;entryY=0.5;fontSize=15;" edge="1" parent="1" source="report" target="checks">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1540" y="1035" />
+              <mxPoint x="1540" y="505" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="it-platforms" name="IT - Desktop e piattaforme">
+    <mxGraphModel dx="1600" dy="1450" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1450" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" value="CrackMyDroid — Sessione Desktop e confini di piattaforma" style="text;html=0;align=left;fontSize=26;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="20" width="1500" height="45" as="geometry" />
+        </mxCell>
+        <object id="connect" label="Collegare Android e autorizzare il debug&#10;Aprire il client Desktop" link="functional-guide.md#it-workflows">
+          <mxCell style="rounded=1;whiteSpace=wrap;html=0;fontSize=17;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+            <mxGeometry x="80" y="110" width="340" height="80" as="geometry" />
+          </mxCell>
+        </object>
+        <mxCell id="adb" value="ADB funziona?" style="rhombus;whiteSpace=wrap;html=0;fontSize=17;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="100" y="260" width="300" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="configure" value="Impostazioni ADB&#10;Correggere il percorso / leggere errore&#10;Salvare e riprovare" style="rounded=1;whiteSpace=wrap;html=0;fontSize=17;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="520" y="260" width="340" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="picker" value="Aggiornare elenco dispositivi&#10;Selezionare il device Android" style="rounded=1;whiteSpace=wrap;html=0;fontSize=17;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="80" y="450" width="340" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="authorized" value="Device accessibile&#10;e autorizzato?" style="rhombus;whiteSpace=wrap;html=0;fontSize=17;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="100" y="600" width="300" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="deviceError" value="Assente / offline / unauthorized&#10;Controllare collegamento e consenso&#10;Aggiornare e riselezionare" style="rounded=1;whiteSpace=wrap;html=0;fontSize=17;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="520" y="600" width="340" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="snapshot" value="Snapshot importabile&#10;con sezioni utilizzabili?" style="rhombus;whiteSpace=wrap;html=0;fontSize=17;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="100" y="800" width="300" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="cached" value="Importare sezioni disponibili&#10;Controllare data e metadati&#10;Altre sezioni possono usare ADB" style="rounded=1;whiteSpace=wrap;html=0;fontSize=17;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="520" y="800" width="340" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="fallback" value="Percorso ADB-only&#10;Snapshot assente / invalido / inutilizzabile&#10;Leggere stato e limiti dei dati" style="rounded=1;whiteSpace=wrap;html=0;fontSize=17;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="80" y="1020" width="340" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="shared" value="Aprire le sezioni condivise&#10;Toolbar: sorgente, metadati, stato snapshot&#10;I dati riguardano il device, non il computer" style="rounded=1;whiteSpace=wrap;html=0;fontSize=17;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="520" y="1020" width="340" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="rescan" value="Nuova scansione&#10;Svuotare cache Desktop e ripetere import&#10;Non forza una nuova raccolta Android" style="rounded=1;whiteSpace=wrap;html=0;fontSize=17;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="520" y="1220" width="340" height="110" as="geometry" />
+        </mxCell>
+        <object id="android" label="Android — capacità native&#10;App, permessi, activity, info e log accessibili&#10;APK e shell secondo i privilegi&#10;Root passivo distinto dalla prova su&#10;Snapshot prodotto dall'app Android" link="functional-guide.md#it-platforms">
+          <mxCell style="rounded=1;whiteSpace=wrap;html=0;fontSize=17;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+            <mxGeometry x="1020" y="110" width="490" height="200" as="geometry" />
+          </mxCell>
+        </object>
+        <object id="integrity" label="Play Integrity — limite attuale&#10;Android: richiesta token, non verdetti verificati&#10;Snapshot automatico: controllo non eseguito&#10;Desktop ADB-only: non disponibile&#10;Un dato importato non è una nuova verifica" link="functional-guide.md#it-limits">
+          <mxCell style="rounded=1;whiteSpace=wrap;html=0;fontSize=17;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+            <mxGeometry x="1020" y="380" width="490" height="200" as="geometry" />
+          </mxCell>
+        </object>
+        <object id="ios" label="iOS — adapter stub attuali&#10;UI condivisa, non strumenti Android operativi&#10;Liste vuote, device info segnaposto&#10;Root, APK, activity e shell non supportati&#10;Preferenze principali in memoria" link="functional-guide.md#it-platforms">
+          <mxCell style="rounded=1;whiteSpace=wrap;html=0;fontSize=17;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+            <mxGeometry x="1020" y="650" width="490" height="200" as="geometry" />
+          </mxCell>
+        </object>
+        <object id="sharing" label="Report e condivisione&#10;Android: azioni di condivisione native&#10;Desktop: file locale aperto/rivelato&#10;Nessun invio automatico o Bluetooth Desktop&#10;Verificare dati sensibili e destinatari" link="functional-guide.md#it-platforms">
+          <mxCell style="rounded=1;whiteSpace=wrap;html=0;fontSize=17;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+            <mxGeometry x="1020" y="920" width="490" height="200" as="geometry" />
+          </mxCell>
+        </object>
+        <mxCell id="legend" value="Blu: accesso/azione · Giallo: scelta/prerequisito · Verde: risultato · Rosso: limite/errore&#10;Il flusso richiede autorizzazione. Snapshot importato ≠ dati appena raccolti. Vedere la guida per prerequisiti e limiti." style="rounded=1;whiteSpace=wrap;html=0;fontSize=16;fillColor=#ffffff;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="40" y="1380" width="1470" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;" edge="1" parent="1" source="connect" target="adb">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" value="no" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;fontSize=15;" edge="1" parent="1" source="adb" target="configure">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" value="riprova" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;exitX=0.5;exitY=0;entryX=1;entryY=0.5;fontSize=15;" edge="1" parent="1" source="configure" target="connect">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="690" y="150" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e4" value="sì" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;fontSize=15;" edge="1" parent="1" source="adb" target="picker">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;" edge="1" parent="1" source="picker" target="authorized">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" value="no" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;fontSize=15;" edge="1" parent="1" source="authorized" target="deviceError">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e7" value="riprova" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;exitX=0.5;exitY=0;entryX=1;entryY=0.5;fontSize=15;" edge="1" parent="1" source="deviceError" target="picker">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="690" y="490" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e8" value="sì: tentare importazione" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;fontSize=15;" edge="1" parent="1" source="authorized" target="snapshot">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e9" value="sì" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;fontSize=15;" edge="1" parent="1" source="snapshot" target="cached">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e10" value="no" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;fontSize=15;" edge="1" parent="1" source="snapshot" target="fallback">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e11" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;" edge="1" parent="1" source="cached" target="shared">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e12" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;" edge="1" parent="1" source="fallback" target="shared">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e13" value="aggiornare dati" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;fontSize=15;" edge="1" parent="1" source="shared" target="rescan">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e14" value="ritenta import" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;exitX=0;exitY=0.5;entryX=0;entryY=0.5;fontSize=15;" edge="1" parent="1" source="rescan" target="snapshot">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="30" y="1275" />
+              <mxPoint x="30" y="860" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e15" value="cambia dispositivo" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;exitX=1;exitY=0.5;entryX=1;entryY=0.5;fontSize=15;" edge="1" parent="1" source="shared" target="picker">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="940" y="1075" />
+              <mxPoint x="940" y="420" />
+              <mxPoint x="470" y="420" />
+              <mxPoint x="470" y="490" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="en-platforms" name="EN - Desktop and platforms">
+    <mxGraphModel dx="1600" dy="1450" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1450" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" value="CrackMyDroid — Desktop session and platform boundaries" style="text;html=0;align=left;fontSize=26;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="20" width="1500" height="45" as="geometry" />
+        </mxCell>
+        <object id="connect" label="Connect Android and authorize debugging&#10;Open the Desktop client" link="functional-guide.md#en-workflows">
+          <mxCell style="rounded=1;whiteSpace=wrap;html=0;fontSize=17;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+            <mxGeometry x="80" y="110" width="340" height="80" as="geometry" />
+          </mxCell>
+        </object>
+        <mxCell id="adb" value="ADB working?" style="rhombus;whiteSpace=wrap;html=0;fontSize=17;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="100" y="260" width="300" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="configure" value="ADB settings&#10;Fix path / read error&#10;Save and retry" style="rounded=1;whiteSpace=wrap;html=0;fontSize=17;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="520" y="260" width="340" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="picker" value="Refresh device list&#10;Select the Android device" style="rounded=1;whiteSpace=wrap;html=0;fontSize=17;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="80" y="450" width="340" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="authorized" value="Device accessible&#10;and authorized?" style="rhombus;whiteSpace=wrap;html=0;fontSize=17;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="100" y="600" width="300" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="deviceError" value="Absent / offline / unauthorized&#10;Check connection and consent&#10;Refresh and reselect" style="rounded=1;whiteSpace=wrap;html=0;fontSize=17;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="520" y="600" width="340" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="snapshot" value="Importable snapshot&#10;with usable sections?" style="rhombus;whiteSpace=wrap;html=0;fontSize=17;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="100" y="800" width="300" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="cached" value="Import available sections&#10;Check creation time and metadata&#10;Other sections may use ADB" style="rounded=1;whiteSpace=wrap;html=0;fontSize=17;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="520" y="800" width="340" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="fallback" value="ADB-only route&#10;Missing / invalid / unusable snapshot&#10;Read status and data limitations" style="rounded=1;whiteSpace=wrap;html=0;fontSize=17;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="80" y="1020" width="340" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="shared" value="Open shared sections&#10;Toolbar: source, metadata, snapshot status&#10;Data concerns the device, not the computer" style="rounded=1;whiteSpace=wrap;html=0;fontSize=17;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="520" y="1020" width="340" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="rescan" value="Rescan&#10;Clear Desktop caches and retry import&#10;Does not force fresh Android collection" style="rounded=1;whiteSpace=wrap;html=0;fontSize=17;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="520" y="1220" width="340" height="110" as="geometry" />
+        </mxCell>
+        <object id="android" label="Android — native capabilities&#10;Accessible apps, permissions, activities, info, logs&#10;APKs and shell subject to privileges&#10;Passive root checks separate from su probe&#10;Snapshot produced by the Android app" link="functional-guide.md#en-platforms">
+          <mxCell style="rounded=1;whiteSpace=wrap;html=0;fontSize=17;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+            <mxGeometry x="1020" y="110" width="490" height="200" as="geometry" />
+          </mxCell>
+        </object>
+        <object id="integrity" label="Play Integrity — current limitation&#10;Android: token request, not verified verdicts&#10;Automatic snapshot: check not executed&#10;Desktop ADB-only: unavailable&#10;Imported data is not a fresh verification" link="functional-guide.md#en-limits">
+          <mxCell style="rounded=1;whiteSpace=wrap;html=0;fontSize=17;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+            <mxGeometry x="1020" y="380" width="490" height="200" as="geometry" />
+          </mxCell>
+        </object>
+        <object id="ios" label="iOS — current stub adapters&#10;Shared UI, not operational Android tools&#10;Empty lists, placeholder device info&#10;Root, APKs, activities and shell unsupported&#10;Main preferences held in memory" link="functional-guide.md#en-platforms">
+          <mxCell style="rounded=1;whiteSpace=wrap;html=0;fontSize=17;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+            <mxGeometry x="1020" y="650" width="490" height="200" as="geometry" />
+          </mxCell>
+        </object>
+        <object id="sharing" label="Reports and sharing&#10;Android: native sharing actions&#10;Desktop: local file opened/revealed&#10;No automatic sending or Desktop Bluetooth&#10;Review sensitive data and recipients" link="functional-guide.md#en-platforms">
+          <mxCell style="rounded=1;whiteSpace=wrap;html=0;fontSize=17;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+            <mxGeometry x="1020" y="920" width="490" height="200" as="geometry" />
+          </mxCell>
+        </object>
+        <mxCell id="legend" value="Blue: entry/action · Yellow: decision/prerequisite · Green: output · Red: limitation/error&#10;Authorized use required. Imported snapshot ≠ freshly collected data. See the guide for prerequisites and limitations." style="rounded=1;whiteSpace=wrap;html=0;fontSize=16;fillColor=#ffffff;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="40" y="1380" width="1470" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;" edge="1" parent="1" source="connect" target="adb">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" value="no" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;fontSize=15;" edge="1" parent="1" source="adb" target="configure">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" value="retry" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;exitX=0.5;exitY=0;entryX=1;entryY=0.5;fontSize=15;" edge="1" parent="1" source="configure" target="connect">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="690" y="150" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e4" value="yes" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;fontSize=15;" edge="1" parent="1" source="adb" target="picker">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;" edge="1" parent="1" source="picker" target="authorized">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" value="no" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;fontSize=15;" edge="1" parent="1" source="authorized" target="deviceError">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e7" value="retry" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;exitX=0.5;exitY=0;entryX=1;entryY=0.5;fontSize=15;" edge="1" parent="1" source="deviceError" target="picker">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="690" y="490" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e8" value="yes: attempt import" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;fontSize=15;" edge="1" parent="1" source="authorized" target="snapshot">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e9" value="yes" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;fontSize=15;" edge="1" parent="1" source="snapshot" target="cached">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e10" value="no" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;fontSize=15;" edge="1" parent="1" source="snapshot" target="fallback">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e11" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;" edge="1" parent="1" source="cached" target="shared">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e12" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;" edge="1" parent="1" source="fallback" target="shared">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e13" value="refresh data" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;fontSize=15;" edge="1" parent="1" source="shared" target="rescan">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e14" value="retry import" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;exitX=0;exitY=0.5;entryX=0;entryY=0.5;fontSize=15;" edge="1" parent="1" source="rescan" target="snapshot">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="30" y="1275" />
+              <mxPoint x="30" y="860" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e15" value="change device" style="edgeStyle=orthogonalEdgeStyle;html=0;endArrow=block;exitX=1;exitY=0.5;entryX=1;entryY=0.5;fontSize=15;" edge="1" parent="1" source="shared" target="picker">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="940" y="1075" />
+              <mxPoint x="940" y="420" />
+              <mxPoint x="470" y="420" />
+              <mxPoint x="470" y="490" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

@@ -1,6 +1,6 @@
 package com.crackmydroid.shared.ui.permissions
 
-import com.crackmydroid.shared.domain.model.AppPermissionEntry
+import com.crackmydroid.shared.domain.model.app.AppPermissionEntry
 import com.crackmydroid.shared.domain.model.PermissionRiskReport
 
 data class PermissionsState(

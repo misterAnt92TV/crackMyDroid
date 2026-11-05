@@ -3,24 +3,20 @@ package com.crackmydroid.shared.data.snapshot
 import android.content.Context
 import com.crackmydroid.database.CacheDatabase
 import com.crackmydroid.shared.AppLogger
-import com.crackmydroid.shared.domain.model.DeviceScanSnapshot
-import com.crackmydroid.shared.domain.model.DeviceScanSnapshotContract
-import com.crackmydroid.shared.domain.model.DeviceScanSnapshotJson
+import com.crackmydroid.shared.domain.model.scansnapshot.DeviceScanSnapshot
+import com.crackmydroid.shared.domain.model.scansnapshot.DeviceScanSnapshotContract
+import com.crackmydroid.shared.domain.model.scansnapshot.DeviceScanSnapshotJson
 import com.crackmydroid.shared.domain.model.PlayIntegrityResult
-import com.crackmydroid.shared.domain.model.SnapshotSection
+import com.crackmydroid.shared.domain.model.scansnapshot.SnapshotSection
 import com.crackmydroid.shared.domain.repository.ActivityRepository
 import com.crackmydroid.shared.domain.repository.DeviceInfoRepository
 import com.crackmydroid.shared.domain.repository.InstalledAppsRepository
-import com.crackmydroid.shared.domain.repository.LogRepository
+import com.crackmydroid.shared.domain.repository.log.LogRepository
 import com.crackmydroid.shared.domain.repository.PermissionsRepository
 import com.crackmydroid.shared.domain.repository.RootCheckRepository
+import kotlinx.serialization.encodeToString
 import java.io.File
 import java.util.concurrent.atomic.AtomicBoolean
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.launch
-import kotlinx.serialization.encodeToString
 
 class AndroidDeviceSnapshotCoordinator(
     private val context: Context,
@@ -32,19 +28,7 @@ class AndroidDeviceSnapshotCoordinator(
     private val permissionsRepository: PermissionsRepository,
     private val installedAppsRepository: InstalledAppsRepository
 ) {
-    private val started = AtomicBoolean(false)
     private val running = AtomicBoolean(false)
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
-
-    fun start() {
-        if (!started.compareAndSet(false, true)) return
-        scope.launch {
-            runCatching { runSnapshotIfIdle() }
-                .onFailure { error ->
-                    AppLogger.logger.e(error) { "Snapshot Android non scritto" }
-                }
-        }
-    }
 
     suspend fun runSnapshotIfIdle(): Boolean {
         if (!running.compareAndSet(false, true)) {
@@ -66,7 +50,8 @@ class AndroidDeviceSnapshotCoordinator(
         val installedAppsSection = captureSection { installedAppsRepository.listInstalled() }
         val permissionsSection = captureSection { permissionsRepository.listAppPermissions() }
         val activitiesSection = captureSection { activityRepository.getActivities() }
-        val manifestSecuritySection = captureSection { installedAppsRepository.analyzeManifestSecurity() }
+        val manifestSecuritySection =
+            captureSection { installedAppsRepository.analyzeManifestSecurity() }
         val rootStatusSection = captureSection { rootCheckRepository.checkRoot() }
         val logsSection = captureSection { logRepository.fetchLog().takeLast(MAX_LOG_LINES) }
         val playIntegritySection = SnapshotSection.skipped(

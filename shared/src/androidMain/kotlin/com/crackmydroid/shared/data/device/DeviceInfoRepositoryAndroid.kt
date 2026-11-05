@@ -34,15 +34,15 @@ class DeviceInfoRepositoryAndroid(
             brand = Build.BRAND,
             device = Build.DEVICE,
             product = Build.PRODUCT,
-            androidVersion = Build.VERSION.RELEASE ?: "unknown",
-            securityPatch = Build.VERSION.SECURITY_PATCH ?: "unknown",
+            androidVersion = Build.VERSION.RELEASE,
+            securityPatch = Build.VERSION.SECURITY_PATCH,
             buildId = Build.ID,
             buildDisplay = Build.DISPLAY,
             buildFingerprint = Build.FINGERPRINT,
             radio = Build.getRadioVersion(),
             kernelVersion = System.getProperty("os.version"),
-            hardware = Build.HARDWARE ?: "n/a",
-            bootloader = Build.BOOTLOADER ?: "n/a",
+            hardware = Build.HARDWARE,
+            bootloader = Build.BOOTLOADER,
             batteryLevel = batteryPct,
             networkType = readNetworkType(),
             totalMemory = totalMem,
@@ -108,17 +108,17 @@ class DeviceInfoRepositoryAndroid(
             brand = value("brand"),
             device = value("device"),
             product = value("product"),
-            androidVersion = value("androidVersion") ?: "unknown",
-            securityPatch = value("securityPatch") ?: "unknown",
+            androidVersion = value("androidVersion"),
+            securityPatch = value("securityPatch"),
             buildId = value("buildId"),
             buildDisplay = value("buildDisplay"),
             buildFingerprint = value("buildFingerprint"),
             radio = value("radio"),
             kernelVersion = value("kernelVersion"),
-            hardware = value("hardware") ?: "n/a",
-            bootloader = value("bootloader") ?: "n/a",
+            hardware = value("hardware"),
+            bootloader = value("bootloader"),
             batteryLevel = value("batteryLevel")?.toIntOrNull(),
-            networkType = value("networkType") ?: "unknown",
+            networkType = value("networkType"),
             totalMemory = value("totalMemory")?.toLongOrNull(),
             freeMemory = value("freeMemory")?.toLongOrNull(),
             screenResolution = value("screenResolution"),
@@ -142,14 +142,16 @@ class DeviceInfoRepositoryAndroid(
     }
 
     private fun readMemory(): Pair<Long?, Long?> {
-        val am = context.getSystemService(Context.ACTIVITY_SERVICE) as? ActivityManager ?: return null to null
+        val am = context.getSystemService(Context.ACTIVITY_SERVICE) as? ActivityManager
+            ?: return null to null
         val memInfo = ActivityManager.MemoryInfo()
         am.getMemoryInfo(memInfo)
         return memInfo.totalMem to memInfo.availMem
     }
 
     private fun readNetworkType(): String {
-        val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager ?: return "unknown"
+        val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
+            ?: return "unknown"
         val network = cm.activeNetwork ?: return "offline"
         val caps = cm.getNetworkCapabilities(network) ?: return "offline"
         return when {
@@ -169,7 +171,11 @@ class DeviceInfoRepositoryAndroid(
         Settings.Global.getInt(context.contentResolver, Settings.Global.ADB_ENABLED, 0) == 1
 
     private fun isDeveloperOptionsEnabled(): Boolean =
-        Settings.Global.getInt(context.contentResolver, Settings.Global.DEVELOPMENT_SETTINGS_ENABLED, 0) == 1
+        Settings.Global.getInt(
+            context.contentResolver,
+            Settings.Global.DEVELOPMENT_SETTINGS_ENABLED,
+            0
+        ) == 1
 
     private fun isAppDebuggable(): Boolean =
         (context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
@@ -182,7 +188,8 @@ class DeviceInfoRepositoryAndroid(
 
     @Suppress("MissingPermission")
     private fun readImei(): String? {
-        val tm = context.getSystemService(Context.TELEPHONY_SERVICE) as? TelephonyManager ?: return null
+        val tm =
+            context.getSystemService(Context.TELEPHONY_SERVICE) as? TelephonyManager ?: return null
         return runCatching {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 tm.imei ?: tm.meid

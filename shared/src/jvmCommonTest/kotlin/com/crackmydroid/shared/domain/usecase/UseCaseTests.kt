@@ -1,13 +1,18 @@
 package com.crackmydroid.shared.domain.usecase
 
-import com.crackmydroid.shared.domain.model.ActivityEntry
+import com.crackmydroid.shared.domain.model.activity.ActivityEntry
 import com.crackmydroid.shared.domain.model.InstalledAppEntry
 import com.crackmydroid.shared.domain.model.RootStatus
 import com.crackmydroid.shared.domain.repository.ActivityRepository
 import com.crackmydroid.shared.domain.repository.InstalledAppsRepository
-import com.crackmydroid.shared.domain.repository.RootCheckRepository
 import com.crackmydroid.shared.domain.repository.ReportFileRepository
+import com.crackmydroid.shared.domain.repository.RootCheckRepository
+import com.crackmydroid.shared.domain.usecase.activities.GetActivitiesUseCase
+import com.crackmydroid.shared.domain.usecase.installedapps.ExportApkUseCase
+import com.crackmydroid.shared.domain.usecase.installedapps.ListInstalledAppsUseCase
+import com.crackmydroid.shared.domain.usecase.installedapps.ShareApkUseCase
 import com.crackmydroid.shared.domain.usecase.reports.ExportReportUseCase
+import com.crackmydroid.shared.domain.usecase.root.CheckRootUseCase
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.coVerifyOrder

@@ -1,29 +1,29 @@
 package com.crackmydroid.shared.ui.settings
 
-import com.crackmydroid.shared.domain.model.AppTheme
-import com.crackmydroid.shared.domain.model.AppLanguage
-import com.crackmydroid.shared.domain.usecase.GetLanguageUseCase
-import com.crackmydroid.shared.domain.usecase.SetLanguageUseCase
-import com.crackmydroid.shared.domain.usecase.GetThemeUseCase
-import com.crackmydroid.shared.domain.usecase.GetVerboseLogUseCase
-import com.crackmydroid.shared.domain.usecase.SetThemeUseCase
-import com.crackmydroid.shared.domain.usecase.SetVerboseLogUseCase
-import com.crackmydroid.shared.domain.usecase.GetExportFormatUseCase
-import com.crackmydroid.shared.domain.usecase.SetExportFormatUseCase
-import com.crackmydroid.shared.domain.usecase.GetHighContrastUseCase
-import com.crackmydroid.shared.domain.usecase.SetHighContrastUseCase
-import com.crackmydroid.shared.domain.usecase.GetReduceMotionUseCase
-import com.crackmydroid.shared.domain.usecase.SetReduceMotionUseCase
-import com.crackmydroid.shared.domain.usecase.GetLargeTextUseCase
-import com.crackmydroid.shared.domain.usecase.SetLargeTextUseCase
-import com.crackmydroid.shared.domain.usecase.GetSuggestionsEnabledUseCase
-import com.crackmydroid.shared.domain.usecase.SetSuggestionsEnabledUseCase
-import com.crackmydroid.shared.domain.usecase.GetFeatureHintsEnabledUseCase
-import com.crackmydroid.shared.domain.usecase.SetFeatureHintsEnabledUseCase
-import com.crackmydroid.shared.domain.usecase.GetIntroSeenUseCase
-import com.crackmydroid.shared.domain.usecase.SetIntroSeenUseCase
-import com.crackmydroid.shared.presentation.BaseViewModel
+import com.crackmydroid.shared.domain.model.app.AppLanguage
+import com.crackmydroid.shared.domain.model.app.AppTheme
 import com.crackmydroid.shared.domain.model.ExportFormat
+import com.crackmydroid.shared.domain.usecase.settings.GetExportFormatUseCase
+import com.crackmydroid.shared.domain.usecase.settings.GetFeatureHintsEnabledUseCase
+import com.crackmydroid.shared.domain.usecase.settings.GetHighContrastUseCase
+import com.crackmydroid.shared.domain.usecase.settings.GetIntroSeenUseCase
+import com.crackmydroid.shared.domain.usecase.settings.GetLanguageUseCase
+import com.crackmydroid.shared.domain.usecase.settings.GetLargeTextUseCase
+import com.crackmydroid.shared.domain.usecase.settings.GetReduceMotionUseCase
+import com.crackmydroid.shared.domain.usecase.settings.GetSuggestionsEnabledUseCase
+import com.crackmydroid.shared.domain.usecase.settings.GetThemeUseCase
+import com.crackmydroid.shared.domain.usecase.settings.GetVerboseLogUseCase
+import com.crackmydroid.shared.domain.usecase.settings.SetExportFormatUseCase
+import com.crackmydroid.shared.domain.usecase.settings.SetFeatureHintsEnabledUseCase
+import com.crackmydroid.shared.domain.usecase.settings.SetHighContrastUseCase
+import com.crackmydroid.shared.domain.usecase.settings.SetIntroSeenUseCase
+import com.crackmydroid.shared.domain.usecase.settings.SetLanguageUseCase
+import com.crackmydroid.shared.domain.usecase.settings.SetLargeTextUseCase
+import com.crackmydroid.shared.domain.usecase.settings.SetReduceMotionUseCase
+import com.crackmydroid.shared.domain.usecase.settings.SetSuggestionsEnabledUseCase
+import com.crackmydroid.shared.domain.usecase.settings.SetThemeUseCase
+import com.crackmydroid.shared.domain.usecase.settings.SetVerboseLogUseCase
+import com.crackmydroid.shared.presentation.BaseViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -48,8 +48,8 @@ class SettingsViewModel(
     private val setFeatureHintsEnabled: SetFeatureHintsEnabledUseCase,
     private val getIntroSeen: GetIntroSeenUseCase,
     private val setIntroSeen: SetIntroSeenUseCase,
-    private val getLanguage: GetLanguageUseCase? = null,
-    private val setLanguage: SetLanguageUseCase? = null
+    private val getLanguage: GetLanguageUseCase,
+    private val setLanguage: SetLanguageUseCase
 ) : BaseViewModel() {
     private val _state = MutableStateFlow(SettingsState())
     val state: StateFlow<SettingsState> = _state
@@ -60,7 +60,7 @@ class SettingsViewModel(
             _state.update { it.copy(loading = true, error = null) }
             runCatching {
                 LoadedSettings(
-                    language = getLanguage?.invoke() ?: AppLanguage.ENGLISH,
+                    language = getLanguage(),
                     theme = getTheme(),
                     verbose = getVerbose(),
                     format = getExportFormat(),
@@ -102,7 +102,7 @@ class SettingsViewModel(
 
     fun selectLanguage(language: AppLanguage) {
         scope.launch {
-            runCatching { setLanguage?.invoke(language) }
+            runCatching { setLanguage(language) }
                 .onSuccess { _state.update { it.copy(language = language, error = null) } }
                 .onFailure { err -> _state.update { it.copy(error = err.message) } }
         }
@@ -117,21 +117,21 @@ class SettingsViewModel(
 
     fun setHighContrast(enabled: Boolean) {
         scope.launch {
-            setHighContrast(enabled)
+            setHighContrast.invoke(enabled)
             _state.update { it.copy(highContrast = enabled) }
         }
     }
 
     fun setReduceMotion(enabled: Boolean) {
         scope.launch {
-            setReduceMotion(enabled)
+            setReduceMotion.invoke(enabled)
             _state.update { it.copy(reduceMotion = enabled) }
         }
     }
 
     fun setLargeText(enabled: Boolean) {
         scope.launch {
-            setLargeText(enabled)
+            setLargeText.invoke(enabled)
             _state.update { it.copy(largeText = enabled) }
         }
     }
@@ -142,7 +142,7 @@ class SettingsViewModel(
 
     fun setSuggestionsEnabled(enabled: Boolean) {
         scope.launch {
-            setSuggestionsEnabled(enabled)
+            setSuggestionsEnabled.invoke(enabled)
             _state.update { it.copy(suggestionsEnabled = enabled) }
             com.crackmydroid.shared.presentation.components.SearchHistoryStore.setEnabled(enabled)
         }
@@ -150,7 +150,7 @@ class SettingsViewModel(
 
     fun setFeatureHintsEnabled(enabled: Boolean) {
         scope.launch {
-            setFeatureHintsEnabled(enabled)
+            setFeatureHintsEnabled.invoke(enabled)
             _state.update { it.copy(featureHintsEnabled = enabled) }
         }
     }
@@ -171,7 +171,7 @@ class SettingsViewModel(
         if (savingFormat) return
         savingFormat = true
         scope.launch {
-            runCatching { setExportFormat(format) }
+            runCatching { setExportFormat.invoke(format) }
                 .onSuccess { _state.update { it.copy(exportFormat = format, error = null) } }
                 .onFailure { err -> _state.update { it.copy(error = err.message) } }
             savingFormat = false

@@ -1,35 +1,37 @@
 package com.crackmydroid.shared.ui.screens
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material3.Switch
-import androidx.compose.material3.Slider
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Slider
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
@@ -40,22 +42,17 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.material3.Icon
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Refresh
 import com.crackmydroid.shared.i18n.LocalStrings
 import com.crackmydroid.shared.presentation.components.AppAccordion
 import com.crackmydroid.shared.presentation.components.AppButton
-import com.crackmydroid.shared.presentation.components.AppText
-import com.crackmydroid.shared.presentation.components.ErrorDialog
-import com.crackmydroid.shared.presentation.components.SearchFieldWithHistory
-import com.crackmydroid.shared.presentation.components.SectionHeader
+import com.crackmydroid.shared.presentation.components.ErrorDialogComponent
 import com.crackmydroid.shared.presentation.components.ScrollToTopButton
+import com.crackmydroid.shared.presentation.components.SearchFieldWithHistoryComponent
+import com.crackmydroid.shared.presentation.components.SectionHeader
+import com.crackmydroid.shared.presentation.components.text.AppText
 import com.crackmydroid.shared.ui.logs.LogViewModel
 import kotlinx.coroutines.launch
 
@@ -105,14 +102,13 @@ fun LogScreen(
                     .padding(bottom = 8.dp)
             ) {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    SearchFieldWithHistory(
+                    SearchFieldWithHistoryComponent(
                         value = state.filter,
                         onValueChange = viewModel::setFilter,
                         onSubmit = viewModel::setFilter,
                         label = strings.searchLog,
                         historyKey = "logs",
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(18.dp),
                         showClearAction = true,
                         onCleared = {
                             viewModel.setFilter("")
@@ -198,7 +194,10 @@ fun LogScreen(
                             valueRange = 10f..18f,
                             modifier = Modifier.weight(1f)
                         )
-                        AppText("${fontSize.value.toInt()}sp", style = MaterialTheme.typography.labelSmall)
+                        AppText(
+                            "${fontSize.value.toInt()}sp",
+                            style = MaterialTheme.typography.labelSmall
+                        )
                     }
                 }
             }
@@ -208,14 +207,26 @@ fun LogScreen(
             }
 
             state.message?.let {
-                AppText(it, color = androidx.compose.material3.MaterialTheme.colorScheme.primary, style = androidx.compose.material3.MaterialTheme.typography.bodySmall)
+                AppText(
+                    it,
+                    color = androidx.compose.material3.MaterialTheme.colorScheme.primary,
+                    style = androidx.compose.material3.MaterialTheme.typography.bodySmall
+                )
             }
             if (state.trimmed) {
-                AppText("Mostro solo le ultime 1500 righe del log per prestazioni.", style = androidx.compose.material3.MaterialTheme.typography.bodySmall, color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant)
+                AppText(
+                    "Mostro solo le ultime 1500 righe del log per prestazioni.",
+                    style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
+                    color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
 
             state.error?.let {
-                AppText(it, color = androidx.compose.material3.MaterialTheme.colorScheme.error, style = androidx.compose.material3.MaterialTheme.typography.bodySmall)
+                AppText(
+                    it,
+                    color = androidx.compose.material3.MaterialTheme.colorScheme.error,
+                    style = androidx.compose.material3.MaterialTheme.typography.bodySmall
+                )
             }
 
             val horizontalScrollState = rememberScrollState()
@@ -244,7 +255,8 @@ fun LogScreen(
                             key = { index, _ -> index }
                         ) { _, line ->
                             val lvl = extractLevel(line)
-                            val lineColor = if (state.colorByLevel) levelColor(lvl) else MaterialTheme.colorScheme.onSurface
+                            val lineColor =
+                                if (state.colorByLevel) levelColor(lvl) else MaterialTheme.colorScheme.onSurface
                             Text(
                                 line,
                                 style = MaterialTheme.typography.bodySmall.copy(
@@ -271,7 +283,7 @@ fun LogScreen(
         )
     }
 
-    state.error?.let { ErrorDialog(it, viewModel::clearError) }
+    state.error?.let { ErrorDialogComponent(it, viewModel::clearError) }
 }
 
 private fun extractLevel(line: String): Char? {

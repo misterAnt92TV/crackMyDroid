@@ -1,6 +1,9 @@
 # CrackMyDroid
 
-> **Kotlin Multiplatform** (Android · Desktop · iOS) — sicurezza mobile, reverse engineering e diagnostica del dispositivo, tutto in un'unica UI condivisa costruita con **Compose Multiplatform**.
+🌐 **Languages:** [Italiano](README.it.md) · [Deutsch](README.de.md) · [Français](README.fr.md) · [Español](README.es.md)
+
+> **Kotlin Multiplatform** (Android · Desktop · iOS) — sicurezza mobile, reverse engineering e
+> diagnostica del dispositivo, tutto in un'unica UI condivisa costruita con **Compose Multiplatform**.
 
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.3.21-blue.svg)](https://kotlinlang.org)
 [![Compose Multiplatform](https://img.shields.io/badge/Compose%20Multiplatform-1.10.3-purple.svg)](https://www.jetbrains.com/lf/compose-multiplatform)
@@ -28,24 +31,25 @@
 
 ## Funzionalità principali
 
-| Sezione | Descrizione |
-|---|---|
-| **Home** | Panoramica rapida, scopo dell'app e FAQ espandibili |
-| **Info dispositivo** | Hardware/software, patch di sicurezza, fingerprint, radio, kernel, bootloader, batteria/rete, flag di debug (ADB, developer options, debuggable), root status; ogni riga copiabile, report esportabile in TXT |
-| **Root / Play Integrity** | Verifica root con RootBeer, controlli Play Integrity con nonce configurabile e dettaglio dei test |
-| **PenTesting** | Suite di check di sicurezza automatizzati (singolo target o scansione completa); stati queued/ok/error, contatori, dettaglio errori, export/share report; cronologia fino a 240 eventi e 12 snapshot salvati |
-| **Attività (Activities)** | Lista attività per app con ricerca/cronologia, preferiti, espansione per pacchetto, lancio diretto, analisi dei rischi di esposizione (intent/exported) ed export |
-| **App installate (APK)** | Ricerca full-text, filtri, preferiti, icone app, analisi sicurezza manifest (debuggable, backup, cleartext, componenti esposti), punteggio di rischio, export APK su storage e condivisione diretta |
-| **Permessi** | Panoramica permessi app installate con classificazione del rischio (Critical/High/Medium/Low), ricerca e dettagli |
-| **Shell/Trick** | Comandi ADB/shell preconfigurati (con flag root-required), conferma opzionale, output ed exit code |
-| **Log** | Visualizzazione log applicativi con export |
-| **Impostazioni** | Tema (chiaro/scuro/sistema), lingua (IT/EN), verbosità log, accessibilità (alto contrasto, animazioni ridotte, testo grande), licenze librerie, versione app |
+| Sezione                   | Descrizione                                                                                                                                                                                                   |
+|---------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Home**                  | Panoramica rapida, scopo dell'app e FAQ espandibili                                                                                                                                                           |
+| **Info dispositivo**      | Hardware/software, patch di sicurezza, fingerprint, radio, kernel, bootloader, batteria/rete, flag di debug (ADB, developer options, debuggable), root status; ogni riga copiabile, report esportabile in TXT |
+| **Root / Play Integrity** | Verifica root con RootBeer, controlli Play Integrity con nonce configurabile e dettaglio dei test                                                                                                             |
+| **PenTesting**            | Suite di check di sicurezza automatizzati (singolo target o scansione completa); stati queued/ok/error, contatori, dettaglio errori, export/share report; cronologia fino a 240 eventi e 12 snapshot salvati  |
+| **Attività (Activities)** | Lista attività per app con ricerca/cronologia, preferiti, espansione per pacchetto, lancio diretto, analisi dei rischi di esposizione (intent/exported) ed export                                             |
+| **App installate (APK)**  | Ricerca full-text, filtri, preferiti, icone app, analisi sicurezza manifest (debuggable, backup, cleartext, componenti esposti), punteggio di rischio, export APK su storage e condivisione diretta           |
+| **Permessi**              | Panoramica permessi app installate con classificazione del rischio (Critical/High/Medium/Low), ricerca e dettagli                                                                                             |
+| **Shell/Trick**           | Comandi ADB/shell preconfigurati (con flag root-required), conferma opzionale, output ed exit code                                                                                                            |
+| **Log**                   | Visualizzazione log applicativi con export                                                                                                                                                                    |
+| **Impostazioni**          | Tema (chiaro/scuro/sistema), lingua (IT/EN), verbosità log, accessibilità (alto contrasto, animazioni ridotte, testo grande), licenze librerie, versione app                                                  |
 
 ---
 
 ## Schermate UI / UI Screens
 
-> Mockup ASCII fedeli alla UI Compose Multiplatform reale. Vedi [`docs/screens.md`](docs/screens.md) per la documentazione visiva completa di tutte le schermate.
+> Mockup ASCII fedeli alla UI Compose Multiplatform reale. Vedi [`docs/screens.md`](docs/screens.md)
+> per la documentazione visiva completa di tutte le schermate.
 
 ### Home & Navigazione
 
@@ -152,26 +156,31 @@ Il progetto segue una **Clean Architecture** a tre layer con separazione netta t
 
 ### Caching & Paginazione
 
-- **`PaginationHelper`** (`commonMain`): utility stateless per slice offset-based (`paginate`, `countPages`).
-- **`CachingRepositoryDecorator`** (`androidMain`): decorator in-memory con TTL di 60 secondi per report manifest e componenti; riduce le chiamate ripetute al `PackageManager`.
-- **SQLDelight** (`CacheDatabase.sq`): cache persistente SQLite con driver platform-specific via `expect/actual`.
-- **PenTestingViewModel**: lazy cache interna per permessi, root status, activity e risk index; history cappata a 240 eventi, max 12 snapshot salvati.
+- **`PaginationHelper`** (`commonMain`): utility stateless per slice offset-based (`paginate`,
+  `countPages`).
+- **`CachingRepositoryDecorator`** (`androidMain`): decorator in-memory con TTL di 60 secondi per
+  report manifest e componenti; riduce le chiamate ripetute al `PackageManager`.
+- **SQLDelight** (`CacheDatabase.sq`): cache persistente SQLite con driver platform-specific via
+  `expect/actual`.
+- **PenTestingViewModel**: lazy cache interna per permessi, root status, activity e risk index;
+  history cappata a 240 eventi, max 12 snapshot salvati.
 
 ### Analisi sicurezza manifest
 
-`ManifestSecurityAnalyzer.analyze()` ispeziona il manifest APK e produce un `ManifestSecurityReport` con:
+`ManifestSecurityAnalyzer.analyze()` ispeziona il manifest APK e produce un `ManifestSecurityReport`
+con:
 
-| Check | Livello |
-|---|---|
-| `android:debuggable=true` | 🔴 Critical |
-| `testOnly=true` | 🟠 High |
-| Debug certificate | 🟠 High |
-| `allowBackup=true` (senza custom agent) | 🟠 High |
-| `allowBackup=true` (con custom agent) | 🟡 Medium |
-| `usesCleartextTraffic=true` | 🟡 Medium |
-| ContentProvider esposto senza permission | 🔴 Critical |
-| Service esposto senza permission | 🟠 High |
-| BroadcastReceiver esposto senza permission | 🟡 Medium |
+| Check                                      | Livello     |
+|--------------------------------------------|-------------|
+| `android:debuggable=true`                  | 🔴 Critical |
+| `testOnly=true`                            | 🟠 High     |
+| Debug certificate                          | 🟠 High     |
+| `allowBackup=true` (senza custom agent)    | 🟠 High     |
+| `allowBackup=true` (con custom agent)      | 🟡 Medium   |
+| `usesCleartextTraffic=true`                | 🟡 Medium   |
+| ContentProvider esposto senza permission   | 🔴 Critical |
+| Service esposto senza permission           | 🟠 High     |
+| BroadcastReceiver esposto senza permission | 🟡 Medium   |
 
 Il punteggio finale determina un `ManifestRiskLevel` (Low / Medium / High / Critical).
 
@@ -179,7 +188,8 @@ Il punteggio finale determina un `ManifestRiskLevel` (Low / Medium / High / Crit
 
 ## Modulo Android
 
-Il modulo `:androidApp` è l'applicazione nativa Android che gira **direttamente sul device** con accesso completo alle API di sistema.
+Il modulo `:androidApp` è l'applicazione nativa Android che gira **direttamente sul device** con
+accesso completo alle API di sistema.
 
 ### Come funziona
 
@@ -193,9 +203,12 @@ MainActivity
   └─ setContent { CrackMyDroidApp() }   // UI condivisa dal modulo :shared
 ```
 
-1. All'avvio, `CrackMyDroidApp` inizializza **Koin** e avvia `AndroidDeviceSnapshotCoordinator` in background.
-2. Il coordinator raccoglie continuamente le informazioni del device (hardware, root, Play Integrity, pacchetti, permessi…) e le serializza in un **file JSON** sullo storage dell'app.
-3. `MainActivity` monta la UI condivisa, che legge i dati direttamente dalle repository Android native.
+1. All'avvio, `CrackMyDroidApp` inizializza **Koin** e avvia `AndroidDeviceSnapshotCoordinator` in
+   background.
+2. Il coordinator raccoglie continuamente le informazioni del device (hardware, root, Play
+   Integrity, pacchetti, permessi…) e le serializza in un **file JSON** sullo storage dell'app.
+3. `MainActivity` monta la UI condivisa, che legge i dati direttamente dalle repository Android
+   native.
 
 ### Requisiti
 
@@ -220,7 +233,8 @@ adb install -r androidApp/build/outputs/apk/debug/androidApp-debug.apk
 
 ## Modulo Desktop
 
-Il modulo `:desktopApp` è un'app **JVM/Desktop** costruita con Compose Multiplatform. Non accede direttamente alle API Android: usa **ADB come bridge** per connettersi a un device fisico o emulato.
+Il modulo `:desktopApp` è un'app **JVM/Desktop** costruita con Compose Multiplatform. Non accede
+direttamente alle API Android: usa **ADB come bridge** per connettersi a un device fisico o emulato.
 
 ### Come funziona
 
@@ -238,8 +252,10 @@ Desktop App
 2. Se `adb` non è nel PATH, si può configurare manualmente il percorso (salvato in DataStore).
 3. Cliccando **"Rileva device"** viene eseguito `adb devices`; i device compaiono in lista.
 4. Selezionando un device, l'app esegue `adb pull` del file JSON generato dall'app Android.
-5. Il JSON viene deserializzato e iniettato nelle stesse repository condivise: la UI si avvia identica all'app Android, ma con i dati del device remoto.
-6. La **toolbar superiore** mostra modello, serial, stato ADB, sorgente dati (live/snapshot + timestamp), pulsanti per rescan, cambio device e impostazioni ADB.
+5. Il JSON viene deserializzato e iniettato nelle stesse repository condivise: la UI si avvia
+   identica all'app Android, ma con i dati del device remoto.
+6. La **toolbar superiore** mostra modello, serial, stato ADB, sorgente dati (live/snapshot +
+   timestamp), pulsanti per rescan, cambio device e impostazioni ADB.
 
 ## Quality Checks
 
@@ -268,7 +284,8 @@ Desktop App
 
 ## Utilizzo combinato Android + Desktop
 
-L'app Android e l'app desktop si **complementano**: la prima raccoglie i dati sul device, la seconda li visualizza su computer via ADB.
+L'app Android e l'app desktop si **complementano**: la prima raccoglie i dati sul device, la seconda
+li visualizza su computer via ADB.
 
 ```
 [PC/Mac]                          [Device Android]
@@ -287,7 +304,8 @@ L'app Android e l'app desktop si **complementano**: la prima raccoglie i dati su
    ```bash
    ./gradlew :androidApp:installDebug
    ```
-2. **Avvia l'app Android** e lasciala girare qualche secondo — il coordinator genera il JSON di snapshot.
+2. **Avvia l'app Android** e lasciala girare qualche secondo — il coordinator genera il JSON di
+   snapshot.
 3. **Collega il device al PC** via USB con **USB Debugging abilitato** (o usa un emulatore).
 4. **Verifica che ADB veda il device:**
    ```bash
@@ -302,7 +320,9 @@ L'app Android e l'app desktop si **complementano**: la prima raccoglie i dati su
 6. Nella schermata picker, clicca **"Rileva device"** → seleziona il device.
 7. L'app importa lo snapshot e mostra la UI completa.
 
-> **Nota:** se l'app Android non è installata o lo snapshot non è ancora stato generato, la desktop app segnala *"Snapshot non disponibile"* e mostra comunque la UI con le informazioni base ricavabili via ADB (package list, shell commands, ecc.).
+> **Nota:** se l'app Android non è installata o lo snapshot non è ancora stato generato, la desktop
+> app segnala *"Snapshot non disponibile"* e mostra comunque la UI con le informazioni base ricavabili
+> via ADB (package list, shell commands, ecc.).
 
 ---
 
@@ -353,22 +373,22 @@ newCrackMyDroid/
 
 ## Stack tecnico
 
-| Layer | Libreria | Versione |
-|---|---|---|
-| **UI** | Compose Multiplatform | 1.10.3 |
-| **UI** | Material3 | 1.9.0 |
-| **Linguaggio** | Kotlin | 2.3.21 |
-| **DI** | Koin | 3.5.6 |
-| **Async** | Kotlin Coroutines | 1.8.1 |
-| **Database** | SQLDelight | 2.0.1 |
-| **Serializzazione** | kotlinx.serialization | 1.6.3 |
-| **Root detection** | RootBeer | 0.1.1 |
-| **Sicurezza** | Play Integrity API | 1.4.0 |
-| **Preferenze** | DataStore Preferences | 1.1.7 |
-| **Logging** | Kermit | 2.0.4 |
-| **Test** | kotlin-test, MockK, coroutines-test | — |
-| **Android** | AGP | 8.13.0 |
-| **Android** | Core KTX / Activity Compose | 1.13.1 / 1.8.2 |
+| Layer               | Libreria                            | Versione       |
+|---------------------|-------------------------------------|----------------|
+| **UI**              | Compose Multiplatform               | 1.10.3         |
+| **UI**              | Material3                           | 1.9.0          |
+| **Linguaggio**      | Kotlin                              | 2.3.21         |
+| **DI**              | Koin                                | 3.5.6          |
+| **Async**           | Kotlin Coroutines                   | 1.8.1          |
+| **Database**        | SQLDelight                          | 2.0.1          |
+| **Serializzazione** | kotlinx.serialization               | 1.6.3          |
+| **Root detection**  | RootBeer                            | 0.1.1          |
+| **Sicurezza**       | Play Integrity API                  | 1.4.0          |
+| **Preferenze**      | DataStore Preferences               | 1.1.7          |
+| **Logging**         | Kermit                              | 2.0.4          |
+| **Test**            | kotlin-test, MockK, coroutines-test | —              |
+| **Android**         | AGP                                 | 8.13.0         |
+| **Android**         | Core KTX / Activity Compose         | 1.13.1 / 1.8.2 |
 
 ---
 
@@ -415,7 +435,10 @@ kotlin.mpp.enableCInteropCommonization=true
 
 ## Note iOS
 
-Il modulo `iosMain` è incluso per condividere UI e logica cross-platform. Le funzionalità dipendenti da API Android (Root, ADB, Play Integrity, APK export, shell commands) non sono disponibili su iOS e vengono rimpiazzate da **stub** che restituiscono stati vuoti/non supportati. Il wrapper SwiftUI in `iosApp/` monta la stessa UI Compose.
+Il modulo `iosMain` è incluso per condividere UI e logica cross-platform. Le funzionalità dipendenti
+da API Android (Root, ADB, Play Integrity, APK export, shell commands) non sono disponibili su iOS e
+vengono rimpiazzate da **stub** che restituiscono stati vuoti/non supportati. Il wrapper SwiftUI in
+`iosApp/` monta la stessa UI Compose.
 
 ---
 
@@ -423,7 +446,8 @@ Il modulo `iosMain` è incluso per condividere UI e logica cross-platform. Le fu
 
 # English Documentation
 
-> Kotlin Multiplatform (Android · Desktop · iOS) security toolkit for mobile penetration testing, reverse engineering, and device diagnostics — single shared UI built with Compose Multiplatform.
+> Kotlin Multiplatform (Android · Desktop · iOS) security toolkit for mobile penetration testing,
+> reverse engineering, and device diagnostics — single shared UI built with Compose Multiplatform.
 
 ## Table of Contents
 
@@ -440,18 +464,18 @@ Il modulo `iosMain` è incluso per condividere UI e logica cross-platform. Le fu
 
 ## Features
 
-| Section | Description |
-|---|---|
-| **Home** | Quick overview, app purpose, expandable FAQ |
-| **Device Info** | Hardware/software, security patch, fingerprint, radio, kernel, bootloader, battery/network, debug flags (ADB, developer options, debuggable), root status; every row copyable, exportable TXT report |
-| **Root / Play Integrity** | Root verification via RootBeer, Play Integrity checks with configurable nonce and detailed test results |
-| **PenTesting** | Automated security check suite (single target or full sweep); queued/ok/error states, counters, error details, export/share report; history up to 240 events and 12 saved snapshots |
-| **Activities** | Per-app activity browser with search/history, favorites, package expansion, direct launch, exposure risk analysis (intent/exported), export |
-| **Installed Apps (APK)** | Full-text search, filters, favorites, app icons, manifest security analysis (debuggable, backup, cleartext, exposed components), risk score, APK export to storage and direct sharing |
-| **Permissions** | Installed app permissions overview with risk classification (Critical/High/Medium/Low), search and details |
-| **Shell/Tricks** | Pre-configured ADB/shell commands (with root-required flag), optional confirmation, output and exit code |
-| **Log** | App operation log viewer with export |
-| **Settings** | Theme (light/dark/system), language (IT/EN), log verbosity, accessibility (high contrast, reduced animations, large text), library licenses, app version |
+| Section                   | Description                                                                                                                                                                                          |
+|---------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Home**                  | Quick overview, app purpose, expandable FAQ                                                                                                                                                          |
+| **Device Info**           | Hardware/software, security patch, fingerprint, radio, kernel, bootloader, battery/network, debug flags (ADB, developer options, debuggable), root status; every row copyable, exportable TXT report |
+| **Root / Play Integrity** | Root verification via RootBeer, Play Integrity checks with configurable nonce and detailed test results                                                                                              |
+| **PenTesting**            | Automated security check suite (single target or full sweep); queued/ok/error states, counters, error details, export/share report; history up to 240 events and 12 saved snapshots                  |
+| **Activities**            | Per-app activity browser with search/history, favorites, package expansion, direct launch, exposure risk analysis (intent/exported), export                                                          |
+| **Installed Apps (APK)**  | Full-text search, filters, favorites, app icons, manifest security analysis (debuggable, backup, cleartext, exposed components), risk score, APK export to storage and direct sharing                |
+| **Permissions**           | Installed app permissions overview with risk classification (Critical/High/Medium/Low), search and details                                                                                           |
+| **Shell/Tricks**          | Pre-configured ADB/shell commands (with root-required flag), optional confirmation, output and exit code                                                                                             |
+| **Log**                   | App operation log viewer with export                                                                                                                                                                 |
+| **Settings**              | Theme (light/dark/system), language (IT/EN), log verbosity, accessibility (high contrast, reduced animations, large text), library licenses, app version                                             |
 
 ---
 
@@ -479,25 +503,29 @@ Clean Architecture with three layers and strict platform separation:
 ### Caching & Pagination
 
 - **`PaginationHelper`** (commonMain): stateless utility for offset-based list slicing.
-- **`CachingRepositoryDecorator`** (androidMain): in-memory cache with 60-second TTL for manifest reports and components; reduces repeated `PackageManager` calls.
-- **SQLDelight** (`CacheDatabase.sq`): persistent SQLite cache with platform-specific driver via `expect/actual`.
-- **PenTestingViewModel**: lazy internal caches for permissions, root status, activity and risk index; history capped at 240 events, max 12 saved snapshots.
+- **`CachingRepositoryDecorator`** (androidMain): in-memory cache with 60-second TTL for manifest
+  reports and components; reduces repeated `PackageManager` calls.
+- **SQLDelight** (`CacheDatabase.sq`): persistent SQLite cache with platform-specific driver via
+  `expect/actual`.
+- **PenTestingViewModel**: lazy internal caches for permissions, root status, activity and risk
+  index; history capped at 240 events, max 12 saved snapshots.
 
 ### Manifest Security Analysis
 
-`ManifestSecurityAnalyzer.analyze()` inspects the APK manifest and produces a `ManifestSecurityReport` with weighted risk scoring:
+`ManifestSecurityAnalyzer.analyze()` inspects the APK manifest and produces a
+`ManifestSecurityReport` with weighted risk scoring:
 
-| Check | Level |
-|---|---|
-| `android:debuggable=true` | 🔴 Critical |
-| `testOnly=true` | 🟠 High |
-| Debug certificate signed | 🟠 High |
-| `allowBackup=true` (no custom agent) | 🟠 High |
-| `allowBackup=true` (custom agent present) | 🟡 Medium |
-| `usesCleartextTraffic=true` | 🟡 Medium |
-| Unprotected exported ContentProvider | 🔴 Critical |
-| Unprotected exported Service | 🟠 High |
-| Unprotected exported BroadcastReceiver | 🟡 Medium |
+| Check                                     | Level       |
+|-------------------------------------------|-------------|
+| `android:debuggable=true`                 | 🔴 Critical |
+| `testOnly=true`                           | 🟠 High     |
+| Debug certificate signed                  | 🟠 High     |
+| `allowBackup=true` (no custom agent)      | 🟠 High     |
+| `allowBackup=true` (custom agent present) | 🟡 Medium   |
+| `usesCleartextTraffic=true`               | 🟡 Medium   |
+| Unprotected exported ContentProvider      | 🔴 Critical |
+| Unprotected exported Service              | 🟠 High     |
+| Unprotected exported BroadcastReceiver    | 🟡 Medium   |
 
 Final score maps to `ManifestRiskLevel` (Low / Medium / High / Critical).
 
@@ -509,8 +537,10 @@ The `:androidApp` module runs **directly on the device** with full access to And
 
 ### How it works
 
-1. `CrackMyDroidApp` (Application) initializes **Koin** and launches `AndroidDeviceSnapshotCoordinator` in background.
-2. The coordinator continuously collects device data (hardware, root, Play Integrity, packages, permissions…) and serializes it as a **JSON snapshot** to app storage.
+1. `CrackMyDroidApp` (Application) initializes **Koin** and launches
+   `AndroidDeviceSnapshotCoordinator` in background.
+2. The coordinator continuously collects device data (hardware, root, Play Integrity, packages,
+   permissions…) and serializes it as a **JSON snapshot** to app storage.
 3. `MainActivity` mounts the shared UI, which reads data from the native Android repositories.
 
 ### Requirements
@@ -535,7 +565,9 @@ adb install -r androidApp/build/outputs/apk/debug/androidApp-debug.apk
 
 ## Desktop Module
 
-The `:desktopApp` module is a **JVM/Desktop** app built with Compose Multiplatform. It does not access Android APIs directly; it uses **ADB as a bridge** to connect to a physical or emulated Android device.
+The `:desktopApp` module is a **JVM/Desktop** app built with Compose Multiplatform. It does not
+access Android APIs directly; it uses **ADB as a bridge** to connect to a physical or emulated
+Android device.
 
 ### How it works
 
@@ -543,8 +575,10 @@ The `:desktopApp` module is a **JVM/Desktop** app built with Compose Multiplatfo
 2. If `adb` is not in the PATH, the binary path can be configured manually (saved in DataStore).
 3. Clicking **"Detect devices"** runs `adb devices`; found devices appear in the list.
 4. Selecting a device triggers an `adb pull` of the snapshot JSON generated by the Android app.
-5. The JSON is deserialized and injected into the same shared repositories; the UI launches identically to the Android app, showing the remote device's data.
-6. The **top toolbar** shows: model + serial + ADB status, data source (live/snapshot + timestamp), rescan/device change/ADB settings buttons.
+5. The JSON is deserialized and injected into the same shared repositories; the UI launches
+   identically to the Android app, showing the remote device's data.
+6. The **top toolbar** shows: model + serial + ADB status, data source (live/snapshot + timestamp),
+   rescan/device change/ADB settings buttons.
 
 ### Requirements
 
@@ -566,7 +600,8 @@ The `:desktopApp` module is a **JVM/Desktop** app built with Compose Multiplatfo
 
 ## Combined Usage
 
-The Android and Desktop apps **complement each other**: the former collects data on the device, the latter visualizes it on a connected computer.
+The Android and Desktop apps **complement each other**: the former collects data on the device, the
+latter visualizes it on a connected computer.
 
 ```
 [PC/Mac]                          [Android Device]
@@ -589,7 +624,9 @@ The Android and Desktop apps **complement each other**: the former collects data
 6. In the picker, click **"Detect devices"** → select the device.
 7. The app imports the snapshot and shows the full UI.
 
-> **Note:** if the Android app is not installed or the snapshot has not been generated yet, the desktop app reports *"Snapshot unavailable"* and still shows the UI with basic info retrievable directly via ADB (package list, shell commands, etc.).
+> **Note:** if the Android app is not installed or the snapshot has not been generated yet, the
+> desktop app reports *"Snapshot unavailable"* and still shows the UI with basic info retrievable
+> directly via ADB (package list, shell commands, etc.).
 
 ---
 
@@ -616,22 +653,22 @@ newCrackMyDroid/
 
 ## Tech Stack
 
-| Layer | Library | Version |
-|---|---|---|
-| **UI** | Compose Multiplatform | 1.10.3 |
-| **UI** | Material3 | 1.9.0 |
-| **Language** | Kotlin | 2.3.21 |
-| **DI** | Koin | 3.5.6 |
-| **Async** | Kotlin Coroutines | 1.8.1 |
-| **Database** | SQLDelight | 2.0.1 |
-| **Serialization** | kotlinx.serialization | 1.6.3 |
-| **Root detection** | RootBeer | 0.1.1 |
-| **Security** | Play Integrity API | 1.4.0 |
-| **Preferences** | DataStore Preferences | 1.1.7 |
-| **Logging** | Kermit | 2.0.4 |
-| **Testing** | kotlin-test, MockK, coroutines-test | — |
-| **Android** | AGP | 8.13.0 |
-| **Android** | Core KTX / Activity Compose | 1.13.1 / 1.8.2 |
+| Layer              | Library                             | Version        |
+|--------------------|-------------------------------------|----------------|
+| **UI**             | Compose Multiplatform               | 1.10.3         |
+| **UI**             | Material3                           | 1.9.0          |
+| **Language**       | Kotlin                              | 2.3.21         |
+| **DI**             | Koin                                | 3.5.6          |
+| **Async**          | Kotlin Coroutines                   | 1.8.1          |
+| **Database**       | SQLDelight                          | 2.0.1          |
+| **Serialization**  | kotlinx.serialization               | 1.6.3          |
+| **Root detection** | RootBeer                            | 0.1.1          |
+| **Security**       | Play Integrity API                  | 1.4.0          |
+| **Preferences**    | DataStore Preferences               | 1.1.7          |
+| **Logging**        | Kermit                              | 2.0.4          |
+| **Testing**        | kotlin-test, MockK, coroutines-test | —              |
+| **Android**        | AGP                                 | 8.13.0         |
+| **Android**        | Core KTX / Activity Compose         | 1.13.1 / 1.8.2 |
 
 ---
 
@@ -663,4 +700,7 @@ cd newCrackMyDroid
 
 ### iOS Notes
 
-The `iosMain` source set shares UI and logic cross-platform. Android-specific features (root detection, ADB, Play Integrity, APK export, shell commands) are not available on iOS and are replaced by **stubs** that return empty/unsupported states. The SwiftUI wrapper in `iosApp/` mounts the same Compose UI.
+The `iosMain` source set shares UI and logic cross-platform. Android-specific features (root
+detection, ADB, Play Integrity, APK export, shell commands) are not available on iOS and are
+replaced by **stubs** that return empty/unsupported states. The SwiftUI wrapper in `iosApp/` mounts
+the same Compose UI.

@@ -1,9 +1,9 @@
 package com.crackmydroid.shared.presentation
 
-import com.crackmydroid.shared.domain.model.ShellCommand
-import com.crackmydroid.shared.domain.model.ShellCommandResult
-import com.crackmydroid.shared.domain.usecase.ExecuteShellCommandUseCase
-import com.crackmydroid.shared.domain.usecase.ListShellCommandsUseCase
+import com.crackmydroid.shared.domain.model.shell.ShellCommand
+import com.crackmydroid.shared.domain.model.shell.ShellCommandResult
+import com.crackmydroid.shared.domain.usecase.trick.ExecuteShellCommandUseCase
+import com.crackmydroid.shared.domain.usecase.trick.ListShellCommandsUseCase
 import com.crackmydroid.shared.ui.trick.TrickViewModel
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -62,7 +62,12 @@ class TrickViewModelTest {
             delay(120)
             ShellCommandResult(success = true, stdout = "package:com.test", stderr = "", code = 0)
         }
-        coEvery { execUseCase(top) } returns ShellCommandResult(success = true, stdout = "ok", stderr = "", code = 0)
+        coEvery { execUseCase(top) } returns ShellCommandResult(
+            success = true,
+            stdout = "ok",
+            stderr = "",
+            code = 0
+        )
         val vm = TrickViewModel(listUseCase, execUseCase)
 
         vm.execute(packages)
@@ -79,6 +84,38 @@ class TrickViewModelTest {
         assertEquals("Elenco pacchetti", vm.state.value.lastCommandTitle)
         coVerify(exactly = 1) { execUseCase(packages) }
         coVerify(exactly = 0) { execUseCase(top) }
+        vm.onCleared()
+    }
+
+    @Test
+    fun execute_failedCommand_storesErrorAndClearsRunningState() = runTest(dispatcher) {
+        val listUseCase = mockk<ListShellCommandsUseCase>()
+        val execUseCase = mockk<ExecuteShellCommandUseCase>()
+        val command = ShellCommand("Root check", "id", requiresRoot = true)
+        coEvery { execUseCase(command) } throws IllegalStateException("su unavailable")
+        val vm = TrickViewModel(listUseCase, execUseCase)
+
+        vm.execute(command)
+        advanceUntilIdle()
+
+        assertEquals(false, vm.state.value.running)
+        assertEquals("Root check", vm.state.value.lastCommandTitle)
+        assertEquals("su unavailable", vm.state.value.error)
+        vm.clearError()
+        assertEquals(null, vm.state.value.error)
+        vm.onCleared()
+    }
+
+    @Test
+    fun unsupportedCommand_andClearHint_manageInteractionHint() {
+        val vm = TrickViewModel(mockk(), mockk())
+        val command = ShellCommand("Root command", "id", requiresRoot = true, unsupportedReason = "Root unavailable")
+
+        vm.notifyUnsupportedCommand(command)
+        assertEquals("Root unavailable", vm.state.value.interactionHint)
+        vm.clearInteractionHint()
+
+        assertEquals(null, vm.state.value.interactionHint)
         vm.onCleared()
     }
 }

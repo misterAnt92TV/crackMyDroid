@@ -1,0 +1,58 @@
+{
+  "$description": "CrackMyDroid design tokens exported from the local Penpot Design system page. Light and dark are semantic themes consumed by Compose Material 3.",
+  "global": {
+    "space": {
+      "xs": { "$type": "dimension", "$value": "4px" },
+      "sm": { "$type": "dimension", "$value": "8px" },
+      "md": { "$type": "dimension", "$value": "12px" },
+      "lg": { "$type": "dimension", "$value": "16px" },
+      "xl": { "$type": "dimension", "$value": "24px" }
+    },
+    "radius": {
+      "small": { "$type": "dimension", "$value": "8px" },
+      "medium": { "$type": "dimension", "$value": "12px" },
+      "large": { "$type": "dimension", "$value": "16px" }
+    },
+    "elevation": {
+      "card": { "$type": "number", "$value": 0 }
+    }
+  },
+  "light": {
+    "color": {
+      "primary": { "$type": "color", "$value": "#1A73E8" },
+      "on-primary": { "$type": "color", "$value": "#FFFFFF" },
+      "primary-container": { "$type": "color", "$value": "#D2E3FC" },
+      "on-primary-container": { "$type": "color", "$value": "#0B3C74" },
+      "secondary": { "$type": "color", "$value": "#188038" },
+      "secondary-container": { "$type": "color", "$value": "#CEEAD6" },
+      "error": { "$type": "color", "$value": "#D93025" },
+      "error-container": { "$type": "color", "$value": "#FDE8E7" },
+      "background": { "$type": "color", "$value": "#F7F9FC" },
+      "on-background": { "$type": "color", "$value": "#1C1F26" },
+      "surface": { "$type": "color", "$value": "#FFFFFF" },
+      "on-surface": { "$type": "color", "$value": "#1C1F26" },
+      "surface-variant": { "$type": "color", "$value": "#E9EDF4" },
+      "on-surface-variant": { "$type": "color", "$value": "#444A56" },
+      "outline": { "$type": "color", "$value": "#737A88" }
+    }
+  },
+  "dark": {
+    "color": {
+      "primary": { "$type": "color", "$value": "#A8C7FA" },
+      "on-primary": { "$type": "color", "$value": "#053062" },
+      "primary-container": { "$type": "color", "$value": "#174EA6" },
+      "on-primary-container": { "$type": "color", "$value": "#D8E2FF" },
+      "secondary": { "$type": "color", "$value": "#81C995" },
+      "secondary-container": { "$type": "color", "$value": "#0F5223" },
+      "error": { "$type": "color", "$value": "#F28B82" },
+      "error-container": { "$type": "color", "$value": "#8C1D18" },
+      "background": { "$type": "color", "$value": "#101418" },
+      "on-background": { "$type": "color", "$value": "#E3E8F0" },
+      "surface": { "$type": "color", "$value": "#101418" },
+      "on-surface": { "$type": "color", "$value": "#E3E8F0" },
+      "surface-variant": { "$type": "color", "$value": "#3F4652" },
+      "on-surface-variant": { "$type": "color", "$value": "#C0C7D2" },
+      "outline": { "$type": "color", "$value": "#8A92A1" }
+    }
+  }
+}

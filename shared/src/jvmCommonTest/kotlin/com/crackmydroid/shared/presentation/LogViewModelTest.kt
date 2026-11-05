@@ -1,8 +1,8 @@
 package com.crackmydroid.shared.presentation
 
-import com.crackmydroid.shared.domain.repository.LogRepository
-import com.crackmydroid.shared.domain.usecase.ExportLogsUseCase
-import com.crackmydroid.shared.domain.usecase.GetLogsUseCase
+import com.crackmydroid.shared.domain.repository.log.LogRepository
+import com.crackmydroid.shared.domain.usecase.log.ExportLogsUseCase
+import com.crackmydroid.shared.domain.usecase.log.GetLogsUseCase
 import com.crackmydroid.shared.ui.logs.LogViewModel
 import io.mockk.coEvery
 import io.mockk.coVerify

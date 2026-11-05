@@ -1,0 +1,4 @@
+interface:
+  display_name: "Penpot MCP"
+  short_description: "Use Penpot hosted through the local MCP bridge"
+  default_prompt: "Use $penpot-mcp for CrackMyDroid Penpot work through the hosted UI and local MCP bridge."

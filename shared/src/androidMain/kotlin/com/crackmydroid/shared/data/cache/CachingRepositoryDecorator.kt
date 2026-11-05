@@ -1,7 +1,7 @@
 package com.crackmydroid.shared.data.cache
 
-import com.crackmydroid.shared.domain.model.ManifestSecurityReport
-import com.crackmydroid.shared.domain.model.AppComponent
+import com.crackmydroid.shared.domain.model.app.AppComponent
+import com.crackmydroid.shared.domain.model.app.ManifestSecurityReport
 
 /**
  * Wrapper di caching in-memory per ridurre accessi ripetuti al PackageManager

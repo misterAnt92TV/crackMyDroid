@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.compose.mpp)
+    alias(libs.plugins.kover)
 }
 
 android {
@@ -14,14 +15,15 @@ android {
     defaultConfig {
         applicationId = "com.crackmydroid.android"
         minSdk = 24
-        targetSdk = 34
-        versionCode = 2
-        versionName = "1.2"
+        targetSdk = 35
+        versionCode = 3
+        versionName = "1.3"
     }
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -50,7 +52,8 @@ dependencies {
     implementation(project(":shared"))
     implementation(libs.compose.ui)
     implementation(libs.compose.material3)
-    implementation(libs.compose.ui.tooling)
+    debugImplementation(libs.compose.ui.tooling)
+    debugImplementation(libs.leakcanary.android)
     implementation(libs.compose.ui.tooling.preview)
     implementation(libs.compose.icons)
     implementation(libs.activity.compose)
@@ -59,5 +62,16 @@ dependencies {
     implementation(libs.koin.compose)
     implementation(libs.kermit)
     implementation(libs.rootbeer)
-    implementation("com.google.android.material:material:1.11.0")
+    implementation(libs.material)
+    implementation(libs.work.runtime.ktx)
+    testImplementation(libs.junit4)
+    testImplementation(libs.coroutines.test)
+}
+
+kover {
+    currentProject {
+        createVariant("coverage") {
+            add("debug")
+        }
+    }
 }
