@@ -10,11 +10,14 @@ versioned handoff used by an agent to propose Compose changes:
 ## One-time local setup
 
 1. Copy `scripts/penpot/.env.penpot.example` to `scripts/penpot/.env.penpot`.
-2. Start Penpot local UI at `http://localhost:9001` and create/import `CrackMyDroid`.
+2. Open `https://design.penpot.app` and create/import `CrackMyDroid`.
 3. Run `./scripts/penpot/start_penpot_mcp.sh` in a separate terminal.
 4. In Penpot, use **Plugins → Load from URL** with
    `http://localhost:4400/manifest.json`, open the plugin and click **Connect**.
 5. Configure the MCP client with `http://localhost:4401/mcp`.
+
+This workflow uses Penpot hosted for the UI/file and a local MCP bridge for the
+plugin and tool endpoint. It does not start Docker or require a local backend.
 
 ## Checks and export
 

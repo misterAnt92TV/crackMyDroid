@@ -23,6 +23,7 @@ For a functional overview in **Italian and English**, start with the
 | [`screens.md`](screens.md)                 | **Schermate UI** — mockup ASCII di tutte le schermate (Home, PenTesting, App, Permessi, Attività, Info, Settings, Desktop) |
 | [`architecture.md`](architecture.md)       | Architettura KMP, layer, flussi dati Android e Desktop, caching, DI, manifest analyzer                                     |
 | [`architecture-specification.md`](architecture-specification.md) | **Specifica architetturale** — principi, source set, layer, flussi, DI, persistenza, vincoli e strategia di test |
+| [`database-architecture.drawio`](database-architecture.drawio) | **Schema database e persistenza** — tabelle SQLDelight, chiavi, componenti e storage per piattaforma |
 | [`clean-code-structure.md`](clean-code-structure.md) | **Struttura Clean Code** — responsabilità, naming, SOLID, anti-pattern, workflow feature e checklist review |
 | [`clean-code-structure.drawio`](clean-code-structure.drawio) | Diagramma Draw.io della struttura Clean Code e delle dipendenze KMP |
 | [`developer-guide.md`](developer-guide.md) | Setup ambiente, comandi Gradle, struttura test, guida aggiunta feature, convenzioni, troubleshooting                       |
@@ -37,6 +38,13 @@ For a functional overview in **Italian and English**, start with the
 | [`testing-viewmodels.md`](testing-viewmodels.md)           | Test ViewModel: PenTesting, Permissions, ActivityList, InstalledApps, Log, Trick — fixture, mock e assertions dettagliate |
 | [`testing-usecases-models.md`](testing-usecases-models.md) | Test use case, serializzazione `DeviceScanSnapshot`, `SearchHistoryStore`                                                 |
 | [`testing-desktop-adb.md`](testing-desktop-adb.md)         | Test layer Desktop/ADB: parser, `ProcessAdbBridge`, manifest analyzer, repository, session controller, snapshot importer  |
+
+### Design
+
+| File                                             | Descrizione                                                                                              |
+|--------------------------------------------------|----------------------------------------------------------------------------------------------------------|
+| [`design/penpot/README.md`](design/penpot/README.md)   | Sorgente Penpot, pagine richieste e procedura di backup/ripristino                                      |
+| [`design/exports/README.md`](design/exports/README.md) | Setup del flusso Penpot-to-Compose, export versionati e policy per gli agenti                           |
 
 ---
 
@@ -56,10 +64,16 @@ For a functional overview in **Italian and English**, start with the
 - [Desktop App screens](screens.md#desktop-app--schermate-specifiche)
 - [Aiuto / Help](screens.md#12-aiuto--help)
 
+### Design
+
+- [Sorgente Penpot e backup](design/penpot/README.md)
+- [Handoff Penpot-to-Compose](design/exports/README.md)
+
 ### Architettura e sviluppo
 
 - [Architettura KMP](architecture.md#visione-dinsieme--overview)
 - [Specifica architetturale](architecture-specification.md)
+- [Schema database e componenti Draw.io](database-architecture.drawio)
 - [Struttura Clean Code](clean-code-structure.md)
 - [Schema Clean Code Draw.io](clean-code-structure.drawio)
 - [Flusso dati Android](architecture.md#flusso-dati-android--android-data-flow)
