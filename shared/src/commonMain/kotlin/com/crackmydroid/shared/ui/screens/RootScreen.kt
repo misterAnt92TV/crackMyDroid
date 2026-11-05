@@ -117,7 +117,7 @@ fun RootScreen(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
                     ) {
-                        Text(
+                        AppText(
                             strings.verifyRoot,
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.SemiBold
@@ -208,7 +208,7 @@ fun RootScreen(
                                                 contentDescription = null,
                                                 tint = onBg
                                             )
-                                            Text(
+                                            AppText(
                                                 text = if (rooted) strings.rootDetected else strings.rootNotDetected,
                                                 style = MaterialTheme.typography.titleMedium,
                                                 color = onBg,
@@ -241,7 +241,7 @@ fun RootScreen(
                                     color = onBg
                                 )
                                 if (status.checks.isNotEmpty()) {
-                                    Text(
+                                    AppText(
                                         text = strings.rootChecksTitle,
                                         style = MaterialTheme.typography.titleSmall,
                                         color = onBg,
@@ -277,7 +277,7 @@ fun RootScreen(
                                     horizontalArrangement = Arrangement.SpaceBetween,
                                     verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
                                 ) {
-                                    Text(
+                                    AppText(
                                         strings.playIntegrityTitle,
                                         style = androidx.compose.material3.MaterialTheme.typography.titleMedium,
                                         fontWeight = FontWeight.SemiBold

@@ -291,17 +291,19 @@ private fun OperationHistoryEntryComponent(
                 verticalArrangement = Arrangement.spacedBy(2.dp)
             ) {
                 AppText(operationDescription, style = MaterialTheme.typography.bodyMedium)
-                AppText(
-                    strings.operationResultLabel,
-                    style = MaterialTheme.typography.labelSmall,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                AppText(
-                    operationResult,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                Row {
+                    AppText(
+                        strings.operationResultLabel,
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    AppText(
+                        operationResult,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
                 AppText(
                     formatOperationTimestamp(entry.timestamp, languageCode),
                     style = MaterialTheme.typography.labelSmall,

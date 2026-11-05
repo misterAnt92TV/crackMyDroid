@@ -13,6 +13,18 @@ else
   fi
 fi
 
+settings_screen="$screens_root/SettingsScreen.kt"
+if rg -n -U '(CardBlock|AppText)\s*\(\s*"\p{L}|(label|text|contentDescription)\s*=\s*"\p{L}' "$settings_screen"; then
+  echo "UI localization guard failed: Settings copy must come from LocalStrings." >&2
+  exit 1
+else
+  status=$?
+  if ((status != 1)); then
+    echo "UI localization guard failed: could not inspect Settings source." >&2
+    exit "$status"
+  fi
+fi
+
 # Direct Material 3 primitives are allowed only inside the design-system package or
 # in this explicit migration baseline. Remove entries as each screen is migrated.
 baseline=(

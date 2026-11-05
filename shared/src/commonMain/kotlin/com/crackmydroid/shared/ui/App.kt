@@ -68,6 +68,7 @@ import com.crackmydroid.shared.presentation.components.AccessibilityPrefs
 import com.crackmydroid.shared.presentation.components.effectiveReduceMotion
 import com.crackmydroid.shared.presentation.components.LocalAccessibilityPrefs
 import com.crackmydroid.shared.presentation.components.PackageIcon
+import com.crackmydroid.shared.presentation.components.text.AppText
 import com.crackmydroid.shared.presentation.navigation.Screen
 import com.crackmydroid.shared.presentation.navigation.bottomScreens
 import com.crackmydroid.shared.presentation.navigation.drawerScreens
@@ -172,12 +173,12 @@ fun CrackMyDroidApp(
                                         contentPadding = 0.dp
                                     )
                                     Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                                        Text(
+                                        AppText(
                                             text = "CrackMyDroid",
                                             style = MaterialTheme.typography.titleLarge,
                                             color = MaterialTheme.colorScheme.onSurface
                                         )
-                                        Text(
+                                        AppText(
                                             text = "Toolkit Android per test rapidi di sicurezza",
                                             style = MaterialTheme.typography.bodySmall,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -195,7 +196,7 @@ fun CrackMyDroidApp(
                                     drawerScreens.forEach { screen ->
                                         NavigationDrawerItem(
                                             icon = { Icon(screen.icon, contentDescription = null) },
-                                            label = { Text(screen.title(strings)) },
+                                            label = { AppText(screen.title(strings)) },
                                             selected = shellState.selectedScreen == screen,
                                             onClick = { navigateFromDrawer(screen) },
                                             modifier = Modifier
@@ -205,7 +206,7 @@ fun CrackMyDroidApp(
                                     }
                                 }
                                 HorizontalDivider()
-                                Text(
+                                AppText(
                                     text = "Versione $androidAppVersionName",
                                     style = MaterialTheme.typography.labelMedium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -237,7 +238,7 @@ fun CrackMyDroidApp(
                                             )
                                         },
                                         label = {
-                                            Text(
+                                            AppText(
                                                 screen.title(strings),
                                                 maxLines = if (accessibilityPrefs.largeText) 2 else 1,
                                                 overflow = TextOverflow.Ellipsis
@@ -393,11 +394,11 @@ fun CrackMyDroidApp(
         if (shellState.showIntro) {
             androidx.compose.material3.AlertDialog(
                 onDismissRequest = shellVm::dismissIntro,
-                title = { Text(strings.introTitle) },
-                text = { Text(strings.introBody) },
+                title = { AppText(strings.introTitle) },
+                text = { AppText(strings.introBody) },
                 confirmButton = {
                     androidx.compose.material3.Button(onClick = shellVm::dismissIntro) {
-                        Text(strings.introAgree)
+                        AppText(strings.introAgree)
                     }
                 }
             )
@@ -408,10 +409,10 @@ fun CrackMyDroidApp(
                 var disableHintsForever by remember(target) { mutableStateOf(false) }
                 androidx.compose.material3.AlertDialog(
                     onDismissRequest = {},
-                    title = { Text(strings.sectionHintTitle.format(target.title(strings))) },
+                    title = { AppText(strings.sectionHintTitle.format(target.title(strings))) },
                     text = {
                         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                            Text(hint)
+                            AppText(hint)
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 verticalAlignment = Alignment.CenterVertically
@@ -420,7 +421,7 @@ fun CrackMyDroidApp(
                                     checked = disableHintsForever,
                                     onCheckedChange = { disableHintsForever = it }
                                 )
-                                Text(strings.sectionHintDisable)
+                                AppText(strings.sectionHintDisable)
                             }
                         }
                     },
@@ -433,7 +434,7 @@ fun CrackMyDroidApp(
                                 )
                             }
                         ) {
-                            Text(strings.sectionHintConfirm)
+                            AppText(strings.sectionHintConfirm)
                         }
                     },
                     dismissButton = {
@@ -442,7 +443,7 @@ fun CrackMyDroidApp(
                                 shellVm.dismissHint()
                             }
                         ) {
-                            Text(strings.close)
+                            AppText(strings.close)
                         }
                     }
                 )
@@ -454,11 +455,11 @@ fun CrackMyDroidApp(
                 onDismissRequest = shellVm::dismissHelp,
                 confirmButton = {
                     androidx.compose.material3.TextButton(onClick = shellVm::dismissHelp) {
-                        Text(strings.close)
+                        AppText(strings.close)
                     }
                 },
-                title = { Text(strings.faqTitle) },
-                text = { Text(msg) }
+                title = { AppText(strings.faqTitle) },
+                text = { AppText(msg) }
             )
         }
     }

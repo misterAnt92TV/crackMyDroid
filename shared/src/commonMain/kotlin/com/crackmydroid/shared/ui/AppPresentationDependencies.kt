@@ -1,6 +1,7 @@
 package com.crackmydroid.shared.ui
 
 import com.crackmydroid.shared.ui.activities.ActivityListViewModel
+import com.crackmydroid.shared.ui.appshell.AppShellViewModel
 import com.crackmydroid.shared.ui.home.HomeViewModel
 import com.crackmydroid.shared.ui.info.InfoViewModel
 import com.crackmydroid.shared.ui.installedapps.InstalledAppsViewModel

@@ -40,6 +40,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 import com.crackmydroid.shared.i18n.LocalStrings
+import com.crackmydroid.shared.presentation.components.text.AppText
 import com.crackmydroid.shared.presentation.preview.AppComponentPreviews
 import com.crackmydroid.shared.presentation.preview.ComponentPreviewContainer
 
@@ -103,7 +104,7 @@ fun SearchFieldWithHistoryComponent(
                 .onFocusChanged { state ->
                     hasFocus = state.isFocused
                 },
-            label = { Text(label) },
+            label = { AppText(label) },
             shape = shape,
             singleLine = true,
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
@@ -170,7 +171,7 @@ fun SearchFieldWithHistoryComponent(
                                 },
                                 onLongClickLabel = strings.removeSearchHistoryContentDescription.format(suggestion)
                             ),
-                            label = { Text(suggestion) },
+                            label = { AppText(suggestion) },
                             leadingIcon = {
                                 Icon(
                                     imageVector = Icons.Filled.History,
@@ -183,7 +184,7 @@ fun SearchFieldWithHistoryComponent(
                     }
                 }
                 if (showClearAction) {
-                    Text(
+                    AppText(
                         text = "Svuota suggerimenti",
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.primary,

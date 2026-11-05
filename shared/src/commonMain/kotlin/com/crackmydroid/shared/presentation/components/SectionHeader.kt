@@ -28,6 +28,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.crackmydroid.shared.i18n.LocalStrings
+import com.crackmydroid.shared.presentation.components.text.AppText
 import com.crackmydroid.shared.presentation.preview.AppComponentPreviews
 import com.crackmydroid.shared.presentation.preview.ComponentPreviewContainer
 
@@ -62,7 +63,7 @@ fun SectionHeader(
         title = {
             val content = titleContent ?: {
                 if (prefs.reduceMotion) {
-                    Text(
+                    AppText(
                         title,
                         style = MaterialTheme.typography.titleLarge,
                         maxLines = if (prefs.largeText) 2 else 1,
@@ -70,7 +71,7 @@ fun SectionHeader(
                     )
                 } else {
                     Crossfade(targetState = title) {
-                        Text(
+                        AppText(
                             it,
                             style = MaterialTheme.typography.titleLarge,
                             maxLines = if (prefs.largeText) 2 else 1,

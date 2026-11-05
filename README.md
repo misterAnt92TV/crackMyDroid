@@ -240,9 +240,11 @@ newCrackMyDroid/
 | **Async**          | Kotlin Coroutines                   | 1.8.1          |
 | **Database**       | SQLDelight                          | 2.0.1          |
 | **Serialization**  | kotlinx.serialization               | 1.6.3          |
+| **Networking**     | Ktor Client                         | 3.5.0          |
 | **Root detection** | RootBeer                            | 0.1.1          |
 | **Security**       | Play Integrity API                  | 1.4.0          |
 | **Preferences**    | DataStore Preferences               | 1.1.7          |
+| **Background work**| WorkManager                         | 2.12.0         |
 | **Logging**        | Kermit                              | 2.0.4          |
 | **Testing**        | kotlin-test, MockK, coroutines-test | —              |
 | **Android**        | AGP                                 | 8.13.0         |

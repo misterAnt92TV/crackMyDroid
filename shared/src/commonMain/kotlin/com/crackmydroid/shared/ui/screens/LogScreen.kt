@@ -133,7 +133,7 @@ fun LogScreen(
                             FilterChip(
                                 selected = state.levels.contains(lv),
                                 onClick = { viewModel.toggleLevel(lv) },
-                                label = { Text(lv.toString()) },
+                                label = { AppText(lv.toString()) },
                                 colors = chipColors,
                                 shape = CircleShape
                             )

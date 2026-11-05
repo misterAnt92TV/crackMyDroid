@@ -11,6 +11,10 @@ import kotlinx.coroutines.launch
 class HomeViewModel(
     private val operationLogs: OperationLogRepository
 ) : BaseViewModel() {
+    private companion object {
+        const val MAX_RECENT_OPERATIONS = 5
+    }
+
     private val _state = MutableStateFlow(HomeState())
     val state: StateFlow<HomeState> = _state
 
@@ -22,7 +26,7 @@ class HomeViewModel(
                         recentOperations = entries
                             .filterNot(OperationEntry::hiddenFromRecent)
                             .distinctBy { entry -> entry.description to entry.success }
-                            .take(5)
+                                .take(MAX_RECENT_OPERATIONS)
                     )
                 }
             }

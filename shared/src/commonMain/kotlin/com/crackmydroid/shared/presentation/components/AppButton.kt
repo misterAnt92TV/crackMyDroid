@@ -17,6 +17,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
+import com.crackmydroid.shared.presentation.components.text.AppText
 import com.crackmydroid.shared.presentation.preview.AppComponentPreviews
 import com.crackmydroid.shared.presentation.preview.ComponentPreviewContainer
 
@@ -39,7 +40,7 @@ fun AppButton(
         if (leadingIcon != null) {
             Icon(leadingIcon, contentDescription = null, modifier = Modifier.padding(end = 6.dp))
         }
-        Text(
+        AppText(
             text,
             style = finalStyle,
             maxLines = if (prefs.largeText) 2 else 1,

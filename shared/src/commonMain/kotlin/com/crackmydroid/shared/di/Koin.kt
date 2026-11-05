@@ -52,7 +52,7 @@ import com.crackmydroid.shared.presentation.DefaultAppDispatchers
 import com.crackmydroid.shared.ui.activities.ActivityListViewModel
 import com.crackmydroid.shared.ui.info.InfoViewModel
 import com.crackmydroid.shared.ui.AppPresentationDependencies
-import com.crackmydroid.shared.ui.AppShellViewModel
+import com.crackmydroid.shared.ui.appshell.AppShellViewModel
 import com.crackmydroid.shared.ui.home.HomeViewModel
 import com.crackmydroid.shared.ui.installedapps.InstalledAppsViewModel
 import com.crackmydroid.shared.ui.logs.LogViewModel

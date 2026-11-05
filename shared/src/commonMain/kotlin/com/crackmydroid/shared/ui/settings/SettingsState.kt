@@ -16,5 +16,6 @@ data class SettingsState(
     val showIntroOnLaunch: Boolean = true,
     val exportFormat: ExportFormat = ExportFormat.TXT,
     val loading: Boolean = false,
-    val error: String? = null
+    val error: String? = null,
+    val thirdPartyLibraries: List<ThirdPartyLibrary> = ThirdPartyLibraries.catalog
 )

@@ -1,4 +1,4 @@
-package com.crackmydroid.shared.ui
+package com.crackmydroid.shared.ui.appshell
 
 import com.crackmydroid.shared.domain.usecase.settings.GetIntroSeenUseCase
 import com.crackmydroid.shared.domain.usecase.settings.SetIntroSeenUseCase
@@ -10,7 +10,6 @@ import com.crackmydroid.shared.ui.installedapps.InstalledAppsViewModel
 import com.crackmydroid.shared.ui.logs.LogViewModel
 import com.crackmydroid.shared.ui.pentest.PenTestingViewModel
 import com.crackmydroid.shared.ui.permissions.PermissionsViewModel
-import com.crackmydroid.shared.ui.root.RootViewModel
 import com.crackmydroid.shared.ui.settings.SettingsViewModel
 import com.crackmydroid.shared.ui.trick.TrickViewModel
 import kotlinx.coroutines.flow.MutableStateFlow

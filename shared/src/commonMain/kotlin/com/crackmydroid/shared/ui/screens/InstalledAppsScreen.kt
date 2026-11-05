@@ -170,7 +170,7 @@ fun InstalledAppsScreen(
                                 FilterChip(
                                     selected = true,
                                     onClick = { viewModel.setFilter(fav, trackUsage = true) },
-                                    label = { Text(fav) },
+                                    label = { AppText(fav) },
                                     modifier = Modifier.combinedClickable(
                                         onClick = { viewModel.setFilter(fav, trackUsage = true) },
                                         onLongClick = {

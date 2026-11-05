@@ -1,4 +1,4 @@
-package com.crackmydroid.shared.ui.settings
+package com.crackmydroid.shared.ui.settings.model
 
 data class SettingsAppInfo(
     val versionName: String,

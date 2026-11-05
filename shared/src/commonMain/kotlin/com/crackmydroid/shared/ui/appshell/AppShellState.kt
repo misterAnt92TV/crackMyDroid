@@ -1,4 +1,4 @@
-package com.crackmydroid.shared.ui
+package com.crackmydroid.shared.ui.appshell
 
 import com.crackmydroid.shared.presentation.navigation.Screen
 

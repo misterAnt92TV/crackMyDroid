@@ -77,6 +77,8 @@ Le versioni di tutte le dipendenze sono centralizzate nel version catalog. Le pr
 | SQLDelight            | `2.0.1`  |
 | Coroutines            | `1.8.1`  |
 | kotlinx.serialization | `1.6.3`  |
+| Ktor Client           | `3.5.0`  |
+| WorkManager           | `2.12.0` |
 
 ---
 

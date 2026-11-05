@@ -6,6 +6,7 @@ Mappa rapida tra funzionalità core e suite di test esistenti, utile per review 
 |-----------------------------------|-------------------------------------------------------|------------------------------------------------------------------------------------------------------|
 | Wiring shell / schermate          | `presentationModule`, `AppPresentationDependencies`, `AppShellViewModel` | `shared/src/jvmCommonTest/kotlin/com/crackmydroid/shared/presentation/AppPresentationDependenciesTest.kt` (caricamento DeviceInfo e altre schermate, inizializzazione singola, settings condivise e isolamento tra grafi) |
 | DeviceInfo                        | `InfoViewModel`, `BuildDeviceInfoReportUseCase`         | `shared/src/jvmCommonTest/kotlin/com/crackmydroid/shared/presentation/InfoViewModelTest.kt` (caricamento, errori, export e condivisione) |
+| Impostazioni multilingua          | `SettingsContent`, `Strings`, `SettingsViewModel`      | `shared/src/jvmCommonTest/kotlin/com/crackmydroid/shared/i18n/SettingsStringsTest.kt`, `LanguageResolverTest.kt`, `presentation/SettingsViewModelTest.kt` (IT/EN/DE/FR/ES: sezioni, opzioni, descrizioni, metadati, aiuto, accessibilità e cambio lingua) |
 | PenTesting workflow               | `PenTestingViewModel`, `RunPenTestChecksUseCase`      | `shared/src/jvmCommonTest/kotlin/com/crackmydroid/shared/presentation/PenTestingViewModelTest.kt` (query, wizard, selezione check e stato derivato) |
 | Permessi app                      | `PermissionsViewModel`                                | `shared/src/jvmCommonTest/kotlin/com/crackmydroid/shared/presentation/PermissionsViewModelTest.kt`   |
 | Attività app                      | `ActivityListViewModel`                               | `shared/src/jvmCommonTest/kotlin/com/crackmydroid/shared/presentation/ActivityListViewModelTest.kt`  |
@@ -32,6 +33,14 @@ Manual UI regression scenarios: open installed apps, apply a filter with no matc
 reset the filter and refresh the list; the empty-state card must render without a crash.
 With test data, verify export details in Activity and PenTesting use the shared card.
 Export validation must not expose real device data.
+
+The same guard rejects hardcoded copy in Settings text, titles, labels and buttons.
+`SettingsScreenPreview.kt` supplies five-language fixtures plus missing SDK/permissions
+and synthetic-error variants, without DI or platform access. Preview fixtures are not
+automated UI rendering tests. Manual localization scenario: switch language in Settings,
+review all sections and help, then restore the initial language; do not clear suggestions
+or change unrelated preferences. Technical package/permission identifiers and original
+repository/OS diagnostic messages intentionally remain unchanged.
 
 ## SQLDelight migration regression checks
 

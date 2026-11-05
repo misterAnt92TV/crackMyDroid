@@ -164,7 +164,7 @@ fun ActivityListScreen(
                                     FilterChip(
                                         selected = true,
                                         onClick = { viewModel.setFilter(fav, trackUsage = true) },
-                                        label = { Text(fav.takeLast(24)) }
+                                        label = { AppText(fav.takeLast(24)) }
                                     )
                                 }
                             }
@@ -415,7 +415,7 @@ private fun GuidedActivityLaunchDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Launcher guidato") },
+        title = { AppText("Launcher guidato") },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 AppText(
@@ -437,21 +437,21 @@ private fun GuidedActivityLaunchDialog(
                 OutlinedTextField(
                     value = action,
                     onValueChange = { action = it },
-                    label = { Text("Action") },
+                    label = { AppText("Action") },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
                 OutlinedTextField(
                     value = dataUri,
                     onValueChange = { dataUri = it },
-                    label = { Text("Data URI") },
+                    label = { AppText("Data URI") },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
                 OutlinedTextField(
                     value = mimeType,
                     onValueChange = { mimeType = it },
-                    label = { Text("MIME type") },
+                    label = { AppText("MIME type") },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
@@ -468,12 +468,12 @@ private fun GuidedActivityLaunchDialog(
                 },
                 enabled = canLaunch
             ) {
-                Text("Avvia")
+                AppText("Avvia")
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Annulla")
+                AppText("Annulla")
             }
         }
     )
@@ -513,7 +513,7 @@ private fun ActivityReportCard(
                     )
                 }
                 TextButton(onClick = onDismiss) {
-                    Text("Chiudi")
+                    AppText("Chiudi")
                 }
             }
 

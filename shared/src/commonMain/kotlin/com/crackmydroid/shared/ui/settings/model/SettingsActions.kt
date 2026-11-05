@@ -1,4 +1,4 @@
-package com.crackmydroid.shared.ui.settings
+package com.crackmydroid.shared.ui.settings.model
 
 import com.crackmydroid.shared.domain.model.app.AppLanguage
 import com.crackmydroid.shared.domain.model.app.AppTheme

@@ -47,8 +47,8 @@ import com.crackmydroid.shared.presentation.components.ScrollToTopButton
 import com.crackmydroid.shared.presentation.components.SectionHeader
 import com.crackmydroid.shared.presentation.components.card.CardBlock
 import com.crackmydroid.shared.presentation.components.text.AppText
-import com.crackmydroid.shared.ui.settings.SettingsActions
-import com.crackmydroid.shared.ui.settings.SettingsAppInfo
+import com.crackmydroid.shared.ui.settings.model.SettingsActions
+import com.crackmydroid.shared.ui.settings.model.SettingsAppInfo
 import com.crackmydroid.shared.ui.settings.SettingsState
 import com.crackmydroid.shared.ui.settings.SettingsViewModel
 import com.crackmydroid.shared.util.appPackageName
@@ -171,19 +171,19 @@ internal fun SettingsContent(
                 }
             }
 
-            CardBlock("Suggerimenti ricerca", leadingIcon = Icons.Filled.History) {
+            CardBlock(strings.settingsSearchSuggestionsTitle, leadingIcon = Icons.Filled.History) {
                 SwitchRow(
-                    label = "Abilita suggerimenti",
+                    label = strings.settingsSearchSuggestionsEnabled,
                     checked = state.suggestionsEnabled,
                     onCheckedChange = actions.onSetSuggestionsEnabled
                 )
                 AppText(
-                    "Memorizza le ultime ricerche e riproponile come chip rapidi nelle aree di cerca.",
+                    strings.settingsSearchSuggestionsDescription,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 AppButton(
-                    text = "Cancella suggerimenti",
+                    text = strings.settingsClearSuggestions,
                     onClick = actions.onClearSuggestions,
                     variant = ButtonVariant.Tonal,
                     modifier = Modifier.padding(top = 8.dp),
@@ -191,27 +191,27 @@ internal fun SettingsContent(
                 )
             }
 
-            CardBlock("Dialog di ingresso sezioni", leadingIcon = Icons.Filled.Settings) {
+            CardBlock(strings.settingsSectionHintsTitle, leadingIcon = Icons.Filled.Settings) {
                 SwitchRow(
-                    label = "Abilita dialog di suggerimento",
+                    label = strings.settingsSectionHintsEnabled,
                     checked = state.featureHintsEnabled,
                     onCheckedChange = actions.onSetFeatureHintsEnabled
                 )
                 AppText(
-                    "Mostra la dialog di ingresso nelle sezioni tecniche. Da ogni dialog puoi anche selezionare \"Non visualizzare più\" per disattivarla.",
+                    strings.settingsSectionHintsDescription,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 
-            CardBlock("Onboarding", leadingIcon = Icons.Filled.Info) {
+            CardBlock(strings.settingsOnboardingTitle, leadingIcon = Icons.Filled.Info) {
                 SwitchRow(
-                    label = "Mostra introduzione all'avvio",
+                    label = strings.settingsShowIntroOnLaunch,
                     checked = state.showIntroOnLaunch,
                     onCheckedChange = actions.onSetShowIntroOnLaunch
                 )
                 AppText(
-                    "Se attivo, la schermata introduttiva viene mostrata all'apertura dell'app.",
+                    strings.settingsOnboardingDescription,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -230,17 +230,17 @@ internal fun SettingsContent(
                 )
             }
 
-            CardBlock("Formato esportazione", leadingIcon = Icons.Filled.Description) {
+            CardBlock(strings.settingsExportFormatTitle, leadingIcon = Icons.Filled.Description) {
                 ExportFormatRow(
-                    label = "Testo (.txt)",
+                    label = strings.settingsExportText,
                     selected = state.exportFormat == com.crackmydroid.shared.domain.model.ExportFormat.TXT
                 ) { actions.onSetExportFormat(com.crackmydroid.shared.domain.model.ExportFormat.TXT) }
                 ExportFormatRow(
-                    label = "JSON formattato",
+                    label = strings.settingsExportJson,
                     selected = state.exportFormat == com.crackmydroid.shared.domain.model.ExportFormat.JSON
                 ) { actions.onSetExportFormat(com.crackmydroid.shared.domain.model.ExportFormat.JSON) }
                 AppText(
-                    "Si applica a export e condividi (liste activity / app).",
+                    strings.settingsExportDescription,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(top = 6.dp)
@@ -270,43 +270,33 @@ internal fun SettingsContent(
 
             CardBlock(strings.thirdPartyTitle, leadingIcon = Icons.Filled.Link) {
                 AppText(strings.thirdPartyIntro, style = MaterialTheme.typography.bodySmall)
-                val libs = listOf(
-                    "Jetpack Compose Multiplatform" to "https://github.com/JetBrains/compose-jb",
-                    "Koin" to "https://insert-koin.io/",
-                    "Kermit" to "https://github.com/touchlab/Kermit",
-                    "RootBeer" to "https://github.com/scottyab/rootbeer",
-                    "Play Integrity API" to "https://developer.android.com/google/play/integrity",
-                    "Kotlin Coroutines" to "https://github.com/Kotlin/kotlinx.coroutines",
-                    "DataStore" to "https://developer.android.com/topic/libraries/architecture/datastore",
-                    "MockK" to "https://mockk.io/"
-                )
-                libs.forEach { (name, url) ->
+                state.thirdPartyLibraries.forEach { library ->
                     AppText(
-                        "• $name",
+                        "• ${library.name}",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier
                             .padding(vertical = 2.dp)
-                            .clickable { actions.onOpenUri(url) }
+                            .clickable { actions.onOpenUri(library.url) }
                     )
                 }
             }
 
             DisclaimerBox()
 
-            CardBlock("Info app", leadingIcon = Icons.Filled.Info) {
+            CardBlock(strings.settingsAppInfoTitle, leadingIcon = Icons.Filled.Info) {
                 AppText(
-                    "Versione: ${appInfo.versionName}",
+                    "${strings.settingsAppVersion}: ${appInfo.versionName}",
                     style = MaterialTheme.typography.titleMedium
                 )
                 AppText(
-                    "Package: ${appInfo.packageName}",
+                    "${strings.settingsAppPackage}: ${appInfo.packageName}",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 if (appInfo.minSdk != null || appInfo.targetSdk != null) {
                     AppText(
-                        "SDK min/target: ${appInfo.minSdk ?: "?"} / ${appInfo.targetSdk ?: "?"}",
+                        "${strings.settingsAppSdk}: ${appInfo.minSdk ?: "?"} / ${appInfo.targetSdk ?: "?"}",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -314,7 +304,7 @@ internal fun SettingsContent(
                 val perms = appInfo.requestedPermissions
                 if (perms.isNotEmpty()) {
                     AppText(
-                        "Permessi richiesti:",
+                        "${strings.settingsRequestedPermissions}:",
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -327,7 +317,7 @@ internal fun SettingsContent(
                     }
                 } else {
                     AppText(
-                        "Permessi richiesti: nessuno",
+                        strings.settingsNoRequestedPermissions,
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )

@@ -301,7 +301,7 @@ fun InfoScreen(
                                         .heightIn(max = 280.dp)
                                         .verticalScroll(rememberScrollState())
                                 ) {
-                                    Text(
+                                    AppText(
                                         text = dump,
                                         style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
                                         color = MaterialTheme.colorScheme.onSurfaceVariant

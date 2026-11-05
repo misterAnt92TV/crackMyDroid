@@ -261,7 +261,7 @@ fun PermissionsScreen(
                                 FilterChip(
                                     selected = true,
                                     onClick = { viewModel.setFilter(fav, trackUsage = true) },
-                                    label = { Text(fav) }
+                                    label = { AppText(fav) }
                                 )
                             }
                         }
@@ -276,12 +276,12 @@ fun PermissionsScreen(
                             FilterChip(
                                 selected = state.showOnlyRisky,
                                 onClick = viewModel::toggleShowOnlyRisky,
-                                label = { Text("Solo app a rischio") }
+                                label = { AppText("Solo app a rischio") }
                             )
                             FilterChip(
                                 selected = false,
                                 onClick = { viewModel.setFilter("") },
-                                label = { Text("Reset filtro") }
+                                label = { AppText("Reset filtro") }
                             )
                         }
                         LazyRow(
@@ -299,7 +299,7 @@ fun PermissionsScreen(
                                             trackUsage = true
                                         )
                                     },
-                                    label = { Text("${report.appLabel} (${report.findings.size})") }
+                                    label = { AppText("${report.appLabel} (${report.findings.size})") }
                                 )
                             }
                         }
