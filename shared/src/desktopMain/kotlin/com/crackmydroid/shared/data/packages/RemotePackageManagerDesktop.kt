@@ -17,7 +17,7 @@ class RemotePackageManagerDesktop(
 ) : DesktopAdbRepositorySupport(adbBridge, sessionController), RemotePackageManager {
     override suspend fun listInstalledApps(): List<InstalledAppEntry> =
         withContext(Dispatchers.IO) {
-            cache.installedApps ?: AdbParsers.parseInstalledApps(shell("pm list packages -f"))
+            cache.installedApps ?: AdbParsers.parseInstalledApps(shell("pm list packages -f -i"))
                 .also {
                     cache.installedApps = it
                 }

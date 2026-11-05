@@ -35,18 +35,24 @@ kotlin {
                 implementation(libs.sqldelight.runtime)
                 implementation(libs.sqldelight.coroutines)
                 implementation(libs.kotlinx.serialization.json)
+                implementation(libs.ktor.client.core)
+                implementation(libs.ktor.client.content.negotiation)
+                implementation(libs.ktor.serialization.kotlinx.json)
+                implementation(libs.ktor.client.logging)
             }
         }
         val commonTest by getting {
             dependencies {
                 implementation(kotlin("test"))
                 implementation(libs.coroutines.test)
+                implementation(libs.ktor.client.mock)
             }
         }
         val jvmCommonTest by creating {
             dependsOn(commonTest)
             dependencies {
                 implementation(libs.mockk)
+                implementation(libs.sqldelight.sqlite)
                 implementation(libs.coroutines.test)
             }
         }
@@ -63,6 +69,7 @@ kotlin {
                 implementation(libs.datastore)
                 implementation(libs.play.integrity)
                 implementation(libs.sqldelight.android)
+                implementation(libs.ktor.client.okhttp)
             }
         }
         val androidUnitTest by getting {
@@ -76,6 +83,7 @@ kotlin {
         val desktopMain by getting {
             dependencies {
                 implementation(libs.coroutines.swing)
+                implementation(libs.ktor.client.cio)
             }
         }
         val desktopTest by getting {
@@ -95,6 +103,7 @@ kotlin {
             iosSimulatorArm64Main.dependsOn(this)
             dependencies {
                 implementation(libs.sqldelight.native)
+                implementation(libs.ktor.client.darwin)
             }
         }
         val iosX64Test by getting

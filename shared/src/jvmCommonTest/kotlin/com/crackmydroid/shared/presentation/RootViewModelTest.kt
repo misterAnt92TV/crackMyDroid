@@ -66,7 +66,8 @@ class RootViewModelTest {
         )
         val viewModel = viewModel(repository)
 
-        viewModel.verifyPlayIntegrity("nonce")
+        viewModel.updatePlayIntegrityNonce("nonce")
+        viewModel.verifyPlayIntegrity()
         advanceUntilIdle()
 
         assertEquals(true, viewModel.state.value.playIntegrity?.basicIntegrity)

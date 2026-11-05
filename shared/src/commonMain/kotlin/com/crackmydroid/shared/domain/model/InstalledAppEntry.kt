@@ -11,5 +11,6 @@ data class InstalledAppEntry(
     val allowBackup: Boolean = false,
     val testOnly: Boolean = false,
     val targetSdkVersion: Int? = null,
-    val minSdkVersion: Int? = null
+    val minSdkVersion: Int? = null,
+    val installSource: InstallSourceInfo = InstallSourceInfo()
 )

@@ -36,7 +36,7 @@ class PermissionsViewModel(
         scope.launch {
             runCatching {
                 getFavorites()
-            }.onSuccess { favorites -> _state.update { it.copy(favorites = favorites) } }
+            }.onSuccess { favorites -> updatePresentation { it.copy(favorites = favorites) } }
             _state.update {
                 it.copy(
                     loading = true,
@@ -50,7 +50,7 @@ class PermissionsViewModel(
                 )
             }
             runCatching { listPermissions() }
-                .onSuccess { apps -> _state.update { it.copy(apps = apps, loading = false) } }
+                .onSuccess { apps -> updatePresentation { it.copy(apps = apps, loading = false) } }
                 .onFailure { err ->
                     _state.update {
                         it.copy(
@@ -72,19 +72,18 @@ class PermissionsViewModel(
             val top = queryCount.maxByOrNull { it.value }?.key
             _state.update { it.copy(topQuery = top) }
         }
-        _state.update { it.copy(filter = value) }
+        updatePresentation { it.copy(filter = value) }
     }
 
     fun setShowOnlyRisky(enabled: Boolean) {
-        _state.update { it.copy(showOnlyRisky = enabled) }
+        updatePresentation { it.copy(showOnlyRisky = enabled) }
     }
 
     fun toggleShowOnlyRisky() {
-        _state.update { it.copy(showOnlyRisky = !it.showOnlyRisky) }
+        updatePresentation { it.copy(showOnlyRisky = !it.showOnlyRisky) }
     }
 
-    fun filtered(): List<AppPermissionEntry> {
-        val state = _state.value
+    private fun visibleApps(state: PermissionsState): List<AppPermissionEntry> {
         val filterValue = state.filter.trim()
         val riskScoreByPackage = state.riskReports.associate { it.packageName to it.score }
         val riskyPackages = state.riskReports.mapTo(mutableSetOf()) { it.packageName }
@@ -135,7 +134,7 @@ class PermissionsViewModel(
     }
 
     fun toggleFavorite(packageName: String) {
-        _state.update {
+        updatePresentation {
             val favorites = it.favorites.toMutableSet()
             if (favorites.contains(packageName)) favorites.remove(packageName) else favorites.add(
                 packageName
@@ -201,7 +200,7 @@ class PermissionsViewModel(
                 apps.forEachIndexed { index, app ->
                     _state.update { it.copy(autoScanCurrentLabel = app.appLabel) }
                     analyzePermissionRisks(app)?.let { results += it }
-                    _state.update {
+                    updatePresentation {
                         it.copy(
                             autoScanScannedApps = index + 1,
                             riskReports = analyzePermissionRisks.sortReports(results)
@@ -237,4 +236,17 @@ class PermissionsViewModel(
         .trim()
         .replace(multiSpaceRegex, " ")
         .lowercase()
+
+    private fun updatePresentation(transform: (PermissionsState) -> PermissionsState) {
+        _state.update { current ->
+            val updated = transform(current)
+            updated.copy(
+                visibleApps = visibleApps(updated),
+                favoriteQueries = updated.favorites.sorted(),
+                visibleFindingsByPackage = updated.riskReports.associate { report ->
+                    report.packageName to report.findings.filterNot { it.isPattern }
+                }
+            )
+        }
+    }
 }

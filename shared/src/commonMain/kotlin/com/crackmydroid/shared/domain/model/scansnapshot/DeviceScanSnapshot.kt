@@ -31,7 +31,8 @@ data class DeviceScanSnapshot(
     )
 ) {
     companion object {
-        const val SCHEMA_VERSION: Int = 2
+        const val SCHEMA_VERSION: Int = 3
+        const val MIN_SUPPORTED_SCHEMA_VERSION: Int = 2
     }
 }
 

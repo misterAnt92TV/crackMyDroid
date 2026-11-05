@@ -33,7 +33,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.crackmydroid.shared.domain.model.operation.OperationEntry
-import com.crackmydroid.shared.domain.repository.log.OperationLogRepository
 import com.crackmydroid.shared.i18n.LocalStrings
 import com.crackmydroid.shared.i18n.formatOperationTimestamp
 import com.crackmydroid.shared.i18n.renderOperation
@@ -42,32 +41,34 @@ import com.crackmydroid.shared.presentation.components.PackageIcon
 import com.crackmydroid.shared.presentation.components.SectionHeader
 import com.crackmydroid.shared.presentation.components.card.AppCard
 import com.crackmydroid.shared.presentation.components.text.AppText
+import com.crackmydroid.shared.ui.home.HomeState
+import com.crackmydroid.shared.ui.home.HomeViewModel
 
 @Composable
 fun HomeScreen(
-    operationLogs: OperationLogRepository,
+    viewModel: HomeViewModel,
     padding: androidx.compose.foundation.layout.PaddingValues,
     headerHelp: String,
     onHelp: (String) -> Unit,
     onMenu: () -> Unit = {},
     languageCode: String = "en"
 ) {
-    val history = operationLogs.entries.collectAsState()
+    val state = viewModel.state.collectAsState()
     HomeContent(
-        history = history.value,
+        state = state.value,
         padding = padding,
         headerHelp = headerHelp,
         onHelp = onHelp,
         onMenu = onMenu,
-        onHideRecent = operationLogs::hideFromRecent,
-        onRemove = operationLogs::remove,
+        onHideRecent = viewModel::hideFromRecent,
+        onRemove = viewModel::remove,
         languageCode = languageCode
     )
 }
 
 @Composable
 internal fun HomeContent(
-    history: List<OperationEntry>,
+    state: HomeState,
     padding: androidx.compose.foundation.layout.PaddingValues,
     headerHelp: String,
     onHelp: (String) -> Unit,
@@ -79,10 +80,7 @@ internal fun HomeContent(
 ) {
     val strings = LocalStrings.current
     val historyExpanded = remember { mutableStateOf(initiallyExpandedHistory) }
-    val uniqueHistory = history
-        .filterNot(OperationEntry::hiddenFromRecent)
-        .distinctBy { it.description to it.success }
-        .take(5)
+    val uniqueHistory = state.recentOperations
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -209,10 +207,10 @@ internal fun HomeContent(
         }
         item {
             AppText(
-                if (history.isEmpty()) {
+                if (uniqueHistory.isEmpty()) {
                     strings.homeOperationHistoryTitle
                 } else {
-                    strings.homeOperationHistoryTitleWithCount.format(history.size)
+                    strings.homeOperationHistoryTitleWithCount.format(uniqueHistory.size)
                 },
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(top = 12.dp, bottom = 4.dp),
@@ -227,7 +225,7 @@ internal fun HomeContent(
                 onToggle = { historyExpanded.value = !historyExpanded.value },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                if (history.isEmpty()) {
+                if (uniqueHistory.isEmpty()) {
                     AppText(
                         strings.homeLatestOperationsEmpty,
                         style = MaterialTheme.typography.bodyMedium,
@@ -235,7 +233,7 @@ internal fun HomeContent(
                     )
                 } else {
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        history.forEach { entry ->
+                        uniqueHistory.forEach { entry ->
                             OperationHistoryEntryComponent(
                                 entry = entry,
                                 onAction = onRemove,

@@ -177,8 +177,7 @@ fun InfoScreen(
                             }
                             IconButton(
                                 onClick = {
-                                    state.info?.let { info ->
-                                        val content = buildInfoContent(info, root, strings)
+                                    state.reportContent?.let { content ->
                                         clipboard.setText(AnnotatedString(content))
                                         viewModel.share(content)
                                     }

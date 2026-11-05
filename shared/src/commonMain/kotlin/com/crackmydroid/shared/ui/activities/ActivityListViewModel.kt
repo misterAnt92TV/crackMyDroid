@@ -92,6 +92,20 @@ class ActivityListViewModel(
         launchInternal(entry)
     }
 
+    fun openGuidedLaunch(entry: ActivityEntry) {
+        val supported = !entry.launchIntentAction.isNullOrBlank() ||
+            !entry.launchIntentData.isNullOrBlank() || !entry.launchIntentMimeType.isNullOrBlank()
+        if (supported) _state.update { it.copy(guidedLaunch = GuidedLaunchState(entry)) }
+    }
+
+    fun dismissGuidedLaunch() = _state.update { it.copy(guidedLaunch = null) }
+
+    fun launchGuided(action: String?, dataUri: String?, mimeType: String?) {
+        val entry = _state.value.guidedLaunch?.entry ?: return
+        _state.update { it.copy(guidedLaunch = null) }
+        launchWithIntent(entry, action, dataUri, mimeType)
+    }
+
     fun launchWithIntent(
         entry: ActivityEntry,
         action: String?,
@@ -390,7 +404,10 @@ class ActivityListViewModel(
                 )
             }
             .sortedBy { it.packageName }
-        return state.copy(groups = grouped)
+        return state.copy(
+            groups = grouped,
+            favoriteQueries = state.favorites.sorted()
+        )
     }
 
     private fun recomputeAsync(state: ActivityListState) {

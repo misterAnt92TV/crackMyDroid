@@ -101,7 +101,7 @@ class PermissionsViewModelTest {
         advanceUntilIdle()
         vm.setShowOnlyRisky(true)
 
-        val filtered = vm.filtered()
+        val filtered = vm.state.value.visibleApps
         assertEquals(1, filtered.size)
         assertEquals("pkg.risky", filtered.first().packageName)
         vm.onCleared()

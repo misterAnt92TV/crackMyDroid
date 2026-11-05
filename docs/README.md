@@ -30,6 +30,7 @@ For a functional overview in **Italian and English**, start with the
 | [`clean-code-structure.drawio`](clean-code-structure.drawio) | Diagramma Draw.io della struttura Clean Code e delle dipendenze KMP |
 | [`developer-guide.md`](developer-guide.md) | Setup ambiente, comandi Gradle, struttura test, guida aggiunta feature, convenzioni, troubleshooting                       |
 | [`api-reference.md`](api-reference.md)     | Domain models, repository interfaces, use cases, ViewModels/state, caching API, utilities                                  |
+| [`play-integrity-backend-contract.md`](play-integrity-backend-contract.md) | Secure client/backend contract for decoded Play Integrity verdicts; no credentials in the app or repository |
 
 ### Test
 

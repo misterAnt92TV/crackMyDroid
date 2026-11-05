@@ -18,6 +18,19 @@
 
 ## Domain Models
 
+### `InstalledAppEntry` provenance
+
+The installed-app inventory includes an `InstallSourceInfo` value. `GOOGLE_PLAY` means the OS
+reported `com.android.vending` as installer; it is not a signature check, Play license, or malware
+assessment. Android provides richer values on API 30+, while Desktop ADB and older Android may
+return `UNAVAILABLE`.
+
+### `PlayIntegrityResult`
+
+The integrity result applies only to CrackMyDroid and the device requesting its token. A decoded
+backend verdict can contain `appRecognitionVerdict`, `appLicensingVerdict`, device-recognition
+labels and an optional Play Protect verdict. See [the backend contract](play-integrity-backend-contract.md).
+
 ### `AppEntry`
 
 Rappresenta un'app installata sul device.

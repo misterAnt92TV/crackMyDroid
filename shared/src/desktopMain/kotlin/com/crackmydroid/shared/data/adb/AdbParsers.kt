@@ -6,6 +6,8 @@ import com.crackmydroid.shared.domain.model.app.AppManifestSecurity
 import com.crackmydroid.shared.domain.model.ConnectedDevice
 import com.crackmydroid.shared.domain.model.app.ExposedComponentInfo
 import com.crackmydroid.shared.domain.model.InstalledAppEntry
+import com.crackmydroid.shared.domain.model.InstallSourceClassification
+import com.crackmydroid.shared.domain.model.InstallSourceInfo
 
 internal object AdbParsers {
     private val deviceKeyValue = Regex("""([A-Za-z_]+):([^\s]+)""")
@@ -52,18 +54,35 @@ internal object AdbParsers {
                 val trimmed = line.trim()
                 if (!trimmed.startsWith("package:")) return@mapNotNull null
                 val body = trimmed.removePrefix("package:")
-                val separatorIndex = body.lastIndexOf('=')
+                val packagePart = body.substringBefore(" installer=")
+                val separatorIndex = packagePart.lastIndexOf('=')
                 if (separatorIndex <= 0 || separatorIndex == body.lastIndex) return@mapNotNull null
-                val sourcePath = body.substring(0, separatorIndex)
-                val packageName = body.substring(separatorIndex + 1)
+                val sourcePath = packagePart.substring(0, separatorIndex)
+                val packageAndInstaller = packagePart.substring(separatorIndex + 1)
+                val packageName = packageAndInstaller.substringBefore(" installer=")
+                val installer = body.substringAfter(" installer=", "").ifBlank { null }
                 InstalledAppEntry(
                     appLabel = labelFromPackage(packageName),
                     packageName = packageName,
-                    sourcePath = sourcePath
+                    sourcePath = sourcePath,
+                    installSource = InstallSourceInfo(
+                        classification = classifyInstaller(installer),
+                        installingPackageName = installer,
+                        observedAtEpochMs = if (installer != null) System.currentTimeMillis() else null,
+                        unavailableReason = if (installer == null) {
+                            "ADB package manager did not report an installer"
+                        } else null
+                    )
                 )
             }
             .sortedBy { it.appLabel.lowercase() }
             .toList()
+    }
+
+    private fun classifyInstaller(installer: String?): InstallSourceClassification = when {
+        installer == "com.android.vending" -> InstallSourceClassification.GOOGLE_PLAY
+        installer.isNullOrBlank() -> InstallSourceClassification.UNAVAILABLE
+        else -> InstallSourceClassification.OTHER
     }
 
     fun parsePmPath(output: String): List<String> =

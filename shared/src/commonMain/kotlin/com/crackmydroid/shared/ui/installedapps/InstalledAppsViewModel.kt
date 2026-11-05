@@ -36,11 +36,11 @@ class InstalledAppsViewModel(
         scope.launch {
             runCatching {
                 getFavorites()
-            }.onSuccess { favorites -> _state.update { it.copy(favorites = favorites) } }
+            }.onSuccess { favorites -> updatePresentation { it.copy(favorites = favorites) } }
             _state.update { it.copy(loading = true, error = null) }
             runCatching { listUseCase() }
                 .onSuccess { list ->
-                    _state.update { it.copy(apps = list, loading = false) }
+                    updatePresentation { it.copy(apps = list, loading = false) }
                     operationLogs.record("Caricate ${list.size} app installate", success = true)
                 }
                 .onFailure { err ->
@@ -64,21 +64,21 @@ class InstalledAppsViewModel(
             val top = queryCount.maxByOrNull { it.value }?.key
             _state.update { it.copy(topQuery = top) }
         }
-        _state.update { it.copy(filter = value) }
+        updatePresentation { it.copy(filter = value) }
     }
 
-    fun filtered(): List<InstalledAppEntry> {
-        val f = _state.value.filter
+    private fun visibleApps(state: InstalledAppsState): List<InstalledAppEntry> {
+        val f = state.filter
         val filtered = if (f.isBlank()) {
-            _state.value.apps
+            state.apps
         } else {
-            _state.value.apps.filter {
+            state.apps.filter {
                 it.appLabel.contains(f, true) ||
                         it.packageName.contains(f, true) ||
                         it.sourcePath.contains(f, true)
             }
         }
-        val favs = _state.value.favorites
+        val favs = state.favorites
         return filtered.sortedWith(
             compareBy<InstalledAppEntry> { if (favs.contains(it.packageName)) 0 else 1 }
                 .thenBy { it.appLabel.lowercase() }
@@ -161,12 +161,22 @@ class InstalledAppsViewModel(
     }
 
     fun toggleFavorite(packageName: String) {
-        _state.update {
+        updatePresentation {
             val favs = it.favorites.toMutableSet()
             if (favs.contains(packageName)) favs.remove(packageName) else favs.add(packageName)
             it.copy(favorites = favs)
         }
         scope.launch { setFavorites(_state.value.favorites) }
+    }
+
+    private fun updatePresentation(transform: (InstalledAppsState) -> InstalledAppsState) {
+        _state.update { current ->
+            val updated = transform(current)
+            updated.copy(
+                visibleApps = visibleApps(updated),
+                favoriteQueries = updated.favorites.sorted()
+            )
+        }
     }
 
     private suspend fun buildListReport(baseName: String): GeneratedReport {
@@ -176,7 +186,12 @@ class InstalledAppsViewModel(
             buildString {
                 appendLine("[")
                 sortedApps.forEachIndexed { idx, app ->
-                    append("  {\"label\":\"${app.appLabel}\",\"package\":\"${app.packageName}\",\"path\":\"${app.sourcePath}\"}")
+                    val installerPackage = app.installSource.installingPackageName
+                        ?.let { "\"$it\"" }
+                        ?: "null"
+                    append(
+                        "  {\"label\":\"${app.appLabel}\",\"package\":\"${app.packageName}\",\"path\":\"${app.sourcePath}\",\"installSource\":\"${app.installSource.classification}\",\"installerPackage\":$installerPackage}"
+                    )
                     if (idx != sortedApps.lastIndex) append(",")
                     appendLine()
                 }
@@ -193,6 +208,8 @@ class InstalledAppsViewModel(
                     appendLine("${index + 1}) ${app.appLabel}")
                     appendLine("Package: ${app.packageName}")
                     appendLine("Path APK: ${app.sourcePath}")
+                    appendLine("Origine installazione: ${app.installSource.classification}")
+                    app.installSource.installingPackageName?.let { appendLine("Installer: $it") }
                     appendLine()
                 }
             }

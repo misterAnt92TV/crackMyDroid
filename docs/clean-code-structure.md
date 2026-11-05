@@ -17,11 +17,12 @@ La regola pratica è: il codice più vicino al dominio deve conoscere meno detta
 ## 2. ViewModel e stato
 
 - Un ViewModel espone stato immutabile e azioni pubbliche comprensibili dalla UI.
-- Le trasformazioni di input e le chiamate ai UseCase avvengono nel ViewModel o nel Domain, non nel composable.
+- Le chiamate ai UseCase, la gestione degli eventi e le transizioni di stato avvengono nel ViewModel o nel Domain, mai nel composable.
 - Loading, successo, errore e stato vuoto devono essere rappresentati esplicitamente quando hanno significato per l'utente.
 - Le coroutine usano lo scope del ViewModel e devono essere cancellabili.
 - `onCleared()` deve rilasciare lo scope e non lasciare lavori in background.
 - Il ViewModel non istanzia repository: riceve le dipendenze dal composition root.
+- Il ViewModel coordina la presentazione; non duplica regole di business già appartenenti al UseCase.
 
 ## 3. UseCase e dominio
 
@@ -31,6 +32,7 @@ La regola pratica è: il codice più vicino al dominio deve conoscere meno detta
 - La validazione di input e la normalizzazione dei risultati devono essere deterministiche.
 - La logica pura deve restare in `commonMain` quando non necessita di API native.
 - Le decisioni di business non devono essere duplicate nei ViewModel e nei repository.
+- Filtering, sorting, mapping e validazione funzionali appartengono al UseCase, non alla UI.
 
 ## 4. Repository e adapter
 
@@ -68,6 +70,11 @@ La regola pratica è: il codice più vicino al dominio deve conoscere meno detta
 ## 8. Anti-pattern da evitare
 
 - Composable che chiama repository o accede direttamente a `Context`.
+- Screen che chiama UseCase, database, SDK, API native, Koin o coroutine applicative.
+- Screen che esegue `filter`, `sorted`, mapping di dominio, validazione, `runCatching` o gestione di errori applicativi.
+- Screen con decisioni di business, autorizzazione, persistenza o navigazione condizionale.
+- Stato di dominio mantenuto con `remember`/`mutableStateOf` invece che nel ViewModel.
+- Flusso diretto `Screen → Repository`: il percorso corretto è `Screen(state, onAction) → ViewModel → UseCase → Repository`.
 - ViewModel che crea dipendenze con costruttori concreti o locator globali.
 - UseCase che contiene codice specifico Android/Desktop.
 - Repository che restituisce JSON grezzo, eccezioni native o tipi di UI.
@@ -86,7 +93,8 @@ La regola pratica è: il codice più vicino al dominio deve conoscere meno detta
 6. Creare stato, azioni e ViewModel.
 7. Collegare il composable alla sola API del ViewModel.
 8. Aggiungere test ViewModel con dispatcher deterministico e MockK sui collaboratori.
-9. Aggiornare documentazione, navigazione e schema solo se la feature introduce un nuovo confine architetturale.
+9. Verificare che la UI non contenga logica applicativa o accessi a dati/coroutine.
+10. Aggiornare documentazione, navigazione e schema solo se la feature introduce un nuovo confine architetturale.
 
 ## 10. Checklist di code review
 
@@ -99,4 +107,7 @@ La regola pratica è: il codice più vicino al dominio deve conoscere meno detta
 - [ ] I test verificano risultati o effetti reali.
 - [ ] Non ci sono duplicazioni di regole tra layer o piattaforme.
 - [ ] La cache ha invalidazione e fallback coerenti.
+- [ ] La UI riceve solo stato immutabile e callback e non contiene logica applicativa.
+- [ ] Le nuove regole applicative hanno test UseCase e le transizioni evento/stato hanno test ViewModel.
+- [ ] È stata eseguita una ricerca dei pattern vietati nelle directory UI (`Repository`, `UseCase`, `viewModelScope`, `launch`, `async`, `collect`, API dirette).
 - [ ] La documentazione o il diagramma sono aggiornati se cambia un confine.

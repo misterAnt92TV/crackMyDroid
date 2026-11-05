@@ -10,5 +10,7 @@ data class InstalledAppsState(
     val lastExportPath: String? = null,
     val lastSharedPackage: String? = null,
     val topQuery: String? = null,
-    val favorites: Set<String> = emptySet()
+    val favorites: Set<String> = emptySet(),
+    val visibleApps: List<InstalledAppEntry> = emptyList(),
+    val favoriteQueries: List<String> = emptyList()
 )

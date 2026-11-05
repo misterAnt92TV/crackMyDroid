@@ -13,8 +13,12 @@ data class ActivityListState(
     val favorites: Set<String> = emptySet(),
     val favoritePackages: Set<String> = emptySet(),
     val expandedPackages: Set<String> = emptySet(),
-    val groups: List<ActivityGroup> = emptyList()
+    val groups: List<ActivityGroup> = emptyList(),
+    val favoriteQueries: List<String> = emptyList(),
+    val guidedLaunch: GuidedLaunchState? = null
 )
+
+data class GuidedLaunchState(val entry: ActivityEntry)
 
 data class ActivityGroup(
     val packageName: String,

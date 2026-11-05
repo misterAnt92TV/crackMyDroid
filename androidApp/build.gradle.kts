@@ -18,6 +18,7 @@ android {
         targetSdk = 35
         versionCode = 3
         versionName = "1.3"
+        manifestPlaceholders["integrityVerificationEndpoint"] = ""
     }
 
     buildTypes {

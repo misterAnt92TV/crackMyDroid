@@ -198,7 +198,7 @@ class InstalledAppsViewModelTest {
         vm.setFilter("app", trackUsage = true)
         vm.toggleFavorite("pkg.beta")
 
-        val filtered = vm.filtered()
+        val filtered = vm.state.value.visibleApps
 
         assertEquals("app", vm.state.value.topQuery)
         assertEquals("pkg.beta", filtered.first().packageName)

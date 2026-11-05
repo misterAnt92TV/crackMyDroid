@@ -72,7 +72,6 @@ fun RootScreen(
     onMenu: () -> Unit = {}
 ) {
     val state by viewModel.state.collectAsState()
-    var nonceInput by remember { mutableStateOf("sample-nonce") }
     val strings = LocalStrings.current
     val accessibilityPrefs = LocalAccessibilityPrefs.current
     val resultBringIntoView = remember { BringIntoViewRequester() }
@@ -146,14 +145,14 @@ fun RootScreen(
                     )
 
                     AppTextField(
-                        value = nonceInput,
-                        onValueChange = { nonceInput = it },
+                        value = state.playIntegrityNonce,
+                        onValueChange = viewModel::updatePlayIntegrityNonce,
                         label = strings.nonceLabel,
                         modifier = Modifier.padding(top = 4.dp)
                     )
                     AppButton(
                         text = strings.verifyPlayIntegrity,
-                        onClick = { viewModel.verifyPlayIntegrity(nonceInput.ifBlank { "sample-nonce" }) },
+                        onClick = viewModel::verifyPlayIntegrity,
                         enabled = !state.loading,
                         fullWidth = true
                     )

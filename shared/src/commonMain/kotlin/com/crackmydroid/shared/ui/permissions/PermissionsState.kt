@@ -16,5 +16,8 @@ data class PermissionsState(
     val autoScanScannedApps: Int = 0,
     val autoScanCurrentLabel: String? = null,
     val showOnlyRisky: Boolean = false,
-    val riskReports: List<PermissionRiskReport> = emptyList()
+    val riskReports: List<PermissionRiskReport> = emptyList(),
+    val visibleApps: List<AppPermissionEntry> = emptyList(),
+    val favoriteQueries: List<String> = emptyList()
+    ,val visibleFindingsByPackage: Map<String, List<com.crackmydroid.shared.domain.model.PermissionRiskFinding>> = emptyMap()
 )

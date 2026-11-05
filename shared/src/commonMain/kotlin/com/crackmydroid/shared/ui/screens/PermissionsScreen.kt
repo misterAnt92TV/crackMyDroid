@@ -92,14 +92,8 @@ fun PermissionsScreen(
     @Suppress("DEPRECATION")
     val clipboard = LocalClipboardManager.current
     val expandedPackages = remember { mutableStateMapOf<String, Boolean>() }
-    val favoriteQueries = remember(state.favorites) { state.favorites.toList().sorted() }
-    val filteredApps = remember(
-        state.apps,
-        state.filter,
-        state.favorites,
-        state.showOnlyRisky,
-        state.riskReports
-    ) { viewModel.filtered() }
+    val favoriteQueries = state.favoriteQueries
+    val filteredApps = state.visibleApps
     val riskByPackage =
         remember(state.riskReports) { state.riskReports.associateBy { it.packageName } }
     val criticalTotal = state.riskReports.sumOf { it.criticalCount }
@@ -398,13 +392,8 @@ fun PermissionsScreen(
                 val expanded = expandedPackages[app.packageName] ?: false
                 val isFavorite = state.favorites.contains(app.packageName)
                 val riskReport = riskByPackage[app.packageName]
-                val permissionFindings = remember(riskReport) {
-                    riskReport
-                        ?.findings
-                        ?.filter { !it.isPattern }
-                        ?.associateBy { it.key }
-                        ?: emptyMap()
-                }
+                val permissionFindings = state.visibleFindingsByPackage[app.packageName]
+                    .orEmpty().associateBy { it.key }
                 val appMeta = if (riskReport == null) {
                     "${app.permissions.size} perm"
                 } else {

@@ -59,7 +59,12 @@ class RootViewModel(
         }
     }
 
-    fun verifyPlayIntegrity(nonce: String = "sample-nonce") {
+    fun updatePlayIntegrityNonce(value: String) {
+        _state.update { it.copy(playIntegrityNonce = value) }
+    }
+
+    fun verifyPlayIntegrity() {
+        val nonce = _state.value.playIntegrityNonce.ifBlank { "sample-nonce" }
         scope.launch {
             _state.update { it.copy(loading = true, error = null) }
             runCatching { checkPlayIntegrity(nonce) }

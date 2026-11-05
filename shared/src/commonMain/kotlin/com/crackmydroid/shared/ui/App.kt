@@ -44,7 +44,6 @@ import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -60,9 +59,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.crackmydroid.shared.domain.model.app.AppTheme
 import com.crackmydroid.shared.domain.model.app.AppLanguage
-import com.crackmydroid.shared.domain.repository.log.OperationLogRepository
-import com.crackmydroid.shared.domain.usecase.settings.GetIntroSeenUseCase
-import com.crackmydroid.shared.domain.usecase.settings.SetIntroSeenUseCase
 import com.crackmydroid.shared.i18n.LocalStrings
 import com.crackmydroid.shared.i18n.Strings
 import com.crackmydroid.shared.i18n.platformLanguage
@@ -72,18 +68,10 @@ import com.crackmydroid.shared.presentation.components.AccessibilityPrefs
 import com.crackmydroid.shared.presentation.components.effectiveReduceMotion
 import com.crackmydroid.shared.presentation.components.LocalAccessibilityPrefs
 import com.crackmydroid.shared.presentation.components.PackageIcon
-import com.crackmydroid.shared.presentation.components.SearchHistoryStore
 import com.crackmydroid.shared.presentation.navigation.Screen
 import com.crackmydroid.shared.presentation.navigation.bottomScreens
 import com.crackmydroid.shared.presentation.navigation.drawerScreens
 import com.crackmydroid.shared.presentation.theme.CrackMyDroidTheme
-import com.crackmydroid.shared.ui.activities.ActivityListViewModel
-import com.crackmydroid.shared.ui.info.InfoViewModel
-import com.crackmydroid.shared.ui.installedapps.InstalledAppsViewModel
-import com.crackmydroid.shared.ui.logs.LogViewModel
-import com.crackmydroid.shared.ui.pentest.PenTestingViewModel
-import com.crackmydroid.shared.ui.permissions.PermissionsViewModel
-import com.crackmydroid.shared.ui.root.RootViewModel
 import com.crackmydroid.shared.ui.screens.ActivityListScreen
 import com.crackmydroid.shared.ui.screens.HelpScreen
 import com.crackmydroid.shared.ui.screens.HomeScreen
@@ -95,42 +83,36 @@ import com.crackmydroid.shared.ui.screens.PermissionsScreen
 import com.crackmydroid.shared.ui.screens.RootScreen
 import com.crackmydroid.shared.ui.screens.SettingsScreen
 import com.crackmydroid.shared.ui.screens.TrickScreen
-import com.crackmydroid.shared.ui.settings.SettingsViewModel
-import com.crackmydroid.shared.ui.trick.TrickViewModel
 import com.crackmydroid.shared.util.appPackageName
 import com.crackmydroid.shared.util.appVersionName
 import kotlinx.coroutines.launch
-import org.koin.mp.KoinPlatform
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
 fun CrackMyDroidApp(
+    dependencies: AppPresentationDependencies,
     onLanguageChanged: (AppLanguage) -> Unit = {},
     systemMotionReductionEnabled: Boolean = false
 ) {
-    val selected: MutableState<Screen> = remember { mutableStateOf<Screen>(Screen.Home) }
     val drawerState: DrawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val androidAppVersionName = appVersionName()
 
-    val activityVm = rememberVM<ActivityListViewModel>()
-    val rootVm = rememberVM<RootViewModel>()
-    val infoVm = rememberVM<InfoViewModel>()
-    val trickVm = rememberVM<TrickViewModel>()
-    val settingsVm = rememberVM<SettingsViewModel>()
-    val logVm = rememberVM<LogViewModel>()
-    val permissionsVm = rememberVM<PermissionsViewModel>()
-    val installedAppsVm = rememberVM<InstalledAppsViewModel>()
-    val penTestingVm = rememberVM<PenTestingViewModel>()
-    val operationLogs = remember { KoinPlatform.getKoin().get<OperationLogRepository>() }
-    val helpDialog = remember { mutableStateOf<String?>(null) }
-    val introSeenUse = remember { KoinPlatform.getKoin().get<GetIntroSeenUseCase>() }
-    val setIntroSeenUse = remember { KoinPlatform.getKoin().get<SetIntroSeenUseCase>() }
+    val activityVm = dependencies.activity
+    val rootVm = dependencies.root
+    val infoVm = dependencies.info
+    val trickVm = dependencies.trick
+    val settingsVm = dependencies.settings
+    val logVm = dependencies.logs
+    val permissionsVm = dependencies.permissions
+    val installedAppsVm = dependencies.installedApps
+    val penTestingVm = dependencies.penTesting
+    val homeVm = dependencies.home
+    val shellVm = dependencies.shell
+    val shellState by shellVm.state.collectAsState()
     val settingsState = settingsVm.state.collectAsState()
     val languageCode = resolveLanguageCode(settingsState.value.language, platformLanguage())
     val strings = stringsFor(languageCode)
-    val showIntro = remember { mutableStateOf(true) }
-    val sectionHintDialog = remember { mutableStateOf<Screen?>(null) }
     val accessibilityPrefs = AccessibilityPrefs(
         highContrast = settingsState.value.highContrast,
         reduceMotion = effectiveReduceMotion(
@@ -140,26 +122,11 @@ fun CrackMyDroidApp(
         largeText = settingsState.value.largeText
     )
 
-    LaunchedEffect(Unit) {
-        val seen = introSeenUse()
-        showIntro.value = !seen
-        activityVm.refresh()
-        infoVm.load()
-        trickVm.load()
-        settingsVm.load()
-        logVm.refresh()
-        permissionsVm.refresh()
-        installedAppsVm.refresh()
-        penTestingVm.refresh()
-    }
-
-    LaunchedEffect(settingsState.value.suggestionsEnabled) {
-        SearchHistoryStore.setEnabled(settingsState.value.suggestionsEnabled)
-    }
+    LaunchedEffect(Unit) { shellVm.initialize() }
 
     LaunchedEffect(settingsState.value.featureHintsEnabled) {
         if (!settingsState.value.featureHintsEnabled) {
-            sectionHintDialog.value = null
+            shellVm.dismissHint()
         }
     }
 
@@ -180,16 +147,7 @@ fun CrackMyDroidApp(
         ) {
             val navigateFromDrawer: (Screen) -> Unit = { target ->
                 scope.launch { drawerState.close() }
-                if (selected.value == target) {
-                    Unit
-                } else if (
-                    settingsState.value.featureHintsEnabled &&
-                    shouldShowEntryHintDialog(target)
-                ) {
-                    sectionHintDialog.value = target
-                } else {
-                    selected.value = target
-                }
+                shellVm.navigate(target, settingsState.value.featureHintsEnabled)
             }
             Box(modifier = Modifier.fillMaxSize()) {
                 ModalNavigationDrawer(
@@ -238,7 +196,7 @@ fun CrackMyDroidApp(
                                         NavigationDrawerItem(
                                             icon = { Icon(screen.icon, contentDescription = null) },
                                             label = { Text(screen.title(strings)) },
-                                            selected = selected.value == screen,
+                                            selected = shellState.selectedScreen == screen,
                                             onClick = { navigateFromDrawer(screen) },
                                             modifier = Modifier
                                                 .fillMaxWidth()
@@ -269,8 +227,8 @@ fun CrackMyDroidApp(
                                 val itemIconSize = 20.dp
                                 bottomScreens.forEach { screen ->
                                     NavigationBarItem(
-                                        selected = selected.value == screen,
-                                        onClick = { selected.value = screen },
+                                        selected = shellState.selectedScreen == screen,
+                                        onClick = { shellVm.navigate(screen, false) },
                                         icon = {
                                             Icon(
                                                 screen.icon,
@@ -294,7 +252,7 @@ fun CrackMyDroidApp(
                         val focusManager = LocalFocusManager.current
                         val adjustedPadding = padding
                         val openDrawer: () -> Unit = { scope.launch { drawerState.open() } }
-                        val backToHome: () -> Unit = { selected.value = Screen.Home }
+                        val backToHome: () -> Unit = { shellVm.navigate(Screen.Home, false) }
                         Column(
                             modifier = Modifier
                                 .fillMaxSize()
@@ -312,7 +270,7 @@ fun CrackMyDroidApp(
                         ) {
                             val reduceMotion = accessibilityPrefs.reduceMotion
                             AnimatedContent(
-                                targetState = selected.value,
+                                targetState = shellState.selectedScreen,
                                 transitionSpec = {
                                     if (reduceMotion) {
                                         fadeIn(tween(1)) togetherWith fadeOut(tween(1))
@@ -324,10 +282,10 @@ fun CrackMyDroidApp(
                             ) { screen ->
                                 when (screen) {
                                     Screen.Home -> HomeScreen(
-                                        operationLogs = operationLogs,
+                                        viewModel = homeVm,
                                         padding = adjustedPadding,
                                         headerHelp = strings.helpHome,
-                                        onHelp = { helpDialog.value = it },
+                                        onHelp = shellVm::showHelp,
                                         onMenu = openDrawer,
                                         languageCode = languageCode
                                     )
@@ -336,7 +294,7 @@ fun CrackMyDroidApp(
                                         viewModel = activityVm,
                                         padding = adjustedPadding,
                                         headerHelp = strings.helpActivities,
-                                        onHelp = { helpDialog.value = it },
+                                        onHelp = shellVm::showHelp,
                                         onBack = backToHome,
                                         onMenu = openDrawer
                                     )
@@ -345,7 +303,7 @@ fun CrackMyDroidApp(
                                         rootVm,
                                         adjustedPadding,
                                         headerHelp = strings.helpRoot,
-                                        onHelp = { helpDialog.value = it },
+                                        onHelp = shellVm::showHelp,
                                         onBack = backToHome,
                                         onMenu = openDrawer
                                     )
@@ -354,7 +312,7 @@ fun CrackMyDroidApp(
                                         infoVm,
                                         adjustedPadding,
                                         headerHelp = strings.helpInfo,
-                                        onHelp = { helpDialog.value = it },
+                                        onHelp = shellVm::showHelp,
                                         onMenu = openDrawer
                                     )
 
@@ -362,7 +320,7 @@ fun CrackMyDroidApp(
                                         trickVm,
                                         adjustedPadding,
                                         headerHelp = strings.helpTrick,
-                                        onHelp = { helpDialog.value = it },
+                                        onHelp = shellVm::showHelp,
                                         onBack = backToHome,
                                         onMenu = openDrawer
                                     )
@@ -371,7 +329,7 @@ fun CrackMyDroidApp(
                                         penTestingVm,
                                         adjustedPadding,
                                         headerHelp = strings.helpPentest,
-                                        onHelp = { helpDialog.value = it },
+                                        onHelp = shellVm::showHelp,
                                         onBack = backToHome,
                                         onMenu = openDrawer
                                     )
@@ -380,7 +338,7 @@ fun CrackMyDroidApp(
                                         installedAppsVm,
                                         adjustedPadding,
                                         headerHelp = strings.helpApk,
-                                        onHelp = { helpDialog.value = it },
+                                        onHelp = shellVm::showHelp,
                                         onBack = backToHome,
                                         onMenu = openDrawer
                                     )
@@ -389,7 +347,7 @@ fun CrackMyDroidApp(
                                         permissionsVm,
                                         adjustedPadding,
                                         headerHelp = strings.helpPermissions,
-                                        onHelp = { helpDialog.value = it },
+                                        onHelp = shellVm::showHelp,
                                         onBack = backToHome,
                                         onMenu = openDrawer
                                     )
@@ -398,7 +356,7 @@ fun CrackMyDroidApp(
                                         logVm,
                                         adjustedPadding,
                                         headerHelp = strings.helpLog,
-                                        onHelp = { helpDialog.value = it },
+                                        onHelp = shellVm::showHelp,
                                         onBack = backToHome,
                                         onMenu = openDrawer
                                     )
@@ -407,15 +365,15 @@ fun CrackMyDroidApp(
                                         settingsVm,
                                         adjustedPadding,
                                         headerHelp = strings.helpSettings,
-                                        onHelp = { helpDialog.value = it },
+                                        onHelp = shellVm::showHelp,
                                         onMenu = openDrawer
                                     )
 
                                     Screen.Help -> HelpScreen(
                                         padding = adjustedPadding,
-                                        onHelp = { helpDialog.value = it },
+                                        onHelp = shellVm::showHelp,
                                         onMenu = openDrawer,
-                                        onNavigate = { target -> selected.value = target }
+                                        onNavigate = { target -> shellVm.navigate(target, false) }
                                     )
                                 }
                             }
@@ -432,25 +390,20 @@ fun CrackMyDroidApp(
             }
         }
 
-        if (showIntro.value) {
+        if (shellState.showIntro) {
             androidx.compose.material3.AlertDialog(
-                onDismissRequest = { showIntro.value = false },
+                onDismissRequest = shellVm::dismissIntro,
                 title = { Text(strings.introTitle) },
                 text = { Text(strings.introBody) },
                 confirmButton = {
-                    androidx.compose.material3.Button(onClick = { showIntro.value = false }) {
+                    androidx.compose.material3.Button(onClick = shellVm::dismissIntro) {
                         Text(strings.introAgree)
                     }
                 }
             )
-            LaunchedEffect(showIntro.value) {
-                if (!showIntro.value) {
-                    setIntroSeenUse(true)
-                }
-            }
         }
 
-        sectionHintDialog.value?.let { target ->
+        shellState.pendingHintScreen?.let { target ->
             sectionEntryHintText(strings, target)?.let { hint ->
                 var disableHintsForever by remember(target) { mutableStateOf(false) }
                 androidx.compose.material3.AlertDialog(
@@ -474,11 +427,10 @@ fun CrackMyDroidApp(
                     confirmButton = {
                         androidx.compose.material3.Button(
                             onClick = {
-                                if (disableHintsForever) {
-                                    settingsVm.setFeatureHintsEnabled(false)
-                                }
-                                selected.value = target
-                                sectionHintDialog.value = null
+                                shellVm.confirmHint(
+                                    disableHints = disableHintsForever,
+                                    target = target
+                                )
                             }
                         ) {
                             Text(strings.sectionHintConfirm)
@@ -487,7 +439,7 @@ fun CrackMyDroidApp(
                     dismissButton = {
                         TextButton(
                             onClick = {
-                                sectionHintDialog.value = null
+                                shellVm.dismissHint()
                             }
                         ) {
                             Text(strings.close)
@@ -497,11 +449,11 @@ fun CrackMyDroidApp(
             }
         }
 
-        helpDialog.value?.let { msg ->
+        shellState.helpDialog?.let { msg ->
             androidx.compose.material3.AlertDialog(
-                onDismissRequest = { helpDialog.value = null },
+                onDismissRequest = shellVm::dismissHelp,
                 confirmButton = {
-                    androidx.compose.material3.TextButton(onClick = { helpDialog.value = null }) {
+                    androidx.compose.material3.TextButton(onClick = shellVm::dismissHelp) {
                         Text(strings.close)
                     }
                 },
@@ -509,24 +461,6 @@ fun CrackMyDroidApp(
                 text = { Text(msg) }
             )
         }
-    }
-}
-
-@Composable
-inline fun <reified T : Any> rememberVM(): T {
-    return remember { KoinPlatform.getKoin().get<T>() }
-}
-
-private fun shouldShowEntryHintDialog(screen: Screen): Boolean {
-    return when (screen) {
-        Screen.Permissions,
-        Screen.InstalledApps,
-        Screen.Pentest,
-        Screen.Activities,
-        Screen.Root,
-        Screen.Trick -> true
-
-        else -> false
     }
 }
 

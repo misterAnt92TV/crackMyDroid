@@ -19,6 +19,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
 import com.crackmydroid.shared.presentation.components.text.AppText
 import com.crackmydroid.shared.ui.CrackMyDroidApp
+import com.crackmydroid.shared.ui.AppPresentationDependencies
+import org.koin.mp.KoinPlatform
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,11 +38,15 @@ class MainActivity : ComponentActivity() {
         val disclosurePreferences =
             getSharedPreferences(DISCLOSURE_PREFERENCES, Context.MODE_PRIVATE)
         val disclosureSeen = disclosurePreferences.getBoolean(DISCLOSURE_SEEN_KEY, false)
+        val presentationDependencies = KoinPlatform.getKoin().get<AppPresentationDependencies>()
         setContent {
             Surface {
                 when (packageInventoryAccess) {
                     PackageInventoryAccess.Full -> {
-                        CrackMyDroidApp(systemMotionReductionEnabled = rememberSystemMotionReduction())
+                        CrackMyDroidApp(
+                            dependencies = presentationDependencies,
+                            systemMotionReductionEnabled = rememberSystemMotionReduction()
+                        )
                         var showDisclosure by remember { mutableStateOf(!disclosureSeen) }
                         if (showDisclosure) {
                             PackageInventoryDisclosure(

@@ -7,6 +7,7 @@ import com.crackmydroid.shared.domain.repository.DeviceInfoRepository
 import com.crackmydroid.shared.domain.repository.RootCheckRepository
 import com.crackmydroid.shared.domain.usecase.root.CheckRootUseCase
 import com.crackmydroid.shared.domain.usecase.info.GetDeviceInfoUseCase
+import com.crackmydroid.shared.domain.usecase.info.BuildDeviceInfoReportUseCase
 import com.crackmydroid.shared.domain.usecase.reports.ExportReportUseCase
 import com.crackmydroid.shared.ui.info.InfoViewModel
 import io.mockk.coEvery
@@ -123,7 +124,8 @@ class InfoViewModelTest {
     ) = InfoViewModel(
         GetDeviceInfoUseCase(infoRepository),
         CheckRootUseCase(rootRepository),
-        ExportReportUseCase(exporter)
+        ExportReportUseCase(exporter),
+        BuildDeviceInfoReportUseCase()
     )
 
     private fun deviceInfo() = DeviceInfo(

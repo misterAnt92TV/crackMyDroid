@@ -46,8 +46,10 @@ Create a mapper only when it converts across a real boundary, for example API/AD
 
 - State is immutable and exposes only what the screen needs.
 - Events have names that describe the user action: `onRefreshRequested`, `onAppSelected`, `onRetryRequested`.
-- ViewModel functions call UseCases and translate outcomes into state; they do not compose UI.
-- Screen functions delegate visual rendering to content functions when that keeps preview data and callbacks simple.
+- ViewModel functions handle events, launch cancellable work, call UseCases, and translate outcomes into state; they do not compose UI or duplicate business rules.
+- Screen functions receive immutable state and callbacks, delegate visual rendering to content functions when useful, and never call UseCases, repositories, APIs, Koin, or application coroutines.
+- Functional filtering, sorting, validation, mapping, persistence, conditional navigation, and application error handling belong in UseCases or ViewModels, never in composables.
+- A screen must follow `Screen(state, onAction)`; the only permitted composable logic is local rendering mechanics such as layout, animation, dimensions, colors, accessibility, and transient control state.
 - Components must not obtain dependencies from Koin or construct ViewModels.
 
 ## Preview recipe
@@ -82,5 +84,8 @@ Before considering a feature complete, verify that:
 - the UseCase, ViewModel, mapper, repository, or adapter behavior changed by the feature has a corresponding focused test;
 - success and at least one meaningful error, empty, or boundary case are covered where the behavior supports them;
 - asynchronous state transitions use deterministic coroutine testing;
+- every new business rule has a UseCase test and every event/state transition has a ViewModel test;
+- UI tests cover rendering and interaction only, with no domain logic in screens;
+- a review search found no repository/UseCase access, `viewModelScope`, `launch`, `async`, application `collect`, direct API calls, or domain transformations in UI directories;
 - test files are placed in the source set matching the production platform;
 - the relevant Gradle test task has executed successfully.

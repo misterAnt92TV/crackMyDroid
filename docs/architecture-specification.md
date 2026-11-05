@@ -45,10 +45,19 @@ Comprende:
 Il flusso è UDF/MVI:
 
 ```text
-User interaction → Action/Event → ViewModel → State/StateFlow → Compose UI
+User interaction → UI event/callback → ViewModel action → UseCase → Repository/data source → result → immutable StateFlow → Compose UI
 ```
 
 I ViewModel usano `BaseViewModel` per possedere uno scope cancellabile. Il lavoro asincrono deve essere lanciato nello scope del ViewModel, con dispatcher forniti tramite `AppDispatchers`, e deve pubblicare stati coerenti per loading, successo ed errore.
+
+La UI non contiene logica applicativa: Screen e composable ricevono `UiState` immutabile e callback,
+renderizzano il contenuto e inoltrano gli eventi. Non possono accedere a UseCase, repository, database,
+SDK, API native, Koin o coroutine applicative, né eseguire filtering, sorting, mapping, validazione,
+gestione errori o navigazione condizionale. Sono ammessi solo calcoli locali strettamente visuali,
+come layout, animazioni, dimensioni, colori, accessibilità e stato transitorio di un controllo.
+
+Le regole di dominio e le trasformazioni funzionali appartengono ai UseCase; il ViewModel gestisce
+solo orchestrazione della presentazione, eventi, coroutine e mapping verso `UiState`.
 
 ### 3.2 Domain
 
@@ -85,6 +94,7 @@ Le responsabilità trasversali includono:
 - SQLDelight per il database locale;
 - kotlinx.serialization per snapshot e report JSON;
 - coroutines per concorrenza e cancellazione strutturata;
+- Ktor Client per tutte le chiamate REST, con engine confinati nel source set di piattaforma;
 - ADB e process bridge esclusivamente nel percorso Desktop/ADB.
 
 ## 4. Flusso applicativo
@@ -129,6 +139,12 @@ Il wrapper SwiftUI ospita la UI condivisa. Le integrazioni iOS restano negli ada
 
 Le dipendenze devono essere costruite nel composition root e passate esplicitamente ai componenti. Un ViewModel non deve creare repository o avviare Koin autonomamente.
 
+Ogni risoluzione di `AppPresentationDependencies` crea un grafo di presentazione indipendente.
+La factory risolve una sola volta i ViewModel delle schermate e passa le stesse istanze ad
+`AppShellViewModel`: i caricamenti della shell aggiornano quindi lo stato osservato dalla UI.
+Non risolvere nuovamente questi ViewModel per costruire la shell e non convertirli in singleton
+globali: contenitori distinti devono mantenere stato indipendente.
+
 ## 6. Persistenza, cache e snapshot
 
 - SQLDelight fornisce il database locale tramite driver di piattaforma.
@@ -136,6 +152,30 @@ Le dipendenze devono essere costruite nel composition root e passate esplicitame
 - Gli eventi di aggiornamento/rimozione pacchetto devono invalidare le cache interessate.
 - Gli snapshot sono serializzati con un contratto stabile e importati tramite un componente dedicato.
 - ADB è una boundary esterna: timeout, processo fallito, output non valido e device non disponibile devono essere trasformati in risultati o errori gestibili.
+
+### CacheDatabase: migrazioni e indici
+
+I driver Android e iOS devono ricevere `CacheDatabaseSchema`, non direttamente lo schema
+generato. L'adattatore conserva le migrazioni SQLDelight e ripara nel passaggio v3 i DB
+legacy che condividono la versione 1/2 ma non le colonne manifest/activity. `2.sqm`
+versiona questo passaggio con un UPDATE senza righe; il callback `AfterVersion(2)`
+controlla `PRAGMA table_info` e aggiunge solo le colonne mancanti. Non modificare
+`1.sqm` già applicato e non aggirare gli errori cancellando il database.
+
+Solo la cache app/activity a cui vengono aggiunte colonne viene invalidata, nella
+transazione di upgrade del driver: i default dei nuovi flag non rappresentano una
+scansione effettiva. I DB già completi mantengono le righe. Le SELECT di queste tabelle
+elencano esplicitamente le colonne, perché l'ordine fisico dopo ALTER TABLE può differire
+da una nuova installazione. `clearDeviceInfo` elimina sia i campi key/value sia
+l'eventuale chiave JSON legacy.
+
+Le quattro cache sono indipendenti, senza foreign key: `packageName` è un collegamento
+logico, non richiede un ordine di popolamento. Le PK `(packageName, activityName)` e
+`(packageName, permission)` coprono già le ricerche per package; le altre PK sono
+`installed_apps_cache(packageName)` e `device_info_cache(key)`. Non aggiungere indici
+ridondanti sul package o sui flag: le query attuali leggono tutte le app e filtrano in
+memoria. La paginazione SQL, la rappresentazione delle app senza permessi e la
+normalizzazione delle cache richiedono un intervento separato, non nuovi indici isolati.
 
 ## 7. Regole di dipendenza
 

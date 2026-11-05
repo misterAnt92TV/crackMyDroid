@@ -2,6 +2,7 @@ package com.crackmydroid.shared.ui.info
 
 import com.crackmydroid.shared.domain.model.DeviceInfo
 import com.crackmydroid.shared.domain.model.RootStatus
+import com.crackmydroid.shared.domain.usecase.info.BuildDeviceInfoReportUseCase
 import com.crackmydroid.shared.domain.usecase.root.CheckRootUseCase
 import com.crackmydroid.shared.domain.usecase.info.GetDeviceInfoUseCase
 import com.crackmydroid.shared.domain.usecase.reports.ExportReportUseCase
@@ -14,7 +15,8 @@ import kotlinx.coroutines.launch
 class InfoViewModel(
     private val getInfo: GetDeviceInfoUseCase,
     private val checkRoot: CheckRootUseCase,
-    private val reportExporter: ExportReportUseCase
+    private val reportExporter: ExportReportUseCase,
+    private val buildReport: BuildDeviceInfoReportUseCase
 ) : BaseViewModel() {
     private val _state = MutableStateFlow(InfoState())
     val state: StateFlow<InfoState> = _state
@@ -32,6 +34,7 @@ class InfoViewModel(
                         it.copy(
                             info = info,
                             root = root,
+                            reportContent = buildReport(info, root),
                             loading = false
                         )
                     }
@@ -49,7 +52,7 @@ class InfoViewModel(
 
     fun export() {
         val info = _state.value.info ?: return
-        val content = buildInfoText(info, _state.value.root)
+        val content = buildReport(info, _state.value.root)
         scope.launch {
             reportExporter.save("device_info", content)
                 .onSuccess { path ->
@@ -66,7 +69,7 @@ class InfoViewModel(
 
     fun share(contentOverride: String? = null) {
         val info = _state.value.info ?: return
-        val content = contentOverride ?: buildInfoText(info, _state.value.root)
+        val content = contentOverride ?: buildReport(info, _state.value.root)
         scope.launch {
             reportExporter.share("device_info", content)
                 .onSuccess { path ->

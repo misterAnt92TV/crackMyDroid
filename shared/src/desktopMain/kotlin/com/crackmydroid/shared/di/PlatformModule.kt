@@ -12,6 +12,8 @@ import com.crackmydroid.shared.data.packages.RemotePackageManagerDesktop
 import com.crackmydroid.shared.data.permissions.PermissionsRepositoryDesktop
 import com.crackmydroid.shared.data.reports.ReportFileRepositoryDesktop
 import com.crackmydroid.shared.data.root.RootCheckRepositoryDesktop
+import com.crackmydroid.shared.data.root.IntegrityVerificationRepositoryDesktop
+import com.crackmydroid.shared.data.network.createDesktopHttpClient
 import com.crackmydroid.shared.data.settings.SettingsRepositoryDesktop
 import com.crackmydroid.shared.data.shell.ShellCommandRepositoryDesktop
 import com.crackmydroid.shared.data.snapshot.RemoteDeviceSnapshotImporter
@@ -27,6 +29,7 @@ import com.crackmydroid.shared.domain.repository.PermissionsRepository
 import com.crackmydroid.shared.domain.repository.RemotePackageManager
 import com.crackmydroid.shared.domain.repository.ReportFileRepository
 import com.crackmydroid.shared.domain.repository.RootCheckRepository
+import com.crackmydroid.shared.domain.repository.IntegrityVerificationRepository
 import com.crackmydroid.shared.domain.repository.SettingsRepository
 import com.crackmydroid.shared.domain.repository.ShellCommandRepository
 import com.crackmydroid.shared.presentation.operations.DefaultOperationLogRepository
@@ -34,9 +37,11 @@ import com.crackmydroid.shared.presentation.operations.OperationLogPersistence
 import com.crackmydroid.shared.presentation.operations.OperationLogPersistenceDesktop
 import org.koin.core.module.Module
 import org.koin.dsl.module
+import io.ktor.client.HttpClient
 
 actual fun platformModule(): Module = module {
     single { DesktopScanCache() }
+    single<HttpClient> { createDesktopHttpClient() }
     single<SettingsRepository> { SettingsRepositoryDesktop() }
     single<AdbBridge> { ProcessAdbBridge() }
     single<CacheMaintenance> { CacheMaintenanceRepositoryDesktop() }
@@ -45,6 +50,7 @@ actual fun platformModule(): Module = module {
     single<RemotePackageManager> { RemotePackageManagerDesktop(get(), get(), get()) }
     single<ActivityRepository> { ActivityRepositoryDesktop(get(), get(), get(), get()) }
     single<RootCheckRepository> { RootCheckRepositoryDesktop(get(), get(), get()) }
+    single<IntegrityVerificationRepository> { IntegrityVerificationRepositoryDesktop() }
     single<DeviceInfoRepository> { DeviceInfoRepositoryDesktop(get(), get(), get()) }
     single<ShellCommandRepository> { ShellCommandRepositoryDesktop(get(), get(), get()) }
     single<LogRepository> { LogRepositoryDesktop(get(), get(), get()) }

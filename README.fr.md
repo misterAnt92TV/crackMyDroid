@@ -14,7 +14,7 @@ Kotlin Multiplatform (Android + Desktop + iOS) pour la sécurité mobile, le rev
 |---|---|
 | **Accueil** | Aperçu rapide, objectif de l'application et FAQ déroulantes |
 | **Infos appareil** | Matériel/logiciel, correctifs de sécurité, empreinte, radio, noyau, bootloader, batterie/réseau, indicateurs de débogage (ADB, options développeur, debuggable), statut root ; chaque ligne copiable, rapport exportable en TXT |
-| **Root / Play Integrity** | Vérification root avec RootBeer, contrôles Play Integrity avec nonce configurable et détail des tests |
+| **Root / Play Integrity** | Vérification root avec RootBeer et verdicts Play Integrity vérifiables par backend pour CrackMyDroid et l’appareil |
 | **PenTesting** | Liste de contrôles de sécurité avec statut (queued/ok/error), compteurs, détail des erreurs, export/partage du rapport |
 | **Activités** | Liste des activités par application avec recherche/historique, favoris, expansion par paquet, lancement direct et export |
 | **Applications installées (APK)** | Recherche, filtres, favoris, icônes des apps, export APK vers le stockage et partage direct |

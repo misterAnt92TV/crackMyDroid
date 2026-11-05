@@ -1,6 +1,18 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+screens_root='shared/src/commonMain/kotlin/com/crackmydroid/shared/ui/screens'
+if rg -n -U '\bTODO\s*\(|\bNotImplementedError\b|\bfun\s+(AppCard|ExportDetailsCard)\s*\(' "$screens_root" --glob '*.kt'; then
+  echo "UI component guard failed: unimplemented code or local shared-card declarations in screens." >&2
+  exit 1
+else
+  status=$?
+  if ((status != 1)); then
+    echo "UI component guard failed: could not inspect screen sources." >&2
+    exit "$status"
+  fi
+fi
+
 # Direct Material 3 primitives are allowed only inside the design-system package or
 # in this explicit migration baseline. Remove entries as each screen is migrated.
 baseline=(

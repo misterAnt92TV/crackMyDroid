@@ -52,9 +52,11 @@ import com.crackmydroid.shared.presentation.components.PackageIcon
 import com.crackmydroid.shared.presentation.components.ScrollToTopButton
 import com.crackmydroid.shared.presentation.components.SearchFieldWithHistoryComponent
 import com.crackmydroid.shared.presentation.components.SectionHeader
+import com.crackmydroid.shared.presentation.components.card.AppCard
 import com.crackmydroid.shared.presentation.components.card.ExportDetailsCard
 import com.crackmydroid.shared.presentation.components.text.AppText
 import com.crackmydroid.shared.ui.installedapps.InstalledAppsViewModel
+import com.crackmydroid.shared.domain.model.InstallSourceClassification
 import kotlinx.coroutines.launch
 
 @Composable
@@ -71,8 +73,8 @@ fun InstalledAppsScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val expandedPackages = remember { mutableStateMapOf<String, Boolean>() }
-    val favoriteQueries = remember(state.favorites) { state.favorites.toList().sorted() }
-    val filteredApps = remember(state.apps, state.filter, state.favorites) { viewModel.filtered() }
+    val favoriteQueries = state.favoriteQueries
+    val filteredApps = state.visibleApps
     val listState = rememberLazyListState()
     var searchToolsExpanded by remember { mutableStateOf(true) }
     val showScrollTop by remember {
@@ -277,7 +279,7 @@ fun InstalledAppsScreen(
                 val isFavorite = state.favorites.contains(app.packageName)
                 AppAccordion(
                     title = app.appLabel,
-                    subtitle = app.packageName,
+                    subtitle = "${app.packageName} · ${app.installSource.label(strings)}",
                     expanded = expanded,
                     onToggle = { expandedPackages[app.packageName] = !expanded },
                     leading = {
@@ -310,6 +312,37 @@ fun InstalledAppsScreen(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis
+                    )
+                    AppText(
+                        "${strings.appInstallSource}: ${app.installSource.label(strings)}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    app.installSource.installingPackageName?.let { installer ->
+                        AppText(
+                            "${strings.appInstallerPackage}: $installer",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    app.installSource.initiatingPackageName?.let { initiator ->
+                        AppText(
+                            "${strings.appInitiatingPackage}: $initiator",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    app.installSource.originatingPackageName?.let { origin ->
+                        AppText(
+                            "${strings.appOriginatingPackage}: $origin",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    AppText(
+                        strings.appInstallSourceLimit,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
 
                     Spacer(modifier = Modifier.height(6.dp))
@@ -360,7 +393,10 @@ fun InstalledAppsScreen(
     state.error?.let { ErrorDialogComponent(it, viewModel::clearError) }
 }
 
-@Composable
-fun AppCard(modifier: Modifier, content: @Composable () -> Unit) {
-    TODO("Not yet implemented")
-}
+private fun com.crackmydroid.shared.domain.model.InstallSourceInfo.label(strings: com.crackmydroid.shared.i18n.Strings): String =
+    when (classification) {
+        InstallSourceClassification.GOOGLE_PLAY -> strings.appInstallSourceGooglePlay
+        InstallSourceClassification.OTHER -> strings.appInstallSourceOther
+        InstallSourceClassification.UNKNOWN -> strings.appInstallSourceUnknown
+        InstallSourceClassification.UNAVAILABLE -> strings.appInstallSourceUnavailable
+    }

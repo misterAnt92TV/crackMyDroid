@@ -7,6 +7,8 @@ import com.crackmydroid.shared.data.InstalledAppsRepositoryIos
 import com.crackmydroid.shared.data.LogRepositoryIos
 import com.crackmydroid.shared.data.PermissionsRepositoryIos
 import com.crackmydroid.shared.data.RootCheckRepositoryIos
+import com.crackmydroid.shared.data.IntegrityVerificationRepositoryIos
+import com.crackmydroid.shared.data.network.createIosHttpClient
 import com.crackmydroid.shared.data.SettingsRepositoryIos
 import com.crackmydroid.shared.data.ShellCommandRepositoryIos
 import com.crackmydroid.shared.data.reports.ReportFileRepositoryIos
@@ -19,6 +21,7 @@ import com.crackmydroid.shared.domain.repository.log.OperationLogRepository
 import com.crackmydroid.shared.domain.repository.PermissionsRepository
 import com.crackmydroid.shared.domain.repository.ReportFileRepository
 import com.crackmydroid.shared.domain.repository.RootCheckRepository
+import com.crackmydroid.shared.domain.repository.IntegrityVerificationRepository
 import com.crackmydroid.shared.domain.repository.SettingsRepository
 import com.crackmydroid.shared.domain.repository.ShellCommandRepository
 import com.crackmydroid.shared.presentation.operations.DefaultOperationLogRepository
@@ -26,13 +29,16 @@ import com.crackmydroid.shared.presentation.operations.InMemoryOperationLogPersi
 import com.crackmydroid.shared.presentation.operations.OperationLogPersistence
 import org.koin.core.module.Module
 import org.koin.dsl.module
+import io.ktor.client.HttpClient
 
 actual fun platformModule(): Module = module {
+    single<HttpClient> { createIosHttpClient() }
     single<ReportFileRepository> { ReportFileRepositoryIos() }
     single<OperationLogPersistence> { InMemoryOperationLogPersistence() }
     single<OperationLogRepository> { DefaultOperationLogRepository(get()) }
     single<ActivityRepository> { ActivityRepositoryIos() }
     single<RootCheckRepository> { RootCheckRepositoryIos() }
+    single<IntegrityVerificationRepository> { IntegrityVerificationRepositoryIos() }
     single<DeviceInfoRepository> { DeviceInfoRepositoryIos() }
     single<ShellCommandRepository> { ShellCommandRepositoryIos() }
     single<SettingsRepository> { SettingsRepositoryIos() }

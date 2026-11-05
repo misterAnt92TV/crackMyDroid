@@ -13,9 +13,13 @@
 |----------------|----------------------------|--------------------------------------|
 | JDK            | 17                         | Testate con Temurin/Eclipse Adoptium |
 | Android Studio | Koala (2024.1) o superiore | oppure IntelliJ IDEA con plugin KMP  |
-| Android SDK    | API 34                     | `compileSdk=34`, `targetSdk=34`      |
+| Android SDK    | API 36                     | `compileSdk=36`, `targetSdk=35`      |
 | `adb`          | qualsiasi                  | Solo per la desktop app              |
 | Xcode          | 15+                        | Solo per build iOS                   |
+
+Ktor resta allineato alla versione 3.5.0, che usa OkHttp 5.3.2 ed è compatibile con
+`compileSdk=36`. Ktor 3.6.0 introduce OkHttp Android 5.5.0, che richiede API 37:
+prima di aggiornare Ktor, ricontrollare i requisiti SDK delle dipendenze transitive.
 
 ### Clone e verifica build
 

@@ -50,7 +50,6 @@ import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import com.crackmydroid.shared.domain.model.activity.ActivityEntry
-import com.crackmydroid.shared.domain.model.activity.ActivityIntentRiskAnalyzer
 import com.crackmydroid.shared.domain.model.activity.favoriteKey
 import com.crackmydroid.shared.i18n.LocalStrings
 import com.crackmydroid.shared.presentation.components.AppAccordion
@@ -63,9 +62,11 @@ import com.crackmydroid.shared.presentation.components.ScrollToTopButton
 import com.crackmydroid.shared.presentation.components.SearchFieldWithHistoryComponent
 import com.crackmydroid.shared.presentation.components.SectionHeader
 import com.crackmydroid.shared.presentation.components.card.AppCard
+import com.crackmydroid.shared.presentation.components.card.ExportDetailsCard
 import com.crackmydroid.shared.presentation.components.text.AppText
 import com.crackmydroid.shared.ui.activities.ActivityAppReport
 import com.crackmydroid.shared.ui.activities.ActivityListViewModel
+import com.crackmydroid.shared.ui.activities.uiLabel
 import kotlinx.coroutines.launch
 
 @Composable
@@ -85,10 +86,9 @@ fun ActivityListScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val groups = state.groups
-    val favoriteQueries = remember(state.favorites) { state.favorites.toList().sorted() }
+    val favoriteQueries = state.favoriteQueries
     val listState = rememberLazyListState()
     var searchToolsExpanded by remember { mutableStateOf(true) }
-    var guidedLaunchTarget by remember { mutableStateOf<ActivityEntry?>(null) }
     var selectedReportPackage by remember { mutableStateOf<String?>(null) }
     var lastReportPath by remember { mutableStateOf<String?>(null) }
     val showScrollTop by remember {
@@ -341,9 +341,7 @@ fun ActivityListScreen(
                             meta = activityMeta,
                             onClick = when {
                                 activity.launchableViaShell -> ({ viewModel.launch(activity) })
-                                activity.supportsGuidedLaunch() -> ({
-                                    guidedLaunchTarget = activity
-                                })
+                                !activity.launchableViaShell -> ({ viewModel.openGuidedLaunch(activity) })
 
                                 else -> null
                             },
@@ -393,21 +391,16 @@ fun ActivityListScreen(
         ErrorDialogComponent(message = it, onDismiss = viewModel::clearError)
     }
 
-    guidedLaunchTarget?.let { activity ->
+    state.guidedLaunch?.entry?.let { activity ->
         GuidedActivityLaunchDialog(
             entry = activity,
-            onDismiss = { guidedLaunchTarget = null },
+            onDismiss = viewModel::dismissGuidedLaunch,
             onLaunch = { action, dataUri, mimeType ->
-                viewModel.launchWithIntent(activity, action, dataUri, mimeType)
+                viewModel.launchGuided(action, dataUri, mimeType)
             }
         )
     }
 }
-
-private fun ActivityEntry.supportsGuidedLaunch(): Boolean =
-    !launchIntentAction.isNullOrBlank() ||
-            !launchIntentData.isNullOrBlank() ||
-            !launchIntentMimeType.isNullOrBlank()
 
 @Composable
 private fun GuidedActivityLaunchDialog(
@@ -530,9 +523,7 @@ private fun ActivityReportCard(
             )
             AppText(
                 "Hint contestuali ${report.contextualLaunchCount} • preferite ${report.favoriteActivitiesCount} • rischio ${
-                    ActivityIntentRiskAnalyzer.formatLevel(
-                        report.highestRiskLevel
-                    )
+                    report.highestRiskLevel.uiLabel()
                 }" +
                         if (report.packageFavorite) " • app preferita" else "",
                 style = MaterialTheme.typography.bodySmall,
@@ -581,9 +572,7 @@ private fun ActivityReportCard(
                         }
                         AppText(
                             "• ${activity.entry.label} • ${activity.entry.activityName} • ${
-                                ActivityIntentRiskAnalyzer.formatLevel(
-                                    activity.level
-                                )
+                                activity.level.uiLabel()
                             } • $detail",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -621,15 +610,10 @@ private fun ActivityReportCard(
                         "App: ${report.appLabel}",
                         "Package: ${report.packageName}",
                         "Activity incluse: ${report.totalActivities}",
-                        "Pericolosita massima: ${ActivityIntentRiskAnalyzer.formatLevel(report.highestRiskLevel)}"
+                        "Pericolosita massima: ${report.highestRiskLevel.uiLabel()}"
                     )
                 )
             }
         }
     }
-}
-
-@Composable
-fun ExportDetailsCard(path: String, title: String, summary: String, details: List<String>) {
-    TODO("Not yet implemented")
 }

@@ -9,6 +9,7 @@ import com.crackmydroid.shared.domain.model.root.RootCheckId
 import com.crackmydroid.shared.domain.model.root.RootCheckMode
 import com.crackmydroid.shared.domain.model.root.RootCheckOutcome
 import com.crackmydroid.shared.domain.repository.RootCheckRepository
+import com.crackmydroid.shared.domain.repository.IntegrityVerificationRepository
 import com.crackmydroid.shared.i18n.platformLanguage
 import com.crackmydroid.shared.i18n.stringsFor
 import com.scottyab.rootbeer.RootBeer
@@ -20,7 +21,10 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
-class RootCheckRepositoryAndroid(private val context: Context) : RootCheckRepository {
+class RootCheckRepositoryAndroid(
+    private val context: Context,
+    private val integrityVerificationRepository: IntegrityVerificationRepository
+) : RootCheckRepository {
     private data class RootSignal(
         val label: String,
         val detected: Boolean,
@@ -231,15 +235,7 @@ class RootCheckRepositoryAndroid(private val context: Context) : RootCheckReposi
                         .addOnSuccessListener { res -> cont.resume(res.token()) }
                         .addOnFailureListener { err -> cont.resumeWithException(err) }
                 }
-                com.crackmydroid.shared.domain.model.PlayIntegrityResult(
-                    basicIntegrity = null,
-                    deviceIntegrity = null,
-                    details = stringsFor(platformLanguage()).playIntegrityDetails + ": ${
-                        token.take(
-                            120
-                        )
-                    }..."
-                )
+                integrityVerificationRepository.verify(token, nonce)
             } catch (t: Throwable) {
                 com.crackmydroid.shared.domain.model.PlayIntegrityResult(
                     basicIntegrity = null,

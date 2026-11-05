@@ -70,8 +70,6 @@ fun TrickScreen(
     onMenu: () -> Unit = {}
 ) {
     val state by viewModel.state.collectAsState()
-    var pending by remember { mutableStateOf<ShellCommand?>(null) }
-    var resultDialog by remember { mutableStateOf<ShellCommandResult?>(null) }
     val strings = LocalStrings.current
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
@@ -79,9 +77,6 @@ fun TrickScreen(
         derivedStateOf { listState.firstVisibleItemIndex > 1 || listState.firstVisibleItemScrollOffset > 240 }
     }
 
-    LaunchedEffect(state.lastResult) {
-        state.lastResult?.let { resultDialog = it }
-    }
     LaunchedEffect(state.interactionHint) {
         if (state.interactionHint != null) {
             delay(1800)
@@ -98,7 +93,7 @@ fun TrickScreen(
             viewModel.notifyUnsupportedCommand(command)
             return
         }
-        if (command.confirmation != null) pending = command else viewModel.execute(command)
+        viewModel.requestExecution(command)
     }
 
     Box(
@@ -186,9 +181,9 @@ fun TrickScreen(
         )
     }
 
-    pending?.let { command ->
+    state.pendingCommand?.let { command ->
         AlertDialog(
-            onDismissRequest = { pending = null },
+            onDismissRequest = viewModel::dismissPendingCommand,
             title = { AppText("Conferma comando") },
             text = {
                 AppText(
@@ -202,8 +197,7 @@ fun TrickScreen(
                     enabled = !state.running,
                     fullWidth = false,
                     onClick = {
-                        viewModel.execute(command)
-                        pending = null
+                        viewModel.confirmPendingExecution()
                     }
                 )
             },
@@ -212,7 +206,7 @@ fun TrickScreen(
                     text = "Annulla",
                     fullWidth = false,
                     variant = ButtonVariant.Secondary,
-                    onClick = { pending = null }
+                    onClick = viewModel::dismissPendingCommand
                 )
             }
         )
@@ -220,9 +214,9 @@ fun TrickScreen(
 
     state.error?.let { ErrorDialogComponent(it, viewModel::clearError) }
 
-    resultDialog?.let { res ->
+    state.resultToDisplay?.let { res ->
         AlertDialog(
-            onDismissRequest = { resultDialog = null },
+            onDismissRequest = viewModel::dismissResult,
             title = {
                 AppText(
                     text = if (res.success) strings.commandSuccess else strings.commandError,
@@ -233,20 +227,23 @@ fun TrickScreen(
             text = {
                 TrickResultDialogBody(
                     result = res,
-                    commandTitle = state.lastCommandTitle
+                    commandTitle = state.lastCommandTitle,
+                    stdoutLines = state.stdoutLines,
+                    stderrLines = state.stderrLines,
+                    packageLines = state.packageLines,
+                    showPackageList = state.stdoutIsPackageList
                 )
             },
             confirmButton = {
                 AppButton(
                     text = strings.close,
                     fullWidth = false,
-                    onClick = { resultDialog = null }
+                    onClick = viewModel::dismissResult
                 )
             }
         )
     }
 }
-
 @Composable
 private fun TrickCommandCard(
     command: ShellCommand,
@@ -391,7 +388,6 @@ private fun TrickCommandCard(
         }
     }
 }
-
 @Composable
 private fun CommandTag(text: String, tint: androidx.compose.ui.graphics.Color) {
     Box(
@@ -408,7 +404,6 @@ private fun CommandTag(text: String, tint: androidx.compose.ui.graphics.Color) {
         )
     }
 }
-
 @Composable
 private fun TrickInlineResultSummary(
     commandTitle: String?,
@@ -461,12 +456,12 @@ private fun TrickInlineResultSummary(
 @Composable
 private fun TrickResultDialogBody(
     result: ShellCommandResult,
-    commandTitle: String?
+    commandTitle: String?,
+    stdoutLines: List<String>,
+    stderrLines: List<String>,
+    packageLines: List<String>,
+    showPackageList: Boolean
 ) {
-    val stdoutLines = remember(result.stdout) { parseNonBlankLines(result.stdout) }
-    val stderrLines = remember(result.stderr) { parseNonBlankLines(result.stderr) }
-    val packageLines = remember(stdoutLines) { parsePackageLines(stdoutLines) }
-    val showPackageList = packageLines.isNotEmpty() && packageLines.size == stdoutLines.size
 
     LazyColumn(
         modifier = Modifier
@@ -590,18 +585,5 @@ private fun TrickResultLine(
             style = MaterialTheme.typography.bodySmall,
             modifier = Modifier.padding(start = 8.dp)
         )
-    }
-}
-
-private fun parseNonBlankLines(raw: String): List<String> {
-    return raw.lineSequence()
-        .map { it.trim() }
-        .filter { it.isNotEmpty() }
-        .toList()
-}
-
-private fun parsePackageLines(lines: List<String>): List<String> {
-    return lines.mapNotNull { line ->
-        if (line.startsWith("package:")) line.removePrefix("package:").trim() else null
     }
 }
