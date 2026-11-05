@@ -21,6 +21,7 @@ For a functional overview in **Italian and English**, start with the
 | [`functional-guide.md`](functional-guide.md) | **Guida funzionale IT/EN** — sezioni, azioni, casi d'uso supportati, prerequisiti e limiti Android/Desktop/iOS |
 | [`functional-flows.drawio`](functional-flows.drawio) | **Flowchart IT/EN** — sei pagine modificabili: mappa funzionale, flussi operativi e Desktop/piattaforme |
 | [`screens.md`](screens.md)                 | **Schermate UI** — mockup ASCII di tutte le schermate (Home, PenTesting, App, Permessi, Attività, Info, Settings, Desktop) |
+| [`android-screenshots-en.md`](android-screenshots-en.md) | English Android runtime screenshot gallery, manifest, and reproduction guide |
 | [`architecture.md`](architecture.md)       | Architettura KMP, layer, flussi dati Android e Desktop, caching, DI, manifest analyzer                                     |
 | [`architecture-specification.md`](architecture-specification.md) | **Specifica architetturale** — principi, source set, layer, flussi, DI, persistenza, vincoli e strategia di test |
 | [`database-architecture.drawio`](database-architecture.drawio) | **Schema database e persistenza** — tabelle SQLDelight, chiavi, componenti e storage per piattaforma |
@@ -63,6 +64,7 @@ For a functional overview in **Italian and English**, start with the
 - [Info dispositivo](screens.md#3-info-dispositivo--device-info)
 - [Desktop App screens](screens.md#desktop-app--schermate-specifiche)
 - [Aiuto / Help](screens.md#12-aiuto--help)
+- [Android runtime screenshot gallery (English)](android-screenshots-en.md)
 
 ### Design
 
