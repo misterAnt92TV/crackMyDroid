@@ -14,6 +14,12 @@ Questo documento definisce come organizzare nuovo codice e modifiche nel progett
 
 La regola pratica è: il codice più vicino al dominio deve conoscere meno dettagli esterni.
 
+### Localizzazione dei componenti
+
+- Ogni testo visibile prodotto da screen e componenti runtime deve provenire da `LocalStrings` o da un parametro già localizzato.
+- `Strings.kt` è la fonte unica per italiano, inglese, tedesco, spagnolo e francese; le nuove chiavi devono essere valorizzate in ogni catalogo.
+- Le preview possono usare testo fixture deterministico soltanto dopo l'annotazione di preview e non devono diventare fallback della UI runtime.
+
 ## 2. ViewModel e stato
 
 - Un ViewModel espone stato immutabile e azioni pubbliche comprensibili dalla UI.

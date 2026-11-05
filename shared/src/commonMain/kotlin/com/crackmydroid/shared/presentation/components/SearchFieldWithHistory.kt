@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -53,7 +54,7 @@ fun SearchFieldWithHistoryComponent(
     label: String,
     historyKey: String,
     modifier: Modifier = Modifier,
-    shape: androidx.compose.ui.graphics.Shape = TextFieldDefaults.shape,
+    shape: androidx.compose.ui.graphics.Shape = RoundedCornerShape(14.dp),
     showClearAction: Boolean = false,
     onCleared: (() -> Unit)? = null
 ) {
@@ -185,7 +186,7 @@ fun SearchFieldWithHistoryComponent(
                 }
                 if (showClearAction) {
                     AppText(
-                        text = "Svuota suggerimenti",
+                        text = strings.clearSearchHistoryContentDescription,
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier
@@ -217,19 +218,20 @@ fun SearchFieldWithHistoryComponent(
 @AppComponentPreviews
 @Composable
 private fun SearchFieldWithHistoryComponentPreview() = ComponentPreviewContainer {
+    val strings = LocalStrings.current
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         SearchFieldWithHistoryComponent(
             value = "",
             onValueChange = {},
             onSubmit = {},
-            label = "Cerca applicazioni",
+            label = strings.permissionsSearch,
             historyKey = "component-preview-empty"
         )
         SearchFieldWithHistoryComponent(
             value = "crack",
             onValueChange = {},
             onSubmit = {},
-            label = "Cerca applicazioni",
+            label = strings.permissionsSearch,
             historyKey = "component-preview-filled",
             showClearAction = true,
             onCleared = {}

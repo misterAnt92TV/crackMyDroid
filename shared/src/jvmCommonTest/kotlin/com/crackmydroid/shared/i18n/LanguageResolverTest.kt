@@ -3,6 +3,7 @@ package com.crackmydroid.shared.i18n
 import com.crackmydroid.shared.domain.model.app.AppLanguage
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 
 class LanguageResolverTest {
@@ -107,6 +108,38 @@ class LanguageResolverTest {
                 "Demo App · com.example.demo",
                 strings.permissionsExpandedAppLabel.format("Demo App", "com.example.demo")
             )
+        }
+    }
+
+    @Test
+    fun componentPenTestLabels_andSearchHistoryAction_areLocalized() {
+        val checkIds = listOf(
+            "lib_scan",
+            "manifest_flags",
+            "file_scout",
+            "network_monitor",
+            "permission_risk"
+        )
+        val italian = stringsFor("it")
+        val italianLabels = checkIds.map { italian.pentestChecks.getValue(it).first }
+
+        listOf("it", "en", "de", "es", "fr").forEach { languageCode ->
+            val strings = stringsFor(languageCode)
+            checkIds.forEachIndexed { index, checkId ->
+                val label = strings.pentestChecks[checkId]?.first.orEmpty()
+                assertTrue(label.isNotBlank(), "$languageCode/$checkId")
+                if (languageCode != "it") {
+                    assertNotEquals(italianLabels[index], label, "$languageCode/$checkId still uses Italian")
+                }
+            }
+            assertTrue(strings.clearSearchHistoryContentDescription.isNotBlank(), languageCode)
+            if (languageCode != "it") {
+                assertNotEquals(
+                    italian.clearSearchHistoryContentDescription,
+                    strings.clearSearchHistoryContentDescription,
+                    "$languageCode/clearSearchHistoryContentDescription still uses Italian"
+                )
+            }
         }
     }
 }

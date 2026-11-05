@@ -25,6 +25,28 @@ else
   fi
 fi
 
+# Runtime component copy must come from the shared Strings catalog. Preview-only
+# sample copy is allowed after the component preview annotation.
+components_root='shared/src/commonMain/kotlin/com/crackmydroid/shared/presentation/components'
+localization_violations=()
+while IFS= read -r file; do
+  matches=$(awk '
+    /@[A-Za-z0-9_]*Preview/ { preview = 1 }
+    !preview && ($0 !~ /[•✓✕⏱]/) && ($0 ~ /AppText[[:space:]]*\([[:space:]]*"/ ||
+                 $0 ~ /text[[:space:]]*=[[:space:]]*"/ ||
+                 $0 ~ /label[[:space:]]*=[[:space:]]*"/ ||
+                 $0 ~ /contentDescription[[:space:]]*=[[:space:]]*"/) { print NR ":" $0 }
+  ' "$file")
+  if [[ -n "$matches" ]]; then
+    localization_violations+=("$file\n$matches")
+  fi
+done < <(find "$components_root" -type f -name '*.kt' -print | sort)
+
+if ((${#localization_violations[@]})); then
+  printf 'UI localization guard failed: runtime component copy must use LocalStrings/Strings:\n%b\n' "${localization_violations[*]}" >&2
+  exit 1
+fi
+
 # Direct Material 3 primitives are allowed only inside the design-system package or
 # in this explicit migration baseline. Remove entries as each screen is migrated.
 baseline=(
