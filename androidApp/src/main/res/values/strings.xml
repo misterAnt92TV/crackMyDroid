@@ -1,0 +1,8 @@
+<resources>
+    <string name="package_inventory_disclosure_title">Installed app scan</string>
+    <string name="package_inventory_disclosure_body">CrackMyDroid reads the installed-app inventory locally to show APKs, activities, components, and permissions. No system dialog is shown: package visibility is declared in the manifest. An APK is exported or shared only when you start that action.</string>
+    <string name="package_inventory_disclosure_confirm">Got it</string>
+    <string name="package_inventory_unavailable_title">Full scan unavailable</string>
+    <string name="package_inventory_unavailable_body">This installation does not have full app visibility. To avoid partial results, the scan is not started. Reinstall an APK that declares QUERY_ALL_PACKAGES in its manifest.</string>
+    <string name="close">Close</string>
+</resources>

@@ -1,11 +1,15 @@
-import org.jetbrains.compose.ExperimentalComposeLibrary
-
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.android.library)
     alias(libs.plugins.compose.mpp)
     alias(libs.plugins.sqldelight)
+    alias(libs.plugins.kover)
+}
+
+dependencies {
+    debugImplementation(libs.compose.ui.tooling)
 }
 
 kotlin {
@@ -19,10 +23,11 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                implementation(compose.runtime)
-                implementation(compose.foundation)
-                implementation(compose.material3)
-                implementation(compose.materialIconsExtended)
+                implementation(libs.compose.runtime)
+                implementation(libs.compose.foundation)
+                implementation(libs.compose.material3)
+                implementation(libs.compose.icons)
+                implementation(libs.compose.ui.tooling.preview)
                 implementation(libs.koin.core)
                 implementation(libs.kermit)
                 implementation(libs.coroutines.core)
@@ -120,6 +125,15 @@ sqldelight {
     databases {
         create("CacheDatabase") {
             packageName.set("com.crackmydroid.database")
+        }
+    }
+}
+
+kover {
+    currentProject {
+        createVariant("coverage") {
+            add("debug")
+            add("jvm")
         }
     }
 }

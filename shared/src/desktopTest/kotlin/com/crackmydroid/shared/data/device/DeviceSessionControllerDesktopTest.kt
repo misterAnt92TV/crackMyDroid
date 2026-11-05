@@ -1,7 +1,8 @@
 package com.crackmydroid.shared.data.device
 
 import com.crackmydroid.shared.data.DesktopScanCache
-import com.crackmydroid.shared.domain.model.AppTheme
+import com.crackmydroid.shared.domain.model.app.AppLanguage
+import com.crackmydroid.shared.domain.model.app.AppTheme
 import com.crackmydroid.shared.domain.model.ConnectedDevice
 import com.crackmydroid.shared.domain.model.ExportFormat
 import com.crackmydroid.shared.domain.repository.AdbBridge
@@ -16,7 +17,13 @@ class DeviceSessionControllerDesktopTest {
     @Test
     fun refreshAndSelectDeviceUpdatesStateAndClearsCache() = runTest {
         val cache = DesktopScanCache().apply {
-            installedApps = listOf(com.crackmydroid.shared.domain.model.InstalledAppEntry("Pkg", "pkg", "/tmp/pkg.apk"))
+            installedApps = listOf(
+                com.crackmydroid.shared.domain.model.InstalledAppEntry(
+                    "Pkg",
+                    "pkg",
+                    "/tmp/pkg.apk"
+                )
+            )
         }
         val settings = FakeSettingsRepository()
         val bridge = FakeAdbBridge(
@@ -88,6 +95,7 @@ private class FakeAdbBridge(
 }
 
 private class FakeSettingsRepository : SettingsRepository {
+    private var language = AppLanguage.ENGLISH
     var adbPath: String = ""
     private var theme = AppTheme.SYSTEM
     private var verbose = false
@@ -100,23 +108,66 @@ private class FakeSettingsRepository : SettingsRepository {
     private var featureHints = true
 
     override suspend fun getTheme(): AppTheme = theme
-    override suspend fun setTheme(theme: AppTheme) { this.theme = theme }
+    override suspend fun setTheme(theme: AppTheme) {
+        this.theme = theme
+    }
+
     override suspend fun isVerboseLog(): Boolean = verbose
-    override suspend fun setVerboseLog(enabled: Boolean) { verbose = enabled }
+    override suspend fun setVerboseLog(enabled: Boolean) {
+        verbose = enabled
+    }
+
     override suspend fun isIntroSeen(): Boolean = introSeen
-    override suspend fun setIntroSeen(seen: Boolean) { introSeen = seen }
+    override suspend fun setIntroSeen(seen: Boolean) {
+        introSeen = seen
+    }
+
     override suspend fun getExportFormat(): ExportFormat = exportFormat
-    override suspend fun setExportFormat(format: ExportFormat) { exportFormat = format }
+    override suspend fun setExportFormat(format: ExportFormat) {
+        exportFormat = format
+    }
+
     override suspend fun isHighContrast(): Boolean = highContrast
-    override suspend fun setHighContrast(enabled: Boolean) { highContrast = enabled }
+    override suspend fun setHighContrast(enabled: Boolean) {
+        highContrast = enabled
+    }
+
     override suspend fun isReduceMotion(): Boolean = reduceMotion
-    override suspend fun setReduceMotion(enabled: Boolean) { reduceMotion = enabled }
+    override suspend fun setReduceMotion(enabled: Boolean) {
+        reduceMotion = enabled
+    }
+
     override suspend fun isLargeText(): Boolean = largeText
-    override suspend fun setLargeText(enabled: Boolean) { largeText = enabled }
+    override suspend fun setLargeText(enabled: Boolean) {
+        largeText = enabled
+    }
+
     override suspend fun isSuggestionsEnabled(): Boolean = suggestions
-    override suspend fun setSuggestionsEnabled(enabled: Boolean) { suggestions = enabled }
+    override suspend fun setSuggestionsEnabled(enabled: Boolean) {
+        suggestions = enabled
+    }
+
     override suspend fun isFeatureHintsEnabled(): Boolean = featureHints
-    override suspend fun setFeatureHintsEnabled(enabled: Boolean) { featureHints = enabled }
+    override suspend fun setFeatureHintsEnabled(enabled: Boolean) {
+        featureHints = enabled
+    }
+
     override suspend fun getAdbPath(): String = adbPath
-    override suspend fun setAdbPath(path: String) { adbPath = path }
+    override suspend fun setAdbPath(path: String) {
+        adbPath = path
+    }
+
+    override suspend fun getLanguage(): AppLanguage = language
+    override suspend fun setLanguage(language: AppLanguage) {
+        this.language = language
+    }
+
+    override suspend fun getActivityFavorites(): Set<String> = emptySet()
+    override suspend fun setActivityFavorites(values: Set<String>) = Unit
+    override suspend fun getActivityPackageFavorites(): Set<String> = emptySet()
+    override suspend fun setActivityPackageFavorites(values: Set<String>) = Unit
+    override suspend fun getInstalledAppFavorites(): Set<String> = emptySet()
+    override suspend fun setInstalledAppFavorites(values: Set<String>) = Unit
+    override suspend fun getPermissionFavorites(): Set<String> = emptySet()
+    override suspend fun setPermissionFavorites(values: Set<String>) = Unit
 }

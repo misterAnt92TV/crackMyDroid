@@ -35,6 +35,7 @@ actual fun shareTextFile(path: String): Result<Unit> = runCatching {
     val intent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
         type = when (file.extension.lowercase()) {
             "json" -> "application/json"
+            "html", "htm" -> "text/html"
             else -> "text/plain"
         }
         putExtra(android.content.Intent.EXTRA_STREAM, uri)

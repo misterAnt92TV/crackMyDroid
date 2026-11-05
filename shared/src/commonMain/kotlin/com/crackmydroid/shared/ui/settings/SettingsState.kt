@@ -1,9 +1,11 @@
 package com.crackmydroid.shared.ui.settings
 
-import com.crackmydroid.shared.domain.model.AppTheme
+import com.crackmydroid.shared.domain.model.app.AppLanguage
+import com.crackmydroid.shared.domain.model.app.AppTheme
 import com.crackmydroid.shared.domain.model.ExportFormat
 
 data class SettingsState(
+    val language: AppLanguage = AppLanguage.SYSTEM,
     val theme: AppTheme = AppTheme.SYSTEM,
     val verbose: Boolean = false,
     val highContrast: Boolean = false,

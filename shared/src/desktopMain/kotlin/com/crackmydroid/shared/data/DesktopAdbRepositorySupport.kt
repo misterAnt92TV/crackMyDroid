@@ -16,13 +16,14 @@ abstract class DesktopAdbRepositorySupport(
     protected fun adbPath(): String? =
         sessionController.state.value.adbPath.takeIf { it.isNotBlank() }
 
-    protected suspend fun shell(command: String, asRoot: Boolean = false): String {
+    protected suspend fun shell(command: String, asRoot: Boolean = false, timeoutMs: Long = 60_000L): String {
         val device = selectedDevice()
-        return adbBridge.shell(
+        return adbBridge.shellWithTimeout(
             serial = device.serial,
             command = command,
             configuredPath = adbPath(),
-            asRoot = asRoot
+            asRoot = asRoot,
+            timeoutMs = timeoutMs
         ).getOrThrow()
     }
 }

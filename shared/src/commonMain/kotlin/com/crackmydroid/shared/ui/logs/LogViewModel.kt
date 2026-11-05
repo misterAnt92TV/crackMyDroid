@@ -1,9 +1,10 @@
 package com.crackmydroid.shared.ui.logs
 
-import com.crackmydroid.shared.domain.usecase.ExportLogsUseCase
-import com.crackmydroid.shared.domain.usecase.GetLogsUseCase
+import com.crackmydroid.shared.domain.usecase.log.ExportLogsUseCase
+import com.crackmydroid.shared.domain.usecase.log.GetLogsUseCase
+import com.crackmydroid.shared.presentation.AppDispatchers
 import com.crackmydroid.shared.presentation.BaseViewModel
-import kotlinx.coroutines.Dispatchers
+import com.crackmydroid.shared.presentation.DefaultAppDispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -13,8 +14,9 @@ import kotlinx.coroutines.withContext
 
 class LogViewModel(
     private val getLogs: GetLogsUseCase,
-    private val exportLogs: ExportLogsUseCase
-) : BaseViewModel() {
+    private val exportLogs: ExportLogsUseCase,
+    dispatchers: AppDispatchers = DefaultAppDispatchers
+) : BaseViewModel(dispatchers) {
     private val _state = MutableStateFlow(LogState())
     val state: StateFlow<LogState> = _state
     private var recomputeJob: Job? = null
@@ -25,9 +27,22 @@ class LogViewModel(
             runCatching { getLogs() }
                 .onSuccess { list ->
                     val trimmed = if (list.size > MAX_LINES) list.takeLast(MAX_LINES) else list
-                    recomputeAsync(_state.value.copy(logs = trimmed, trimmed = list.size > MAX_LINES, loading = false))
+                    recomputeAsync(
+                        _state.value.copy(
+                            logs = trimmed,
+                            trimmed = list.size > MAX_LINES,
+                            loading = false
+                        )
+                    )
                 }
-                .onFailure { err -> _state.update { it.copy(error = err.message, loading = false) } }
+                .onFailure { err ->
+                    _state.update {
+                        it.copy(
+                            error = err.message,
+                            loading = false
+                        )
+                    }
+                }
         }
     }
 
@@ -66,7 +81,12 @@ class LogViewModel(
         val lv = state.levels
         val filtered = state.logs.filter { line ->
             (f.isBlank() || line.contains(f, ignoreCase = true)) &&
-                (lv.isEmpty() || lv.any { level -> line.startsWith("$level/") || line.contains(" $level/", ignoreCase = true) })
+                    (lv.isEmpty() || lv.any { level ->
+                        line.startsWith("$level/") || line.contains(
+                            " $level/",
+                            ignoreCase = true
+                        )
+                    })
         }
         return state.copy(visibleLogs = filtered)
     }
@@ -74,9 +94,9 @@ class LogViewModel(
     private fun recomputeAsync(state: LogState) {
         _state.value = state
         recomputeJob?.cancel()
-        recomputeJob = scope.launch(Dispatchers.Default) {
+        recomputeJob = scope.launch(dispatchers.default) {
             val newState = recompute(state)
-            withContext(Dispatchers.Main) { _state.value = newState }
+            withContext(dispatchers.main) { _state.value = newState }
         }
     }
 

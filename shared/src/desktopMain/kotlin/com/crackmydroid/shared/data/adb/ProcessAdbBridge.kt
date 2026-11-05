@@ -14,18 +14,27 @@ class ProcessAdbBridge : AdbBridge {
         resolveBinaryPath(configuredPath)
     }
 
-    override suspend fun listDevices(configuredPath: String?): Result<List<ConnectedDevice>> = runCatching {
-        val adb = resolveBinaryPath(configuredPath)
-        val output = runCommand(listOf(adb, "devices", "-l"))
-        ensureSuccess(output, "Impossibile leggere i device ADB")
-        AdbParsers.parseAdbDevices(output.stdout)
-    }
+    override suspend fun listDevices(configuredPath: String?): Result<List<ConnectedDevice>> =
+        runCatching {
+            val adb = resolveBinaryPath(configuredPath)
+            val output = runCommand(listOf(adb, "devices", "-l"))
+            ensureSuccess(output, "Impossibile leggere i device ADB")
+            AdbParsers.parseAdbDevices(output.stdout)
+        }
 
     override suspend fun shell(
         serial: String,
         command: String,
         configuredPath: String?,
         asRoot: Boolean
+    ): Result<String> = shellWithTimeout(serial, command, configuredPath, asRoot)
+
+    override suspend fun shellWithTimeout(
+        serial: String,
+        command: String,
+        configuredPath: String?,
+        asRoot: Boolean,
+        timeoutMs: Long
     ): Result<String> = runCatching {
         val adb = resolveBinaryPath(configuredPath)
         val shellArgs = if (asRoot) {
@@ -33,7 +42,7 @@ class ProcessAdbBridge : AdbBridge {
         } else {
             listOf("shell", "sh", "-c", command)
         }
-        val output = runCommand(listOf(adb, "-s", serial) + shellArgs)
+        val output = runCommand(listOf(adb, "-s", serial) + shellArgs, timeoutMs)
         ensureSuccess(output, "Comando shell fallito")
         output.stdout.trim()
     }
@@ -57,7 +66,19 @@ class ProcessAdbBridge : AdbBridge {
         lines: Int
     ): Result<List<String>> = runCatching {
         val adb = resolveBinaryPath(configuredPath)
-        val output = runCommand(listOf(adb, "-s", serial, "logcat", "-d", "-t", lines.toString(), "-v", "time"))
+        val output = runCommand(
+            listOf(
+                adb,
+                "-s",
+                serial,
+                "logcat",
+                "-d",
+                "-t",
+                lines.toString(),
+                "-v",
+                "time"
+            )
+        )
         ensureSuccess(output, "Lettura logcat fallita")
         output.stdout.lines().filter { it.isNotBlank() }
     }
@@ -66,7 +87,9 @@ class ProcessAdbBridge : AdbBridge {
         val explicit = configuredPath?.trim().orEmpty()
         if (explicit.isNotBlank()) {
             val file = File(explicit)
-            require(file.exists()) { "adb non trovato in $explicit" }
+            require(file.isFile && file.canExecute()) {
+                "adb non valido o non eseguibile in $explicit"
+            }
             return file.absolutePath
         }
 
@@ -83,22 +106,23 @@ class ProcessAdbBridge : AdbBridge {
         return candidate.absolutePath
     }
 
-    private suspend fun runCommand(args: List<String>): CommandOutput = withContext(Dispatchers.IO) {
-        coroutineScope {
-            val process = ProcessBuilder(args).start()
-            val stdout = async { process.inputStream.bufferedReader().use { it.readText() } }
-            val stderr = async { process.errorStream.bufferedReader().use { it.readText() } }
-            if (!process.waitFor(60, TimeUnit.SECONDS)) {
-                process.destroyForcibly()
-                error("Timeout eseguendo: ${args.joinToString(" ")}")
+    private suspend fun runCommand(args: List<String>, timeoutMs: Long = 60_000L): CommandOutput =
+        withContext(Dispatchers.IO) {
+            coroutineScope {
+                val process = ProcessBuilder(args).start()
+                val stdout = async { process.inputStream.bufferedReader().use { it.readText() } }
+                val stderr = async { process.errorStream.bufferedReader().use { it.readText() } }
+                if (!process.waitFor(timeoutMs, TimeUnit.MILLISECONDS)) {
+                    process.destroyForcibly()
+                    error("Timeout eseguendo: ${args.joinToString(" ")}")
+                }
+                CommandOutput(
+                    exitCode = process.exitValue(),
+                    stdout = stdout.await().trim(),
+                    stderr = stderr.await().trim()
+                )
             }
-            CommandOutput(
-                exitCode = process.exitValue(),
-                stdout = stdout.await().trim(),
-                stderr = stderr.await().trim()
-            )
         }
-    }
 
     private fun ensureSuccess(output: CommandOutput, message: String) {
         if (output.exitCode == 0) return

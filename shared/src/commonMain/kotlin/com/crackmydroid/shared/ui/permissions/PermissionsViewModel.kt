@@ -1,13 +1,14 @@
 package com.crackmydroid.shared.ui.permissions
 
-import com.crackmydroid.shared.domain.model.AppPermissionEntry
+import com.crackmydroid.shared.domain.model.app.AppPermissionEntry
 import com.crackmydroid.shared.domain.model.PermissionRiskReport
-import com.crackmydroid.shared.domain.usecase.ListPermissionsUseCase
+import com.crackmydroid.shared.domain.usecase.permissions.ListPermissionsUseCase
+import com.crackmydroid.shared.domain.usecase.settings.SetPermissionFavoritesUseCase
 import com.crackmydroid.shared.domain.usecase.permissions.AnalyzePermissionRisksUseCase
 import com.crackmydroid.shared.domain.usecase.permissions.BuildPermissionsReportUseCase
+import com.crackmydroid.shared.domain.usecase.reports.ExportReportUseCase
+import com.crackmydroid.shared.domain.usecase.settings.GetPermissionFavoritesUseCase
 import com.crackmydroid.shared.presentation.BaseViewModel
-import com.crackmydroid.shared.util.saveTextFile
-import com.crackmydroid.shared.util.shareTextFile
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -19,7 +20,10 @@ import kotlinx.coroutines.launch
 class PermissionsViewModel(
     private val listPermissions: ListPermissionsUseCase,
     private val analyzePermissionRisks: AnalyzePermissionRisksUseCase,
-    private val buildPermissionsReport: BuildPermissionsReportUseCase
+    private val buildPermissionsReport: BuildPermissionsReportUseCase,
+    private val reportExporter: ExportReportUseCase,
+    private val getFavorites: GetPermissionFavoritesUseCase,
+    private val setFavorites: SetPermissionFavoritesUseCase
 ) : BaseViewModel() {
     private val _state = MutableStateFlow(PermissionsState())
     val state: StateFlow<PermissionsState> = _state
@@ -30,6 +34,9 @@ class PermissionsViewModel(
     fun refresh() {
         cancelAutoRiskScan()
         scope.launch {
+            runCatching {
+                getFavorites()
+            }.onSuccess { favorites -> _state.update { it.copy(favorites = favorites) } }
             _state.update {
                 it.copy(
                     loading = true,
@@ -44,7 +51,14 @@ class PermissionsViewModel(
             }
             runCatching { listPermissions() }
                 .onSuccess { apps -> _state.update { it.copy(apps = apps, loading = false) } }
-                .onFailure { err -> _state.update { it.copy(error = err.message, loading = false) } }
+                .onFailure { err ->
+                    _state.update {
+                        it.copy(
+                            error = err.message,
+                            loading = false
+                        )
+                    }
+                }
         }
     }
 
@@ -80,8 +94,8 @@ class PermissionsViewModel(
         } else {
             state.apps.filter {
                 it.appLabel.contains(filterValue, true) ||
-                    it.packageName.contains(filterValue, true) ||
-                    it.permissions.any { permission -> permission.contains(filterValue, true) }
+                        it.packageName.contains(filterValue, true) ||
+                        it.permissions.any { permission -> permission.contains(filterValue, true) }
             }
         }
 
@@ -104,35 +118,51 @@ class PermissionsViewModel(
     }
 
     fun export() {
-        val currentState = _state.value
-        val content = buildPermissionsReport(currentState.apps, currentState.riskReports)
-        val result = saveTextFile("permissions_report.txt", content)
-        result.onSuccess { path -> _state.update { it.copy(lastExportPath = path, error = null) } }
-            .onFailure { err -> _state.update { it.copy(error = err.message) } }
+        scope.launch {
+            val currentState = _state.value
+            val content = buildPermissionsReport(currentState.apps, currentState.riskReports)
+            reportExporter.save("permissions_report.txt", content)
+                .onSuccess { path ->
+                    _state.update {
+                        it.copy(
+                            lastExportPath = path,
+                            error = null
+                        )
+                    }
+                }
+                .onFailure { error -> _state.update { it.copy(error = error.message) } }
+        }
     }
 
     fun toggleFavorite(packageName: String) {
         _state.update {
             val favorites = it.favorites.toMutableSet()
-            if (favorites.contains(packageName)) favorites.remove(packageName) else favorites.add(packageName)
+            if (favorites.contains(packageName)) favorites.remove(packageName) else favorites.add(
+                packageName
+            )
             it.copy(favorites = favorites)
         }
+        scope.launch { setFavorites(_state.value.favorites) }
     }
 
-    fun shareSingle(packageName: String): Result<String> {
-        val currentState = _state.value
-        val app = currentState.apps.find { it.packageName == packageName }
-        val risk = currentState.riskReports.find { it.packageName == packageName }
-        val content = app?.let { buildPermissionsReport.single(it, risk) }
-            ?: "Nessun dato disponibile per il package selezionato."
-
-        val result = saveTextFile(buildPermissionsReport.singleFileName(packageName), content)
-        result.onFailure { err -> _state.update { it.copy(error = err.message) } }
-        result.onSuccess { path ->
-            _state.update { it.copy(lastExportPath = path, error = null) }
-            shareTextFile(path).onFailure { err -> _state.update { it.copy(error = err.message) } }
+    fun shareSingle(packageName: String) {
+        scope.launch {
+            val currentState = _state.value
+            val app = currentState.apps.find { it.packageName == packageName }
+            val risk = currentState.riskReports.find { it.packageName == packageName }
+            val content = app?.let { buildPermissionsReport.single(it, risk) }
+                ?: "Nessun dato disponibile per il package selezionato."
+            reportExporter.share(buildPermissionsReport.singleFileName(packageName), content)
+                .onSuccess { path ->
+                    _state.update {
+                        it.copy(
+                            lastExportPath = path,
+                            error = null
+                        )
+                    }
+                }
+                .onFailure { error -> _state.update { it.copy(error = error.message) } }
         }
-        return result
     }
 
     fun singleReportPreview(packageName: String): String {

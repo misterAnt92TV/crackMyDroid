@@ -1,26 +1,31 @@
 package com.crackmydroid.shared.ui.installedapps
 
-import com.crackmydroid.shared.domain.model.InstalledAppEntry
-import com.crackmydroid.shared.domain.usecase.ExportApkUseCase
-import com.crackmydroid.shared.domain.usecase.ListInstalledAppsUseCase
-import com.crackmydroid.shared.domain.usecase.ShareApkUseCase
-import com.crackmydroid.shared.presentation.BaseViewModel
-import com.crackmydroid.shared.presentation.operations.OperationLogStore
-import com.crackmydroid.shared.domain.usecase.GetExportFormatUseCase
 import com.crackmydroid.shared.domain.model.ExportFormat
-import com.crackmydroid.shared.util.saveTextFile
-import com.crackmydroid.shared.util.shareTextFile
+import com.crackmydroid.shared.domain.model.InstalledAppEntry
+import com.crackmydroid.shared.domain.repository.log.OperationLogRepository
+import com.crackmydroid.shared.domain.usecase.installedapps.ExportApkUseCase
+import com.crackmydroid.shared.domain.usecase.settings.GetExportFormatUseCase
+import com.crackmydroid.shared.domain.usecase.settings.GetInstalledAppFavoritesUseCase
+import com.crackmydroid.shared.domain.usecase.installedapps.ListInstalledAppsUseCase
+import com.crackmydroid.shared.domain.usecase.settings.SetInstalledAppFavoritesUseCase
+import com.crackmydroid.shared.domain.usecase.installedapps.ShareApkUseCase
+import com.crackmydroid.shared.domain.usecase.reports.ExportReportUseCase
+import com.crackmydroid.shared.presentation.BaseViewModel
+import com.crackmydroid.shared.presentation.operations.NoOpOperationLogRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 
 class InstalledAppsViewModel(
     private val listUseCase: ListInstalledAppsUseCase,
     private val exportUseCase: ExportApkUseCase,
     private val shareUseCase: ShareApkUseCase,
-    private val getExportFormat: GetExportFormatUseCase
+    private val getExportFormat: GetExportFormatUseCase,
+    private val reportExporter: ExportReportUseCase,
+    private val getFavorites: GetInstalledAppFavoritesUseCase,
+    private val setFavorites: SetInstalledAppFavoritesUseCase,
+    private val operationLogs: OperationLogRepository = NoOpOperationLogRepository
 ) : BaseViewModel() {
     private val _state = MutableStateFlow(InstalledAppsState())
     val state: StateFlow<InstalledAppsState> = _state
@@ -29,15 +34,22 @@ class InstalledAppsViewModel(
 
     fun refresh() {
         scope.launch {
+            runCatching {
+                getFavorites()
+            }.onSuccess { favorites -> _state.update { it.copy(favorites = favorites) } }
             _state.update { it.copy(loading = true, error = null) }
             runCatching { listUseCase() }
                 .onSuccess { list ->
                     _state.update { it.copy(apps = list, loading = false) }
-                    OperationLogStore.record("Caricate ${list.size} app installate", success = true)
+                    operationLogs.record("Caricate ${list.size} app installate", success = true)
                 }
                 .onFailure { err ->
                     _state.update { it.copy(error = err.message ?: "Errore", loading = false) }
-                    OperationLogStore.record("Caricamento app installate", success = false, details = err.message)
+                    operationLogs.record(
+                        "Caricamento app installate",
+                        success = false,
+                        details = err.message
+                    )
                 }
         }
     }
@@ -62,8 +74,8 @@ class InstalledAppsViewModel(
         } else {
             _state.value.apps.filter {
                 it.appLabel.contains(f, true) ||
-                    it.packageName.contains(f, true) ||
-                    it.sourcePath.contains(f, true)
+                        it.packageName.contains(f, true) ||
+                        it.sourcePath.contains(f, true)
             }
         }
         val favs = _state.value.favorites
@@ -81,40 +93,45 @@ class InstalledAppsViewModel(
             result
                 .onSuccess { path ->
                     _state.update { it.copy(lastExportPath = path, lastSharedPackage = null) }
-                    OperationLogStore.record("Export APK $packageName", success = true, details = path)
+                    operationLogs.record("Export APK $packageName", success = true, details = path)
                 }
                 .onFailure { err ->
                     _state.update { it.copy(error = err.message ?: "Errore") }
-                    OperationLogStore.record("Export APK $packageName", success = false, details = err.message)
+                    operationLogs.record(
+                        "Export APK $packageName",
+                        success = false,
+                        details = err.message
+                    )
                 }
         }
     }
 
     fun exportAll(baseName: String = "installed_apps") {
-        _state.update { it.copy(error = null) }
-        val result = saveListToFile(baseName)
-        result.onSuccess { path ->
-            _state.update { it.copy(lastExportPath = path, error = null) }
-            OperationLogStore.record("Export lista app", success = true, details = path)
-        }.onFailure { err ->
-            _state.update { it.copy(error = err.message) }
-            OperationLogStore.record("Export lista app", success = false, details = err.message)
+        scope.launch {
+            _state.update { it.copy(error = null) }
+            val report = buildListReport(baseName)
+            reportExporter.save(report.fileName, report.content)
+                .onSuccess { path ->
+                    _state.update { it.copy(lastExportPath = path, error = null) }
+                    operationLogs.record("Export lista app", success = true, details = path)
+                }
+                .onFailure { err ->
+                    _state.update { it.copy(error = err.message) }
+                    operationLogs.record("Export lista app", success = false, details = err.message)
+                }
         }
     }
 
     fun shareAll(baseName: String = "installed_apps") {
         scope.launch {
             _state.update { it.copy(error = null) }
-            runCatching {
-                val path = saveListToFile(baseName).getOrThrow()
-                shareTextFile(path).getOrThrow()
-                path
-            }.onSuccess { path ->
+            val report = buildListReport(baseName)
+            reportExporter.share(report.fileName, report.content).onSuccess { path ->
                 _state.update { it.copy(lastExportPath = path, error = null) }
-                OperationLogStore.record("Share lista app", success = true, details = path)
+                operationLogs.record("Share lista app", success = true, details = path)
             }.onFailure { err ->
                 _state.update { it.copy(error = err.message) }
-                OperationLogStore.record("Share lista app", success = false, details = err.message)
+                operationLogs.record("Share lista app", success = false, details = err.message)
             }
         }
     }
@@ -126,11 +143,15 @@ class InstalledAppsViewModel(
             result
                 .onSuccess {
                     _state.update { it.copy(lastSharedPackage = packageName) }
-                    OperationLogStore.record("Share APK $packageName", success = true)
+                    operationLogs.record("Share APK $packageName", success = true)
                 }
                 .onFailure { err ->
                     _state.update { it.copy(error = err.message ?: "Errore") }
-                    OperationLogStore.record("Share APK $packageName", success = false, details = err.message)
+                    operationLogs.record(
+                        "Share APK $packageName",
+                        success = false,
+                        details = err.message
+                    )
                 }
         }
     }
@@ -145,10 +166,11 @@ class InstalledAppsViewModel(
             if (favs.contains(packageName)) favs.remove(packageName) else favs.add(packageName)
             it.copy(favorites = favs)
         }
+        scope.launch { setFavorites(_state.value.favorites) }
     }
 
-    private fun saveListToFile(baseName: String): Result<String> {
-        val format = runBlocking { runCatching { getExportFormat() }.getOrDefault(ExportFormat.TXT) }
+    private suspend fun buildListReport(baseName: String): GeneratedReport {
+        val format = runCatching { getExportFormat() }.getOrDefault(ExportFormat.TXT)
         val sortedApps = _state.value.apps.sortedBy { it.appLabel.lowercase() }
         val content = if (format == ExportFormat.JSON) {
             buildString {
@@ -175,11 +197,19 @@ class InstalledAppsViewModel(
                 }
             }
         }
-        return saveTextFile(baseName + if (format == ExportFormat.JSON) ".json" else "", content)
+        return GeneratedReport(
+            fileName = baseName + if (format == ExportFormat.JSON) ".json" else "",
+            content = content
+        )
     }
 
     private fun normalizeQuery(value: String): String = value
         .trim()
         .replace(multiSpaceRegex, " ")
         .lowercase()
+
+    private data class GeneratedReport(
+        val fileName: String,
+        val content: String
+    )
 }

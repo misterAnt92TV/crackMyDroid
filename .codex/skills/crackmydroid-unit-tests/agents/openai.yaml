@@ -1,0 +1,6 @@
+interface:
+  display_name: "CrackMyDroid Unit Tests"
+  short_description: "Generate purposeful platform-aware KMP tests"
+  default_prompt: "Use $crackmydroid-unit-tests to add purposeful MockK/JUnit unit tests for this CrackMyDroid target."
+policy:
+  allow_implicit_invocation: true

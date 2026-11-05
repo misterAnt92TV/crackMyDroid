@@ -1,9 +1,9 @@
 package com.crackmydroid.shared.util
 
+import android.content.pm.PackageManager
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
-import android.content.pm.PackageManager
 
 @Composable
 actual fun appVersionName(): String {

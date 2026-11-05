@@ -1,0 +1,129 @@
+<mxfile host="app.diagrams.net" type="device">
+  <diagram id="database-schema" name="Schema SQLDelight">
+    <mxGraphModel dx="1500" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" page="1" pageScale="1" pageWidth="1500" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="schema-title" value="CrackMyDroid — schema SQLDelight (CacheDatabase)" style="text;html=0;align=left;fontSize=26;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="25" width="1400" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="schema-source" value="Definizione: shared/src/commonMain/sqldelight/com/crackmydroid/database/CacheDatabase.sq&#10;SQLite — 4 tabelle di cache; PK indicate con PK. I tipi INTEGER memorizzano flag booleani come 0/1." style="rounded=1;whiteSpace=wrap;html=0;align=left;fontSize=14;fillColor=#f5f5f5;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="40" y="85" width="1420" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="table-activities" value="activities_cache&#10;────────────────────&#10;PK packageName TEXT&#10;PK activityName TEXT&#10;appLabel TEXT NOT NULL&#10;label TEXT NOT NULL&#10;exported INTEGER NOT NULL DEFAULT 0&#10;permission TEXT NULL&#10;&#10;PK composta: (packageName, activityName)" style="rounded=1;whiteSpace=wrap;html=0;align=left;spacingLeft=14;spacingTop=10;fontSize=14;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="60" y="220" width="600" height="245" as="geometry" />
+        </mxCell>
+        <mxCell id="table-permissions" value="permissions_cache&#10;────────────────────&#10;PK packageName TEXT&#10;PK permission TEXT&#10;appLabel TEXT NOT NULL&#10;&#10;PK composta: (packageName, permission)" style="rounded=1;whiteSpace=wrap;html=0;align=left;spacingLeft=14;spacingTop=10;fontSize=14;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="840" y="220" width="600" height="180" as="geometry" />
+        </mxCell>
+        <mxCell id="table-installed" value="installed_apps_cache&#10;────────────────────&#10;PK packageName TEXT&#10;appLabel TEXT NOT NULL&#10;sourcePath TEXT NOT NULL&#10;debuggable INTEGER NOT NULL DEFAULT 0&#10;allowBackup INTEGER NOT NULL DEFAULT 0&#10;testOnly INTEGER NOT NULL DEFAULT 0&#10;targetSdkVersion INTEGER NULL&#10;minSdkVersion INTEGER NULL" style="rounded=1;whiteSpace=wrap;html=0;align=left;spacingLeft=14;spacingTop=10;fontSize=14;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="450" y="555" width="600" height="250" as="geometry" />
+        </mxCell>
+        <mxCell id="table-device" value="device_info_cache&#10;────────────────────&#10;PK key TEXT&#10;value TEXT NOT NULL&#10;&#10;Tabella key/value per i campi memorizzati del dispositivo." style="rounded=1;whiteSpace=wrap;html=0;align=left;spacingLeft=14;spacingTop=10;fontSize=14;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="60" y="555" width="330" height="180" as="geometry" />
+        </mxCell>
+        <mxCell id="rel-activities-installed" value="packageName&#10;(correlazione logica)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=0;dashed=1;strokeColor=#666666;fontSize=12;endArrow=none;startArrow=none;" edge="1" parent="1" source="table-activities" target="table-installed">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel-permissions-installed" value="packageName&#10;(correlazione logica)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=0;dashed=1;strokeColor=#666666;fontSize=12;endArrow=none;startArrow=none;" edge="1" parent="1" source="table-permissions" target="table-installed">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="schema-note" value="Relazioni: lo schema non dichiara FOREIGN KEY. Le linee tratteggiate mostrano solo il packageName comune, non vincoli referenziali.&#10;Nota device info: il commento nello .sq descrive una riga JSON; l’implementazione Android usa invece righe key/value (una per campo) tramite setInfoField/getAllInfo. Le query setDeviceInfo/getDeviceInfo non sono il percorso usato dal repository." style="rounded=1;whiteSpace=wrap;html=0;align=left;fontSize=14;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="1100" y="555" width="340" height="250" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="persistence-components" name="Componenti e persistenza">
+    <mxGraphModel dx="1600" dy="1000" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1000" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="components-title" value="CrackMyDroid — componenti e persistenza per piattaforma" style="text;html=0;align=left;fontSize=26;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="25" width="1500" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="shared-domain" value="Shared domain / UI&#10;Repository interfaces · Use cases · ViewModels&#10;DefaultOperationLogRepository: max 50 eventi, delega load/save al persistence adapter" style="rounded=1;whiteSpace=wrap;html=0;fontSize=16;fontStyle=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="510" y="100" width="580" height="85" as="geometry" />
+        </mxCell>
+        <mxCell id="android-boundary" value="ANDROID — implementazioni attive&#10;Koin platformModule collega adapter e storage" style="rounded=1;whiteSpace=wrap;html=0;fontSize=18;fontStyle=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="40" y="230" width="480" height="75" as="geometry" />
+        </mxCell>
+        <mxCell id="android-repos" value="Repository Android&#10;ActivityRepositoryAndroid&#10;PermissionsRepositoryAndroid&#10;InstalledAppsRepositoryAndroid&#10;DeviceInfoRepositoryAndroid&#10;CacheMaintenanceRepositoryAndroid" style="rounded=1;whiteSpace=wrap;html=0;fontSize=15;fillColor=#ffffff;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="40" y="360" width="480" height="210" as="geometry" />
+        </mxCell>
+        <mxCell id="cache-db" value="SQLDelight CacheDatabase&#10;AndroidSqliteDriver · cache.db&#10;&#10;activities_cache&#10;permissions_cache&#10;installed_apps_cache&#10;device_info_cache" style="rounded=1;whiteSpace=wrap;html=0;fontSize=15;fontStyle=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="40" y="690" width="480" height="170" as="geometry" />
+        </mxCell>
+        <mxCell id="android-settings" value="SettingsRepositoryAndroid&#10;Preferences DataStore: settings&#10;Tema, lingua, accessibilita, preferiti, ADB path e altre opzioni" style="rounded=1;whiteSpace=wrap;html=0;fontSize=14;fillColor=#f5f5f5;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="40" y="900" width="480" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="android-ops" value="OperationLogPersistenceAndroid&#10;Preferences DataStore: operation_log · entries serializzate con codec condiviso" style="rounded=1;whiteSpace=wrap;html=0;fontSize=14;fillColor=#f5f5f5;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="40" y="585" width="480" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="desktop-boundary" value="DESKTOP — nessun SQLDelight driver attivo&#10;DatabaseDriverFactory Desktop segnala target non supportato" style="rounded=1;whiteSpace=wrap;html=0;fontSize=18;fontStyle=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="560" y="230" width="480" height="75" as="geometry" />
+        </mxCell>
+        <mxCell id="desktop-repos" value="Repository Desktop&#10;Dati raccolti via ADB e device selezionato" style="rounded=1;whiteSpace=wrap;html=0;fontSize=15;fillColor=#ffffff;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="560" y="360" width="480" height="85" as="geometry" />
+        </mxCell>
+        <mxCell id="desktop-cache" value="DesktopScanCache&#10;Cache in memoria: device info, app installate, permessi, attivita, report sicurezza, root, integrity, log e dump package" style="rounded=1;whiteSpace=wrap;html=0;fontSize=14;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="560" y="490" width="480" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="desktop-settings" value="SettingsRepositoryDesktop&#10;java.util.prefs.Preferences&#10;Nodo com.crackmydroid.desktop" style="rounded=1;whiteSpace=wrap;html=0;fontSize=14;fillColor=#f5f5f5;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="560" y="675" width="480" height="85" as="geometry" />
+        </mxCell>
+        <mxCell id="desktop-ops" value="OperationLogPersistenceDesktop&#10;File operation-log.txt tramite DesktopPaths" style="rounded=1;whiteSpace=wrap;html=0;fontSize=14;fillColor=#f5f5f5;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="560" y="805" width="480" height="75" as="geometry" />
+        </mxCell>
+        <mxCell id="ios-boundary" value="iOS — repository stub / stato volatile&#10;CacheDatabase non collegato nel platformModule iOS" style="rounded=1;whiteSpace=wrap;html=0;fontSize=18;fontStyle=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="1080" y="230" width="480" height="75" as="geometry" />
+        </mxCell>
+        <mxCell id="ios-repos" value="Repository iOS stub&#10;Liste vuote o dati non persistenti; funzioni non supportate dove previsto" style="rounded=1;whiteSpace=wrap;html=0;fontSize=15;fillColor=#ffffff;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="1080" y="360" width="480" height="105" as="geometry" />
+        </mxCell>
+        <mxCell id="ios-persistence" value="SettingsRepositoryIos + InMemoryOperationLogPersistence&#10;Valori mantenuti solo nell’istanza in esecuzione; cache maintenance vuota" style="rounded=1;whiteSpace=wrap;html=0;fontSize=14;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="1080" y="520" width="480" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="ios-driver" value="NativeSqliteDriver / cache.db esiste come factory, ma non viene fornito da Koin iOS e non è usato dai repository stub" style="rounded=1;whiteSpace=wrap;html=0;fontSize=13;dashed=1;fillColor=#f5f5f5;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="1080" y="690" width="480" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-shared-android" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=0;strokeColor=#6c8ebf;endArrow=block;" edge="1" parent="1" source="shared-domain" target="android-repos">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-shared-desktop" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=0;strokeColor=#6c8ebf;endArrow=block;" edge="1" parent="1" source="shared-domain" target="desktop-repos">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-shared-ios" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=0;strokeColor=#6c8ebf;endArrow=block;" edge="1" parent="1" source="shared-domain" target="ios-repos">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-android-db" value="lettura / scrittura cache" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=0;strokeColor=#82b366;endArrow=block;" edge="1" parent="1" source="android-repos" target="cache-db">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-android-settings" value="preferenze" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=0;strokeColor=#666666;endArrow=block;" edge="1" parent="1" source="shared-domain" target="android-settings">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-android-ops" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=0;strokeColor=#666666;endArrow=block;" edge="1" parent="1" source="shared-domain" target="android-ops">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-desktop-cache" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=0;strokeColor=#9673a6;endArrow=block;" edge="1" parent="1" source="desktop-repos" target="desktop-cache">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-desktop-settings" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=0;strokeColor=#666666;endArrow=block;" edge="1" parent="1" source="shared-domain" target="desktop-settings">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-desktop-ops" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=0;strokeColor=#666666;endArrow=block;" edge="1" parent="1" source="shared-domain" target="desktop-ops">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-ios-persistence" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=0;strokeColor=#b85450;endArrow=block;" edge="1" parent="1" source="ios-repos" target="ios-persistence">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-ios-driver" value="non collegato" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=0;dashed=1;strokeColor=#666666;endArrow=none;" edge="1" parent="1" source="ios-driver" target="ios-repos">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="legend" value="Linee continue: dipendenza/uso implementato · Linee tratteggiate: componente disponibile o collegamento concettuale, non FK" style="text;html=0;align=left;fontSize=13;fontColor=#555555;" vertex="1" parent="1">
+          <mxGeometry x="40" y="940" width="1500" height="30" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

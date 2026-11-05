@@ -3,7 +3,9 @@ package com.crackmydroid.shared.data.activity
 import com.crackmydroid.shared.data.DesktopAdbRepositorySupport
 import com.crackmydroid.shared.data.DesktopScanCache
 import com.crackmydroid.shared.data.adb.AdbParsers
-import com.crackmydroid.shared.domain.model.ActivityEntry
+import com.crackmydroid.shared.data.cache.PaginationHelper
+import com.crackmydroid.shared.domain.model.activity.ActivityEntry
+import com.crackmydroid.shared.domain.model.app.AppComponent
 import com.crackmydroid.shared.domain.repository.ActivityRepository
 import com.crackmydroid.shared.domain.repository.AdbBridge
 import com.crackmydroid.shared.domain.repository.DeviceSessionController
@@ -29,6 +31,22 @@ class ActivityRepositoryDesktop(
         fresh
     }
 
+    override suspend fun getActivitiesPaginated(offset: Int, limit: Int): List<ActivityEntry> =
+        withContext(Dispatchers.IO) {
+            val all = getActivities()
+            PaginationHelper.paginate(all, offset, limit)
+        }
+
+    override suspend fun getComponents(): List<AppComponent> = withContext(Dispatchers.IO) {
+        // Desktop: components available only via full PackageManager dump from snapshot
+        emptyList()
+    }
+
+    override suspend fun getComponentsCached(): List<AppComponent> = withContext(Dispatchers.IO) {
+        // Desktop: components available only via full PackageManager dump from snapshot
+        emptyList()
+    }
+
     override suspend fun launch(
         entry: ActivityEntry,
         action: String?,
@@ -39,9 +57,11 @@ class ActivityRepositoryDesktop(
             val normalizedAction = action?.trim().orEmpty().ifBlank { null }
             val normalizedData = dataUri?.trim().orEmpty().ifBlank { null }
             val normalizedMimeType = mimeType?.trim().orEmpty().ifBlank { null }
-            val hasGuidedIntent = normalizedAction != null || normalizedData != null || normalizedMimeType != null
+            val hasGuidedIntent =
+                normalizedAction != null || normalizedData != null || normalizedMimeType != null
             require(entry.launchableViaShell || hasGuidedIntent) {
-                entry.launchabilityReason ?: "Activity visibile nel dump ma non avviabile via am start -n"
+                entry.launchabilityReason
+                    ?: "Activity visibile nel dump ma non avviabile via am start -n"
             }
             val component = shellQuote("${entry.packageName}/${entry.activityName}")
             val command = buildString {

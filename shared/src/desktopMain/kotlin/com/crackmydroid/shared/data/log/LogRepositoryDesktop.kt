@@ -4,7 +4,7 @@ import com.crackmydroid.shared.data.DesktopAdbRepositorySupport
 import com.crackmydroid.shared.data.DesktopScanCache
 import com.crackmydroid.shared.domain.repository.AdbBridge
 import com.crackmydroid.shared.domain.repository.DeviceSessionController
-import com.crackmydroid.shared.domain.repository.LogRepository
+import com.crackmydroid.shared.domain.repository.log.LogRepository
 import com.crackmydroid.shared.util.saveTextFile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

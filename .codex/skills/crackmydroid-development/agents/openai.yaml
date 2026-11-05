@@ -1,0 +1,6 @@
+interface:
+  display_name: "CrackMyDroid Development"
+  short_description: "Build clean Android/KMP features with previews"
+  default_prompt: "Use $crackmydroid-development to implement this CrackMyDroid feature with platform-aware Clean Architecture."
+policy:
+  allow_implicit_invocation: true

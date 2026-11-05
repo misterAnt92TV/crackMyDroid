@@ -47,15 +47,15 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.crackmydroid.shared.domain.model.ShellCommand
-import com.crackmydroid.shared.domain.model.ShellCommandResult
+import com.crackmydroid.shared.domain.model.shell.ShellCommand
+import com.crackmydroid.shared.domain.model.shell.ShellCommandResult
 import com.crackmydroid.shared.i18n.LocalStrings
 import com.crackmydroid.shared.presentation.components.AppButton
-import com.crackmydroid.shared.presentation.components.AppText
 import com.crackmydroid.shared.presentation.components.ButtonVariant
-import com.crackmydroid.shared.presentation.components.ErrorDialog
-import com.crackmydroid.shared.presentation.components.SectionHeader
+import com.crackmydroid.shared.presentation.components.ErrorDialogComponent
 import com.crackmydroid.shared.presentation.components.ScrollToTopButton
+import com.crackmydroid.shared.presentation.components.SectionHeader
+import com.crackmydroid.shared.presentation.components.text.AppText
 import com.crackmydroid.shared.ui.trick.TrickViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -102,17 +102,13 @@ fun TrickScreen(
     }
 
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(padding)
+        modifier = Modifier.fillMaxSize()
     ) {
         LazyColumn(
             state = listState,
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 16.dp, vertical = 10.dp),
+            modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(10.dp),
-            contentPadding = PaddingValues(bottom = 28.dp)
+            contentPadding = screenContentPadding(padding, horizontal = 16.dp, vertical = 10.dp)
         ) {
             item {
                 SectionHeader(
@@ -222,7 +218,7 @@ fun TrickScreen(
         )
     }
 
-    state.error?.let { ErrorDialog(it, viewModel::clearError) }
+    state.error?.let { ErrorDialogComponent(it, viewModel::clearError) }
 
     resultDialog?.let { res ->
         AlertDialog(

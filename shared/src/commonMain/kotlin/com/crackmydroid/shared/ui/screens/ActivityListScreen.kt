@@ -1,25 +1,28 @@
+@file:OptIn(
+    androidx.compose.foundation.ExperimentalFoundationApi::class,
+    androidx.compose.ui.ExperimentalComposeUiApi::class
+)
+
 package com.crackmydroid.shared.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.StarBorder
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
@@ -28,39 +31,42 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.TextButton
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Snackbar
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import kotlinx.coroutines.launch
-import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
-import com.crackmydroid.shared.domain.model.ActivityEntry
+import com.crackmydroid.shared.domain.model.activity.ActivityEntry
+import com.crackmydroid.shared.domain.model.activity.ActivityIntentRiskAnalyzer
+import com.crackmydroid.shared.domain.model.activity.favoriteKey
 import com.crackmydroid.shared.i18n.LocalStrings
 import com.crackmydroid.shared.presentation.components.AppAccordion
 import com.crackmydroid.shared.presentation.components.AppButton
-import com.crackmydroid.shared.presentation.components.ButtonVariant
-import com.crackmydroid.shared.presentation.components.AppCard
 import com.crackmydroid.shared.presentation.components.AppListItem
-import com.crackmydroid.shared.presentation.components.AppText
-import com.crackmydroid.shared.presentation.components.ErrorDialog
+import com.crackmydroid.shared.presentation.components.ButtonVariant
+import com.crackmydroid.shared.presentation.components.ErrorDialogComponent
 import com.crackmydroid.shared.presentation.components.PackageIcon
-import com.crackmydroid.shared.presentation.components.SectionHeader
-import com.crackmydroid.shared.presentation.components.SearchFieldWithHistory
 import com.crackmydroid.shared.presentation.components.ScrollToTopButton
+import com.crackmydroid.shared.presentation.components.SearchFieldWithHistoryComponent
+import com.crackmydroid.shared.presentation.components.SectionHeader
+import com.crackmydroid.shared.presentation.components.card.AppCard
+import com.crackmydroid.shared.presentation.components.text.AppText
+import com.crackmydroid.shared.ui.activities.ActivityAppReport
 import com.crackmydroid.shared.ui.activities.ActivityListViewModel
+import kotlinx.coroutines.launch
 
 @Composable
 fun ActivityListScreen(
@@ -73,6 +79,8 @@ fun ActivityListScreen(
 ) {
     val state by viewModel.state.collectAsState()
     val strings = LocalStrings.current
+
+    @Suppress("DEPRECATION")
     val clipboard = LocalClipboardManager.current
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
@@ -81,21 +89,20 @@ fun ActivityListScreen(
     val listState = rememberLazyListState()
     var searchToolsExpanded by remember { mutableStateOf(true) }
     var guidedLaunchTarget by remember { mutableStateOf<ActivityEntry?>(null) }
+    var selectedReportPackage by remember { mutableStateOf<String?>(null) }
+    var lastReportPath by remember { mutableStateOf<String?>(null) }
     val showScrollTop by remember {
         derivedStateOf { listState.firstVisibleItemIndex > 1 || listState.firstVisibleItemScrollOffset > 240 }
     }
 
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(padding)
-            .padding(horizontal = 16.dp, vertical = 10.dp)
+        modifier = Modifier.fillMaxSize()
     ) {
         LazyColumn(
             state = listState,
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(10.dp),
-            contentPadding = androidx.compose.foundation.layout.PaddingValues(bottom = 28.dp)
+            contentPadding = screenContentPadding(padding, horizontal = 16.dp, vertical = 10.dp)
         ) {
             item {
                 SectionHeader(
@@ -106,7 +113,7 @@ fun ActivityListScreen(
                         IconButton(onClick = viewModel::refresh) {
                             Icon(
                                 imageVector = Icons.Filled.Refresh,
-                                contentDescription = "Aggiorna attività",
+                                contentDescription = strings.refreshActivitiesContentDescription,
                                 tint = MaterialTheme.colorScheme.primary
                             )
                         }
@@ -125,14 +132,13 @@ fun ActivityListScreen(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        SearchFieldWithHistory(
+                        SearchFieldWithHistoryComponent(
                             value = state.filter,
                             onValueChange = { viewModel.setFilter(it) },
                             onSubmit = { viewModel.setFilter(it, trackUsage = true) },
                             label = strings.filterActivities,
                             historyKey = "activities",
                             modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(18.dp),
                             showClearAction = true,
                             onCleared = {
                                 viewModel.setFilter("")
@@ -150,7 +156,9 @@ fun ActivityListScreen(
                             LazyRow(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                contentPadding = androidx.compose.foundation.layout.PaddingValues(vertical = 6.dp)
+                                contentPadding = androidx.compose.foundation.layout.PaddingValues(
+                                    vertical = 6.dp
+                                )
                             ) {
                                 items(favoriteQueries, key = { it }) { fav ->
                                     FilterChip(
@@ -179,6 +187,35 @@ fun ActivityListScreen(
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
+                }
+            }
+
+            selectedReportPackage?.let { packageName ->
+                item(key = "activity-report-$packageName") {
+                    viewModel.buildReport(packageName)?.let { report ->
+                        ActivityReportCard(
+                            report = report,
+                            lastExportPath = lastReportPath,
+                            onDismiss = {
+                                selectedReportPackage = null
+                                lastReportPath = null
+                            },
+                            onExport = {
+                                scope.launch {
+                                    viewModel.exportVisualReport(report.packageName)
+                                        .onSuccess { path ->
+                                            lastReportPath = path
+                                            snackbarHostState.showSnackbar("Report HTML esportato per ${report.appLabel}")
+                                        }
+                                        .onFailure { err ->
+                                            snackbarHostState.showSnackbar(
+                                                err.message ?: "Export report non riuscito"
+                                            )
+                                        }
+                                }
+                            }
+                        )
+                    }
                 }
             }
 
@@ -238,24 +275,46 @@ fun ActivityListScreen(
                     meta = "${group.activities.size} act",
                     expanded = expanded,
                     onToggle = { viewModel.toggleExpanded(group.packageName) },
-                    leading = { PackageIcon(packageName = group.packageName, modifier = Modifier.size(44.dp)) },
+                    leading = {
+                        PackageIcon(
+                            packageName = group.packageName,
+                            modifier = Modifier.size(44.dp)
+                        )
+                    },
                     actions = {
                         IconButton(onClick = {
-                            viewModel.groupContent(group.packageName)?.let { content ->
-                                clipboard.setText(AnnotatedString(content))
+                            selectedReportPackage =
+                                if (selectedReportPackage == group.packageName) null else group.packageName
+                            lastReportPath = null
+                        }) {
+                            Icon(
+                                imageVector = Icons.Filled.Description,
+                                contentDescription = strings.reportActivitiesContentDescription,
+                                tint = if (selectedReportPackage == group.packageName) {
+                                    MaterialTheme.colorScheme.primary
+                                } else {
+                                    MaterialTheme.colorScheme.onSurfaceVariant
+                                }
+                            )
+                        }
+                        IconButton(onClick = {
+                            scope.launch {
+                                viewModel.groupContent(group.packageName)?.let { content ->
+                                    clipboard.setText(AnnotatedString(content))
+                                }
                             }
                             viewModel.exportGroup(group.packageName)
                         }) {
                             Icon(
                                 imageVector = Icons.Filled.Share,
-                                contentDescription = "Condividi attività app",
+                                contentDescription = strings.shareActivitiesContentDescription,
                                 tint = MaterialTheme.colorScheme.primary
                             )
                         }
                         IconButton(onClick = { viewModel.toggleFavoritePackage(group.packageName) }) {
                             Icon(
                                 imageVector = if (favPkg) Icons.Filled.Star else Icons.Filled.StarBorder,
-                                contentDescription = "Preferito app",
+                                contentDescription = strings.favoriteContentDescription,
                                 tint = if (favPkg) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
@@ -265,7 +324,7 @@ fun ActivityListScreen(
                         .padding(vertical = 6.dp)
                 ) {
                     group.activities.forEach { activity ->
-                        val favKey = activity.packageName + activity.activityName
+                        val favKey = activity.favoriteKey()
                         val activityMeta = when {
                             !activity.launchableViaShell && activity.launchContextHint != null -> "intent required"
                             !activity.launchableViaShell -> "dump only"
@@ -282,7 +341,10 @@ fun ActivityListScreen(
                             meta = activityMeta,
                             onClick = when {
                                 activity.launchableViaShell -> ({ viewModel.launch(activity) })
-                                activity.supportsGuidedLaunch() -> ({ guidedLaunchTarget = activity })
+                                activity.supportsGuidedLaunch() -> ({
+                                    guidedLaunchTarget = activity
+                                })
+
                                 else -> null
                             },
                             trailing = {
@@ -290,7 +352,7 @@ fun ActivityListScreen(
                                     if (!activity.launchableViaShell) {
                                         Icon(
                                             imageVector = Icons.Filled.Warning,
-                                            contentDescription = "Non avviabile via shell",
+                                            contentDescription = strings.shellUnavailableContentDescription,
                                             tint = MaterialTheme.colorScheme.error,
                                             modifier = Modifier.padding(end = 4.dp)
                                         )
@@ -298,7 +360,7 @@ fun ActivityListScreen(
                                     IconButton(onClick = { viewModel.toggleFavorite(activity) }) {
                                         Icon(
                                             imageVector = if (state.favorites.contains(favKey)) Icons.Filled.Star else Icons.Filled.StarBorder,
-                                            contentDescription = "Preferito",
+                                            contentDescription = strings.favoriteContentDescription,
                                             tint = if (state.favorites.contains(favKey)) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
                                         )
                                     }
@@ -328,7 +390,7 @@ fun ActivityListScreen(
     }
 
     state.error?.let {
-        ErrorDialog(message = it, onDismiss = viewModel::clearError)
+        ErrorDialogComponent(message = it, onDismiss = viewModel::clearError)
     }
 
     guidedLaunchTarget?.let { activity ->
@@ -344,8 +406,8 @@ fun ActivityListScreen(
 
 private fun ActivityEntry.supportsGuidedLaunch(): Boolean =
     !launchIntentAction.isNullOrBlank() ||
-        !launchIntentData.isNullOrBlank() ||
-        !launchIntentMimeType.isNullOrBlank()
+            !launchIntentData.isNullOrBlank() ||
+            !launchIntentMimeType.isNullOrBlank()
 
 @Composable
 private fun GuidedActivityLaunchDialog(
@@ -405,7 +467,10 @@ private fun GuidedActivityLaunchDialog(
         confirmButton = {
             TextButton(
                 onClick = {
-                    onLaunch(action.ifBlank { null }, dataUri.ifBlank { null }, mimeType.ifBlank { null })
+                    onLaunch(
+                        action.ifBlank { null },
+                        dataUri.ifBlank { null },
+                        mimeType.ifBlank { null })
                     onDismiss()
                 },
                 enabled = canLaunch
@@ -419,4 +484,152 @@ private fun GuidedActivityLaunchDialog(
             }
         }
     )
+}
+
+@Composable
+private fun ActivityReportCard(
+    report: ActivityAppReport,
+    lastExportPath: String?,
+    onDismiss: () -> Unit,
+    onExport: () -> Unit
+) {
+    AppCard(modifier = Modifier.fillMaxWidth()) {
+        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    AppText(
+                        "Report activity desktop",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    AppText(
+                        report.appLabel,
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    AppText(
+                        report.packageName,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                TextButton(onClick = onDismiss) {
+                    Text("Chiudi")
+                }
+            }
+
+            AppText(
+                "Totale ${report.totalActivities} activity • shell ${report.shellLaunchableCount} • guided ${report.guidedLaunchCount} • dump only ${report.dumpOnlyCount}",
+                style = MaterialTheme.typography.bodyMedium
+            )
+            AppText(
+                "Hint contestuali ${report.contextualLaunchCount} • preferite ${report.favoriteActivitiesCount} • rischio ${
+                    ActivityIntentRiskAnalyzer.formatLevel(
+                        report.highestRiskLevel
+                    )
+                }" +
+                        if (report.packageFavorite) " • app preferita" else "",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            if (report.recommendations.isNotEmpty()) {
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    AppText(
+                        "Raccomandazioni PenTest",
+                        style = MaterialTheme.typography.titleSmall
+                    )
+                    report.recommendations.forEach { recommendation ->
+                        AppText(
+                            "• $recommendation",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                report.findings.forEach { finding ->
+                    AppText(
+                        "• $finding",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+
+            if (report.highlights.isNotEmpty()) {
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    AppText(
+                        "Activity in evidenza",
+                        style = MaterialTheme.typography.titleSmall
+                    )
+                    report.highlights.forEach { activity ->
+                        val detail = when {
+                            activity.entry.launchabilityReason != null -> activity.entry.launchabilityReason
+                            activity.entry.launchContextHint != null -> activity.entry.launchContextHint
+                            !activity.entry.launchIntentAction.isNullOrBlank() -> activity.entry.launchIntentAction
+                            !activity.entry.launchIntentData.isNullOrBlank() -> activity.entry.launchIntentData
+                            else -> "Nessun hint aggiuntivo"
+                        }
+                        AppText(
+                            "• ${activity.entry.label} • ${activity.entry.activityName} • ${
+                                ActivityIntentRiskAnalyzer.formatLevel(
+                                    activity.level
+                                )
+                            } • $detail",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                AppButton(
+                    text = "Esporta report HTML",
+                    onClick = onExport,
+                    variant = ButtonVariant.Tonal,
+                    modifier = Modifier.weight(1f),
+                    fullWidth = false
+                )
+                AppButton(
+                    text = "Chiudi report",
+                    onClick = onDismiss,
+                    variant = ButtonVariant.Secondary,
+                    modifier = Modifier.weight(1f),
+                    fullWidth = false
+                )
+            }
+
+            lastExportPath?.let { path ->
+                ExportDetailsCard(
+                    path = path,
+                    title = "Report activity esportato",
+                    summary = "Report HTML pronto per consultazione desktop.",
+                    details = listOf(
+                        "App: ${report.appLabel}",
+                        "Package: ${report.packageName}",
+                        "Activity incluse: ${report.totalActivities}",
+                        "Pericolosita massima: ${ActivityIntentRiskAnalyzer.formatLevel(report.highestRiskLevel)}"
+                    )
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun ExportDetailsCard(path: String, title: String, summary: String, details: List<String>) {
+    TODO("Not yet implemented")
 }

@@ -1,20 +1,20 @@
 package com.crackmydroid.shared.data.snapshot
 
 import com.crackmydroid.shared.data.DesktopScanCache
-import com.crackmydroid.shared.domain.model.ActivityEntry
-import com.crackmydroid.shared.domain.model.AppPermissionEntry
+import com.crackmydroid.shared.domain.model.activity.ActivityEntry
+import com.crackmydroid.shared.domain.model.app.AppPermissionEntry
 import com.crackmydroid.shared.domain.model.ConnectedDevice
 import com.crackmydroid.shared.domain.model.DeviceInfo
-import com.crackmydroid.shared.domain.model.DeviceScanSnapshot
-import com.crackmydroid.shared.domain.model.DeviceScanSnapshotJson
+import com.crackmydroid.shared.domain.model.scansnapshot.DeviceScanSnapshot
+import com.crackmydroid.shared.domain.model.scansnapshot.DeviceScanSnapshotJson
 import com.crackmydroid.shared.domain.model.InstalledAppEntry
 import com.crackmydroid.shared.domain.model.PlayIntegrityResult
 import com.crackmydroid.shared.domain.model.RootStatus
-import com.crackmydroid.shared.domain.model.SnapshotSection
+import com.crackmydroid.shared.domain.model.scansnapshot.SnapshotSection
 import com.crackmydroid.shared.domain.repository.AdbBridge
-import java.io.File
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.encodeToString
+import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -56,7 +56,13 @@ class RemoteDeviceSnapshotImporterTest {
                 listOf(InstalledAppEntry("Demo", "pkg.demo", "/data/app/pkg.demo/base.apk"))
             ),
             permissions = SnapshotSection.ready(
-                listOf(AppPermissionEntry("Demo", "pkg.demo", listOf("android.permission.INTERNET")))
+                listOf(
+                    AppPermissionEntry(
+                        "Demo",
+                        "pkg.demo",
+                        listOf("android.permission.INTERNET")
+                    )
+                )
             ),
             activities = SnapshotSection.ready(
                 listOf(ActivityEntry("Main", "Demo", "pkg.demo", "pkg.demo.MainActivity"))

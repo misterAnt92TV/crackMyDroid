@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "source": {
+    "application": "Penpot local",
+    "file": "CrackMyDroid",
+    "page": "Home"
+  },
+  "generatedAt": null,
+  "tokens": "design-tokens.json",
+  "assets": [],
+  "codeTargets": [
+    "HomeContent",
+    "SectionHeader",
+    "AppCard",
+    "AppAccordion",
+    "PackageIcon"
+  ]
+}

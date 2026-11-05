@@ -1,0 +1,33 @@
+{
+  "capture": {
+    "platform": "Android emulator",
+    "avd": "Small_Phone_-_720x1280",
+    "serial": "emulator-5554",
+    "android": "Android 16 (API 36)",
+    "package": "com.crackmydroid.android",
+    "language": "English",
+    "dimensions": "720x1280",
+    "captureCommit": "3d6a1e3fb1b9a22eace039113d0d78c5f9463011",
+    "fixture": "No temporary fixture required; the clean emulator inventory was used.",
+    "notes": "Navigation and assertions used the accessibility UI driver. PNG capture used adb screencap only after the screen was stable."
+  },
+  "screens": [
+    {"name": "Home", "state": "Recent operations populated", "route": "Home bottom navigation", "image": "android/home.png"},
+    {"name": "Device Info", "state": "Default device summary", "route": "Device info bottom navigation", "image": "android/device-info.png"},
+    {"name": "Settings", "state": "English selected", "route": "Settings bottom navigation > Language > English", "image": "android/settings.png"},
+    {"name": "Installed Apps", "state": "APK tip dialog", "route": "Menu > APKs", "image": "android/installed-apps.png", "fixtureRequired": false},
+    {"name": "PenTesting", "state": "Wizard step 1 of 4", "route": "Menu > Pentest > Got it", "image": "android/pentesting.png"},
+    {"name": "Permissions", "state": "Inventory loaded", "route": "Menu > Permissions > Got it", "image": "android/permissions.png"},
+    {"name": "Activities", "state": "Inventory loaded", "route": "Menu > Activity list > Got it", "image": "android/activities.png"},
+    {"name": "Root / Play Integrity", "state": "Checks ready", "route": "Menu > Root test > Got it", "image": "android/root-play-integrity.png"},
+    {"name": "Shell / Trick", "state": "Command cards ready", "route": "Menu > Trick > Got it", "image": "android/shell-trick.png"},
+    {"name": "Log", "state": "Filtered log view", "route": "Menu > Log", "image": "android/log.png"},
+    {"name": "Help", "state": "Feature map", "route": "Menu > Help", "image": "android/help.png"},
+    {"name": "PenTesting tip", "state": "First-entry guidance", "route": "Menu > Pentest", "image": "android/pentesting-tip.png"},
+    {"name": "Permissions tip", "state": "First-entry guidance", "route": "Menu > Permissions", "image": "android/permissions-tip.png"},
+    {"name": "Activities tip", "state": "First-entry guidance", "route": "Menu > Activity list", "image": "android/activities-tip.png"},
+    {"name": "Root / Play Integrity tip", "state": "First-entry guidance", "route": "Menu > Root test", "image": "android/root-play-integrity-tip.png"},
+    {"name": "Shell / Trick tip", "state": "First-entry guidance", "route": "Menu > Trick", "image": "android/shell-trick-tip.png"},
+    {"name": "Help dialog", "state": "Log help dialog", "route": "Log > Help", "image": "android/help-dialog.png"}
+  ]
+}

@@ -2,10 +2,10 @@ package com.crackmydroid.shared.data.shell
 
 import com.crackmydroid.shared.data.DesktopScanCache
 import com.crackmydroid.shared.domain.model.ConnectedDevice
-import com.crackmydroid.shared.domain.model.ShellCommandResult
+import com.crackmydroid.shared.domain.model.shell.ShellCommandResult
 import com.crackmydroid.shared.domain.repository.AdbBridge
 import com.crackmydroid.shared.domain.repository.DeviceSessionController
-import com.crackmydroid.shared.domain.repository.DeviceSessionState
+import com.crackmydroid.shared.domain.model.DeviceSessionState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.runTest
@@ -89,7 +89,10 @@ private class FakeShellSessionController : DeviceSessionController {
     override suspend fun refreshDevices(adbPathOverride: String?): Result<List<ConnectedDevice>> =
         Result.success(emptyList())
 
-    override suspend fun selectDevice(device: ConnectedDevice, adbPathOverride: String?): Result<Unit> =
+    override suspend fun selectDevice(
+        device: ConnectedDevice,
+        adbPathOverride: String?
+    ): Result<Unit> =
         Result.success(Unit)
 
     override suspend fun clearSelection() = Unit

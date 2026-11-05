@@ -10,8 +10,8 @@
         android:pathData="M54,54a26,26 0 1 1 0,-0.01z" />
     <!-- Shadow ring -->
     <path
-        android:fillColor="#3C8C5F"
         android:fillAlpha="0.25"
+        android:fillColor="#3C8C5F"
         android:pathData="M54,54a30,30 0 1 1 0,-0.01z" />
     <!-- Stylized ant -->
     <!-- Body -->
@@ -37,24 +37,24 @@
         android:pathData="M58,30a2,2 0 1 1 0,-0.01z" />
     <!-- Antennae -->
     <path
-        android:strokeColor="#111827"
-        android:strokeWidth="3"
         android:fillColor="@android:color/transparent"
-        android:pathData="M48,24 l-8,-10" />
+        android:pathData="M48,24 l-8,-10"
+        android:strokeWidth="3"
+        android:strokeColor="#111827" />
     <path
-        android:strokeColor="#111827"
-        android:strokeWidth="3"
         android:fillColor="@android:color/transparent"
-        android:pathData="M60,24 l8,-10" />
+        android:pathData="M60,24 l8,-10"
+        android:strokeWidth="3"
+        android:strokeColor="#111827" />
     <!-- Legs -->
     <path
-        android:strokeColor="#111827"
-        android:strokeWidth="3"
         android:fillColor="@android:color/transparent"
-        android:pathData="M44,48 l-10,6 M46,56 l-8,10 M52,64 l-4,12" />
+        android:pathData="M44,48 l-10,6 M46,56 l-8,10 M52,64 l-4,12"
+        android:strokeWidth="3"
+        android:strokeColor="#111827" />
     <path
-        android:strokeColor="#111827"
-        android:strokeWidth="3"
         android:fillColor="@android:color/transparent"
-        android:pathData="M66,48 l10,6 M64,56 l8,10 M58,64 l4,12" />
+        android:pathData="M66,48 l10,6 M64,56 l8,10 M58,64 l4,12"
+        android:strokeWidth="3"
+        android:strokeColor="#111827" />
 </vector>
