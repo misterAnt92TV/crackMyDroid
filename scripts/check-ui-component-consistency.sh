@@ -25,6 +25,20 @@ else
   fi
 fi
 
+activity_screen='shared/src/commonMain/kotlin/com/crackmydroid/shared/ui/screens/ActivityListScreen.kt'
+activity_literals=$(awk '
+  $0 !~ /[•]/ &&
+  ($0 ~ /AppText[[:space:]]*\([[:space:]]*"/ ||
+   $0 ~ /showSnackbar[[:space:]]*\([[:space:]]*"/ ||
+   $0 ~ /(title|subtitle|summary|label|text|contentDescription)[[:space:]]*=[[:space:]]*"/) &&
+  $0 !~ /historyKey[[:space:]]*=[[:space:]]*"activities"/ { print NR ":" $0 }
+' "$activity_screen")
+if [[ -n "$activity_literals" ]]; then
+  printf '%s\n' "$activity_literals"
+  echo "UI localization guard failed: ActivityListScreen contains hardcoded user-visible copy." >&2
+  exit 1
+fi
+
 # Runtime component copy must come from the shared Strings catalog. Preview-only
 # sample copy is allowed after the component preview annotation.
 components_root='shared/src/commonMain/kotlin/com/crackmydroid/shared/presentation/components'

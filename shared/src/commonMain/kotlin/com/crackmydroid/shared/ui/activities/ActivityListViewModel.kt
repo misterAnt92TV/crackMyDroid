@@ -16,6 +16,8 @@ import com.crackmydroid.shared.domain.usecase.activities.LaunchActivityUseCase
 import com.crackmydroid.shared.domain.usecase.settings.SetActivityFavoritesUseCase
 import com.crackmydroid.shared.domain.usecase.settings.SetActivityPackageFavoritesUseCase
 import com.crackmydroid.shared.domain.usecase.reports.ExportReportUseCase
+import com.crackmydroid.shared.i18n.Strings
+import com.crackmydroid.shared.i18n.stringsFor
 import com.crackmydroid.shared.presentation.BaseViewModel
 import com.crackmydroid.shared.presentation.operations.NoOpOperationLogRepository
 import kotlinx.coroutines.Job
@@ -242,7 +244,7 @@ class ActivityListViewModel(
         return buildExportContent(acts)
     }
 
-    fun buildReport(packageName: String): ActivityAppReport? {
+    fun buildReport(packageName: String, strings: Strings = stringsFor("it")): ActivityAppReport? {
         val activities = _state.value.activities.filter { it.packageName == packageName }
         if (activities.isEmpty()) return null
 
@@ -257,40 +259,42 @@ class ActivityListViewModel(
         val riskyActivitiesCount = riskReports.count { it.level != ActivityIntentRiskLevel.Low }
         val favoriteActivitiesCount = activities.count { favorites.contains(it.favoriteKey()) }
         val highestRiskLevel = ActivityIntentRiskAnalyzer.summarize(riskReports)
+        val activityUi = strings.activityUi
         val findings = buildList {
             if (dumpOnlyCount > 0) {
-                add("$dumpOnlyCount activity compaiono solo nel dump del package e richiedono verifica manuale.")
+                add(activityUi.findingDumpOnly.format(dumpOnlyCount))
             }
             if (guidedLaunchCount > 0) {
-                add("$guidedLaunchCount activity richiedono un intent contestualizzato per essere testate.")
+                add(activityUi.findingGuided.format(guidedLaunchCount))
             }
             if (contextualLaunchCount > 0) {
-                add("$contextualLaunchCount activity espongono hint utili per un lancio guidato o per test deeplink.")
+                add(activityUi.findingContextual.format(contextualLaunchCount))
             }
             if (_state.value.favoritePackages.contains(packageName)) {
-                add("L'app e stata marcata come preferita nella sezione Activity.")
+                add(activityUi.findingFavoritePackage)
             }
             if (favoriteActivitiesCount > 0) {
-                add("$favoriteActivitiesCount activity sono state segnate come preferite per analisi ripetute.")
+                add(activityUi.findingFavoriteActivities.format(favoriteActivitiesCount))
             }
             if (riskyActivitiesCount > 0) {
-                add(
-                    "$riskyActivitiesCount activity espongono superfici intent/deeplink con rischio ${
-                        ActivityIntentRiskAnalyzer.formatLevel(
-                            highestRiskLevel
-                        )
-                    }."
-                )
+                add(activityUi.findingRisky.format(riskyActivitiesCount, highestRiskLevel.uiLabel(activityUi)))
             }
             if (isEmpty()) {
-                add("Tutte le activity rilevate risultano avviabili via shell senza metadati aggiuntivi.")
+                add(activityUi.findingAllShell)
             }
         }
 
         val recommendations = riskReports
             .filter { it.level != ActivityIntentRiskLevel.Low }
             .sortedByDescending { it.score }
-            .map { it.recommendation }
+            .map { report ->
+                when (report.level) {
+                    ActivityIntentRiskLevel.Critical -> activityUi.recommendationCritical
+                    ActivityIntentRiskLevel.High -> activityUi.recommendationHigh
+                    ActivityIntentRiskLevel.Medium -> activityUi.recommendationMedium
+                    ActivityIntentRiskLevel.Low -> activityUi.recommendationLow
+                }
+            }
             .distinct()
             .take(4)
 
@@ -318,8 +322,8 @@ class ActivityListViewModel(
         )
     }
 
-    suspend fun exportVisualReport(packageName: String): Result<String> {
-        val report = buildReport(packageName)
+    suspend fun exportVisualReport(packageName: String, strings: Strings = stringsFor("it")): Result<String> {
+        val report = buildReport(packageName, strings)
             ?: run {
                 _state.update { it.copy(error = "Nessuna activity per $packageName") }
                 return Result.failure(IllegalArgumentException("Nessuna activity per $packageName"))

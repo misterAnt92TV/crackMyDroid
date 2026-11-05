@@ -125,7 +125,7 @@ fun ActivityListScreen(
             item {
                 AppAccordion(
                     title = strings.filterActivities,
-                    subtitle = "Suggerimenti e filtri",
+                    subtitle = strings.activityUi.searchToolsSubtitle,
                     meta = favoriteQueries.takeIf { it.isNotEmpty() }?.size?.toString(),
                     expanded = searchToolsExpanded,
                     onToggle = { searchToolsExpanded = !searchToolsExpanded },
@@ -142,12 +142,12 @@ fun ActivityListScreen(
                             showClearAction = true,
                             onCleared = {
                                 viewModel.setFilter("")
-                                scope.launch { snackbarHostState.showSnackbar("Suggerimenti svuotati") }
+                                scope.launch { snackbarHostState.showSnackbar(strings.activityUi.suggestionsCleared) }
                             }
                         )
                         state.topQuery?.let { top ->
                             AppText(
-                                "Ricerca frequente: $top",
+                                strings.activityUi.frequentSearch.format(top),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.primary
                             )
@@ -183,7 +183,7 @@ fun ActivityListScreen(
                     val totalActivities = state.activities.size
                     val currentActivities = groups.sumOf { it.activities.size }
                     AppText(
-                        "Risultati: $currentActivities / $totalActivities attività",
+                        strings.activityUi.resultsSummary.format(currentActivities, totalActivities),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -192,7 +192,7 @@ fun ActivityListScreen(
 
             selectedReportPackage?.let { packageName ->
                 item(key = "activity-report-$packageName") {
-                    viewModel.buildReport(packageName)?.let { report ->
+                    viewModel.buildReport(packageName, strings)?.let { report ->
                         ActivityReportCard(
                             report = report,
                             lastExportPath = lastReportPath,
@@ -202,14 +202,14 @@ fun ActivityListScreen(
                             },
                             onExport = {
                                 scope.launch {
-                                    viewModel.exportVisualReport(report.packageName)
+                                    viewModel.exportVisualReport(report.packageName, strings)
                                         .onSuccess { path ->
                                             lastReportPath = path
-                                            snackbarHostState.showSnackbar("Report HTML esportato per ${report.appLabel}")
+                                            snackbarHostState.showSnackbar(strings.activityUi.exportSuccess.format(report.appLabel))
                                         }
                                         .onFailure { err ->
                                             snackbarHostState.showSnackbar(
-                                                err.message ?: "Export report non riuscito"
+                                                err.message ?: strings.activityUi.exportFailed
                                             )
                                         }
                                 }
@@ -224,12 +224,12 @@ fun ActivityListScreen(
                     AppCard(modifier = Modifier.fillMaxWidth()) {
                         val hasFilter = state.filter.isNotBlank()
                         AppText(
-                            if (hasFilter) "Nessun risultato per \"${state.filter}\"." else "Nessuna activity disponibile.",
+                            if (hasFilter) strings.activityUi.noResults.format(state.filter) else strings.activityUi.noActivities,
                             style = MaterialTheme.typography.bodyMedium
                         )
                         AppText(
-                            if (hasFilter) "Prova con package, nome app o nome activity."
-                            else "Aggiorna la lista per rileggere le activity installate.",
+                            if (hasFilter) strings.activityUi.searchHint
+                            else strings.activityUi.refresh,
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -239,7 +239,7 @@ fun ActivityListScreen(
                         ) {
                             if (hasFilter) {
                                 AppButton(
-                                    text = "Reset filtro",
+                                    text = strings.activityUi.resetFilter,
                                     onClick = { viewModel.setFilter("") },
                                     variant = ButtonVariant.Secondary,
                                     modifier = Modifier.weight(1f),
@@ -247,7 +247,7 @@ fun ActivityListScreen(
                                 )
                             }
                             AppButton(
-                                text = "Aggiorna",
+                                text = strings.activityUi.refresh,
                                 onClick = viewModel::refresh,
                                 variant = ButtonVariant.Tonal,
                                 modifier = Modifier.weight(1f),
@@ -272,7 +272,7 @@ fun ActivityListScreen(
                 AppAccordion(
                     title = group.label ?: group.packageName,
                     subtitle = group.packageName,
-                    meta = "${group.activities.size} act",
+                    meta = strings.activityUi.activityCount.format(group.activities.size),
                     expanded = expanded,
                     onToggle = { viewModel.toggleExpanded(group.packageName) },
                     leading = {
@@ -326,10 +326,10 @@ fun ActivityListScreen(
                     group.activities.forEach { activity ->
                         val favKey = activity.favoriteKey()
                         val activityMeta = when {
-                            !activity.launchableViaShell && activity.launchContextHint != null -> "intent required"
-                            !activity.launchableViaShell -> "dump only"
-                            activity.launchContextHint != null -> "am start + action"
-                            else -> "am start"
+                            !activity.launchableViaShell && activity.launchContextHint != null -> strings.activityUi.intentRequired
+                            !activity.launchableViaShell -> strings.activityUi.dumpOnly
+                            activity.launchContextHint != null -> strings.activityUi.shellWithAction
+                            else -> strings.activityUi.shellStart
                         }
                         AppListItem(
                             title = activity.label,
@@ -415,7 +415,7 @@ private fun GuidedActivityLaunchDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { AppText("Launcher guidato") },
+        title = { AppText(LocalStrings.current.activityUi.guidedLauncherTitle) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 AppText(
@@ -429,7 +429,7 @@ private fun GuidedActivityLaunchDialog(
                 )
                 entry.launchContextHint?.let { hint ->
                     AppText(
-                        text = "Resolver: $hint",
+                        text = LocalStrings.current.activityUi.resolver.format(hint),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.primary
                     )
@@ -437,21 +437,21 @@ private fun GuidedActivityLaunchDialog(
                 OutlinedTextField(
                     value = action,
                     onValueChange = { action = it },
-                    label = { AppText("Action") },
+                    label = { AppText(LocalStrings.current.activityUi.actionLabel) },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
                 OutlinedTextField(
                     value = dataUri,
                     onValueChange = { dataUri = it },
-                    label = { AppText("Data URI") },
+                    label = { AppText(LocalStrings.current.activityUi.dataUriLabel) },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
                 OutlinedTextField(
                     value = mimeType,
                     onValueChange = { mimeType = it },
-                    label = { AppText("MIME type") },
+                    label = { AppText(LocalStrings.current.activityUi.mimeTypeLabel) },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
@@ -468,12 +468,12 @@ private fun GuidedActivityLaunchDialog(
                 },
                 enabled = canLaunch
             ) {
-                AppText("Avvia")
+                AppText(LocalStrings.current.activityUi.launch)
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                AppText("Annulla")
+                AppText(LocalStrings.current.activityUi.cancel)
             }
         }
     )
@@ -486,6 +486,8 @@ private fun ActivityReportCard(
     onDismiss: () -> Unit,
     onExport: () -> Unit
 ) {
+    val strings = LocalStrings.current
+    val activityUi = strings.activityUi
     AppCard(modifier = Modifier.fillMaxWidth()) {
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Row(
@@ -498,7 +500,7 @@ private fun ActivityReportCard(
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     AppText(
-                        "Report activity desktop",
+                        activityUi.reportTitle,
                         style = MaterialTheme.typography.titleMedium
                     )
                     AppText(
@@ -513,19 +515,26 @@ private fun ActivityReportCard(
                     )
                 }
                 TextButton(onClick = onDismiss) {
-                    AppText("Chiudi")
+                    AppText(activityUi.close)
                 }
             }
 
             AppText(
-                "Totale ${report.totalActivities} activity • shell ${report.shellLaunchableCount} • guided ${report.guidedLaunchCount} • dump only ${report.dumpOnlyCount}",
+                activityUi.totals.format(
+                    report.totalActivities,
+                    report.shellLaunchableCount,
+                    report.guidedLaunchCount,
+                    report.dumpOnlyCount
+                ),
                 style = MaterialTheme.typography.bodyMedium
             )
             AppText(
-                "Hint contestuali ${report.contextualLaunchCount} • preferite ${report.favoriteActivitiesCount} • rischio ${
-                    report.highestRiskLevel.uiLabel()
-                }" +
-                        if (report.packageFavorite) " • app preferita" else "",
+                activityUi.riskSummary.format(
+                    report.contextualLaunchCount,
+                    report.favoriteActivitiesCount,
+                    report.highestRiskLevel.uiLabel(activityUi),
+                    if (report.packageFavorite) activityUi.favoriteAppSuffix else ""
+                ),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -533,7 +542,7 @@ private fun ActivityReportCard(
             if (report.recommendations.isNotEmpty()) {
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     AppText(
-                        "Raccomandazioni PenTest",
+                        activityUi.recommendations,
                         style = MaterialTheme.typography.titleSmall
                     )
                     report.recommendations.forEach { recommendation ->
@@ -559,7 +568,7 @@ private fun ActivityReportCard(
             if (report.highlights.isNotEmpty()) {
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     AppText(
-                        "Activity in evidenza",
+                        activityUi.highlights,
                         style = MaterialTheme.typography.titleSmall
                     )
                     report.highlights.forEach { activity ->
@@ -568,11 +577,11 @@ private fun ActivityReportCard(
                             activity.entry.launchContextHint != null -> activity.entry.launchContextHint
                             !activity.entry.launchIntentAction.isNullOrBlank() -> activity.entry.launchIntentAction
                             !activity.entry.launchIntentData.isNullOrBlank() -> activity.entry.launchIntentData
-                            else -> "Nessun hint aggiuntivo"
+                            else -> activityUi.noAdditionalHint
                         }
                         AppText(
                             "• ${activity.entry.label} • ${activity.entry.activityName} • ${
-                                activity.level.uiLabel()
+                                activity.level.uiLabel(activityUi)
                             } • $detail",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -586,14 +595,14 @@ private fun ActivityReportCard(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 AppButton(
-                    text = "Esporta report HTML",
+                    text = activityUi.exportHtml,
                     onClick = onExport,
                     variant = ButtonVariant.Tonal,
                     modifier = Modifier.weight(1f),
                     fullWidth = false
                 )
                 AppButton(
-                    text = "Chiudi report",
+                    text = activityUi.closeReport,
                     onClick = onDismiss,
                     variant = ButtonVariant.Secondary,
                     modifier = Modifier.weight(1f),
@@ -604,13 +613,13 @@ private fun ActivityReportCard(
             lastExportPath?.let { path ->
                 ExportDetailsCard(
                     path = path,
-                    title = "Report activity esportato",
-                    summary = "Report HTML pronto per consultazione desktop.",
+                    title = activityUi.exportedTitle,
+                    summary = activityUi.exportedSummary,
                     details = listOf(
-                        "App: ${report.appLabel}",
-                        "Package: ${report.packageName}",
-                        "Activity incluse: ${report.totalActivities}",
-                        "Pericolosita massima: ${report.highestRiskLevel.uiLabel()}"
+                        activityUi.appDetail.format(report.appLabel),
+                        activityUi.packageDetail.format(report.packageName),
+                        activityUi.activitiesDetail.format(report.totalActivities),
+                        activityUi.maximumRiskDetail.format(report.highestRiskLevel.uiLabel(activityUi))
                     )
                 )
             }

@@ -12,6 +12,7 @@ import com.crackmydroid.shared.domain.usecase.activities.LaunchActivityUseCase
 import com.crackmydroid.shared.domain.usecase.reports.ExportReportUseCase
 import com.crackmydroid.shared.domain.usecase.settings.SetActivityFavoritesUseCase
 import com.crackmydroid.shared.domain.usecase.settings.SetActivityPackageFavoritesUseCase
+import com.crackmydroid.shared.i18n.stringsFor
 import com.crackmydroid.shared.ui.activities.ActivityListViewModel
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -29,6 +30,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class ActivityListViewModelTest {
@@ -230,7 +232,7 @@ class ActivityListViewModelTest {
         )
         advanceUntilIdle()
 
-        val report = vm.buildReport("com.demo.app")
+        val report = vm.buildReport("com.demo.app", stringsFor("en"))
 
         assertNotNull(report)
         assertEquals(3, report.totalActivities)
@@ -241,6 +243,8 @@ class ActivityListViewModelTest {
         assertEquals(1, report.favoriteActivitiesCount)
         assertEquals(true, report.packageFavorite)
         assertEquals(ActivityIntentRiskLevel.High, report.highestRiskLevel)
+        assertTrue(report.findings.any { it.contains("favorite", ignoreCase = true) })
+        assertTrue(report.recommendations.all { !it.contains("Avvia", ignoreCase = true) })
         vm.onCleared()
     }
 }

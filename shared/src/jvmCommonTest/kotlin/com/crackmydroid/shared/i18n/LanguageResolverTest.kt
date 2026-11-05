@@ -142,4 +142,23 @@ class LanguageResolverTest {
             }
         }
     }
+
+    @Test
+    fun activityUiStrings_areLocalizedForEverySupportedLanguage() {
+        listOf("it", "en", "de", "es", "fr").forEach { languageCode ->
+            val ui = stringsFor(languageCode).activityUi
+            listOf(
+                ui.searchToolsSubtitle, ui.suggestionsCleared, ui.exportSuccess, ui.frequentSearch,
+                ui.resultsSummary, ui.noResults, ui.noActivities, ui.searchHint,
+                ui.resetFilter, ui.refresh, ui.activityCount, ui.guidedLauncherTitle,
+                ui.reportTitle, ui.totals, ui.riskSummary, ui.recommendations,
+                ui.highlights, ui.exportHtml, ui.closeReport, ui.exportedTitle,
+                ui.exportedSummary, ui.appDetail, ui.packageDetail, ui.activitiesDetail,
+                ui.maximumRiskDetail, ui.riskLow, ui.riskMedium, ui.riskHigh, ui.riskCritical
+            ).forEach { value -> assertTrue(value.isNotBlank(), "$languageCode has blank Activity UI text") }
+            assertTrue(ui.resultsSummary.contains("%d"), languageCode)
+            assertTrue(ui.riskSummary.contains("%s"), languageCode)
+            assertTrue(ui.noResults.contains("%s"), languageCode)
+        }
+    }
 }
