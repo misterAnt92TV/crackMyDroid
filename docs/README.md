@@ -17,7 +17,8 @@ For a functional overview in **Italian and English**, start with the
 
 | File                                       | Descrizione                                                                                                                |
 |--------------------------------------------|----------------------------------------------------------------------------------------------------------------------------|
-| [`../README.md`](../README.md)             | Overview del progetto, quick start, stack tecnico (IT + EN)                                                                |
+| [`../README.md`](../README.md)             | Overview del progetto, quick start e stack tecnico in inglese                                                              |
+| [`../README.it.md`](../README.it.md)       | Guida del progetto in italiano: funzionalità, schermate, architettura e setup                                               |
 | [`functional-guide.md`](functional-guide.md) | **Guida funzionale IT/EN** — sezioni, azioni, casi d'uso supportati, prerequisiti e limiti Android/Desktop/iOS |
 | [`functional-flows.drawio`](functional-flows.drawio) | **Flowchart IT/EN** — sei pagine modificabili: mappa funzionale, flussi operativi e Desktop/piattaforme |
 | [`screens.md`](screens.md)                 | **Schermate UI** — mockup ASCII di tutte le schermate (Home, PenTesting, App, Permessi, Attività, Info, Settings, Desktop) |

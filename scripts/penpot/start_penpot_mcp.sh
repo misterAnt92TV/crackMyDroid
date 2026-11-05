@@ -10,14 +10,64 @@ if [[ -f "$ENV_FILE" ]]; then
 fi
 
 MCP_VERSION="${PENPOT_MCP_PACKAGE_VERSION:-stable}"
+PNPM_VERSION="${PENPOT_PNPM_VERSION:-10.31.0}"
 COREPACK_CACHE="${TMPDIR:-/tmp}/crackmydroid-penpot-corepack"
+
+# A previous launcher instance may already own the bridge ports. Starting a
+# second recursive pnpm workspace then makes the plugin fail with EADDRINUSE
+# and kills the server sibling. Reuse a complete existing bridge instead.
+port_owner() {
+  lsof -nP -tiTCP:"$1" -sTCP:LISTEN 2>/dev/null | head -n 1
+}
+
+process_command() {
+  ps -p "$1" -o command= 2>/dev/null || true
+}
+
+process_cwd() {
+  lsof -a -p "$1" -d cwd -Fn 2>/dev/null | sed -n 's/^n//p' | head -n 1
+}
+
+is_penpot_process() {
+  local command_line cwd
+  command_line="$(process_command "$1")"
+  cwd="$(process_cwd "$1")"
+  [[ "$cwd" == *"/@penpot/mcp/"* && ( "$command_line" == *"dist/index.js"* || "$command_line" == *"vite.js build --watch"* || "$command_line" == *"@penpot/mcp"* ) ]]
+}
+
+PLUGIN_PID="$(port_owner 4400 || true)"
+MCP_PID="$(port_owner 4401 || true)"
+WS_PID="$(port_owner 4402 || true)"
+if [[ -n "$PLUGIN_PID" || -n "$MCP_PID" || -n "$WS_PID" ]]; then
+  if [[ -n "$PLUGIN_PID" && -n "$MCP_PID" && -n "$WS_PID" ]]; then
+    if ! is_penpot_process "$PLUGIN_PID" || ! is_penpot_process "$MCP_PID" || ! is_penpot_process "$WS_PID"; then
+      echo "Penpot MCP ports are occupied by an unexpected process (4400=$PLUGIN_PID, 4401=$MCP_PID, 4402=$WS_PID)." >&2
+      echo "Inspect the processes and free the ports before starting the bridge; no process was terminated." >&2
+      exit 1
+    fi
+    echo "Penpot MCP bridge already running (plugin PID $PLUGIN_PID, MCP PID $MCP_PID, websocket PID $WS_PID)."
+    echo "Reuse it; do not start a second instance."
+    exit 0
+  fi
+  echo "Penpot MCP ports are partially occupied (4400=$PLUGIN_PID, 4401=$MCP_PID, 4402=$WS_PID)." >&2
+  echo "Stop the incomplete bridge instance, then run this launcher again." >&2
+  exit 1
+fi
 
 # Keep Corepack isolated from a broken user cache and from repository state.
 export COREPACK_HOME="$COREPACK_CACHE"
-if ! corepack pnpm --version >/dev/null 2>&1; then
-  echo "Preparing isolated pnpm runtime for Penpot MCP..."
-  corepack install --global pnpm@10 >/dev/null
+CURRENT_PNPM_VERSION="$(corepack pnpm --version 2>/dev/null || true)"
+if [[ "$CURRENT_PNPM_VERSION" != "$PNPM_VERSION" ]]; then
+  echo "Preparing isolated pnpm $PNPM_VERSION runtime for Penpot MCP..."
+  corepack install --global "pnpm@$PNPM_VERSION" >/dev/null
+  CURRENT_PNPM_VERSION="$(corepack pnpm --version 2>/dev/null || true)"
 fi
+if [[ "$CURRENT_PNPM_VERSION" != "$PNPM_VERSION" ]]; then
+  echo "Unable to prepare pnpm $PNPM_VERSION (found ${CURRENT_PNPM_VERSION:-unavailable})." >&2
+  echo "The isolated Corepack cache is incomplete or incompatible; remove only $COREPACK_CACHE and retry." >&2
+  exit 1
+fi
+echo "Using pnpm $CURRENT_PNPM_VERSION for Penpot MCP."
 
 # pnpm blocks native dependency lifecycle scripts by default. The MCP package
 # needs only esbuild and sharp to build its server/plugin; approve those builds
@@ -30,7 +80,7 @@ prepare_mcp_builds() {
 
   while IFS= read -r package_json; do
     package_dir="$(dirname "$package_json")"
-    pnpm --dir "$package_dir" approve-builds esbuild sharp >/dev/null 2>&1 || true
+    corepack pnpm --dir "$package_dir" approve-builds esbuild sharp >/dev/null 2>&1 || true
   done < <(find "$npm_cache/_npx" -type f -path '*/node_modules/@penpot/mcp/package.json' -print 2>/dev/null)
 }
 
