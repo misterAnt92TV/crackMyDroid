@@ -1,6 +1,5 @@
 package com.crackmydroid.shared.ui.screens
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,15 +10,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.background
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Error
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -32,17 +26,16 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.crackmydroid.shared.domain.model.operation.OperationEntry
 import com.crackmydroid.shared.i18n.LocalStrings
-import com.crackmydroid.shared.i18n.formatOperationTimestamp
-import com.crackmydroid.shared.i18n.renderOperation
 import com.crackmydroid.shared.presentation.components.AppAccordion
 import com.crackmydroid.shared.presentation.components.PackageIcon
 import com.crackmydroid.shared.presentation.components.SectionHeader
 import com.crackmydroid.shared.presentation.components.card.AppCard
 import com.crackmydroid.shared.presentation.components.text.AppText
-import com.crackmydroid.shared.ui.home.HomeState
+import com.crackmydroid.shared.ui.home.HomeUiState
+import com.crackmydroid.shared.ui.home.HomeUiStateMapper
 import com.crackmydroid.shared.ui.home.HomeViewModel
+import com.crackmydroid.shared.ui.home.LastOperationItemComponent
 
 @Composable
 fun HomeScreen(
@@ -54,33 +47,35 @@ fun HomeScreen(
     languageCode: String = "en"
 ) {
     val state = viewModel.state.collectAsState()
+    val strings = LocalStrings.current
+    val uiState = remember(state.value, strings, languageCode) {
+        HomeUiStateMapper().map(state.value, strings, languageCode)
+    }
     HomeContent(
-        state = state.value,
+        state = uiState,
         padding = padding,
         headerHelp = headerHelp,
         onHelp = onHelp,
         onMenu = onMenu,
         onHideRecent = viewModel::hideFromRecent,
-        onRemove = viewModel::remove,
-        languageCode = languageCode
+        onRemove = viewModel::remove
     )
 }
 
 @Composable
 internal fun HomeContent(
-    state: HomeState,
+    state: HomeUiState,
     padding: androidx.compose.foundation.layout.PaddingValues,
     headerHelp: String,
     onHelp: (String) -> Unit,
     onMenu: () -> Unit = {},
-    onHideRecent: (OperationEntry) -> Unit = {},
-    onRemove: (OperationEntry) -> Unit = {},
+    onHideRecent: (String) -> Unit = {},
+    onRemove: (String) -> Unit = {},
     initiallyExpandedHistory: Boolean = false,
-    languageCode: String = "en"
 ) {
     val strings = LocalStrings.current
     val historyExpanded = remember { mutableStateOf(initiallyExpandedHistory) }
-    val uniqueHistory = state.recentOperations
+    val uniqueHistory = state.operationHistory
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -161,11 +156,10 @@ internal fun HomeContent(
             }
         } else {
             items(uniqueHistory) { entry ->
-                OperationHistoryEntryComponent(
-                    entry = entry,
+                LastOperationItemComponent(
+                    item = entry,
                     onAction = onHideRecent,
-                    actionContentDescription = strings.hideRecentOperationContentDescription,
-                    languageCode = languageCode
+                    actionContentDescription = strings.hideRecentOperationContentDescription
                 )
             }
         }
@@ -234,92 +228,14 @@ internal fun HomeContent(
                 } else {
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         uniqueHistory.forEach { entry ->
-                            OperationHistoryEntryComponent(
-                                entry = entry,
+                            LastOperationItemComponent(
+                                item = entry,
                                 onAction = onRemove,
-                                actionContentDescription = strings.removeOperationContentDescription,
-                                languageCode = languageCode
+                                actionContentDescription = strings.removeOperationContentDescription
                             )
                         }
                     }
                 }
-            }
-        }
-    }
-}
-
-@Composable
-private fun OperationHistoryEntryComponent(
-    entry: OperationEntry,
-    onAction: (OperationEntry) -> Unit,
-    actionContentDescription: String,
-    languageCode: String = "en"
-) {
-    val strings = LocalStrings.current
-    val operationDescription = entry.event?.let(strings::renderOperation)
-        ?: entry.legacyDescription
-        ?: entry.description
-    val operationResult = entry.details
-        ?: if (entry.success) strings.operationSuccess else strings.operationFailed
-    val statusColor = if (entry.success) {
-        MaterialTheme.colorScheme.secondary
-    } else {
-        MaterialTheme.colorScheme.error
-    }
-
-    AppCard(modifier = Modifier.fillMaxWidth()) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalAlignment = Alignment.Top
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(36.dp)
-                    .clip(CircleShape)
-                    .background(statusColor.copy(alpha = 0.16f)),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = if (entry.success) Icons.Filled.CheckCircle else Icons.Filled.Error,
-                    contentDescription = null,
-                    tint = statusColor
-                )
-            }
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(2.dp)
-            ) {
-                AppText(operationDescription, style = MaterialTheme.typography.bodyMedium)
-                Row {
-                    AppText(
-                        strings.operationResultLabel,
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    AppText(
-                        operationResult,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-                AppText(
-                    formatOperationTimestamp(entry.timestamp, languageCode),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-            IconButton(
-                onClick = { onAction(entry) },
-                modifier = Modifier.size(48.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.Close,
-                    contentDescription = actionContentDescription.format(operationDescription),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(16.dp)
-                )
             }
         }
     }

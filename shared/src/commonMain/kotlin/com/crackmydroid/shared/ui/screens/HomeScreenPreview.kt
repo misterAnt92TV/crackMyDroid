@@ -9,6 +9,7 @@ import com.crackmydroid.shared.i18n.stringsFor
 import com.crackmydroid.shared.presentation.preview.AppScreenPreviews
 import com.crackmydroid.shared.presentation.theme.CrackMyDroidTheme
 import com.crackmydroid.shared.ui.home.HomeState
+import com.crackmydroid.shared.ui.home.HomeUiStateMapper
 
 @AppScreenPreviews
 @Composable
@@ -16,15 +17,18 @@ private fun HomeScreenPreview() {
     CrackMyDroidTheme {
         CompositionLocalProvider(LocalStrings provides stringsFor("it")) {
             HomeContent(
-                state = HomeState(recentOperations = listOf(
-                    OperationEntry("Scansione APK completata", true, "42 applicazioni", 0L),
-                    OperationEntry("Avvio activity", false, "Activity non esportata", 0L)
-                )),
+                state = HomeUiStateMapper().map(
+                    HomeState(recentOperations = listOf(
+                        OperationEntry("Scansione APK completata", true, "42 applicazioni", 0L),
+                        OperationEntry("Avvio activity", false, "Activity non esportata", 0L)
+                    )),
+                    stringsFor("it"),
+                    "it"
+                ),
                 padding = PaddingValues(),
                 headerHelp = "Panoramica delle funzioni principali.",
                 onHelp = {},
                 onRemove = {},
-                languageCode = "it"
             )
         }
     }
@@ -36,13 +40,12 @@ private fun HomeScreenEmptyHistoryPreview() {
     CrackMyDroidTheme {
         CompositionLocalProvider(LocalStrings provides stringsFor("it")) {
             HomeContent(
-                state = HomeState(),
+                state = HomeUiStateMapper().map(HomeState(), stringsFor("it"), "it"),
                 padding = PaddingValues(),
                 headerHelp = "Panoramica delle funzioni principali.",
                 onHelp = {},
                 onRemove = {},
-                initiallyExpandedHistory = true,
-                languageCode = "it"
+                initiallyExpandedHistory = true
             )
         }
     }

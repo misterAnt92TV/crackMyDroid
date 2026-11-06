@@ -80,6 +80,8 @@ La regola pratica è: il codice più vicino al dominio deve conoscere meno detta
 - Screen che esegue `filter`, `sorted`, mapping di dominio, validazione, `runCatching` o gestione di errori applicativi.
 - Screen con decisioni di business, autorizzazione, persistenza o navigazione condizionale.
 - Stato di dominio mantenuto con `remember`/`mutableStateOf` invece che nel ViewModel.
+- Screen che formattano modelli di dominio o costruiscono direttamente righe/card complesse: usare un
+  `XxxUiStateMapper`, item UI immutabili specifici della feature e un componente dedicato.
 - Flusso diretto `Screen → Repository`: il percorso corretto è `Screen(state, onAction) → ViewModel → UseCase → Repository`.
 - ViewModel che crea dipendenze con costruttori concreti o locator globali.
 - UseCase che contiene codice specifico Android/Desktop.

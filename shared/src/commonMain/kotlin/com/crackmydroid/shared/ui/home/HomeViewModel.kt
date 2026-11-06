@@ -33,7 +33,18 @@ class HomeViewModel(
         }
     }
 
-    fun hideFromRecent(entry: OperationEntry) = operationLogs.hideFromRecent(entry)
+    fun hideFromRecent(operationId: String) {
+        operationLogs.entries.value
+            .firstOrNull { entry -> entry.stableId() == operationId }
+            ?.let(operationLogs::hideFromRecent)
+    }
 
-    fun remove(entry: OperationEntry) = operationLogs.remove(entry)
+    fun remove(operationId: String) {
+        operationLogs.entries.value
+            .firstOrNull { entry -> entry.stableId() == operationId }
+            ?.let(operationLogs::remove)
+    }
+
+    private fun OperationEntry.stableId(): String =
+        operationId.ifBlank { "$timestamp:$description:$success" }
 }

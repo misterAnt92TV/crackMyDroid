@@ -56,6 +56,11 @@ SDK, API native, Koin o coroutine applicative, né eseguire filtering, sorting, 
 gestione errori o navigazione condizionale. Sono ammessi solo calcoli locali strettamente visuali,
 come layout, animazioni, dimensioni, colori, accessibilità e stato transitorio di un controllo.
 
+Le liste con righe o card strutturate attraversano un confine esplicito di presentazione:
+`FeatureState → XxxUiStateMapper → XxxUiState → XxxContent`. I mapper puri ricevono la localizzazione
+attiva e producono item immutabili specifici della feature; le screen non passano modelli di dominio ai
+componenti di lista. Le azioni degli item usano identificatori stabili, risolti dal ViewModel.
+
 Le regole di dominio e le trasformazioni funzionali appartengono ai UseCase; il ViewModel gestisce
 solo orchestrazione della presentazione, eventi, coroutine e mapping verso `UiState`.
 

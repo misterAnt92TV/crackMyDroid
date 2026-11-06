@@ -86,8 +86,10 @@ orchestration. Keep only strictly visual calculations in composables.
 - Use `CrackMyDroidTheme`, `LocalStrings`, and the existing `@AppScreenPreviews` annotation whenever applicable. It supplies phone/tablet and light/dark previews.
 - Keep each reusable component's `@AppComponentPreviews` functions in the same Kotlin file as the component they preview. Do not create package-level aggregate preview files; shared theme/local setup belongs in `presentation.preview.ComponentPreviewContainer`.
 - Use `@AppComponentPreviews` for isolated reusable components (light and dark variants) and reserve `@AppScreenPreviews` for complete screens (phone/tablet and light/dark variants). Keep preview functions private and place them after the production component.
+- Every new reusable Compose UI component must include at least one private `@AppComponentPreviews` function in the same file, in the same implementation change. The preview is mandatory for completion, not optional follow-up work.
+- Component previews must use deterministic fixture data, `ComponentPreviewContainer` (or the equivalent `CrackMyDroidTheme` and `LocalStrings` setup), and no-op callbacks. They must not create or resolve ViewModels, DI, repositories, filesystem access, network clients, or platform APIs.
 - When a KMP Android library declares previews, keep `ui-tooling-preview` available to its source set and add `debugImplementation(libs.compose.ui.tooling)` to that same module. The latter provides `ComposeViewAdapter` to Android Studio's renderer; an app module dependency alone does not cover previews opened from the library.
-- Preview fixtures must cover the normal state and every meaningful visual variant (for example expanded/collapsed, enabled/disabled, empty/error, accessibility preferences, or heterogeneous status values) while keeping callbacks no-op and data deterministic.
+- Preview fixtures must cover the normal state and every meaningful visual variant (for example expanded/collapsed, enabled/disabled, empty/error, accessibility preferences, optional content, action availability, or heterogeneous status values) while keeping callbacks no-op and data deterministic.
 - Add an explicit 7-inch preview (`widthDp = 600`, `heightDp = 960`) when the screen’s layout or behavior depends on that breakpoint.
 - Preview the normal state and each user-visible empty or error state. Keep preview functions separate from production screen logic when that improves readability.
 
@@ -132,6 +134,7 @@ For UDF/architecture changes, also update `docs/architecture-specification.md`,
 ## Tests and validation
 
 - Execute the tests created or updated for the feature before reporting completion.
+- Treat a new reusable UI component without its same-file `@AppComponentPreviews` and meaningful fixture variants as incomplete, even when production code and tests pass.
 - Use MockK and coroutine-test for JVM/Android collaborators; use platform-compatible fakes for Native and platform boundaries. Never require a real device, ADB instance, network, or user filesystem.
 - Run the narrowest applicable Gradle compile/test task from the platform matrix, then widen only for shared contract changes.
 - Before finishing, check preview fixtures, modified-file line counts, architectural dependency direction, meaningful comments for complex code, and `git diff --check`.
