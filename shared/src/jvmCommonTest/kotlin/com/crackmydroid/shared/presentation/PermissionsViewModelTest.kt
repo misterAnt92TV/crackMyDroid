@@ -1,35 +1,40 @@
 package com.crackmydroid.shared.presentation
 
+import com.crackmydroid.shared.domain.model.UseCaseReportText
 import com.crackmydroid.shared.domain.model.app.AppPermissionEntry
 import com.crackmydroid.shared.domain.repository.ReportFileRepository
-import com.crackmydroid.shared.domain.usecase.permissions.ListPermissionsUseCase
 import com.crackmydroid.shared.domain.usecase.permissions.AnalyzePermissionRisksUseCase
 import com.crackmydroid.shared.domain.usecase.permissions.BuildPermissionsReportUseCase
+import com.crackmydroid.shared.domain.usecase.permissions.ListPermissionsUseCase
 import com.crackmydroid.shared.domain.usecase.reports.ExportReportUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetPermissionFavoritesUseCase
 import com.crackmydroid.shared.domain.usecase.settings.SetPermissionFavoritesUseCase
-import com.crackmydroid.shared.ui.permissions.PermissionsViewModel
-import com.crackmydroid.shared.domain.model.UseCaseReportText
 import com.crackmydroid.shared.i18n.UseCaseTexts
+import com.crackmydroid.shared.ui.permissions.PermissionsViewModel
 import io.mockk.coEvery
 import io.mockk.coJustRun
 import io.mockk.coVerify
 import io.mockk.mockk
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.advanceUntilIdle
-import kotlinx.coroutines.test.resetMain
-import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.runCurrent
-import kotlinx.coroutines.test.setMain
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 import kotlin.test.assertNull
+import kotlin.test.assertSame
+import kotlin.test.assertTrue
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runCurrent
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
+import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class PermissionsViewModelTest {
@@ -55,11 +60,14 @@ class PermissionsViewModelTest {
     @Test
     fun setFilterTracksMostFrequentTopQuery() = runTest(dispatcher) {
         val listPermissions = mockk<ListPermissionsUseCase>()
-        coEvery { listPermissions() } returns Result.success(listOf(
-            AppPermissionEntry("Demo", "pkg.demo", listOf("android.permission.INTERNET"))
-        ))
+        coEvery { listPermissions() } returns Result.success(
+            listOf(
+                AppPermissionEntry("Demo", "pkg.demo", listOf("android.permission.INTERNET")),
+            ),
+        )
         val analyzePermissionRisks = AnalyzePermissionRisksUseCase(dispatchers = TestAppDispatchers(dispatcher))
-        val buildPermissionsReport = BuildPermissionsReportUseCase(analyzePermissionRisks, dispatchers = TestAppDispatchers(dispatcher))
+        val buildPermissionsReport =
+            BuildPermissionsReportUseCase(analyzePermissionRisks, dispatchers = TestAppDispatchers(dispatcher))
         val vm = PermissionsViewModel(
             listPermissions,
             analyzePermissionRisks,
@@ -67,7 +75,7 @@ class PermissionsViewModelTest {
             reportExporter(),
             emptyFavorites(),
             mockk(relaxed = true),
-            TestAppDispatchers(dispatcher)
+            TestAppDispatchers(dispatcher),
         )
 
         vm.refresh()
@@ -83,16 +91,19 @@ class PermissionsViewModelTest {
     @Test
     fun showOnlyRiskyFiltersOutSafeAppsAfterScan() = runTest(dispatcher) {
         val listPermissions = mockk<ListPermissionsUseCase>()
-        coEvery { listPermissions() } returns Result.success(listOf(
-            AppPermissionEntry("Safe App", "pkg.safe", emptyList()),
-            AppPermissionEntry(
-                "Risky App",
-                "pkg.risky",
-                listOf("android.permission.SYSTEM_ALERT_WINDOW")
-            )
-        ))
+        coEvery { listPermissions() } returns Result.success(
+            listOf(
+                AppPermissionEntry("Safe App", "pkg.safe", emptyList()),
+                AppPermissionEntry(
+                    "Risky App",
+                    "pkg.risky",
+                    listOf("android.permission.SYSTEM_ALERT_WINDOW"),
+                ),
+            ),
+        )
         val analyzePermissionRisks = AnalyzePermissionRisksUseCase(dispatchers = TestAppDispatchers(dispatcher))
-        val buildPermissionsReport = BuildPermissionsReportUseCase(analyzePermissionRisks, dispatchers = TestAppDispatchers(dispatcher))
+        val buildPermissionsReport =
+            BuildPermissionsReportUseCase(analyzePermissionRisks, dispatchers = TestAppDispatchers(dispatcher))
         val vm = PermissionsViewModel(
             listPermissions,
             analyzePermissionRisks,
@@ -100,7 +111,7 @@ class PermissionsViewModelTest {
             reportExporter(),
             emptyFavorites(),
             mockk(relaxed = true),
-            TestAppDispatchers(dispatcher)
+            TestAppDispatchers(dispatcher),
         )
 
         vm.refresh()
@@ -131,7 +142,7 @@ class PermissionsViewModelTest {
             reportExporter(),
             getFavorites,
             setFavorites,
-            TestAppDispatchers(dispatcher)
+            TestAppDispatchers(dispatcher),
         )
 
         vm.refresh()
@@ -182,7 +193,8 @@ class PermissionsViewModelTest {
                 firstCancelled = true
             }
         }
-        coEvery { builder.single(match { it.packageName == "pkg.second" }, any(), any()) } returns Result.success("second")
+        coEvery { builder.single(match { it.packageName == "pkg.second" }, any(), any()) } returns
+            Result.success("second")
         val vm = previewViewModel(builder)
         vm.refresh()
         advanceUntilIdle()
@@ -257,12 +269,19 @@ class PermissionsViewModelTest {
         val dispatchers = TestAppDispatchers(dispatcher)
         val analyzer = AnalyzePermissionRisksUseCase(dispatchers)
         val list = mockk<ListPermissionsUseCase>()
-        coEvery { list() } returns Result.success(listOf(
-            AppPermissionEntry("Demo", "pkg.demo", listOf("android.permission.CAMERA"))
-        ))
+        coEvery { list() } returns Result.success(
+            listOf(
+                AppPermissionEntry("Demo", "pkg.demo", listOf("android.permission.CAMERA")),
+            ),
+        )
         val vm = PermissionsViewModel(
-            list, analyzer, BuildPermissionsReportUseCase(analyzer, dispatchers), reportExporter(),
-            emptyFavorites(), mockk(), dispatchers
+            list,
+            analyzer,
+            BuildPermissionsReportUseCase(analyzer, dispatchers),
+            reportExporter(),
+            emptyFavorites(),
+            mockk(),
+            dispatchers,
         )
         vm.refresh()
         advanceUntilIdle()
@@ -275,7 +294,7 @@ class PermissionsViewModelTest {
             assertEquals(report, vm.state.value.riskReports.single())
             assertEquals(
                 UseCaseTexts(language).permissionReason(report.findings.single()),
-                vm.state.value.findingsByPackage["pkg.demo"]?.single()?.reason
+                vm.state.value.findingsByPackage["pkg.demo"]?.single()?.reason,
             )
             assertEquals("android.permission.CAMERA", vm.state.value.findingsByPackage["pkg.demo"]?.single()?.title)
         }
@@ -320,19 +339,199 @@ class PermissionsViewModelTest {
         vm.onCleared()
     }
 
+    @Test
+    fun oldScanFinallyDoesNotClearReplacementProgress() = runTest(dispatcher) {
+        val analyzer = mockk<AnalyzePermissionRisksUseCase>()
+        var calls = 0
+        coEvery { analyzer(any()) } coAnswers {
+            if (++calls == 1) {
+                try {
+                    awaitCancellation()
+                } finally {
+                    withContext(NonCancellable) { delay(1_000) }
+                }
+            }
+            delay(2_000)
+            Result.success(null)
+        }
+        val vm = previewViewModel(mockk(), analyzer = analyzer)
+        vm.refresh()
+        advanceUntilIdle()
+        vm.startAutoRiskScan()
+        runCurrent()
+        vm.startAutoRiskScan()
+        advanceTimeBy(1_100)
+        runCurrent()
+
+        assertTrue(vm.state.value.autoScanRunning)
+        assertEquals("First", vm.state.value.autoScanCurrentLabel)
+        assertEquals(0, vm.state.value.autoScanScannedApps)
+        advanceUntilIdle()
+        assertEquals(false, vm.state.value.autoScanRunning)
+        assertEquals(2, vm.state.value.autoScanScannedApps)
+        assertNull(vm.state.value.error)
+        vm.onCleared()
+    }
+
+    @Test
+    fun refreshInvalidatesScanIgnoringCancellation() = runTest(dispatcher) {
+        val analyzer = mockk<AnalyzePermissionRisksUseCase>()
+        val app = AppPermissionEntry("First", "pkg.first", listOf("android.permission.CAMERA"))
+        val real = AnalyzePermissionRisksUseCase(TestAppDispatchers(dispatcher))
+        val report = real(app).getOrThrow()
+        coEvery { analyzer(any()) } coAnswers {
+            withContext(NonCancellable) { delay(1_000) }
+            Result.success(report)
+        }
+        val vm = previewViewModel(mockk(), analyzer = analyzer)
+        vm.refresh()
+        advanceUntilIdle()
+        vm.startAutoRiskScan()
+        runCurrent()
+        vm.refresh()
+        advanceUntilIdle()
+
+        assertTrue(vm.state.value.riskReports.isEmpty())
+        assertTrue(vm.state.value.findingsByPackage.isEmpty())
+        assertEquals(false, vm.state.value.autoScanRunning)
+        assertEquals(0, vm.state.value.autoScanScannedApps)
+        assertNull(vm.state.value.error)
+        vm.onCleared()
+    }
+
+    @Test
+    fun latestRefreshWinsOverNonCooperativeOldLoad() = runTest(dispatcher) {
+        val list = mockk<ListPermissionsUseCase>()
+        var calls = 0
+        val latest = listOf(AppPermissionEntry("Latest", "pkg.latest", emptyList()))
+        coEvery { list() } coAnswers {
+            if (++calls == 1) {
+                withContext(NonCancellable) { delay(1_000) }
+                Result.success(listOf(AppPermissionEntry("Old", "pkg.old", emptyList())))
+            } else {
+                Result.success(latest)
+            }
+        }
+        val vm = previewViewModel(mockk(), list = list)
+        vm.refresh()
+        runCurrent()
+        vm.refresh()
+        advanceUntilIdle()
+
+        assertEquals(latest, vm.state.value.apps)
+        assertEquals(latest, vm.state.value.visibleApps)
+        assertEquals(false, vm.state.value.loading)
+        assertNull(vm.state.value.error)
+        vm.onCleared()
+    }
+
+    @Test
+    fun filteringAndSafeScanProgressReuseLocalizedFindings() = runTest(dispatcher) {
+        val analyzer = AnalyzePermissionRisksUseCase(TestAppDispatchers(dispatcher))
+        val list = mockk<ListPermissionsUseCase>()
+        coEvery { list() } returns Result.success(
+            listOf(
+                AppPermissionEntry("First", "pkg.first", listOf("android.permission.CAMERA")),
+                AppPermissionEntry("Second", "pkg.second", emptyList()),
+            ),
+        )
+        val vm = previewViewModel(mockk(), analyzer = analyzer, list = list)
+        vm.refresh()
+        advanceUntilIdle()
+        vm.startAutoRiskScan()
+        runCurrent()
+        val findings = vm.state.value.findingsByPackage
+        val visibleFindings = vm.state.value.visibleFindingsByPackage
+        assertEquals(1, findings.size)
+        advanceUntilIdle()
+        assertSame(findings, vm.state.value.findingsByPackage)
+        vm.setFilter("First")
+        vm.setShowOnlyRisky(true)
+
+        assertSame(findings, vm.state.value.findingsByPackage)
+        assertSame(visibleFindings, vm.state.value.visibleFindingsByPackage)
+        assertEquals(listOf("pkg.first"), vm.state.value.visibleApps.map { it.packageName })
+        assertEquals(2, vm.state.value.autoScanScannedApps)
+        vm.onCleared()
+    }
+
+    @Test
+    fun addingReportReusesUnchangedLocalizedFindingItems() = runTest(dispatcher) {
+        val analyzer = AnalyzePermissionRisksUseCase(TestAppDispatchers(dispatcher))
+        val list = mockk<ListPermissionsUseCase>()
+        coEvery { list() } returns Result.success(
+            listOf(
+                AppPermissionEntry("First", "pkg.first", listOf("android.permission.CAMERA")),
+                AppPermissionEntry("Second", "pkg.second", listOf("android.permission.SYSTEM_ALERT_WINDOW")),
+            ),
+        )
+        val vm = previewViewModel(mockk(), analyzer = analyzer, list = list)
+        vm.refresh()
+        advanceUntilIdle()
+        vm.startAutoRiskScan()
+        runCurrent()
+        val firstItems = vm.state.value.findingsByPackage.getValue("pkg.first")
+        advanceUntilIdle()
+
+        assertSame(firstItems, vm.state.value.findingsByPackage.getValue("pkg.first"))
+        assertEquals(2, vm.state.value.findingsByPackage.size)
+        assertEquals("pkg.second", vm.state.value.riskReports.first().packageName)
+        vm.onCleared()
+    }
+
+    @Test
+    fun largeScanPreservesRiskOrderingAndFilterResults() = runTest(dispatcher) {
+        val analyzer = AnalyzePermissionRisksUseCase(TestAppDispatchers(dispatcher))
+        val apps = (1..120).map {
+            AppPermissionEntry(
+                "App $it",
+                "pkg.$it",
+                listOf(
+                    if (it % 2 == 0) "android.permission.SYSTEM_ALERT_WINDOW" else "android.permission.CAMERA",
+                ),
+            )
+        }
+        val expected = analyzer.sortReports(apps.mapNotNull { analyzer(it).getOrThrow() })
+        val list = mockk<ListPermissionsUseCase>()
+        coEvery { list() } returns Result.success(apps)
+        val vm = previewViewModel(mockk(), analyzer = analyzer, list = list)
+        vm.refresh()
+        advanceUntilIdle()
+        vm.startAutoRiskScan()
+        advanceUntilIdle()
+
+        assertEquals(expected, vm.state.value.riskReports)
+        assertEquals(apps.size, vm.state.value.autoScanScannedApps)
+        val findings = vm.state.value.findingsByPackage
+        vm.setFilter("SYSTEM_ALERT_WINDOW")
+        assertEquals(60, vm.state.value.visibleApps.size)
+        assertSame(findings, vm.state.value.findingsByPackage)
+        vm.onCleared()
+    }
+
     private fun previewViewModel(
         builder: BuildPermissionsReportUseCase,
         exporter: ExportReportUseCase = reportExporter(),
-        analyzer: AnalyzePermissionRisksUseCase = AnalyzePermissionRisksUseCase(dispatchers = TestAppDispatchers(dispatcher))
+        analyzer: AnalyzePermissionRisksUseCase =
+            AnalyzePermissionRisksUseCase(dispatchers = TestAppDispatchers(dispatcher)),
+        list: ListPermissionsUseCase? = null,
     ): PermissionsViewModel {
-        val list = mockk<ListPermissionsUseCase>()
-        coEvery { list() } returns Result.success(listOf(
-            AppPermissionEntry("First", "pkg.first", emptyList()),
-            AppPermissionEntry("Second", "pkg.second", emptyList())
-        ))
+        val permissions = list ?: mockk<ListPermissionsUseCase>().also {
+            coEvery { it() } returns Result.success(
+                listOf(
+                    AppPermissionEntry("First", "pkg.first", emptyList()),
+                    AppPermissionEntry("Second", "pkg.second", emptyList()),
+                ),
+            )
+        }
         return PermissionsViewModel(
-            list, analyzer, builder, exporter, emptyFavorites(), mockk(),
-            TestAppDispatchers(dispatcher)
+            permissions,
+            analyzer,
+            builder,
+            exporter,
+            emptyFavorites(),
+            mockk(),
+            TestAppDispatchers(dispatcher),
         )
     }
 }

@@ -8,14 +8,19 @@ plugins {
     alias(libs.plugins.kover)
 }
 
+val androidCompileSdk = providers.gradleProperty("android.compileSdk").map(String::toInt)
+val androidTargetSdk = providers.gradleProperty("android.targetSdk").map(String::toInt)
+val androidMinSdk = providers.gradleProperty("android.minSdk").map(String::toInt)
+val jvmVersion = providers.gradleProperty("build.jvmVersion").map(String::toInt)
+
 android {
     namespace = "com.crackmydroid.android"
-    compileSdk = 36
+    compileSdk = androidCompileSdk.get()
 
     defaultConfig {
         applicationId = "com.crackmydroid.android"
-        minSdk = 24
-        targetSdk = 35
+        minSdk = androidMinSdk.get()
+        targetSdk = androidTargetSdk.get()
         versionCode = 4
         versionName = "1.4"
         manifestPlaceholders["integrityVerificationEndpoint"] = ""
@@ -27,13 +32,13 @@ android {
             isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                "proguard-rules.pro",
             )
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.toVersion(jvmVersion.get())
+        targetCompatibility = JavaVersion.toVersion(jvmVersion.get())
     }
     buildFeatures {
         compose = true
@@ -45,7 +50,7 @@ android {
 
 kotlin {
     compilerOptions {
-        jvmTarget.set(JvmTarget.JVM_17)
+        jvmTarget.set(jvmVersion.map { JvmTarget.fromTarget(it.toString()) })
     }
 }
 

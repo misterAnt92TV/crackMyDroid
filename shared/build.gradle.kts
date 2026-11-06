@@ -8,12 +8,16 @@ plugins {
     alias(libs.plugins.kover)
 }
 
+val androidCompileSdk = providers.gradleProperty("android.compileSdk").map(String::toInt)
+val androidMinSdk = providers.gradleProperty("android.minSdk").map(String::toInt)
+val jvmVersion = providers.gradleProperty("build.jvmVersion").map(String::toInt)
+
 dependencies {
     debugImplementation(libs.compose.ui.tooling)
 }
 
 kotlin {
-    jvmToolchain(17)
+    jvmToolchain(jvmVersion.get())
     androidTarget()
     jvm("desktop")
     iosX64()
@@ -21,63 +25,54 @@ kotlin {
     iosSimulatorArm64()
 
     sourceSets {
-        val commonMain by getting {
-            dependencies {
-                implementation(libs.compose.runtime)
-                implementation(libs.compose.foundation)
-                implementation(libs.compose.material3)
-                implementation(libs.compose.icons)
-                implementation(libs.compose.ui.tooling.preview)
-                implementation(libs.koin.core)
-                implementation(libs.kermit)
-                implementation(libs.coroutines.core)
-                implementation(libs.koin.compose)
-                implementation(libs.sqldelight.runtime)
-                implementation(libs.sqldelight.coroutines)
-                implementation(libs.kotlinx.serialization.json)
-                implementation(libs.ktor.client.core)
-                implementation(libs.ktor.client.content.negotiation)
-                implementation(libs.ktor.serialization.kotlinx.json)
-                implementation(libs.ktor.client.logging)
-            }
+        commonMain.dependencies {
+            implementation(libs.compose.runtime)
+            implementation(libs.compose.foundation)
+            implementation(libs.compose.material3)
+            implementation(libs.compose.icons)
+            implementation(libs.compose.ui.tooling.preview)
+            implementation(libs.koin.core)
+            implementation(libs.kermit)
+            implementation(libs.coroutines.core)
+            implementation(libs.koin.compose)
+            implementation(libs.sqldelight.runtime)
+            implementation(libs.sqldelight.coroutines)
+            implementation(libs.kotlinx.serialization.json)
+            implementation(libs.ktor.client.core)
+            implementation(libs.ktor.client.content.negotiation)
+            implementation(libs.ktor.serialization.kotlinx.json)
+            implementation(libs.ktor.client.logging)
         }
-        val commonTest by getting {
-            dependencies {
-                implementation(kotlin("test"))
-                implementation(libs.coroutines.test)
-                implementation(libs.ktor.client.mock)
-            }
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+            implementation(libs.coroutines.test)
+            implementation(libs.ktor.client.mock)
         }
         val jvmCommonTest by creating {
-            dependsOn(commonTest)
+            dependsOn(commonTest.get())
             dependencies {
                 implementation(libs.mockk)
                 implementation(libs.sqldelight.sqlite)
-                implementation(libs.coroutines.test)
             }
         }
-        val androidMain by getting {
-            dependencies {
-                implementation(libs.core.ktx)
-                implementation(libs.compose.ui)
-                implementation(libs.compose.material3)
-                implementation(libs.compose.ui.tooling.preview)
-                implementation(libs.activity.compose)
-                implementation(libs.koin.android)
-                implementation(libs.koin.androidx.compose)
-                implementation(libs.rootbeer)
-                implementation(libs.datastore)
-                implementation(libs.play.integrity)
-                implementation(libs.sqldelight.android)
-                implementation(libs.ktor.client.okhttp)
-            }
+        androidMain.dependencies {
+            implementation(libs.core.ktx)
+            implementation(libs.compose.ui)
+            implementation(libs.compose.material3)
+            implementation(libs.compose.ui.tooling.preview)
+            implementation(libs.activity.compose)
+            implementation(libs.koin.android)
+            implementation(libs.koin.androidx.compose)
+            implementation(libs.rootbeer)
+            implementation(libs.datastore)
+            implementation(libs.play.integrity)
+            implementation(libs.sqldelight.android)
+            implementation(libs.ktor.client.okhttp)
         }
         val androidUnitTest by getting {
             dependsOn(jvmCommonTest)
             dependencies {
-                implementation(libs.mockk)
                 implementation(libs.junit4)
-                implementation(libs.coroutines.test)
             }
         }
         val desktopMain by getting {
@@ -88,16 +83,12 @@ kotlin {
         }
         val desktopTest by getting {
             dependsOn(jvmCommonTest)
-            dependencies {
-                implementation(kotlin("test"))
-                implementation(libs.coroutines.test)
-            }
         }
         val iosX64Main by getting
         val iosArm64Main by getting
         val iosSimulatorArm64Main by getting
         val iosMain by creating {
-            dependsOn(commonMain)
+            dependsOn(commonMain.get())
             iosX64Main.dependsOn(this)
             iosArm64Main.dependsOn(this)
             iosSimulatorArm64Main.dependsOn(this)
@@ -110,7 +101,7 @@ kotlin {
         val iosArm64Test by getting
         val iosSimulatorArm64Test by getting
         val iosTest by creating {
-            dependsOn(commonTest)
+            dependsOn(commonTest.get())
             iosX64Test.dependsOn(this)
             iosArm64Test.dependsOn(this)
             iosSimulatorArm64Test.dependsOn(this)
@@ -120,13 +111,13 @@ kotlin {
 
 android {
     namespace = "com.crackmydroid.shared"
-    compileSdk = 36
+    compileSdk = androidCompileSdk.get()
     defaultConfig {
-        minSdk = 24
+        minSdk = androidMinSdk.get()
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.toVersion(jvmVersion.get())
+        targetCompatibility = JavaVersion.toVersion(jvmVersion.get())
     }
 }
 

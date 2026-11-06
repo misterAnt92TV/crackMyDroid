@@ -14,14 +14,11 @@ import android.telephony.TelephonyManager
 import com.crackmydroid.database.CacheDatabase
 import com.crackmydroid.shared.domain.model.DeviceInfo
 import com.crackmydroid.shared.domain.repository.DeviceInfoRepository
+import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.io.File
 
-class DeviceInfoRepositoryAndroid(
-    private val context: Context,
-    private val db: CacheDatabase
-) : DeviceInfoRepository {
+class DeviceInfoRepositoryAndroid(private val context: Context, private val db: CacheDatabase) : DeviceInfoRepository {
     override suspend fun getDeviceInfo(): DeviceInfo = withContext(Dispatchers.Default) {
         loadCached()?.let { return@withContext it }
         val batteryPct = readBattery()
@@ -55,7 +52,7 @@ class DeviceInfoRepositoryAndroid(
             imei = readImei(),
             serial = readSerial(),
             systemPropSource = systemPropSource,
-            systemPropDump = systemPropDump
+            systemPropDump = systemPropDump,
         )
 
         cacheInfo(info)
@@ -129,7 +126,7 @@ class DeviceInfoRepositoryAndroid(
             imei = value("imei"),
             serial = value("serial"),
             systemPropSource = value("systemPropSource"),
-            systemPropDump = value("systemPropDump")
+            systemPropDump = value("systemPropDump"),
         )
     }
 
@@ -170,15 +167,13 @@ class DeviceInfoRepositoryAndroid(
     private fun isAdbEnabled(): Boolean =
         Settings.Global.getInt(context.contentResolver, Settings.Global.ADB_ENABLED, 0) == 1
 
-    private fun isDeveloperOptionsEnabled(): Boolean =
-        Settings.Global.getInt(
-            context.contentResolver,
-            Settings.Global.DEVELOPMENT_SETTINGS_ENABLED,
-            0
-        ) == 1
+    private fun isDeveloperOptionsEnabled(): Boolean = Settings.Global.getInt(
+        context.contentResolver,
+        Settings.Global.DEVELOPMENT_SETTINGS_ENABLED,
+        0,
+    ) == 1
 
-    private fun isAppDebuggable(): Boolean =
-        (context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
+    private fun isAppDebuggable(): Boolean = (context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
 
     @Suppress("DEPRECATION", "MissingPermission")
     private fun readSerial(): String? {
@@ -194,21 +189,20 @@ class DeviceInfoRepositoryAndroid(
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 tm.imei ?: tm.meid
             } else {
-                @Suppress("DEPRECATION") tm.deviceId
+                @Suppress("DEPRECATION")
+                tm.deviceId
             }
         }.getOrNull()
     }
 
     private fun readSystemPropDump(): Pair<String?, String?> {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) return null to null
-
         val propFiles = listOf(
             "/default.prop",
             "/system/build.prop",
             "/vendor/build.prop",
             "/product/build.prop",
             "/system_ext/build.prop",
-            "/odm/etc/build.prop"
+            "/odm/etc/build.prop",
         )
 
         val sections = mutableListOf<String>()
@@ -248,21 +242,17 @@ class DeviceInfoRepositoryAndroid(
         return normalizePropText(runShellText("cat $path"))
     }
 
-    private fun runShellText(command: String): String? {
-        return runCatching {
-            val process = Runtime.getRuntime().exec(arrayOf("sh", "-c", command))
-            val stdout = process.inputStream.bufferedReader().use { it.readText() }
-            process.waitFor()
-            stdout
-        }.getOrNull()
-    }
+    private fun runShellText(command: String): String? = runCatching {
+        val process = Runtime.getRuntime().exec(arrayOf("sh", "-c", command))
+        val stdout = process.inputStream.bufferedReader().use { it.readText() }
+        process.waitFor()
+        stdout
+    }.getOrNull()
 
-    private fun normalizePropText(raw: String?): String? {
-        return raw
-            ?.lineSequence()
-            ?.map { it.trimEnd() }
-            ?.filter { it.isNotBlank() && !it.startsWith("#") }
-            ?.joinToString("\n")
-            ?.takeIf { it.isNotBlank() }
-    }
+    private fun normalizePropText(raw: String?): String? = raw
+        ?.lineSequence()
+        ?.map { it.trimEnd() }
+        ?.filter { it.isNotBlank() && !it.startsWith("#") }
+        ?.joinToString("\n")
+        ?.takeIf { it.isNotBlank() }
 }

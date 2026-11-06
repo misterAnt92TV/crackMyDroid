@@ -66,19 +66,21 @@
 
 ### Version Catalog (`gradle/libs.versions.toml`)
 
-Le versioni di tutte le dipendenze sono centralizzate nel version catalog. Le principali:
+Coordinate e versioni richieste di librerie/plugin sono centralizzate nel
+version catalog, inclusa ktlint CLI. Il catalogo e la fonte di riferimento:
+non duplicare qui le versioni, che possono cambiare indipendentemente
+dalla documentazione. La risoluzione Gradle puo selezionare versioni
+transitive diverse da quelle richieste.
 
-| Libreria              | Versione |
-|-----------------------|----------|
-| Kotlin                | `2.3.21` |
-| Compose Multiplatform | `1.10.3` |
-| AGP                   | `8.13.0` |
-| Koin                  | `3.5.6`  |
-| SQLDelight            | `2.0.1`  |
-| Coroutines            | `1.8.1`  |
-| kotlinx.serialization | `1.6.3`  |
-| Ktor Client           | `3.5.0`  |
-| WorkManager           | `2.12.0` |
+SDK Android e JVM non sono dipendenze: i moduli leggono le proprieta comuni
+`android.compileSdk`, `android.minSdk`, `android.targetSdk` e
+`build.jvmVersion` da `gradle.properties`. Identificativi e opzioni specifiche
+dell'app restano negli script dei moduli.
+
+Gli helper `kotlin("test")` e `compose.desktop.currentOs` mantengono
+rispettivamente l'allineamento Kotlin e la selezione degli artefatti nativi
+per l'OS. La gerarchia KMP esplicita resta invariata; le dipendenze test
+condivise sono ereditate da `commonTest` e `jvmCommonTest`.
 
 ---
 

@@ -1,22 +1,24 @@
 package com.crackmydroid.shared.ui.permissions
 
-import com.crackmydroid.shared.domain.model.app.AppPermissionEntry
 import com.crackmydroid.shared.domain.model.PermissionRiskReport
-import com.crackmydroid.shared.domain.usecase.permissions.ListPermissionsUseCase
-import com.crackmydroid.shared.domain.usecase.settings.SetPermissionFavoritesUseCase
+import com.crackmydroid.shared.domain.model.app.AppPermissionEntry
 import com.crackmydroid.shared.domain.usecase.permissions.AnalyzePermissionRisksUseCase
 import com.crackmydroid.shared.domain.usecase.permissions.BuildPermissionsReportUseCase
+import com.crackmydroid.shared.domain.usecase.permissions.ListPermissionsUseCase
 import com.crackmydroid.shared.domain.usecase.reports.ExportReportUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetPermissionFavoritesUseCase
-import com.crackmydroid.shared.presentation.BaseViewModel
-import com.crackmydroid.shared.i18n.UseCaseTexts
+import com.crackmydroid.shared.domain.usecase.settings.SetPermissionFavoritesUseCase
 import com.crackmydroid.shared.i18n.UseCasePresentationTexts
+import com.crackmydroid.shared.i18n.UseCaseTexts
+import com.crackmydroid.shared.presentation.BaseViewModel
 import com.crackmydroid.shared.util.AppDispatchers
 import com.crackmydroid.shared.util.DefaultAppDispatchers
 import com.crackmydroid.shared.util.runSuspendCatching
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -30,12 +32,15 @@ class PermissionsViewModel(
     private val reportExporter: ExportReportUseCase,
     private val getFavorites: GetPermissionFavoritesUseCase,
     private val setFavorites: SetPermissionFavoritesUseCase,
-    dispatchers: AppDispatchers = DefaultAppDispatchers
+    dispatchers: AppDispatchers = DefaultAppDispatchers,
 ) : BaseViewModel(dispatchers) {
     private val _state = MutableStateFlow(PermissionsState())
     val state: StateFlow<PermissionsState> = _state
     private val queryCount = mutableMapOf<String, Int>()
     private var riskScanJob: Job? = null
+    private var riskScanId = 0L
+    private var refreshJob: Job? = null
+    private var refreshId = 0L
     private var reportPreviewJob: Job? = null
     private var reportPreviewId = 0L
     private val multiSpaceRegex = Regex("\\s+")
@@ -49,19 +54,23 @@ class PermissionsViewModel(
         dismissReportPreview()
         text = next
         copy = UseCasePresentationTexts(next.languageCode)
-        updatePresentation { it }
+        updatePresentation(languageChanged = true) { it }
         if (previewPackage != null) requestReportPreview(previewPackage)
     }
 
     fun refresh() {
         cancelAutoRiskScan()
         dismissReportPreview()
-        scope.launch {
+        cancelRefresh()
+        val request = refreshId
+        refreshJob = scope.launch {
             val favoritesResult = getFavorites()
+            currentCoroutineContext().ensureActive()
+            if (request != refreshId) return@launch
             favoritesResult.onSuccess { favorites ->
                 updatePresentation { it.copy(favorites = favorites) }
             }
-            _state.update {
+            updatePresentation {
                 it.copy(
                     loading = true,
                     error = favoritesResult.exceptionOrNull()?.message,
@@ -72,16 +81,19 @@ class PermissionsViewModel(
                     showOnlyRisky = false,
                     riskReports = emptyList(),
                     findingsByPackage = emptyMap(),
-                    visibleFindingsByPackage = emptyMap()
+                    visibleFindingsByPackage = emptyMap(),
                 )
             }
-            listPermissions()
+            val result = listPermissions()
+            currentCoroutineContext().ensureActive()
+            if (request != refreshId) return@launch
+            result
                 .onSuccess { apps -> updatePresentation { it.copy(apps = apps, loading = false) } }
                 .onFailure { err ->
                     _state.update {
                         it.copy(
                             error = err.message,
-                            loading = false
+                            loading = false,
                         )
                     }
                 }
@@ -119,8 +131,8 @@ class PermissionsViewModel(
         } else {
             state.apps.filter {
                 it.appLabel.contains(filterValue, true) ||
-                        it.packageName.contains(filterValue, true) ||
-                        it.permissions.any { permission -> permission.contains(filterValue, true) }
+                    it.packageName.contains(filterValue, true) ||
+                    it.permissions.any { permission -> permission.contains(filterValue, true) }
             }
         }
 
@@ -134,7 +146,7 @@ class PermissionsViewModel(
         return riskFiltered.sortedWith(
             compareByDescending<AppPermissionEntry> { favorites.contains(it.packageName) }
                 .thenByDescending { riskScoreByPackage[it.packageName] ?: 0 }
-                .thenBy { it.appLabel.lowercase() }
+                .thenBy { it.appLabel.lowercase() },
         )
     }
 
@@ -147,14 +159,18 @@ class PermissionsViewModel(
         scope.launch {
             val currentState = _state.value
             runSuspendCatching {
-                val content = buildPermissionsReport(currentState.apps, currentState.riskReports, reportText).getOrThrow()
+                val content = buildPermissionsReport(
+                    currentState.apps,
+                    currentState.riskReports,
+                    reportText,
+                ).getOrThrow()
                 reportExporter.save("permissions_report.txt", content).getOrThrow()
             }
                 .onSuccess { path ->
                     _state.update {
                         it.copy(
                             lastExportPath = path,
-                            error = null
+                            error = null,
                         )
                     }
                 }
@@ -165,9 +181,13 @@ class PermissionsViewModel(
     fun toggleFavorite(packageName: String) {
         updatePresentation {
             val favorites = it.favorites.toMutableSet()
-            if (favorites.contains(packageName)) favorites.remove(packageName) else favorites.add(
-                packageName
-            )
+            if (favorites.contains(packageName)) {
+                favorites.remove(packageName)
+            } else {
+                favorites.add(
+                    packageName,
+                )
+            }
             it.copy(favorites = favorites)
         }
         scope.launch {
@@ -184,15 +204,16 @@ class PermissionsViewModel(
             val app = currentState.apps.find { it.packageName == packageName }
             val risk = currentState.riskReports.find { it.packageName == packageName }
             runSuspendCatching {
-                val content = contentOverride ?: app?.let { buildPermissionsReport.single(it, risk, reportText).getOrThrow() }
-                    ?: noData
+                val content =
+                    contentOverride ?: app?.let { buildPermissionsReport.single(it, risk, reportText).getOrThrow() }
+                        ?: noData
                 reportExporter.share(buildPermissionsReport.singleFileName(packageName), content).getOrThrow()
             }
                 .onSuccess { path ->
                     _state.update {
                         it.copy(
                             lastExportPath = path,
-                            error = null
+                            error = null,
                         )
                     }
                 }
@@ -213,7 +234,7 @@ class PermissionsViewModel(
                 reportPreviewPackage = packageName,
                 reportPreviewLoading = true,
                 reportPreviewContent = null,
-                reportPreviewError = null
+                reportPreviewError = null,
             )
         }
         reportPreviewJob = scope.launch {
@@ -229,7 +250,7 @@ class PermissionsViewModel(
                 _state.update {
                     it.copy(
                         reportPreviewLoading = false,
-                        reportPreviewError = error.message ?: reportCopy.reportFailed
+                        reportPreviewError = error.message ?: reportCopy.reportFailed,
                     )
                 }
             }
@@ -245,7 +266,7 @@ class PermissionsViewModel(
                 reportPreviewPackage = null,
                 reportPreviewLoading = false,
                 reportPreviewContent = null,
-                reportPreviewError = null
+                reportPreviewError = null,
             )
         }
     }
@@ -257,12 +278,15 @@ class PermissionsViewModel(
             return
         }
 
-        riskScanJob?.cancel()
-        riskScanJob = null
+        cancelRefresh()
+        cancelAutoRiskScan()
+        dismissReportPreview()
+        val request = riskScanId
 
-        _state.update {
+        updatePresentation {
             it.copy(
                 error = null,
+                loading = false,
                 autoScanRunning = true,
                 autoScanTotalApps = apps.size,
                 autoScanScannedApps = 0,
@@ -270,7 +294,7 @@ class PermissionsViewModel(
                 showOnlyRisky = false,
                 riskReports = emptyList(),
                 findingsByPackage = emptyMap(),
-                visibleFindingsByPackage = emptyMap()
+                visibleFindingsByPackage = emptyMap(),
             )
         }
 
@@ -279,14 +303,23 @@ class PermissionsViewModel(
             try {
                 apps.forEachIndexed { index, app ->
                     _state.update { it.copy(autoScanCurrentLabel = app.appLabel) }
-                    analyzePermissionRisks(app).getOrThrow()?.let { results += it }
-                    val sorted = withContext(dispatchers.default) {
-                        analyzePermissionRisks.sortReports(results)
+                    val report = analyzePermissionRisks(app).getOrThrow()
+                    currentCoroutineContext().ensureActive()
+                    if (request != riskScanId) return@launch
+                    val sorted = if (report != null) {
+                        results += report
+                        withContext(dispatchers.default) {
+                            analyzePermissionRisks.sortReports(results)
+                        }
+                    } else {
+                        _state.value.riskReports
                     }
+                    currentCoroutineContext().ensureActive()
+                    if (request != riskScanId) return@launch
                     updatePresentation {
                         it.copy(
                             autoScanScannedApps = index + 1,
-                            riskReports = sorted
+                            riskReports = sorted,
                         )
                     }
                     delay(40)
@@ -294,27 +327,38 @@ class PermissionsViewModel(
             } catch (cancellation: CancellationException) {
                 throw cancellation
             } catch (failure: Exception) {
-                _state.update { it.copy(error = failure.message ?: copy.permissionScanFailed) }
+                if (request == riskScanId) {
+                    _state.update { it.copy(error = failure.message ?: copy.permissionScanFailed) }
+                }
             } finally {
-                _state.update {
-                    it.copy(
-                        autoScanRunning = false,
-                        autoScanCurrentLabel = null
-                    )
+                if (request == riskScanId) {
+                    _state.update {
+                        it.copy(
+                            autoScanRunning = false,
+                            autoScanCurrentLabel = null,
+                        )
+                    }
                 }
             }
         }
     }
 
     fun cancelAutoRiskScan() {
+        ++riskScanId
         riskScanJob?.cancel()
         riskScanJob = null
         _state.update {
             it.copy(
                 autoScanRunning = false,
-                autoScanCurrentLabel = null
+                autoScanCurrentLabel = null,
             )
         }
+    }
+
+    private fun cancelRefresh() {
+        ++refreshId
+        refreshJob?.cancel()
+        refreshJob = null
     }
 
     private fun normalizeQuery(value: String): String = value
@@ -322,17 +366,49 @@ class PermissionsViewModel(
         .replace(multiSpaceRegex, " ")
         .lowercase()
 
-    private fun updatePresentation(transform: (PermissionsState) -> PermissionsState) {
+    private fun updatePresentation(
+        languageChanged: Boolean = false,
+        transform: (PermissionsState) -> PermissionsState,
+    ) {
         _state.update { current ->
             val updated = transform(current)
-            val findings = updated.riskReports.associate { report ->
-                report.packageName to report.findings.map { it.toUi(text) }
+            val risksChanged = updated.riskReports !== current.riskReports
+            val findingsChanged = risksChanged || languageChanged
+            val previousReports = if (risksChanged && !languageChanged) {
+                current.riskReports.associateBy { it.packageName }
+            } else {
+                emptyMap()
             }
+            val findings = if (findingsChanged) {
+                updated.riskReports.associate { report ->
+                    val items = if (!languageChanged && report === previousReports[report.packageName]) {
+                        current.findingsByPackage.getValue(report.packageName)
+                    } else {
+                        report.findings.map { it.toUi(text) }
+                    }
+                    report.packageName to items
+                }
+            } else {
+                current.findingsByPackage
+            }
+            val appsChanged = updated.apps !== current.apps ||
+                risksChanged || updated.filter != current.filter ||
+                updated.favorites !== current.favorites || updated.showOnlyRisky != current.showOnlyRisky
             updated.copy(
-                visibleApps = visibleApps(updated),
-                favoriteQueries = updated.favorites.sorted(),
+                visibleApps = if (appsChanged) visibleApps(updated) else current.visibleApps,
+                favoriteQueries = if (updated.favorites !==
+                    current.favorites
+                ) {
+                    updated.favorites.sorted()
+                } else {
+                    current.favoriteQueries
+                },
                 findingsByPackage = findings,
-                visibleFindingsByPackage = findings.mapValues { (_, values) -> values.filterNot { it.isPattern } }
+                visibleFindingsByPackage = if (findingsChanged) {
+                    findings.mapValues { (_, values) -> values.filterNot { it.isPattern } }
+                } else {
+                    current.visibleFindingsByPackage
+                },
             )
         }
     }
