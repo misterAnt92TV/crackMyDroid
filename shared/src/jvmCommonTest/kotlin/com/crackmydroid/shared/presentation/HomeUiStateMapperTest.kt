@@ -2,8 +2,8 @@ package com.crackmydroid.shared.presentation
 
 import com.crackmydroid.shared.domain.model.operation.OperationEntry
 import com.crackmydroid.shared.i18n.stringsFor
-import com.crackmydroid.shared.ui.home.HomeState
-import com.crackmydroid.shared.ui.home.HomeUiStateMapper
+import com.crackmydroid.shared.ui.home.model.HomeState
+import com.crackmydroid.shared.ui.home.model.HomeUiStateMapper
 import com.crackmydroid.shared.ui.home.OperationOutcome
 import kotlin.test.Test
 import kotlin.test.assertEquals

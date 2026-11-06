@@ -20,6 +20,7 @@ import com.crackmydroid.shared.i18n.Strings
 import com.crackmydroid.shared.i18n.stringsFor
 import com.crackmydroid.shared.presentation.BaseViewModel
 import com.crackmydroid.shared.presentation.operations.NoOpOperationLogRepository
+import com.crackmydroid.shared.ui.activities.view.uiLabel
 import com.crackmydroid.shared.util.runSuspendCatching
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,7 +28,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 class ActivityListViewModel(

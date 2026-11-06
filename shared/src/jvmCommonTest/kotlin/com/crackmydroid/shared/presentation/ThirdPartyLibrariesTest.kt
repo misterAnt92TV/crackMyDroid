@@ -1,6 +1,6 @@
 package com.crackmydroid.shared.presentation
 
-import com.crackmydroid.shared.ui.settings.ThirdPartyLibraries
+import com.crackmydroid.shared.ui.settings.model.ThirdPartyLibraries
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
