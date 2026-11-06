@@ -39,7 +39,6 @@ import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 import kotlin.test.assertSame
 
 class SettingsUseCasesTest {
@@ -61,20 +60,20 @@ class SettingsUseCasesTest {
         coEvery { repository.getInstalledAppFavorites() } returns setOf("installed")
         coEvery { repository.getPermissionFavorites() } returns setOf("permission")
 
-        assertEquals(AppLanguage.ITALIAN, GetLanguageUseCase(repository)())
-        assertEquals(AppTheme.DARK, GetThemeUseCase(repository)())
-        assertEquals(true, GetVerboseLogUseCase(repository)())
-        assertEquals(true, GetIntroSeenUseCase(repository)())
-        assertEquals(ExportFormat.JSON, GetExportFormatUseCase(repository)())
-        assertEquals(true, GetHighContrastUseCase(repository)())
-        assertEquals(true, GetReduceMotionUseCase(repository)())
-        assertEquals(true, GetLargeTextUseCase(repository)())
-        assertEquals(false, GetSuggestionsEnabledUseCase(repository)())
-        assertEquals(false, GetFeatureHintsEnabledUseCase(repository)())
-        assertEquals(setOf("activity"), GetActivityFavoritesUseCase(repository)())
-        assertEquals(setOf("package"), GetActivityPackageFavoritesUseCase(repository)())
-        assertEquals(setOf("installed"), GetInstalledAppFavoritesUseCase(repository)())
-        assertEquals(setOf("permission"), GetPermissionFavoritesUseCase(repository)())
+        assertEquals(AppLanguage.ITALIAN, GetLanguageUseCase(repository)().getOrThrow())
+        assertEquals(AppTheme.DARK, GetThemeUseCase(repository)().getOrThrow())
+        assertEquals(true, GetVerboseLogUseCase(repository)().getOrThrow())
+        assertEquals(true, GetIntroSeenUseCase(repository)().getOrThrow())
+        assertEquals(ExportFormat.JSON, GetExportFormatUseCase(repository)().getOrThrow())
+        assertEquals(true, GetHighContrastUseCase(repository)().getOrThrow())
+        assertEquals(true, GetReduceMotionUseCase(repository)().getOrThrow())
+        assertEquals(true, GetLargeTextUseCase(repository)().getOrThrow())
+        assertEquals(false, GetSuggestionsEnabledUseCase(repository)().getOrThrow())
+        assertEquals(false, GetFeatureHintsEnabledUseCase(repository)().getOrThrow())
+        assertEquals(setOf("activity"), GetActivityFavoritesUseCase(repository)().getOrThrow())
+        assertEquals(setOf("package"), GetActivityPackageFavoritesUseCase(repository)().getOrThrow())
+        assertEquals(setOf("installed"), GetInstalledAppFavoritesUseCase(repository)().getOrThrow())
+        assertEquals(setOf("permission"), GetPermissionFavoritesUseCase(repository)().getOrThrow())
 
         coVerify(exactly = 1) { repository.getLanguage() }
         coVerify(exactly = 1) { repository.getActivityPackageFavorites() }
@@ -150,13 +149,13 @@ class SettingsUseCasesTest {
             coJustRun { repository.setSuggestionsEnabled(value) }
             coJustRun { repository.setFeatureHintsEnabled(value) }
 
-            assertEquals(value, GetVerboseLogUseCase(repository)())
-            assertEquals(value, GetIntroSeenUseCase(repository)())
-            assertEquals(value, GetHighContrastUseCase(repository)())
-            assertEquals(value, GetReduceMotionUseCase(repository)())
-            assertEquals(value, GetLargeTextUseCase(repository)())
-            assertEquals(value, GetSuggestionsEnabledUseCase(repository)())
-            assertEquals(value, GetFeatureHintsEnabledUseCase(repository)())
+            assertEquals(value, GetVerboseLogUseCase(repository)().getOrThrow())
+            assertEquals(value, GetIntroSeenUseCase(repository)().getOrThrow())
+            assertEquals(value, GetHighContrastUseCase(repository)().getOrThrow())
+            assertEquals(value, GetReduceMotionUseCase(repository)().getOrThrow())
+            assertEquals(value, GetLargeTextUseCase(repository)().getOrThrow())
+            assertEquals(value, GetSuggestionsEnabledUseCase(repository)().getOrThrow())
+            assertEquals(value, GetFeatureHintsEnabledUseCase(repository)().getOrThrow())
             SetVerboseLogUseCase(repository)(value)
             SetIntroSeenUseCase(repository)(value)
             SetHighContrastUseCase(repository)(value)
@@ -181,21 +180,21 @@ class SettingsUseCasesTest {
         for (value in AppLanguage.entries) {
             coEvery { repository.getLanguage() } returns value
             coJustRun { repository.setLanguage(value) }
-            assertEquals(value, GetLanguageUseCase(repository)())
+            assertEquals(value, GetLanguageUseCase(repository)().getOrThrow())
             SetLanguageUseCase(repository)(value)
             coVerify(exactly = 1) { repository.setLanguage(value) }
         }
         for (value in AppTheme.entries) {
             coEvery { repository.getTheme() } returns value
             coJustRun { repository.setTheme(value) }
-            assertEquals(value, GetThemeUseCase(repository)())
+            assertEquals(value, GetThemeUseCase(repository)().getOrThrow())
             SetThemeUseCase(repository)(value)
             coVerify(exactly = 1) { repository.setTheme(value) }
         }
         for (value in ExportFormat.entries) {
             coEvery { repository.getExportFormat() } returns value
             coJustRun { repository.setExportFormat(value) }
-            assertEquals(value, GetExportFormatUseCase(repository)())
+            assertEquals(value, GetExportFormatUseCase(repository)().getOrThrow())
             SetExportFormatUseCase(repository)(value)
             coVerify(exactly = 1) { repository.setExportFormat(value) }
         }
@@ -214,10 +213,10 @@ class SettingsUseCasesTest {
             coJustRun { repository.setInstalledAppFavorites(value) }
             coJustRun { repository.setPermissionFavorites(value) }
 
-            assertEquals(value, GetActivityFavoritesUseCase(repository)())
-            assertEquals(value, GetActivityPackageFavoritesUseCase(repository)())
-            assertEquals(value, GetInstalledAppFavoritesUseCase(repository)())
-            assertEquals(value, GetPermissionFavoritesUseCase(repository)())
+            assertEquals(value, GetActivityFavoritesUseCase(repository)().getOrThrow())
+            assertEquals(value, GetActivityPackageFavoritesUseCase(repository)().getOrThrow())
+            assertEquals(value, GetInstalledAppFavoritesUseCase(repository)().getOrThrow())
+            assertEquals(value, GetPermissionFavoritesUseCase(repository)().getOrThrow())
             SetActivityFavoritesUseCase(repository)(value)
             SetActivityPackageFavoritesUseCase(repository)(value)
             SetInstalledAppFavoritesUseCase(repository)(value)
@@ -248,20 +247,20 @@ class SettingsUseCasesTest {
         coEvery { repository.getActivityPackageFavorites() } throws failure
         coEvery { repository.getInstalledAppFavorites() } throws failure
         coEvery { repository.getPermissionFavorites() } throws failure
-        assertSame(failure, assertFailsWith<IllegalStateException> { GetLanguageUseCase(repository)() })
-        assertSame(failure, assertFailsWith<IllegalStateException> { GetThemeUseCase(repository)() })
-        assertSame(failure, assertFailsWith<IllegalStateException> { GetExportFormatUseCase(repository)() })
-        assertSame(failure, assertFailsWith<IllegalStateException> { GetVerboseLogUseCase(repository)() })
-        assertSame(failure, assertFailsWith<IllegalStateException> { GetIntroSeenUseCase(repository)() })
-        assertSame(failure, assertFailsWith<IllegalStateException> { GetHighContrastUseCase(repository)() })
-        assertSame(failure, assertFailsWith<IllegalStateException> { GetReduceMotionUseCase(repository)() })
-        assertSame(failure, assertFailsWith<IllegalStateException> { GetLargeTextUseCase(repository)() })
-        assertSame(failure, assertFailsWith<IllegalStateException> { GetSuggestionsEnabledUseCase(repository)() })
-        assertSame(failure, assertFailsWith<IllegalStateException> { GetFeatureHintsEnabledUseCase(repository)() })
-        assertSame(failure, assertFailsWith<IllegalStateException> { GetActivityFavoritesUseCase(repository)() })
-        assertSame(failure, assertFailsWith<IllegalStateException> { GetActivityPackageFavoritesUseCase(repository)() })
-        assertSame(failure, assertFailsWith<IllegalStateException> { GetInstalledAppFavoritesUseCase(repository)() })
-        assertSame(failure, assertFailsWith<IllegalStateException> { GetPermissionFavoritesUseCase(repository)() })
+        assertSame(failure, GetLanguageUseCase(repository)().exceptionOrNull())
+        assertSame(failure, GetThemeUseCase(repository)().exceptionOrNull())
+        assertSame(failure, GetExportFormatUseCase(repository)().exceptionOrNull())
+        assertSame(failure, GetVerboseLogUseCase(repository)().exceptionOrNull())
+        assertSame(failure, GetIntroSeenUseCase(repository)().exceptionOrNull())
+        assertSame(failure, GetHighContrastUseCase(repository)().exceptionOrNull())
+        assertSame(failure, GetReduceMotionUseCase(repository)().exceptionOrNull())
+        assertSame(failure, GetLargeTextUseCase(repository)().exceptionOrNull())
+        assertSame(failure, GetSuggestionsEnabledUseCase(repository)().exceptionOrNull())
+        assertSame(failure, GetFeatureHintsEnabledUseCase(repository)().exceptionOrNull())
+        assertSame(failure, GetActivityFavoritesUseCase(repository)().exceptionOrNull())
+        assertSame(failure, GetActivityPackageFavoritesUseCase(repository)().exceptionOrNull())
+        assertSame(failure, GetInstalledAppFavoritesUseCase(repository)().exceptionOrNull())
+        assertSame(failure, GetPermissionFavoritesUseCase(repository)().exceptionOrNull())
     }
 
     @Test
@@ -282,19 +281,19 @@ class SettingsUseCasesTest {
         coEvery { repository.setActivityPackageFavorites(any()) } throws failure
         coEvery { repository.setInstalledAppFavorites(any()) } throws failure
         coEvery { repository.setPermissionFavorites(any()) } throws failure
-        assertSame(failure, assertFailsWith<IllegalStateException> { SetLanguageUseCase(repository)(AppLanguage.SYSTEM) })
-        assertSame(failure, assertFailsWith<IllegalStateException> { SetThemeUseCase(repository)(AppTheme.SYSTEM) })
-        assertSame(failure, assertFailsWith<IllegalStateException> { SetExportFormatUseCase(repository)(ExportFormat.TXT) })
-        assertSame(failure, assertFailsWith<IllegalStateException> { SetVerboseLogUseCase(repository)(false) })
-        assertSame(failure, assertFailsWith<IllegalStateException> { SetIntroSeenUseCase(repository)(false) })
-        assertSame(failure, assertFailsWith<IllegalStateException> { SetHighContrastUseCase(repository)(false) })
-        assertSame(failure, assertFailsWith<IllegalStateException> { SetReduceMotionUseCase(repository)(false) })
-        assertSame(failure, assertFailsWith<IllegalStateException> { SetLargeTextUseCase(repository)(false) })
-        assertSame(failure, assertFailsWith<IllegalStateException> { SetSuggestionsEnabledUseCase(repository)(false) })
-        assertSame(failure, assertFailsWith<IllegalStateException> { SetFeatureHintsEnabledUseCase(repository)(false) })
-        assertSame(failure, assertFailsWith<IllegalStateException> { SetActivityFavoritesUseCase(repository)(emptySet()) })
-        assertSame(failure, assertFailsWith<IllegalStateException> { SetActivityPackageFavoritesUseCase(repository)(emptySet()) })
-        assertSame(failure, assertFailsWith<IllegalStateException> { SetInstalledAppFavoritesUseCase(repository)(emptySet()) })
-        assertSame(failure, assertFailsWith<IllegalStateException> { SetPermissionFavoritesUseCase(repository)(emptySet()) })
+        assertSame(failure, SetLanguageUseCase(repository)(AppLanguage.SYSTEM).exceptionOrNull())
+        assertSame(failure, SetThemeUseCase(repository)(AppTheme.SYSTEM).exceptionOrNull())
+        assertSame(failure, SetExportFormatUseCase(repository)(ExportFormat.TXT).exceptionOrNull())
+        assertSame(failure, SetVerboseLogUseCase(repository)(false).exceptionOrNull())
+        assertSame(failure, SetIntroSeenUseCase(repository)(false).exceptionOrNull())
+        assertSame(failure, SetHighContrastUseCase(repository)(false).exceptionOrNull())
+        assertSame(failure, SetReduceMotionUseCase(repository)(false).exceptionOrNull())
+        assertSame(failure, SetLargeTextUseCase(repository)(false).exceptionOrNull())
+        assertSame(failure, SetSuggestionsEnabledUseCase(repository)(false).exceptionOrNull())
+        assertSame(failure, SetFeatureHintsEnabledUseCase(repository)(false).exceptionOrNull())
+        assertSame(failure, SetActivityFavoritesUseCase(repository)(emptySet()).exceptionOrNull())
+        assertSame(failure, SetActivityPackageFavoritesUseCase(repository)(emptySet()).exceptionOrNull())
+        assertSame(failure, SetInstalledAppFavoritesUseCase(repository)(emptySet()).exceptionOrNull())
+        assertSame(failure, SetPermissionFavoritesUseCase(repository)(emptySet()).exceptionOrNull())
     }
 }

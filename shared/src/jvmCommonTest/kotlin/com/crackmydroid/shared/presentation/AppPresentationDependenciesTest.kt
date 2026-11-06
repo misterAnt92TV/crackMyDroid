@@ -1,5 +1,9 @@
 package com.crackmydroid.shared.presentation
 
+import com.crackmydroid.shared.AppLogger
+import com.crackmydroid.shared.util.AppDispatchers
+import com.crackmydroid.shared.domain.model.ReportLabel
+import com.crackmydroid.shared.i18n.UseCaseTexts
 import com.crackmydroid.shared.di.commonModule
 import com.crackmydroid.shared.di.presentationModule
 import com.crackmydroid.shared.domain.model.DeviceInfo
@@ -68,6 +72,7 @@ class AppPresentationDependenciesTest {
     @BeforeTest
     fun setUp() {
         Dispatchers.setMain(dispatcher)
+        AppLogger.setVerbose(false)
         coEvery { deviceRepository.getDeviceInfo() } returns device
         coEvery { rootRepository.checkRoot() } returns root
         coEvery { settingsRepository.isIntroSeen() } returns false
@@ -117,7 +122,37 @@ class AppPresentationDependenciesTest {
     fun tearDown() {
         graphs.forEach { graph -> viewModels(graph).forEach { it.onCleared() } }
         application.close()
+        AppLogger.setVerbose(false)
         Dispatchers.resetMain()
+    }
+
+    @Test
+    fun persistedLanguageIsUsedForTheFirstReportAndUpdatesWithoutReloads() = runTest(dispatcher) {
+        coEvery { settingsRepository.getLanguage() } returns AppLanguage.FRENCH
+        coEvery { settingsRepository.setLanguage(AppLanguage.GERMAN) } returns Unit
+        val graph = resolveGraph()
+        graph.shell.initialize()
+        advanceUntilIdle()
+        assertTrue(graph.info.state.value.reportContent.orEmpty().startsWith(UseCaseTexts("fr").label(ReportLabel.DEVICE_INFO_TITLE)))
+
+        graph.settings.selectLanguage(AppLanguage.GERMAN)
+        advanceUntilIdle()
+        assertTrue(graph.info.state.value.reportContent.orEmpty().startsWith(UseCaseTexts("de").label(ReportLabel.DEVICE_INFO_TITLE)))
+        coVerify(exactly = 1) { deviceRepository.getDeviceInfo() }
+        coVerify(exactly = 1) { rootRepository.checkRoot() }
+    }
+
+    @Test
+    fun failedVerboseBootstrapDoesNotBlockFeatureInitialization() = runTest(dispatcher) {
+        coEvery { settingsRepository.isVerboseLog() } throws IllegalStateException("diagnostics unavailable")
+        val graph = resolveGraph()
+        graph.shell.initialize()
+        advanceUntilIdle()
+
+        assertFalse(AppLogger.isVerbose())
+        assertTrue(graph.shell.state.value.initialized)
+        assertEquals(apps, graph.installedApps.state.value.apps)
+        assertEquals("diagnostics unavailable", graph.settings.state.value.error)
     }
 
     @Test
@@ -143,6 +178,7 @@ class AppPresentationDependenciesTest {
         assertEquals(apps, graph.installedApps.state.value.apps)
         assertEquals(apps, graph.penTesting.state.value.apps)
         assertTrue(graph.shell.state.value.initialized)
+        assertTrue(AppLogger.isVerbose())
         assertTrue(graph.shell.state.value.showIntro)
 
         graph.shell.initialize()

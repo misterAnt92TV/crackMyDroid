@@ -22,7 +22,7 @@ class VerifyPlayIntegrityTokenUseCaseTest {
 
         val result = VerifyPlayIntegrityTokenUseCase(backend)("encrypted-token", "scan-nonce")
 
-        assertEquals(expected, result)
+        assertEquals(expected, result.getOrThrow())
         coVerify(exactly = 1) { backend.verify("encrypted-token", "scan-nonce") }
     }
 }

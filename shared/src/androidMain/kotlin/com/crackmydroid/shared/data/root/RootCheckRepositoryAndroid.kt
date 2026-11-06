@@ -13,13 +13,15 @@ import com.crackmydroid.shared.domain.repository.IntegrityVerificationRepository
 import com.crackmydroid.shared.i18n.platformLanguage
 import com.crackmydroid.shared.i18n.stringsFor
 import com.scottyab.rootbeer.RootBeer
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.Calendar
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
-import kotlin.coroutines.suspendCoroutine
 
 class RootCheckRepositoryAndroid(
     private val context: Context,
@@ -229,18 +231,23 @@ class RootCheckRepositoryAndroid(
                 val request = com.google.android.play.core.integrity.IntegrityTokenRequest.builder()
                     .setNonce(nonce)
                     .build()
-                // Suspends awaiting the task result
-                val token = suspendCoroutine<String> { cont ->
+                val token = suspendCancellableCoroutine<String> { cont ->
                     manager.requestIntegrityToken(request)
-                        .addOnSuccessListener { res -> cont.resume(res.token()) }
-                        .addOnFailureListener { err -> cont.resumeWithException(err) }
+                        .addOnSuccessListener { res ->
+                            if (cont.isActive) cont.resume(res.token())
+                        }
+                        .addOnFailureListener { err ->
+                            if (cont.isActive) cont.resumeWithException(err)
+                        }
                 }
                 integrityVerificationRepository.verify(token, nonce)
-            } catch (t: Throwable) {
+            } catch (cancellation: CancellationException) {
+                throw cancellation
+            } catch (error: Exception) {
                 com.crackmydroid.shared.domain.model.PlayIntegrityResult(
                     basicIntegrity = null,
                     deviceIntegrity = null,
-                    details = "Play Integrity error: ${t.message}"
+                    details = "Play Integrity error: ${error.message}"
                 )
             }
         }

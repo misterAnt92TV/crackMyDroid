@@ -7,6 +7,7 @@ import com.crackmydroid.shared.domain.model.shell.ShellCommandResult
 import com.crackmydroid.shared.domain.repository.AdbBridge
 import com.crackmydroid.shared.domain.repository.DeviceSessionController
 import com.crackmydroid.shared.domain.repository.ShellCommandRepository
+import com.crackmydroid.shared.util.runSuspendCatching
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -74,7 +75,7 @@ class ShellCommandRepositoryDesktop(
                     code = 126
                 )
             }
-            runCatching {
+            runSuspendCatching {
                 val stdout = shell(command.command, asRoot = command.requiresRoot)
                 ShellCommandResult(
                     success = true,
@@ -94,8 +95,8 @@ class ShellCommandRepositoryDesktop(
 
     private suspend fun canUseRootShell(): Boolean {
         cache.rootShellAvailable?.let { return it }
-        val whichSu = runCatching { shell("which su") }.getOrDefault("")
-        val suId = runCatching { shell("id", asRoot = true) }.getOrDefault("")
+        val whichSu = runSuspendCatching { shell("which su") }.getOrDefault("")
+        val suId = runSuspendCatching { shell("id", asRoot = true) }.getOrDefault("")
         val available = whichSu.isNotBlank() && suId.contains("uid=0")
         cache.rootShellAvailable = available
         return available

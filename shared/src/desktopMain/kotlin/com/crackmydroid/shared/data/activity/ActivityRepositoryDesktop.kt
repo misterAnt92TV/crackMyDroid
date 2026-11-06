@@ -7,6 +7,7 @@ import com.crackmydroid.shared.data.cache.PaginationHelper
 import com.crackmydroid.shared.domain.model.activity.ActivityEntry
 import com.crackmydroid.shared.domain.model.app.AppComponent
 import com.crackmydroid.shared.domain.repository.ActivityRepository
+import com.crackmydroid.shared.util.runSuspendCatching
 import com.crackmydroid.shared.domain.repository.AdbBridge
 import com.crackmydroid.shared.domain.repository.DeviceSessionController
 import com.crackmydroid.shared.domain.repository.RemotePackageManager
@@ -53,7 +54,7 @@ class ActivityRepositoryDesktop(
         dataUri: String?,
         mimeType: String?
     ): Result<Unit> = withContext(Dispatchers.IO) {
-        runCatching {
+        runSuspendCatching {
             val normalizedAction = action?.trim().orEmpty().ifBlank { null }
             val normalizedData = dataUri?.trim().orEmpty().ifBlank { null }
             val normalizedMimeType = mimeType?.trim().orEmpty().ifBlank { null }

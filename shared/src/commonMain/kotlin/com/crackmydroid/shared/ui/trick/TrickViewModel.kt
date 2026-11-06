@@ -18,8 +18,9 @@ class TrickViewModel(
 
     fun load() {
         scope.launch {
-            val list = listUseCase()
-            _state.update { it.copy(commands = list) }
+            listUseCase()
+                .onSuccess { list -> _state.update { it.copy(commands = list) } }
+                .onFailure { error -> _state.update { it.copy(error = error.message) } }
         }
     }
 
@@ -40,7 +41,7 @@ class TrickViewModel(
             )
         }
         scope.launch {
-            runCatching { execUseCase(command) }
+            execUseCase(command)
                 .onSuccess { res ->
                     _state.update {
                         it.copy(

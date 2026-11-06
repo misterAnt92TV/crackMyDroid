@@ -59,18 +59,18 @@ class ExportReportUseCaseTest {
     }
 
     @Test
-    fun `save preserves failure results and thrown exceptions`() = runTest {
+    fun `save preserves failure results and converts thrown exceptions to failures`() = runTest {
         val repository = mockk<ReportFileRepository>()
         val failure = IllegalStateException("Cannot save")
         val useCase = ExportReportUseCase(repository)
         coEvery { repository.save("empty.txt", "") } returns Result.failure(failure)
         assertSame(failure, useCase.save("empty.txt", "").exceptionOrNull())
         coEvery { repository.save("empty.txt", "") } throws failure
-        assertSame(failure, assertFailsWith<IllegalStateException> { useCase.save("empty.txt", "") })
+        assertSame(failure, useCase.save("empty.txt", "").exceptionOrNull())
     }
 
     @Test
-    fun `share preserves save or share exceptions without reporting a successful path`() = runTest {
+    fun `share converts save or share exceptions into failures`() = runTest {
         for (saveThrows in listOf(false, true)) {
             val repository = mockk<ReportFileRepository>()
             val failure = IllegalStateException("Cannot export")
@@ -88,5 +88,31 @@ class ExportReportUseCaseTest {
                 coVerify(exactly = 2) { repository.share("/generated.txt") }
             }
         }
+
+    }
+
+    @Test
+    fun `share propagates cancellation instead of returning it as a failure`() = runTest {
+        val repository = mockk<ReportFileRepository>()
+        val cancellation = kotlinx.coroutines.CancellationException("cancelled")
+        coEvery { repository.save("report.txt", "") } returns Result.failure(cancellation)
+
+        val failure = assertFailsWith<kotlinx.coroutines.CancellationException> {
+            ExportReportUseCase(repository).share("report.txt", "")
+        }
+
+        assertSame(cancellation, failure)
+        coVerify(exactly = 0) { repository.share(any()) }
+    }
+
+    @Test
+    fun `share propagates a cancellation returned after saving`() = runTest {
+        val repository = mockk<ReportFileRepository>()
+        val cancellation = kotlinx.coroutines.CancellationException("cancelled")
+        coEvery { repository.save("report.txt", "") } returns Result.success("/report.txt")
+        coEvery { repository.share("/report.txt") } returns Result.failure(cancellation)
+        assertSame(cancellation, assertFailsWith<kotlinx.coroutines.CancellationException> {
+            ExportReportUseCase(repository).share("report.txt", "")
+        })
     }
 }

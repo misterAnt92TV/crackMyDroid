@@ -20,6 +20,7 @@ import com.crackmydroid.shared.i18n.Strings
 import com.crackmydroid.shared.i18n.stringsFor
 import com.crackmydroid.shared.presentation.BaseViewModel
 import com.crackmydroid.shared.presentation.operations.NoOpOperationLogRepository
+import com.crackmydroid.shared.util.runSuspendCatching
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -49,13 +50,16 @@ class ActivityListViewModel(
 
     fun refresh() {
         scope.launch {
-            runCatching {
-                getFavorites() to getPackageFavorites()
-            }.onSuccess { (favorites, packages) ->
+            val favoritesResult = runSuspendCatching {
+                getFavorites().getOrThrow() to getPackageFavorites().getOrThrow()
+            }
+            favoritesResult.onSuccess { (favorites, packages) ->
                 _state.update { it.copy(favorites = favorites, favoritePackages = packages) }
             }
-            _state.update { it.copy(loading = true, error = null) }
-            runCatching { getActivities() }
+            _state.update {
+                it.copy(loading = true, error = favoritesResult.exceptionOrNull()?.message)
+            }
+            getActivities()
                 .onSuccess { list ->
                     recomputeAsync(_state.value.copy(activities = list, loading = false))
                     operationLogs.record(
@@ -170,14 +174,20 @@ class ActivityListViewModel(
         val favs = _state.value.favorites.toMutableSet()
         if (favs.contains(key)) favs.remove(key) else favs.add(key)
         recomputeAsync(_state.value.copy(favorites = favs))
-        scope.launch { setFavorites(favs) }
+        scope.launch {
+            setFavorites(favs)
+                .onFailure { error -> _state.update { it.copy(error = error.message) } }
+        }
     }
 
     fun toggleFavoritePackage(packageName: String) {
         val favs = _state.value.favoritePackages.toMutableSet()
         if (favs.contains(packageName)) favs.remove(packageName) else favs.add(packageName)
         recomputeAsync(_state.value.copy(favoritePackages = favs))
-        scope.launch { setPackageFavorites(favs) }
+        scope.launch {
+            setPackageFavorites(favs)
+                .onFailure { error -> _state.update { it.copy(error = error.message) } }
+        }
     }
 
     fun toggleExpanded(packageName: String) {
@@ -190,8 +200,10 @@ class ActivityListViewModel(
 
     fun exportAll() {
         scope.launch {
-            val content = buildExportContent(_state.value.activities)
-            reportExporter.save("activities${extensionForCurrentFormat()}", content)
+            runSuspendCatching {
+                val content = buildExportContent(_state.value.activities)
+                reportExporter.save("activities${extensionForCurrentFormat()}", content).getOrThrow()
+            }
                 .onSuccess { path ->
                     operationLogs.record("Export attività", success = true, details = path)
                 }.onFailure { error ->
@@ -217,10 +229,12 @@ class ActivityListViewModel(
             return
         }
         scope.launch {
-            val content = buildExportContent(acts)
-            val fileName =
-                "activities_${packageName.replace('.', '_')}" + extensionForCurrentFormat()
-            reportExporter.share(fileName, content)
+            runSuspendCatching {
+                val content = buildExportContent(acts)
+                val fileName =
+                    "activities_${packageName.replace('.', '_')}" + extensionForCurrentFormat()
+                reportExporter.share(fileName, content).getOrThrow()
+            }
                 .onSuccess { path ->
                     operationLogs.record(
                         "Export attività $packageName",
@@ -330,7 +344,7 @@ class ActivityListViewModel(
             }
         val baseName = "activity_report_${packageName.replace('.', '_')}.html"
         val content = buildHtmlReport(report)
-        return reportExporter.share(baseName, content)
+        return runSuspendCatching { reportExporter.share(baseName, content).getOrThrow() }
             .onSuccess { path ->
                 operationLogs.record("Report activity $packageName", success = true, details = path)
             }.onFailure { error ->
@@ -344,7 +358,7 @@ class ActivityListViewModel(
     }
 
     private suspend fun buildExportContent(list: List<ActivityEntry>): String {
-        val format = getExportFormat()
+        val format = getExportFormat().getOrThrow()
         return if (format == com.crackmydroid.shared.domain.model.ExportFormat.JSON) {
             val payload = list.map { entry -> entry.toExportPayload() }
             json.encodeToString(payload)
@@ -424,7 +438,7 @@ class ActivityListViewModel(
     }
 
     private suspend fun extensionForCurrentFormat(): String =
-        if (getExportFormat() == com.crackmydroid.shared.domain.model.ExportFormat.JSON) ".json" else ".txt"
+        if (getExportFormat().getOrThrow() == com.crackmydroid.shared.domain.model.ExportFormat.JSON) ".json" else ".txt"
 
     private fun normalizeQuery(value: String): String = value
         .trim()

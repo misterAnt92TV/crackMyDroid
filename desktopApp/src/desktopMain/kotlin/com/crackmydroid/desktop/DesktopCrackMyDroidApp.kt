@@ -90,8 +90,10 @@ fun DesktopCrackMyDroidApp() {
     }
 
     LaunchedEffect(Unit) {
-        strings = stringsFor(resolveLanguageCode(getLanguage(), platformLanguage()))
-        appTheme = getTheme()
+        getLanguage().onSuccess { language ->
+            strings = stringsFor(resolveLanguageCode(language, platformLanguage()))
+        }
+        getTheme().onSuccess { appTheme = it }
         if (state.availableDevices.isEmpty()) {
             sessionController.refreshDevices(null)
         }

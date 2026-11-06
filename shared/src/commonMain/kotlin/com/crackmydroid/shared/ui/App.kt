@@ -134,6 +134,9 @@ fun CrackMyDroidApp(
     LaunchedEffect(settingsState.value.language) {
         onLanguageChanged(settingsState.value.language)
     }
+    LaunchedEffect(languageCode, shellState.initialized) {
+        if (shellState.initialized) shellVm.updateLanguage(languageCode)
+    }
 
     val darkTheme = when (settingsState.value.theme) {
         AppTheme.DARK -> true

@@ -75,6 +75,56 @@ Si trova in `com.crackmydroid.shared.domain` e contiene la logica indipendente d
 
 Un UseCase coordina una singola intenzione applicativa. Può validare input, chiamare uno o più repository, trasformare i dati e restituire un risultato di dominio. Non deve conoscere Compose, Koin, Activity, Context o API ADB.
 
+Le operazioni one-shot sono `suspend` e restituiscono `Result<T>` (anche analisi e
+report); le scritture restituiscono `Result<Unit>`. Tutti gli use case estendono
+`BaseUseCase`, che centralizza conversione delle eccezioni ordinarie e diagnostica,
+senza possedere scope o job. `CancellationException` viene sempre propagata,
+anche se contenuta in un risultato del repository; gli `Error` fatali non vengono
+catturati. Un esito di dominio negativo o l'assenza legittima di finding non sono
+automaticamente errori tecnici.
+
+Ogni use case dichiara `private const val TAG = "NomeClasse"` nel proprio
+`private companion object` e passa `TAG` a `BaseUseCase`, mantenendo stabile
+l'identificativo diagnostico senza stringhe letterali nel costruttore della base.
+
+Gli use case CPU usano `AppDispatchers.default` iniettabile, con controlli
+cooperativi di cancellazione. Gli altri mantengono il contesto del chiamante e il
+dispatching I/O dei repository. `AppDispatchers` risiede in `shared.util`, non
+nel layer Presentation. I ViewModel consumano i risultati e preparano report
+fuori da `StateFlow.update`; le anteprime asincrone espongono stato osservabile.
+
+La base usa Kermit per eventi con nome use case/operazione, esito e durata
+monotona: debug solo con Log verbosi, error per fallimenti. La preferenza viene
+letta prima dei caricamenti della shell e aggiornata solo dopo persistenza
+riuscita. I nuovi eventi non contengono input/output, messaggi grezzi, cause o
+throwable; la cancellazione non viene registrata come errore. La policy non
+modifica i livelli degli altri logger.
+
+Non esistono attualmente use case Flow. Per futuri stream il contratto previsto
+e `Flow<Result<T>>`, con errori upstream gestiti nello stream e cancellazione
+propagata, senza intercettare gli errori del collector.
+
+### Localizzazione dei risultati e dei report
+
+L'analisi permessi produce `PermissionFindingKind` e parametri tecnici;
+i controlli PenTest producono messaggi `PenTestMessage` tipizzati. Questi
+risultati non memorizzano frasi nella lingua della scansione. Il catalogo puro
+`UseCaseTexts` li rende in italiano, inglese, tedesco, spagnolo e francese, con
+fallback inglese, condividendo descrizioni e severita tra UI e report.
+
+I builder di report ricevono esplicitamente `UseCaseReportText`, contratto
+definito nel dominio: non leggono preferenze, `LocalStrings` o locale globale.
+La shell carica la lingua prima delle feature e coordina i mapper dei ViewModel.
+Cambiare lingua rimappa i risultati e gli snapshot PenTest in memoria senza
+rifare scansioni; il report dispositivo viene rigenerato dai dati caricati.
+Le preview obsolete vengono cancellate e ogni export/share cattura la lingua
+all'inizio dell'operazione. I file gia esportati non vengono riscritti.
+
+TAG, permessi, package, URI, nomi file e termini tecnici (APK, ADB, shell,
+intent/deeplink, overlay, accessibility, score, finding) rimangono invariati.
+I messaggi raw dei repository/dispositivo e i testi dell'analizzatore activity
+preesistente non fanno parte di questa localizzazione.
+
 ### 3.3 Data
 
 Il layer Data contiene adapter, persistenza, cache e accesso a sorgenti esterne. Le interfacce consumate dal dominio sono dichiarate in `commonMain`; le implementazioni sono selezionate per piattaforma.
@@ -138,8 +188,8 @@ Il wrapper SwiftUI ospita la UI condivisa. Le integrazioni iOS restano negli ada
 
 `shared/src/commonMain/kotlin/com/crackmydroid/shared/di/Koin.kt` compone:
 
-- `commonModule()` per gli UseCase comuni;
-- `presentationModule()` per dispatcher e ViewModel;
+- `commonModule()` per UseCase, logger e dispatcher condivisi;
+- `presentationModule()` per ViewModel;
 - `platformModule()` come `expect`, con implementazioni nei source set di piattaforma.
 
 Le dipendenze devono essere costruite nel composition root e passate esplicitamente ai componenti. Un ViewModel non deve creare repository o avviare Koin autonomamente.

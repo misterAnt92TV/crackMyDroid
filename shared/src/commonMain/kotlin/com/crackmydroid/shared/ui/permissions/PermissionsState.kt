@@ -18,6 +18,11 @@ data class PermissionsState(
     val showOnlyRisky: Boolean = false,
     val riskReports: List<PermissionRiskReport> = emptyList(),
     val visibleApps: List<AppPermissionEntry> = emptyList(),
-    val favoriteQueries: List<String> = emptyList()
-    ,val visibleFindingsByPackage: Map<String, List<com.crackmydroid.shared.domain.model.PermissionRiskFinding>> = emptyMap()
+    val favoriteQueries: List<String> = emptyList(),
+    val findingsByPackage: Map<String, List<PermissionFindingUi>> = emptyMap(),
+    val visibleFindingsByPackage: Map<String, List<PermissionFindingUi>> = emptyMap(),
+    val reportPreviewPackage: String? = null,
+    val reportPreviewLoading: Boolean = false,
+    val reportPreviewContent: String? = null,
+    val reportPreviewError: String? = null
 )

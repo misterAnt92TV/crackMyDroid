@@ -10,6 +10,9 @@ import com.crackmydroid.shared.domain.usecase.info.GetDeviceInfoUseCase
 import com.crackmydroid.shared.domain.usecase.info.BuildDeviceInfoReportUseCase
 import com.crackmydroid.shared.domain.usecase.reports.ExportReportUseCase
 import com.crackmydroid.shared.ui.info.InfoViewModel
+import com.crackmydroid.shared.domain.model.ReportLabel
+import com.crackmydroid.shared.domain.model.UseCaseReportText
+import com.crackmydroid.shared.i18n.UseCaseTexts
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -19,11 +22,14 @@ import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.runCurrent
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.setMain
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class InfoViewModelTest {
@@ -86,7 +92,12 @@ class InfoViewModelTest {
         advanceUntilIdle()
 
         assertEquals("/tmp/device.txt", viewModel.state.value.lastExportPath)
-        coVerify { exporter.save("device_info", match { it.contains("Device info") && it.contains("Rooted: false") }) }
+        coVerify {
+            exporter.save("device_info", match {
+                it.contains(UseCaseTexts("en").label(ReportLabel.DEVICE_INFO_TITLE)) &&
+                    it.contains("${UseCaseTexts("en").label(ReportLabel.ROOTED)}: ${UseCaseTexts("en").boolean(false)}")
+            })
+        }
         coVerify { exporter.save("device_info", "override") }
         coVerify { exporter.share("/tmp/device.txt") }
         viewModel.onCleared()
@@ -117,6 +128,65 @@ class InfoViewModelTest {
         viewModel.onCleared()
     }
 
+    @Test
+    fun loadedDeviceReportChangesLanguageWithoutReloadingRepositories() = runTest(dispatcher) {
+        val infoRepository = mockk<DeviceInfoRepository>()
+        val rootRepository = mockk<RootCheckRepository>()
+        val files = mockk<ReportFileRepository>()
+        coEvery { infoRepository.getDeviceInfo() } returns deviceInfo()
+        coEvery { rootRepository.checkRoot() } returns RootStatus(false, "raw details")
+        coEvery { files.save(any(), any()) } returns Result.success("/tmp/device")
+        val vm = viewModel(infoRepository, rootRepository, files)
+        vm.load()
+        advanceUntilIdle()
+
+        for (language in listOf("it", "en", "de", "es", "fr")) {
+            vm.updateLanguage(language)
+            advanceUntilIdle()
+            val content = vm.state.value.reportContent.orEmpty()
+            assertTrue(content.startsWith(UseCaseTexts(language).label(ReportLabel.DEVICE_INFO_TITLE)))
+            assertTrue(content.contains("raw details"))
+            assertEquals(false, vm.state.value.reportLoading)
+        }
+        vm.export()
+        advanceUntilIdle()
+        coVerify { files.save("device_info", match { it.startsWith(UseCaseTexts("fr").label(ReportLabel.DEVICE_INFO_TITLE)) }) }
+        coVerify(exactly = 1) { infoRepository.getDeviceInfo() }
+        coVerify(exactly = 1) { rootRepository.checkRoot() }
+        vm.onCleared()
+    }
+
+    @Test
+    fun languageSwitchCannotPublishAnObsoleteDevicePreview() = runTest(dispatcher) {
+        val infoRepository = mockk<DeviceInfoRepository>()
+        val rootRepository = mockk<RootCheckRepository>()
+        val builder = mockk<BuildDeviceInfoReportUseCase>()
+        coEvery { infoRepository.getDeviceInfo() } returns deviceInfo()
+        coEvery { rootRepository.checkRoot() } returns RootStatus(false, "")
+        var cancelled = false
+        coEvery { builder(any(), any(), any()) } coAnswers {
+            val reportText = thirdArg<UseCaseReportText>()
+            if (reportText.label(ReportLabel.DEVICE_INFO_TITLE) == UseCaseTexts("en").label(ReportLabel.DEVICE_INFO_TITLE)) {
+                try {
+                    delay(1_000)
+                } finally {
+                    cancelled = true
+                }
+            }
+            Result.success(reportText.label(ReportLabel.DEVICE_INFO_TITLE))
+        }
+        val vm = InfoViewModel(GetDeviceInfoUseCase(infoRepository), CheckRootUseCase(rootRepository), ExportReportUseCase(mockk()), builder)
+        vm.load()
+        runCurrent()
+        vm.updateLanguage("de")
+        advanceUntilIdle()
+
+        assertTrue(cancelled)
+        assertEquals(UseCaseTexts("de").label(ReportLabel.DEVICE_INFO_TITLE), vm.state.value.reportContent)
+        assertEquals(false, vm.state.value.reportLoading)
+        vm.onCleared()
+    }
+
     private fun viewModel(
         infoRepository: DeviceInfoRepository,
         rootRepository: RootCheckRepository,
@@ -125,7 +195,7 @@ class InfoViewModelTest {
         GetDeviceInfoUseCase(infoRepository),
         CheckRootUseCase(rootRepository),
         ExportReportUseCase(exporter),
-        BuildDeviceInfoReportUseCase()
+        BuildDeviceInfoReportUseCase(dispatchers = TestAppDispatchers(dispatcher))
     )
 
     private fun deviceInfo() = DeviceInfo(

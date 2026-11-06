@@ -33,6 +33,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.CancellationException
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -52,7 +53,7 @@ class UseCaseDelegationTest {
         val useCase = GetActivitiesUseCase(repository)
         val result = useCase()
 
-        assertEquals(expected, result)
+        assertEquals(expected, result.getOrThrow())
         coVerify(exactly = 1) { repository.getActivities() }
     }
 
@@ -68,7 +69,7 @@ class UseCaseDelegationTest {
         val useCase = ListInstalledAppsUseCase(repository)
         val result = useCase()
 
-        assertEquals(expected, result)
+        assertEquals(expected, result.getOrThrow())
         coVerify(exactly = 1) { repository.listInstalled() }
     }
 
@@ -82,7 +83,7 @@ class UseCaseDelegationTest {
         val useCase = ExecuteShellCommandUseCase(repository)
         val result = useCase(command)
 
-        assertEquals(expected, result)
+        assertEquals(expected, result.getOrThrow())
         coVerify(exactly = 1) { repository.execute(command) }
     }
 
@@ -99,7 +100,7 @@ class UseCaseDelegationTest {
         coEvery { repository.launch(entry, "VIEW", "demo://item", "text/plain") } returns Result.failure(failure)
         assertSame(failure, useCase(entry, "VIEW", "demo://item", "text/plain").exceptionOrNull())
         coEvery { repository.launch(entry, null, null, null) } throws failure
-        assertSame(failure, assertFailsWith<IllegalStateException> { useCase(entry) })
+        assertSame(failure, useCase(entry).exceptionOrNull())
     }
 
     @Test
@@ -108,9 +109,9 @@ class UseCaseDelegationTest {
         val useCase = GetDeviceInfoUseCase(repository)
         val info = DeviceInfo(model = "Demo", batteryLevel = null, totalMemory = null, freeMemory = null)
         coEvery { repository.getDeviceInfo() } returns info
-        assertSame(info, useCase())
+        assertSame(info, useCase().getOrThrow())
         coEvery { repository.getDeviceInfo() } throws IllegalStateException("Device unavailable")
-        assertEquals("Device unavailable", assertFailsWith<IllegalStateException> { useCase() }.message)
+        assertEquals("Device unavailable", useCase().exceptionOrNull()?.message)
     }
 
     @Test
@@ -125,11 +126,11 @@ class UseCaseDelegationTest {
         coEvery { logs.fetchLog() } returns emptyList()
         coEvery { permissions.listAppPermissions() } returns emptyList()
         coEvery { commands.listCommands() } returns emptyList()
-        assertEquals(emptyList(), GetActivitiesUseCase(activities)())
-        assertEquals(emptyList(), ListInstalledAppsUseCase(apps)())
-        assertEquals(emptyList(), GetLogsUseCase(logs)())
-        assertEquals(emptyList(), ListPermissionsUseCase(permissions)())
-        assertEquals(emptyList(), ListShellCommandsUseCase(commands)())
+        assertEquals(emptyList(), GetActivitiesUseCase(activities)().getOrThrow())
+        assertEquals(emptyList(), ListInstalledAppsUseCase(apps)().getOrThrow())
+        assertEquals(emptyList(), GetLogsUseCase(logs)().getOrThrow())
+        assertEquals(emptyList(), ListPermissionsUseCase(permissions)().getOrThrow())
+        assertEquals(emptyList(), ListShellCommandsUseCase(commands)().getOrThrow())
 
         val failure = IllegalStateException("Read failed")
         coEvery { activities.getActivities() } throws failure
@@ -137,11 +138,11 @@ class UseCaseDelegationTest {
         coEvery { logs.fetchLog() } throws failure
         coEvery { permissions.listAppPermissions() } throws failure
         coEvery { commands.listCommands() } throws failure
-        assertSame(failure, assertFailsWith<IllegalStateException> { GetActivitiesUseCase(activities)() })
-        assertSame(failure, assertFailsWith<IllegalStateException> { ListInstalledAppsUseCase(apps)() })
-        assertSame(failure, assertFailsWith<IllegalStateException> { GetLogsUseCase(logs)() })
-        assertSame(failure, assertFailsWith<IllegalStateException> { ListPermissionsUseCase(permissions)() })
-        assertSame(failure, assertFailsWith<IllegalStateException> { ListShellCommandsUseCase(commands)() })
+        assertSame(failure, GetActivitiesUseCase(activities)().exceptionOrNull())
+        assertSame(failure, ListInstalledAppsUseCase(apps)().exceptionOrNull())
+        assertSame(failure, GetLogsUseCase(logs)().exceptionOrNull())
+        assertSame(failure, ListPermissionsUseCase(permissions)().exceptionOrNull())
+        assertSame(failure, ListShellCommandsUseCase(commands)().exceptionOrNull())
     }
 
     @Test
@@ -155,13 +156,13 @@ class UseCaseDelegationTest {
         coEvery { logs.fetchLog() } returns logLines
         coEvery { permissions.listAppPermissions() } returns listOf(app)
         coEvery { commands.listCommands() } returns listOf(command)
-        assertEquals(logLines, GetLogsUseCase(logs)())
-        assertEquals(listOf(app), ListPermissionsUseCase(permissions)())
-        assertEquals(listOf(command), ListShellCommandsUseCase(commands)())
+        assertEquals(logLines, GetLogsUseCase(logs)().getOrThrow())
+        assertEquals(listOf(app), ListPermissionsUseCase(permissions)().getOrThrow())
+        assertEquals(listOf(command), ListShellCommandsUseCase(commands)().getOrThrow())
     }
 
     @Test
-    fun `APK and log exports forward inputs and preserve failure results and exceptions`() = runTest {
+    fun `APK and log exports forward inputs and convert thrown exceptions to failures`() = runTest {
         val apps = mockk<InstalledAppsRepository>()
         val logs = mockk<LogRepository>()
         val failure = IllegalStateException("Export failed")
@@ -182,9 +183,22 @@ class UseCaseDelegationTest {
         coEvery { apps.exportApk("pkg") } throws failure
         coEvery { apps.shareApk("pkg", false) } throws failure
         coEvery { logs.export(lines) } throws failure
-        assertSame(failure, assertFailsWith<IllegalStateException> { ExportApkUseCase(apps)("pkg") })
-        assertSame(failure, assertFailsWith<IllegalStateException> { ShareApkUseCase(apps)("pkg", false) })
-        assertSame(failure, assertFailsWith<IllegalStateException> { ExportLogsUseCase(logs)(lines) })
+        assertSame(failure, ExportApkUseCase(apps)("pkg").exceptionOrNull())
+        assertSame(failure, ShareApkUseCase(apps)("pkg", false).exceptionOrNull())
+        assertSame(failure, ExportLogsUseCase(logs)(lines).exceptionOrNull())
+    }
+
+    @Test
+    fun `result use cases propagate cancellation from repository failures`() = runTest {
+        val repository = mockk<InstalledAppsRepository>()
+        val cancellation = CancellationException("cancelled")
+        coEvery { repository.exportApk("pkg") } returns Result.failure(cancellation)
+
+        val failure = assertFailsWith<CancellationException> {
+            ExportApkUseCase(repository)("pkg")
+        }
+
+        assertSame(cancellation, failure)
     }
 
     @Test
@@ -195,10 +209,10 @@ class UseCaseDelegationTest {
         val privileged = RootStatus(true, "access granted")
         coEvery { repository.checkRoot(RootCheckMode.PASSIVE) } returns passive
         coEvery { repository.checkRoot(RootCheckMode.PRIVILEGE_ACCESS) } returns privileged
-        assertEquals(passive, useCase())
-        assertEquals(privileged, useCase(RootCheckMode.PRIVILEGE_ACCESS))
+        assertEquals(passive, useCase().getOrThrow())
+        assertEquals(privileged, useCase(RootCheckMode.PRIVILEGE_ACCESS).getOrThrow())
         coEvery { repository.checkRoot(any()) } throws IllegalStateException("Root failed")
-        assertEquals("Root failed", assertFailsWith<IllegalStateException> { useCase() }.message)
+        assertEquals("Root failed", useCase().exceptionOrNull()?.message)
     }
 
     @Test
@@ -209,10 +223,10 @@ class UseCaseDelegationTest {
         val unavailable = PlayIntegrityResult(details = "unavailable")
         coEvery { repository.checkPlayIntegrity("sample-nonce") } returns available
         coEvery { repository.checkPlayIntegrity("custom-nonce") } returns unavailable
-        assertEquals(available, useCase())
-        assertEquals(unavailable, useCase("custom-nonce"))
+        assertEquals(available, useCase().getOrThrow())
+        assertEquals(unavailable, useCase("custom-nonce").getOrThrow())
         coEvery { repository.checkPlayIntegrity(any()) } throws IllegalStateException("Integrity failed")
-        assertEquals("Integrity failed", assertFailsWith<IllegalStateException> { useCase() }.message)
+        assertEquals("Integrity failed", useCase().exceptionOrNull()?.message)
     }
 
     @Test
@@ -221,11 +235,11 @@ class UseCaseDelegationTest {
         val command = ShellCommand("Root", "id", requiresRoot = true)
         val failureResult = ShellCommandResult(false, "", "denied", 1)
         coEvery { repository.execute(command) } returns failureResult
-        assertEquals(failureResult, ExecuteShellCommandUseCase(repository)(command))
+        assertEquals(failureResult, ExecuteShellCommandUseCase(repository)(command).getOrThrow())
         coEvery { repository.execute(command) } throws IllegalStateException("Shell unavailable")
         assertEquals(
             "Shell unavailable",
-            assertFailsWith<IllegalStateException> { ExecuteShellCommandUseCase(repository)(command) }.message
+            ExecuteShellCommandUseCase(repository)(command).exceptionOrNull()?.message
         )
     }
 }

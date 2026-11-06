@@ -11,6 +11,7 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.isSuccess
 import kotlinx.serialization.Serializable
+import kotlinx.coroutines.CancellationException
 
 class IntegrityBackendClient(private val httpClient: HttpClient) {
     suspend fun verify(
@@ -27,7 +28,9 @@ class IntegrityBackendClient(private val httpClient: HttpClient) {
         if (!response.status.isSuccess()) throw IntegrityBackendFailure.Http(response.status)
         val payload = try {
             response.body<IntegrityVerificationResponse>()
-        } catch (error: Throwable) {
+        } catch (cancellation: CancellationException) {
+            throw cancellation
+        } catch (error: Exception) {
             throw IntegrityBackendFailure.MalformedResponse(error)
         }
         if (payload.requestBinding != requestBinding) throw IntegrityBackendFailure.BindingMismatch

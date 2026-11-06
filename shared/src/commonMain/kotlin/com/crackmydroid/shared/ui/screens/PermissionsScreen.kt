@@ -46,6 +46,8 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -60,7 +62,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
-import com.crackmydroid.shared.domain.model.PermissionRiskFinding
+import com.crackmydroid.shared.ui.permissions.PermissionFindingUi
 import com.crackmydroid.shared.domain.model.PermissionRiskLevel
 import com.crackmydroid.shared.i18n.LocalStrings
 import com.crackmydroid.shared.i18n.ScreenUiStrings
@@ -93,6 +95,18 @@ fun PermissionsScreen(
 
     @Suppress("DEPRECATION")
     val clipboard = LocalClipboardManager.current
+    DisposableEffect(viewModel) {
+        onDispose { viewModel.dismissReportPreview() }
+    }
+    LaunchedEffect(state.reportPreviewPackage, state.reportPreviewContent) {
+        val packageName = state.reportPreviewPackage
+        val content = state.reportPreviewContent
+        if (packageName != null && content != null) {
+            clipboard.setText(AnnotatedString(content))
+            viewModel.shareSingle(packageName, content)
+            viewModel.dismissReportPreview()
+        }
+    }
     val expandedPackages = remember { mutableStateMapOf<String, Boolean>() }
     val favoriteQueries = state.favoriteQueries
     val filteredApps = state.visibleApps
@@ -389,6 +403,12 @@ fun PermissionsScreen(
                     AppText(err, color = androidx.compose.material3.MaterialTheme.colorScheme.error)
                 }
             }
+            if (state.reportPreviewLoading) {
+                item { LinearProgressIndicator(modifier = Modifier.fillMaxWidth()) }
+            }
+            state.reportPreviewError?.let { error ->
+                item { AppText(error, color = MaterialTheme.colorScheme.error) }
+            }
             items(filteredApps, key = { it.packageName }) { app ->
                 val expanded = expandedPackages[app.packageName] ?: false
                 val isFavorite = state.favorites.contains(app.packageName)
@@ -414,9 +434,7 @@ fun PermissionsScreen(
                     },
                     actions = {
                         IconButton(onClick = {
-                            val content = viewModel.singleReportPreview(app.packageName)
-                            clipboard.setText(AnnotatedString(content))
-                            viewModel.shareSingle(app.packageName)
+                            viewModel.requestReportPreview(app.packageName)
                         }) {
                             Icon(
                                 imageVector = Icons.Filled.Share,
@@ -455,7 +473,7 @@ fun PermissionsScreen(
                             color = MaterialTheme.colorScheme.error,
                             modifier = Modifier.padding(vertical = 4.dp)
                         )
-                        report.findings.take(6).forEach { finding ->
+                        state.findingsByPackage[app.packageName].orEmpty().take(6).forEach { finding ->
                             RiskFindingRow(finding = finding)
                         }
                         if (report.findings.size > 6) {
@@ -495,8 +513,7 @@ fun PermissionsScreen(
 }
 
 @Composable
-private fun RiskFindingRow(finding: PermissionRiskFinding) {
-    val screenStrings = ScreenUiStrings.from(LocalStrings.current)
+private fun RiskFindingRow(finding: PermissionFindingUi) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -504,7 +521,7 @@ private fun RiskFindingRow(finding: PermissionRiskFinding) {
         verticalArrangement = Arrangement.spacedBy(2.dp)
     ) {
         AppText(
-            "[${riskLevelLabel(finding.level, screenStrings)}] ${finding.title}",
+            "[${finding.levelLabel}] ${finding.title}",
             style = MaterialTheme.typography.bodySmall,
             color = riskLevelColor(finding.level)
         )
@@ -519,9 +536,8 @@ private fun RiskFindingRow(finding: PermissionRiskFinding) {
 @Composable
 private fun PermissionRow(
     permission: String,
-    finding: PermissionRiskFinding? = null
+    finding: PermissionFindingUi? = null
 ) {
-    val screenStrings = ScreenUiStrings.from(LocalStrings.current)
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -546,7 +562,7 @@ private fun PermissionRow(
             )
             finding?.let {
                 AppText(
-                    "${riskLevelLabel(it.level, screenStrings)}: ${it.reason}",
+                    "${it.levelLabel}: ${it.reason}",
                     style = MaterialTheme.typography.labelSmall,
                     color = riskLevelColor(it.level)
                 )
@@ -605,10 +621,4 @@ private fun riskLevelColor(level: PermissionRiskLevel): androidx.compose.ui.grap
         PermissionRiskLevel.High -> scheme.tertiary
         PermissionRiskLevel.Medium -> scheme.secondary
     }
-}
-
-private fun riskLevelLabel(level: PermissionRiskLevel, strings: ScreenUiStrings): String = when (level) {
-    PermissionRiskLevel.Critical -> strings.riskCritical
-    PermissionRiskLevel.High -> strings.riskHigh
-    PermissionRiskLevel.Medium -> strings.riskMedium
 }

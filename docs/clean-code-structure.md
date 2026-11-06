@@ -40,6 +40,17 @@ La regola pratica è: il codice più vicino al dominio deve conoscere meno detta
 - La logica pura deve restare in `commonMain` quando non necessita di API native.
 - Le decisioni di business non devono essere duplicate nei ViewModel e nei repository.
 - Filtering, sorting, mapping e validazione funzionali appartengono al UseCase, non alla UI.
+- Le operazioni principali sono `suspend Result<T>` e passano da `BaseUseCase.execute`;
+  le scritture sono `Result<Unit>`, gli helper puri restano sincroni.
+- La base non crea scope/job: propaga cancellazione e usa dispatcher CPU iniettabili
+  solo per analisi/report. Il dispatching I/O rimane nei repository.
+- Non usare `runCatching` sulle operazioni suspend, ignorare failure dei setter o
+  restituire `Result<Result<T>>`. Nelle composizioni usare `getOrThrow` dentro
+  un confine cancellation-safe.
+- I log della base identificano operazione/esito/durata, mai payload o messaggi
+  grezzi; debug segue Log verbosi, fallimenti error, cancellazione solo debug.
+- Futuri stream espongono `Flow<Result<T>>`, senza catturare cancellazione o
+  errori del collector; non aggiungere una base Flow priva di utilizzatori.
 
 ## 4. Repository e adapter
 
@@ -54,7 +65,8 @@ La regola pratica è: il codice più vicino al dominio deve conoscere meno detta
 
 - I modelli di dominio descrivono dati e invarianti, non dettagli di rendering.
 - Preferire `data class`, sealed hierarchy e tipi espliciti a mappe non tipizzate.
-- `ResultWrapper` o tipi equivalenti devono distinguere successo, errore e dati mancanti quando necessario.
+- Gli use case usano Kotlin `Result<T>` per distinguere successo e fallimento;
+  l'assenza legittima di dati mantiene la propria semantica nel valore di successo.
 - Non usare `null` per rappresentare indistintamente errore, loading e assenza legittima.
 - I messaggi destinati alla UI devono essere adattati nel layer di presentazione; il dominio restituisce informazioni semantiche.
 

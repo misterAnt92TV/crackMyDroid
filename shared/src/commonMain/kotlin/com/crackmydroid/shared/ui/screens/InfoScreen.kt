@@ -30,6 +30,7 @@ import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -176,6 +177,7 @@ fun InfoScreen(
                                 )
                             }
                             IconButton(
+                                enabled = state.reportContent != null && !state.reportLoading,
                                 onClick = {
                                     state.reportContent?.let { content ->
                                         clipboard.setText(AnnotatedString(content))
@@ -189,6 +191,9 @@ fun InfoScreen(
                                     tint = MaterialTheme.colorScheme.primary
                                 )
                             }
+                        }
+                        if (state.reportLoading) {
+                            LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
                         }
                         InfoRow(strings.manufacturer, info.manufacturer ?: strings.notAvailable)
                         InfoRow(strings.model, info.model ?: strings.notAvailable)

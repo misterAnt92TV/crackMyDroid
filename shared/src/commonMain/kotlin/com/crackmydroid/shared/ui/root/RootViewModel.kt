@@ -46,7 +46,7 @@ class RootViewModel(
     private fun verify(mode: RootCheckMode) {
         scope.launch {
             _state.update { it.copy(loading = true, error = null) }
-            runCatching { checkRoot(mode) }
+            checkRoot(mode)
                 .onSuccess { status -> _state.update { it.copy(status = status, loading = false) } }
                 .onFailure { err ->
                     _state.update {
@@ -67,7 +67,7 @@ class RootViewModel(
         val nonce = _state.value.playIntegrityNonce.ifBlank { "sample-nonce" }
         scope.launch {
             _state.update { it.copy(loading = true, error = null) }
-            runCatching { checkPlayIntegrity(nonce) }
+            checkPlayIntegrity(nonce)
                 .onSuccess { res ->
                     _state.update {
                         it.copy(

@@ -1,12 +1,14 @@
 package com.crackmydroid.shared.ui.info
 
-import com.crackmydroid.shared.domain.model.DeviceInfo
-import com.crackmydroid.shared.domain.model.RootStatus
 import com.crackmydroid.shared.domain.usecase.info.BuildDeviceInfoReportUseCase
 import com.crackmydroid.shared.domain.usecase.root.CheckRootUseCase
 import com.crackmydroid.shared.domain.usecase.info.GetDeviceInfoUseCase
 import com.crackmydroid.shared.domain.usecase.reports.ExportReportUseCase
+import com.crackmydroid.shared.i18n.UseCaseTexts
+import com.crackmydroid.shared.i18n.UseCasePresentationTexts
 import com.crackmydroid.shared.presentation.BaseViewModel
+import com.crackmydroid.shared.util.runSuspendCatching
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -20,105 +22,79 @@ class InfoViewModel(
 ) : BaseViewModel() {
     private val _state = MutableStateFlow(InfoState())
     val state: StateFlow<InfoState> = _state
+    private var text = UseCaseTexts("en")
+    private var reportJob: Job? = null
+    private var reportRequest = 0L
+
+    fun updateLanguage(languageCode: String) {
+        val next = UseCaseTexts(languageCode)
+        if (text.languageCode == next.languageCode) return
+        text = next
+        refreshReport()
+    }
 
     fun load() {
         scope.launch {
             _state.update { it.copy(loading = true, error = null) }
-            runCatching {
-                val info = getInfo()
-                val root = checkRoot()
-                info to root
+            runSuspendCatching {
+                getInfo().getOrThrow() to checkRoot().getOrThrow()
+            }.onSuccess { (info, root) ->
+                _state.update { it.copy(info = info, root = root, loading = false) }
+                refreshReport()
+            }.onFailure { error ->
+                _state.update { it.copy(error = error.message, loading = false) }
             }
-                .onSuccess { (info, root) ->
-                    _state.update {
-                        it.copy(
-                            info = info,
-                            root = root,
-                            reportContent = buildReport(info, root),
-                            loading = false
-                        )
-                    }
+        }
+    }
+
+    private fun refreshReport() {
+        reportJob?.cancel()
+        val request = ++reportRequest
+        val info = _state.value.info ?: return
+        val root = _state.value.root
+        val reportText = text
+        _state.update { it.copy(reportContent = null, reportLoading = true) }
+        reportJob = scope.launch {
+            val result = buildReport(info, root, reportText)
+            if (request != reportRequest) return@launch
+            result.onSuccess { content ->
+                _state.update { it.copy(reportContent = content, reportLoading = false) }
+            }.onFailure { error ->
+                _state.update {
+                    it.copy(
+                        error = error.message ?: UseCasePresentationTexts(reportText.languageCode).reportFailed,
+                        reportLoading = false
+                    )
                 }
-                .onFailure { err ->
-                    _state.update {
-                        it.copy(
-                            error = err.message,
-                            loading = false
-                        )
-                    }
-                }
+            }
         }
     }
 
     fun export() {
         val info = _state.value.info ?: return
-        val content = buildReport(info, _state.value.root)
+        val root = _state.value.root
+        val reportText = text
         scope.launch {
-            reportExporter.save("device_info", content)
-                .onSuccess { path ->
-                    _state.update {
-                        it.copy(
-                            lastExportPath = path,
-                            error = null
-                        )
-                    }
-                }
-                .onFailure { error -> _state.update { it.copy(error = error.message) } }
+            runSuspendCatching {
+                val content = buildReport(info, root, reportText).getOrThrow()
+                reportExporter.save("device_info", content).getOrThrow()
+            }.onSuccess { path ->
+                _state.update { it.copy(lastExportPath = path, error = null) }
+            }.onFailure { error -> _state.update { it.copy(error = error.message) } }
         }
     }
 
     fun share(contentOverride: String? = null) {
         val info = _state.value.info ?: return
-        val content = contentOverride ?: buildReport(info, _state.value.root)
+        val root = _state.value.root
+        val reportText = text
         scope.launch {
-            reportExporter.share("device_info", content)
-                .onSuccess { path ->
-                    _state.update {
-                        it.copy(
-                            lastExportPath = path,
-                            error = null
-                        )
-                    }
-                }
-                .onFailure { error -> _state.update { it.copy(error = error.message) } }
-        }
-    }
-
-    private fun buildInfoText(info: DeviceInfo, root: RootStatus?): String = buildString {
-        appendLine("Device info")
-        appendLine("Manufacturer: ${info.manufacturer}")
-        appendLine("Model: ${info.model}")
-        appendLine("Brand: ${info.brand}")
-        appendLine("Device: ${info.device}")
-        appendLine("Product: ${info.product}")
-        appendLine("Android: ${info.androidVersion}")
-        appendLine("Patch: ${info.securityPatch}")
-        appendLine("Build ID: ${info.buildId}")
-        appendLine("Build display: ${info.buildDisplay}")
-        appendLine("Fingerprint: ${info.buildFingerprint}")
-        appendLine("Radio: ${info.radio}")
-        appendLine("Kernel: ${info.kernelVersion}")
-        appendLine("Hardware: ${info.hardware}")
-        appendLine("Bootloader: ${info.bootloader}")
-        appendLine("Battery: ${info.batteryLevel ?: -1}%")
-        appendLine("Network: ${info.networkType}")
-        appendLine("Total RAM: ${info.totalMemory}")
-        appendLine("Free RAM: ${info.freeMemory}")
-        appendLine("Screen: ${info.screenResolution} (${info.densityDpi} dpi)")
-        appendLine("ADB enabled: ${info.adbEnabled}")
-        appendLine("Developer options: ${info.developerOptions}")
-        appendLine("App debuggable: ${info.appDebuggable}")
-        root?.let {
-            appendLine("Rooted: ${it.isRooted}")
-            appendLine("Root details: ${it.details}")
-        }
-        appendLine("IMEI: ${info.imei}")
-        appendLine("Serial: ${info.serial}")
-        if (!info.systemPropDump.isNullOrBlank()) {
-            appendLine()
-            appendLine("System properties source: ${info.systemPropSource ?: "n/a"}")
-            appendLine("System properties dump:")
-            appendLine(info.systemPropDump)
+            runSuspendCatching {
+                val content = contentOverride ?: buildReport(info, root, reportText).getOrThrow()
+                reportExporter.share("device_info", content).getOrThrow()
+            }.onSuccess { path ->
+                _state.update { it.copy(lastExportPath = path, error = null) }
+            }.onFailure { error -> _state.update { it.copy(error = error.message) } }
         }
     }
 }

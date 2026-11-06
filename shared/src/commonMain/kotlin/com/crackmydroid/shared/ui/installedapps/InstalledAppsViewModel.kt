@@ -12,6 +12,7 @@ import com.crackmydroid.shared.domain.usecase.installedapps.ShareApkUseCase
 import com.crackmydroid.shared.domain.usecase.reports.ExportReportUseCase
 import com.crackmydroid.shared.presentation.BaseViewModel
 import com.crackmydroid.shared.presentation.operations.NoOpOperationLogRepository
+import com.crackmydroid.shared.util.runSuspendCatching
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -34,11 +35,14 @@ class InstalledAppsViewModel(
 
     fun refresh() {
         scope.launch {
-            runCatching {
-                getFavorites()
-            }.onSuccess { favorites -> updatePresentation { it.copy(favorites = favorites) } }
-            _state.update { it.copy(loading = true, error = null) }
-            runCatching { listUseCase() }
+            val favoritesResult = getFavorites()
+            favoritesResult.onSuccess { favorites ->
+                updatePresentation { it.copy(favorites = favorites) }
+            }
+            _state.update {
+                it.copy(loading = true, error = favoritesResult.exceptionOrNull()?.message)
+            }
+            listUseCase()
                 .onSuccess { list ->
                     updatePresentation { it.copy(apps = list, loading = false) }
                     operationLogs.record("Caricate ${list.size} app installate", success = true)
@@ -109,8 +113,10 @@ class InstalledAppsViewModel(
     fun exportAll(baseName: String = "installed_apps") {
         scope.launch {
             _state.update { it.copy(error = null) }
-            val report = buildListReport(baseName)
-            reportExporter.save(report.fileName, report.content)
+            runSuspendCatching {
+                val report = buildListReport(baseName)
+                reportExporter.save(report.fileName, report.content).getOrThrow()
+            }
                 .onSuccess { path ->
                     _state.update { it.copy(lastExportPath = path, error = null) }
                     operationLogs.record("Export lista app", success = true, details = path)
@@ -125,14 +131,18 @@ class InstalledAppsViewModel(
     fun shareAll(baseName: String = "installed_apps") {
         scope.launch {
             _state.update { it.copy(error = null) }
-            val report = buildListReport(baseName)
-            reportExporter.share(report.fileName, report.content).onSuccess { path ->
-                _state.update { it.copy(lastExportPath = path, error = null) }
-                operationLogs.record("Share lista app", success = true, details = path)
-            }.onFailure { err ->
-                _state.update { it.copy(error = err.message) }
-                operationLogs.record("Share lista app", success = false, details = err.message)
+            runSuspendCatching {
+                val report = buildListReport(baseName)
+                reportExporter.share(report.fileName, report.content).getOrThrow()
             }
+                .onSuccess { path ->
+                    _state.update { it.copy(lastExportPath = path, error = null) }
+                    operationLogs.record("Share lista app", success = true, details = path)
+                }
+                .onFailure { err ->
+                    _state.update { it.copy(error = err.message) }
+                    operationLogs.record("Share lista app", success = false, details = err.message)
+                }
         }
     }
 
@@ -166,7 +176,10 @@ class InstalledAppsViewModel(
             if (favs.contains(packageName)) favs.remove(packageName) else favs.add(packageName)
             it.copy(favorites = favs)
         }
-        scope.launch { setFavorites(_state.value.favorites) }
+        scope.launch {
+            setFavorites(_state.value.favorites)
+                .onFailure { error -> _state.update { it.copy(error = error.message) } }
+        }
     }
 
     private fun updatePresentation(transform: (InstalledAppsState) -> InstalledAppsState) {
@@ -180,7 +193,7 @@ class InstalledAppsViewModel(
     }
 
     private suspend fun buildListReport(baseName: String): GeneratedReport {
-        val format = runCatching { getExportFormat() }.getOrDefault(ExportFormat.TXT)
+        val format = getExportFormat().getOrThrow()
         val sortedApps = _state.value.apps.sortedBy { it.appLabel.lowercase() }
         val content = if (format == ExportFormat.JSON) {
             buildString {

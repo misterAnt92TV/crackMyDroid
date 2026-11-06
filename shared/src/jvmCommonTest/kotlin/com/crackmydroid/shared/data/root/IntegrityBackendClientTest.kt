@@ -10,9 +10,11 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.CancellationException
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertIs
 import kotlinx.serialization.json.Json
 
 class IntegrityBackendClientTest {
@@ -54,6 +56,24 @@ class IntegrityBackendClientTest {
         assertFailsWith<IntegrityBackendFailure.MalformedResponse> {
             client.verify("https://example.test/integrity", "token", "nonce", "CrackMyDroid/test")
         }
+    }
+
+    @Test
+    fun propagatesCancellationFromHttpRequest() = runTest {
+        val cancellation = CancellationException("cancelled")
+        val client = IntegrityBackendClient(
+            HttpClient(
+                MockEngine { throw cancellation }
+            ) {
+                install(ContentNegotiation) { json(Json { ignoreUnknownKeys = true }) }
+            }
+        )
+
+        val thrown = assertFailsWith<CancellationException> {
+            client.verify("https://example.test/integrity", "token", "nonce", "CrackMyDroid/test")
+        }
+
+        assertIs<CancellationException>(thrown)
     }
 
     private fun clientResponding(status: HttpStatusCode, body: String): HttpClient = HttpClient(

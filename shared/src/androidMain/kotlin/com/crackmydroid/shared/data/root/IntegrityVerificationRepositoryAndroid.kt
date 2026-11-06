@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import com.crackmydroid.shared.domain.model.PlayIntegrityResult
 import com.crackmydroid.shared.domain.repository.IntegrityVerificationRepository
+import kotlinx.coroutines.CancellationException
 
 class IntegrityVerificationRepositoryAndroid(
     private val context: Context,
@@ -11,14 +12,18 @@ class IntegrityVerificationRepositoryAndroid(
 ) : IntegrityVerificationRepository {
     override suspend fun verify(integrityToken: String, requestBinding: String): PlayIntegrityResult {
         val endpoint = backendEndpoint() ?: return unavailable("Backend di verifica non configurato")
-        return runCatching {
+        return try {
             backendClient.verify(
                 endpoint = endpoint,
                 integrityToken = integrityToken,
                 requestBinding = requestBinding,
                 userAgent = userAgent()
             )
-        }.getOrElse { error -> unavailable(error.message ?: "Verifica Play Integrity non riuscita") }
+        } catch (cancellation: CancellationException) {
+            throw cancellation
+        } catch (error: Exception) {
+            unavailable(error.message ?: "Verifica Play Integrity non riuscita")
+        }
     }
 
     private fun backendEndpoint(): String? = runCatching {

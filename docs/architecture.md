@@ -126,6 +126,7 @@ domain/
 │   ├── ResultWrapper.kt          // Success/Failure wrapper
 │   └── AppLanguage.kt
 └── usecase/
+    ├── BaseUseCase.kt            // Result, cancellation, safe diagnostics; no scope
     ├── permissions/              // List, AnalyzeRisk, BuildReport
     ├── activities/               // Get, Analyze
     ├── installedapps/            // List, Export, ShareApk
@@ -135,6 +136,20 @@ domain/
     ├── settings/                 // Get/Set theme, language, prefs
     └── trick/                    // ListCommands, Execute
 ```
+
+**Use-case execution:** main operations are `suspend Result<T>`, including CPU
+analysis and report generation; setters use `Result<Unit>`. `BaseUseCase.execute`
+preserves caller cancellation and converts ordinary exceptions, not fatal errors,
+to failures. CPU work runs on injectable `AppDispatchers.default` (`shared.util`);
+repository operations keep repository-owned I/O dispatching. Pure formatting
+helpers remain synchronous. ViewModels prepare report content outside state
+updates and expose asynchronous permission-report preparation through state.
+
+**Diagnostics:** Kermit events contain use-case/operation names, outcome and
+monotonic duration, never payloads or raw exception messages/causes. Debug follows
+the persisted Verbose logs preference; failures remain error-level and cancellation
+is debug-only. The shell initializes the policy before triggering feature loads.
+There are no Flow use cases today; future stream operations use `Flow<Result<T>>`.
 
 ### Data Layer
 

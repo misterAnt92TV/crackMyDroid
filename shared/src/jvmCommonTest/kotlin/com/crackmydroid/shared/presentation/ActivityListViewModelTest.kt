@@ -54,13 +54,13 @@ class ActivityListViewModelTest {
 
     private fun emptyActivityFavorites(): GetActivityFavoritesUseCase {
         val getFavorites = mockk<GetActivityFavoritesUseCase>()
-        coEvery { getFavorites() } returns emptySet()
+        coEvery { getFavorites() } returns Result.success(emptySet())
         return getFavorites
     }
 
     private fun emptyPackageFavorites(): GetActivityPackageFavoritesUseCase {
         val getFavorites = mockk<GetActivityPackageFavoritesUseCase>()
-        coEvery { getFavorites() } returns emptySet()
+        coEvery { getFavorites() } returns Result.success(emptySet())
         return getFavorites
     }
 
@@ -79,8 +79,8 @@ class ActivityListViewModelTest {
         val get = mockk<GetActivitiesUseCase>()
         val launch = mockk<LaunchActivityUseCase>()
         val format = mockk<GetExportFormatUseCase>()
-        coEvery { get() } returns listOf(ActivityEntry("Label", "App", "pkg", "Act"))
-        coEvery { format() } returns ExportFormat.TXT
+        coEvery { get() } returns Result.success(listOf(ActivityEntry("Label", "App", "pkg", "Act")))
+        coEvery { format() } returns Result.success(ExportFormat.TXT)
         val vm = activityViewModel(get, launch, format)
 
         vm.refresh()
@@ -96,15 +96,15 @@ class ActivityListViewModelTest {
         val get = mockk<GetActivitiesUseCase>()
         val launch = mockk<LaunchActivityUseCase>()
         val format = mockk<GetExportFormatUseCase>()
-        coEvery { get() } returns listOf(
+        coEvery { get() } returns Result.success(listOf(
             ActivityEntry(
                 label = "Settings",
                 appLabel = "Demo App",
                 packageName = "com.demo.app",
                 activityName = "com.demo.app.HiddenActivity"
             )
-        )
-        coEvery { format() } returns ExportFormat.TXT
+        ))
+        coEvery { format() } returns Result.success(ExportFormat.TXT)
         val vm = activityViewModel(get, launch, format)
 
         vm.refresh()
@@ -122,8 +122,8 @@ class ActivityListViewModelTest {
         val get = mockk<GetActivitiesUseCase>()
         val launch = mockk<LaunchActivityUseCase>()
         val format = mockk<GetExportFormatUseCase>()
-        coEvery { get() } returns listOf(ActivityEntry("Label", "App", "pkg", "Act"))
-        coEvery { format() } returns ExportFormat.TXT
+        coEvery { get() } returns Result.success(listOf(ActivityEntry("Label", "App", "pkg", "Act")))
+        coEvery { format() } returns Result.success(ExportFormat.TXT)
         val vm = activityViewModel(get, launch, format)
 
         vm.refresh()
@@ -151,7 +151,7 @@ class ActivityListViewModelTest {
             launchIntentAction = "android.intent.action.VIEW",
             launchIntentData = "demo://host/details"
         )
-        coEvery { get() } returns listOf(entry)
+        coEvery { get() } returns Result.success(listOf(entry))
         coEvery {
             launch(
                 entry,
@@ -160,7 +160,7 @@ class ActivityListViewModelTest {
                 null
             )
         } returns Result.success(Unit)
-        coEvery { format() } returns ExportFormat.TXT
+        coEvery { format() } returns Result.success(ExportFormat.TXT)
         val vm = activityViewModel(get, launch, format)
 
         vm.refresh()
@@ -185,8 +185,8 @@ class ActivityListViewModelTest {
         val get = mockk<GetActivitiesUseCase>()
         val launch = mockk<LaunchActivityUseCase>()
         val format = mockk<GetExportFormatUseCase>()
-        coEvery { format() } returns ExportFormat.TXT
-        coEvery { get() } returns listOf(
+        coEvery { format() } returns Result.success(ExportFormat.TXT)
+        coEvery { get() } returns Result.success(listOf(
             ActivityEntry(
                 label = "Home",
                 appLabel = "Demo App",
@@ -216,7 +216,7 @@ class ActivityListViewModelTest {
                 packageName = "com.other.app",
                 activityName = "com.other.app.MainActivity"
             )
-        )
+        ))
         val vm = activityViewModel(get, launch, format)
 
         vm.refresh()
