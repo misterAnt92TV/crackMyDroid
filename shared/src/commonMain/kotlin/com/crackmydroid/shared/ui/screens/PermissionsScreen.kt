@@ -63,6 +63,7 @@ import androidx.compose.ui.unit.dp
 import com.crackmydroid.shared.domain.model.PermissionRiskFinding
 import com.crackmydroid.shared.domain.model.PermissionRiskLevel
 import com.crackmydroid.shared.i18n.LocalStrings
+import com.crackmydroid.shared.i18n.ScreenUiStrings
 import com.crackmydroid.shared.presentation.components.AppAccordion
 import com.crackmydroid.shared.presentation.components.AppButton
 import com.crackmydroid.shared.presentation.components.ButtonVariant
@@ -88,6 +89,7 @@ fun PermissionsScreen(
 ) {
     val state by viewModel.state.collectAsState()
     val strings = LocalStrings.current
+    val screenStrings = ScreenUiStrings.from(strings)
 
     @Suppress("DEPRECATION")
     val clipboard = LocalClipboardManager.current
@@ -148,12 +150,12 @@ fun PermissionsScreen(
             item {
                 AppCard(modifier = Modifier.fillMaxWidth()) {
                     AppText(
-                        "Scansione automatica permessi rischiosi",
+                        screenStrings.riskScanTitle,
                         style = MaterialTheme.typography.titleSmall,
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     AppText(
-                        "Analizza tutte le app installate e segnala permessi pericolosi o pattern potenzialmente malevoli.",
+                        screenStrings.riskScanDescription,
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -164,7 +166,7 @@ fun PermissionsScreen(
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         AppButton(
-                            text = "Avvia scansione",
+                            text = screenStrings.startScan,
                             onClick = viewModel::startAutoRiskScan,
                             enabled = state.apps.isNotEmpty() && !state.autoScanRunning,
                             variant = ButtonVariant.Tonal,
@@ -173,7 +175,7 @@ fun PermissionsScreen(
                             leadingIcon = Icons.Filled.Warning
                         )
                         AppButton(
-                            text = "Interrompi",
+                            text = screenStrings.stopScan,
                             onClick = viewModel::cancelAutoRiskScan,
                             enabled = state.autoScanRunning,
                             variant = ButtonVariant.Secondary,
@@ -185,14 +187,14 @@ fun PermissionsScreen(
 
                     if (state.autoScanRunning) {
                         AppText(
-                            "Scansione in corso: ${state.autoScanScannedApps}/${state.autoScanTotalApps} app",
+                            screenStrings.scanProgress.format(state.autoScanScannedApps, state.autoScanTotalApps),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.padding(top = 8.dp)
                         )
                         state.autoScanCurrentLabel?.let { label ->
                             AppText(
-                                "Analisi: $label",
+                                screenStrings.analysis.format(label),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -207,7 +209,7 @@ fun PermissionsScreen(
 
                     if (state.riskReports.isNotEmpty()) {
                         AppText(
-                            "Riepilogo: ${state.riskReports.size} app a rischio • Critici $criticalTotal • Alti $highTotal • Medi $mediumTotal",
+                            screenStrings.riskSummary.format(state.riskReports.size, criticalTotal, highTotal, mediumTotal),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.padding(top = 8.dp)
@@ -218,9 +220,9 @@ fun PermissionsScreen(
             item {
                 AppAccordion(
                     title = strings.permissionsSearch,
-                    subtitle = "Suggerimenti e filtri",
+                    subtitle = screenStrings.searchFilters,
                     meta = buildString {
-                        if (state.showOnlyRisky) append("rischio")
+                        if (state.showOnlyRisky) append(screenStrings.riskOnly)
                         if (favoriteQueries.isNotEmpty()) {
                             if (isNotEmpty()) append(" • ")
                             append(favoriteQueries.size)
@@ -244,7 +246,7 @@ fun PermissionsScreen(
                     )
                     state.topQuery?.let { top ->
                         AppText(
-                            "Ricerca frequente: $top",
+                            screenStrings.frequentSearch.format(top),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.primary
                         )
@@ -276,12 +278,12 @@ fun PermissionsScreen(
                             FilterChip(
                                 selected = state.showOnlyRisky,
                                 onClick = viewModel::toggleShowOnlyRisky,
-                                label = { AppText("Solo app a rischio") }
+                                label = { AppText(screenStrings.riskOnly) }
                             )
                             FilterChip(
                                 selected = false,
                                 onClick = { viewModel.setFilter("") },
-                                label = { AppText("Reset filtro") }
+                                label = { AppText(screenStrings.resetFilter) }
                             )
                         }
                         LazyRow(
@@ -310,7 +312,7 @@ fun PermissionsScreen(
             if (!state.loading && state.error == null) {
                 item {
                     AppText(
-                        "Risultati: ${filteredApps.size} / ${state.apps.size}",
+                        screenStrings.resultsSummary.format(filteredApps.size, state.apps.size),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -322,10 +324,10 @@ fun PermissionsScreen(
                     ExportDetailsCard(
                         path = path,
                         title = strings.apkExported,
-                        summary = "Report permessi esportato in formato testuale, già pronto alla condivisione.",
+                        summary = screenStrings.permissionsExportSummary,
                         details = listOf(
-                            "Contiene riepilogo rischi (critici/alti/medi) e lista permessi per app.",
-                            "Formato leggibile: blocchi separati per app e finding."
+                            screenStrings.permissionsExportDetails,
+                            screenStrings.readableFormat
                         )
                     )
                 }
@@ -341,12 +343,11 @@ fun PermissionsScreen(
                     AppCard(modifier = Modifier.fillMaxWidth()) {
                         val hasFilter = state.filter.isNotBlank() || state.showOnlyRisky
                         AppText(
-                            if (hasFilter) "Nessun risultato con i filtri correnti." else "Nessun permesso disponibile.",
+                            if (hasFilter) screenStrings.noRiskResults else screenStrings.noPermissions,
                             style = MaterialTheme.typography.bodyMedium
                         )
                         AppText(
-                            if (hasFilter) "Prova a disattivare \"Solo app a rischio\" o a cambiare ricerca."
-                            else "Aggiorna i dati permessi per iniziare l'analisi.",
+                            if (hasFilter) screenStrings.riskFilterHint else screenStrings.refreshPermissionsHint,
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -356,7 +357,7 @@ fun PermissionsScreen(
                         ) {
                             if (state.showOnlyRisky) {
                                 AppButton(
-                                    text = "Mostra tutte",
+                                    text = screenStrings.allApps,
                                     onClick = { viewModel.setShowOnlyRisky(false) },
                                     variant = ButtonVariant.Secondary,
                                     modifier = Modifier.weight(1f),
@@ -364,7 +365,7 @@ fun PermissionsScreen(
                                 )
                             } else if (state.filter.isNotBlank()) {
                                 AppButton(
-                                    text = "Reset filtro",
+                                    text = screenStrings.resetFilter,
                                     onClick = { viewModel.setFilter("") },
                                     variant = ButtonVariant.Secondary,
                                     modifier = Modifier.weight(1f),
@@ -372,7 +373,7 @@ fun PermissionsScreen(
                                 )
                             }
                             AppButton(
-                                text = "Aggiorna",
+                                text = screenStrings.refresh,
                                 onClick = viewModel::refresh,
                                 variant = ButtonVariant.Tonal,
                                 modifier = Modifier.weight(1f),
@@ -395,9 +396,9 @@ fun PermissionsScreen(
                 val permissionFindings = state.visibleFindingsByPackage[app.packageName]
                     .orEmpty().associateBy { it.key }
                 val appMeta = if (riskReport == null) {
-                    "${app.permissions.size} perm"
+                    screenStrings.permissionsCount.format(app.permissions.size)
                 } else {
-                    "${app.permissions.size} perm • rischi ${riskReport.findings.size}"
+                    screenStrings.permissionsRiskCount.format(app.permissions.size, riskReport.findings.size)
                 }
                 AppAccordion(
                     title = app.appLabel,
@@ -449,7 +450,7 @@ fun PermissionsScreen(
                     )
                     riskReport?.let { report ->
                         AppText(
-                            "Rischi rilevati: ${report.findings.size} (Critici ${report.criticalCount}, Alti ${report.highCount}, Medi ${report.mediumCount})",
+                            screenStrings.risksDetected.format(report.findings.size, report.criticalCount, report.highCount, report.mediumCount),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.error,
                             modifier = Modifier.padding(vertical = 4.dp)
@@ -459,7 +460,7 @@ fun PermissionsScreen(
                         }
                         if (report.findings.size > 6) {
                             AppText(
-                                "+${report.findings.size - 6} finding aggiuntivi nel report condivisibile",
+                                screenStrings.findingAdditional.format(report.findings.size - 6),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -495,6 +496,7 @@ fun PermissionsScreen(
 
 @Composable
 private fun RiskFindingRow(finding: PermissionRiskFinding) {
+    val screenStrings = ScreenUiStrings.from(LocalStrings.current)
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -502,7 +504,7 @@ private fun RiskFindingRow(finding: PermissionRiskFinding) {
         verticalArrangement = Arrangement.spacedBy(2.dp)
     ) {
         AppText(
-            "[${riskLevelLabel(finding.level)}] ${finding.title}",
+            "[${riskLevelLabel(finding.level, screenStrings)}] ${finding.title}",
             style = MaterialTheme.typography.bodySmall,
             color = riskLevelColor(finding.level)
         )
@@ -519,6 +521,7 @@ private fun PermissionRow(
     permission: String,
     finding: PermissionRiskFinding? = null
 ) {
+    val screenStrings = ScreenUiStrings.from(LocalStrings.current)
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -543,7 +546,7 @@ private fun PermissionRow(
             )
             finding?.let {
                 AppText(
-                    "${riskLevelLabel(it.level)}: ${it.reason}",
+                    "${riskLevelLabel(it.level, screenStrings)}: ${it.reason}",
                     style = MaterialTheme.typography.labelSmall,
                     color = riskLevelColor(it.level)
                 )
@@ -604,8 +607,8 @@ private fun riskLevelColor(level: PermissionRiskLevel): androidx.compose.ui.grap
     }
 }
 
-private fun riskLevelLabel(level: PermissionRiskLevel): String = when (level) {
-    PermissionRiskLevel.Critical -> "CRITICO"
-    PermissionRiskLevel.High -> "ALTO"
-    PermissionRiskLevel.Medium -> "MEDIO"
+private fun riskLevelLabel(level: PermissionRiskLevel, strings: ScreenUiStrings): String = when (level) {
+    PermissionRiskLevel.Critical -> strings.riskCritical
+    PermissionRiskLevel.High -> strings.riskHigh
+    PermissionRiskLevel.Medium -> strings.riskMedium
 }

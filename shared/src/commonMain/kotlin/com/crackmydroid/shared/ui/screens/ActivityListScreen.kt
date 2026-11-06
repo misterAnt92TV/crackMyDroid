@@ -52,6 +52,7 @@ import androidx.compose.ui.unit.dp
 import com.crackmydroid.shared.domain.model.activity.ActivityEntry
 import com.crackmydroid.shared.domain.model.activity.favoriteKey
 import com.crackmydroid.shared.i18n.LocalStrings
+import com.crackmydroid.shared.i18n.ScreenUiStrings
 import com.crackmydroid.shared.presentation.components.AppAccordion
 import com.crackmydroid.shared.presentation.components.AppButton
 import com.crackmydroid.shared.presentation.components.AppListItem
@@ -80,6 +81,7 @@ fun ActivityListScreen(
 ) {
     val state by viewModel.state.collectAsState()
     val strings = LocalStrings.current
+    val screenStrings = ScreenUiStrings.from(strings)
 
     @Suppress("DEPRECATION")
     val clipboard = LocalClipboardManager.current
@@ -496,6 +498,7 @@ private fun ActivityReportCard(
     onExport: () -> Unit
 ) {
     val strings = LocalStrings.current
+    val screenStrings = ScreenUiStrings.from(strings)
     val activityUi = strings.activityUi
     AppCard(modifier = Modifier.fillMaxWidth()) {
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -556,7 +559,7 @@ private fun ActivityReportCard(
                     )
                     report.recommendations.forEach { recommendation ->
                         AppText(
-                            "• $recommendation",
+                            screenStrings.bullet.format(recommendation),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -567,7 +570,7 @@ private fun ActivityReportCard(
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 report.findings.forEach { finding ->
                     AppText(
-                        "• $finding",
+                        screenStrings.bullet.format(finding),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )

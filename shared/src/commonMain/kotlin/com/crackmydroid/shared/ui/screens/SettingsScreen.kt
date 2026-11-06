@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import com.crackmydroid.shared.domain.model.app.AppLanguage
 import com.crackmydroid.shared.domain.model.app.AppTheme
 import com.crackmydroid.shared.i18n.LocalStrings
+import com.crackmydroid.shared.i18n.ScreenUiStrings
 import com.crackmydroid.shared.presentation.components.AppButton
 import com.crackmydroid.shared.presentation.components.ButtonVariant
 import com.crackmydroid.shared.presentation.components.ErrorDialogComponent
@@ -108,6 +109,7 @@ internal fun SettingsContent(
     actions: SettingsActions
 ) {
     val strings = LocalStrings.current
+    val screenStrings = ScreenUiStrings.from(strings)
     val scrollState = rememberScrollState()
     val scope = rememberCoroutineScope()
     val showScrollTop by remember {
@@ -163,7 +165,7 @@ internal fun SettingsContent(
                         AppLanguage.SPANISH -> strings.languageSpanish
                     }
                     AppButton(
-                        text = if (state.language == language) "✔︎ $label" else label,
+                        text = if (state.language == language) screenStrings.selected.format(label) else label,
                         onClick = { actions.onSelectLanguage(language) },
                         modifier = Modifier.padding(vertical = 4.dp),
                         variant = ButtonVariant.Tonal
@@ -272,7 +274,7 @@ internal fun SettingsContent(
                 AppText(strings.thirdPartyIntro, style = MaterialTheme.typography.bodySmall)
                 state.thirdPartyLibraries.forEach { library ->
                     AppText(
-                        "• ${library.name}",
+                        screenStrings.bullet.format(library.name),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier
@@ -296,7 +298,7 @@ internal fun SettingsContent(
                 )
                 if (appInfo.minSdk != null || appInfo.targetSdk != null) {
                     AppText(
-                        "${strings.settingsAppSdk}: ${appInfo.minSdk ?: "?"} / ${appInfo.targetSdk ?: "?"}",
+                    "${strings.settingsAppSdk}: ${appInfo.minSdk ?: screenStrings.missingValue} / ${appInfo.targetSdk ?: screenStrings.missingValue}",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -310,7 +312,7 @@ internal fun SettingsContent(
                     )
                     perms.forEach { perm ->
                         AppText(
-                            "• $perm",
+                            screenStrings.bullet.format(perm),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -345,8 +347,9 @@ internal fun SettingsContent(
 
 @Composable
 private fun ThemeRow(label: String, theme: AppTheme, current: AppTheme, onClick: () -> Unit) {
+    val screenStrings = ScreenUiStrings.from(LocalStrings.current)
     AppButton(
-        text = if (current == theme) "✔︎ $label" else label,
+        text = if (current == theme) screenStrings.selected.format(label) else label,
         onClick = onClick,
         modifier = Modifier.padding(vertical = 4.dp),
         variant = ButtonVariant.Tonal
@@ -355,8 +358,9 @@ private fun ThemeRow(label: String, theme: AppTheme, current: AppTheme, onClick:
 
 @Composable
 private fun ExportFormatRow(label: String, selected: Boolean, onClick: () -> Unit) {
+    val screenStrings = ScreenUiStrings.from(LocalStrings.current)
     AppButton(
-        text = if (selected) "✔︎ $label" else label,
+        text = if (selected) screenStrings.selected.format(label) else label,
         onClick = onClick,
         modifier = Modifier.padding(vertical = 4.dp),
         variant = ButtonVariant.Tonal

@@ -46,6 +46,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.crackmydroid.shared.i18n.LocalStrings
+import com.crackmydroid.shared.i18n.ScreenUiStrings
 import com.crackmydroid.shared.presentation.components.AppAccordion
 import com.crackmydroid.shared.presentation.components.AppButton
 import com.crackmydroid.shared.presentation.components.ErrorDialogComponent
@@ -67,6 +68,7 @@ fun LogScreen(
 ) {
     val state by viewModel.state.collectAsState()
     val strings = LocalStrings.current
+    val screenStrings = ScreenUiStrings.from(strings)
     val fontSize = remember { mutableStateOf(13f) }
     val wrap = remember { mutableStateOf(true) }
     var optionsExpanded by remember { mutableStateOf(true) }
@@ -93,7 +95,7 @@ fun LogScreen(
                 onMenu = onMenu
             )
             AppAccordion(
-                title = "Ricerca e filtri log",
+                title = screenStrings.searchFilters,
                 subtitle = strings.searchLog,
                 expanded = optionsExpanded,
                 onToggle = { optionsExpanded = !optionsExpanded },
@@ -166,7 +168,7 @@ fun LogScreen(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
                     ) {
-                        AppText("Avvolgi righe", style = MaterialTheme.typography.bodySmall)
+                        AppText(screenStrings.logWrapLines, style = MaterialTheme.typography.bodySmall)
                         Switch(checked = wrap.value, onCheckedChange = { wrap.value = it })
                     }
                     Row(
@@ -175,7 +177,7 @@ fun LogScreen(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
                     ) {
-                        AppText("Colora per livello", style = MaterialTheme.typography.bodySmall)
+                        AppText(screenStrings.logColorByLevel, style = MaterialTheme.typography.bodySmall)
                         Switch(
                             checked = state.colorByLevel,
                             onCheckedChange = { viewModel.setColorByLevel(it) }
@@ -187,7 +189,7 @@ fun LogScreen(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
                     ) {
-                        AppText("Dimensione testo", style = MaterialTheme.typography.bodySmall)
+                        AppText(screenStrings.logTextSize, style = MaterialTheme.typography.bodySmall)
                         Slider(
                             value = fontSize.value,
                             onValueChange = { fontSize.value = it },
@@ -215,7 +217,7 @@ fun LogScreen(
             }
             if (state.trimmed) {
                 AppText(
-                    "Mostro solo le ultime 1500 righe del log per prestazioni.",
+                    screenStrings.logTrimmed,
                     style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
                     color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant
                 )

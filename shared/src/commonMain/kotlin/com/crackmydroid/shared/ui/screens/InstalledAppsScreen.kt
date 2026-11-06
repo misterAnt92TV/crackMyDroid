@@ -44,6 +44,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.crackmydroid.shared.i18n.LocalStrings
+import com.crackmydroid.shared.i18n.ScreenUiStrings
 import com.crackmydroid.shared.presentation.components.AppAccordion
 import com.crackmydroid.shared.presentation.components.AppButton
 import com.crackmydroid.shared.presentation.components.ButtonVariant
@@ -70,6 +71,7 @@ fun InstalledAppsScreen(
 ) {
     val state by viewModel.state.collectAsState()
     val strings = LocalStrings.current
+    val screenStrings = ScreenUiStrings.from(strings)
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val expandedPackages = remember { mutableStateMapOf<String, Boolean>() }
@@ -131,7 +133,7 @@ fun InstalledAppsScreen(
             item {
                 AppAccordion(
                     title = strings.apkSearch,
-                    subtitle = "Suggerimenti e filtri",
+                    subtitle = screenStrings.searchFilters,
                     meta = favoriteQueries.takeIf { it.isNotEmpty() }?.size?.toString(),
                     expanded = searchToolsExpanded,
                     onToggle = { searchToolsExpanded = !searchToolsExpanded },
@@ -147,12 +149,12 @@ fun InstalledAppsScreen(
                         showClearAction = true,
                         onCleared = {
                             viewModel.setFilter("")
-                            scope.launch { snackbarHostState.showSnackbar("Suggerimenti svuotati") }
+                            scope.launch { snackbarHostState.showSnackbar(screenStrings.suggestionsCleared) }
                         }
                     )
                     state.topQuery?.let { top ->
                         AppText(
-                            "Ricerca frequente: $top",
+                            screenStrings.frequentSearch.format(top),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.primary
                         )
@@ -175,7 +177,7 @@ fun InstalledAppsScreen(
                                         onClick = { viewModel.setFilter(fav, trackUsage = true) },
                                         onLongClick = {
                                             viewModel.toggleFavorite(fav)
-                                            scope.launch { snackbarHostState.showSnackbar("Rimosso dai preferiti") }
+                                            scope.launch { snackbarHostState.showSnackbar(screenStrings.removedFromFavorites) }
                                         }
                                     )
                                 )
@@ -196,10 +198,10 @@ fun InstalledAppsScreen(
                     ExportDetailsCard(
                         path = path,
                         title = strings.apkExported,
-                        summary = "Esportazione completata. Puoi usare il file per backup o condivisione tecnica.",
+                        summary = screenStrings.appsExportSummary,
                         details = listOf(
-                            "Contenuto: lista applicazioni installate (label, package, path APK).",
-                            "Stato: pronto per invio."
+                            screenStrings.appsExportContent,
+                            screenStrings.exportReady
                         )
                     )
                 }
@@ -228,7 +230,7 @@ fun InstalledAppsScreen(
             if (!state.loading && state.error == null) {
                 item {
                     AppText(
-                        "Risultati: ${filteredApps.size} / ${state.apps.size}",
+                        screenStrings.resultsSummary.format(filteredApps.size, state.apps.size),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -240,12 +242,11 @@ fun InstalledAppsScreen(
                     AppCard(modifier = Modifier.fillMaxWidth()) {
                         val hasFilter = state.filter.isNotBlank()
                         AppText(
-                            if (hasFilter) "Nessun risultato per \"${state.filter}\"." else "Nessuna app disponibile al momento.",
+                            if (hasFilter) screenStrings.noResultsFor.format(state.filter) else screenStrings.noApps,
                             style = MaterialTheme.typography.bodyMedium
                         )
                         AppText(
-                            if (hasFilter) "Rimuovi o cambia filtro per vedere altre app."
-                            else "Prova ad aggiornare la lista per rileggere le app installate.",
+                            if (hasFilter) screenStrings.changeFilter else screenStrings.refreshAppsHint,
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -255,7 +256,7 @@ fun InstalledAppsScreen(
                         ) {
                             if (hasFilter) {
                                 AppButton(
-                                    text = "Reset filtro",
+                                    text = screenStrings.resetFilter,
                                     onClick = { viewModel.setFilter("") },
                                     variant = ButtonVariant.Secondary,
                                     modifier = Modifier.weight(1f),
@@ -263,7 +264,7 @@ fun InstalledAppsScreen(
                                 )
                             }
                             AppButton(
-                                text = "Aggiorna",
+                                text = screenStrings.refresh,
                                 onClick = viewModel::refresh,
                                 variant = ButtonVariant.Tonal,
                                 modifier = Modifier.weight(1f),

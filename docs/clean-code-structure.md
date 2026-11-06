@@ -18,6 +18,7 @@ La regola pratica è: il codice più vicino al dominio deve conoscere meno detta
 
 - Ogni testo visibile prodotto da screen e componenti runtime deve provenire da `LocalStrings` o da un parametro già localizzato.
 - `Strings.kt` è la fonte unica per italiano, inglese, tedesco, spagnolo e francese; le nuove chiavi devono essere valorizzate in ogni catalogo.
+- I testi runtime degli screen devono usare `LocalStrings.current`; per gruppi estesi e specifici della UI usare un catalogo localizzato dedicato costruito dalla lingua attiva. Sono ammessi literal solo per fixture di preview e valori tecnici non mostrati come copy.
 - Le preview possono usare testo fixture deterministico soltanto dopo l'annotazione di preview e non devono diventare fallback della UI runtime.
 
 ## 2. ViewModel e stato

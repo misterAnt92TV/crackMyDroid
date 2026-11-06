@@ -50,6 +50,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.crackmydroid.shared.i18n.LocalStrings
+import com.crackmydroid.shared.i18n.ScreenUiStrings
 import com.crackmydroid.shared.presentation.components.AppButton
 import com.crackmydroid.shared.presentation.components.AppProgressIndicator
 import com.crackmydroid.shared.presentation.components.AppTextField
@@ -73,6 +74,7 @@ fun RootScreen(
 ) {
     val state by viewModel.state.collectAsState()
     val strings = LocalStrings.current
+    val screenStrings = ScreenUiStrings.from(strings)
     val accessibilityPrefs = LocalAccessibilityPrefs.current
     val resultBringIntoView = remember { BringIntoViewRequester() }
 
@@ -251,7 +253,9 @@ fun RootScreen(
                                         val label = strings.rootCheckLabels[check.id.name] ?: check.id.name
                                         val outcome = strings.rootOutcomeLabels[check.outcome.name] ?: check.outcome.name
                                         AppText(
-                                            text = "$label: $outcome${check.evidence.takeIf { it.isNotBlank() }?.let { " — $it" } ?: ""}",
+                                            text = check.evidence.takeIf { it.isNotBlank() }
+                                                ?.let { screenStrings.rootEvidence.format(label, outcome, it) }
+                                                ?: "$label: $outcome",
                                             color = onBg,
                                             style = MaterialTheme.typography.bodySmall
                                         )

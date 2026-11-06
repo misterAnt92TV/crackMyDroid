@@ -50,6 +50,7 @@ import androidx.compose.ui.unit.dp
 import com.crackmydroid.shared.domain.model.shell.ShellCommand
 import com.crackmydroid.shared.domain.model.shell.ShellCommandResult
 import com.crackmydroid.shared.i18n.LocalStrings
+import com.crackmydroid.shared.i18n.ScreenUiStrings
 import com.crackmydroid.shared.presentation.components.AppButton
 import com.crackmydroid.shared.presentation.components.ButtonVariant
 import com.crackmydroid.shared.presentation.components.ErrorDialogComponent
@@ -71,6 +72,7 @@ fun TrickScreen(
 ) {
     val state by viewModel.state.collectAsState()
     val strings = LocalStrings.current
+    val screenStrings = ScreenUiStrings.from(strings)
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
     val showScrollTop by remember {
@@ -184,16 +186,16 @@ fun TrickScreen(
     state.pendingCommand?.let { command ->
         AlertDialog(
             onDismissRequest = viewModel::dismissPendingCommand,
-            title = { AppText("Conferma comando") },
+            title = { AppText(screenStrings.confirmCommand) },
             text = {
                 AppText(
-                    text = command.confirmation ?: "Eseguire: ${command.command}",
+                    text = command.confirmation ?: "${screenStrings.execute}: ${command.command}",
                     style = MaterialTheme.typography.bodySmall
                 )
             },
             confirmButton = {
                 AppButton(
-                    text = if (state.running) "In esecuzione..." else "Esegui",
+                    text = if (state.running) screenStrings.executing else screenStrings.execute,
                     enabled = !state.running,
                     fullWidth = false,
                     onClick = {
@@ -203,7 +205,7 @@ fun TrickScreen(
             },
             dismissButton = {
                 AppButton(
-                    text = "Annulla",
+                    text = screenStrings.cancel,
                     fullWidth = false,
                     variant = ButtonVariant.Secondary,
                     onClick = viewModel::dismissPendingCommand
@@ -251,6 +253,7 @@ private fun TrickCommandCard(
     runningThis: Boolean,
     onExecute: () -> Unit
 ) {
+    val screenStrings = ScreenUiStrings.from(LocalStrings.current)
     val disabledByOther = running && !runningThis
     val unsupported = !command.supported
     val cardContainer = when {
@@ -317,9 +320,9 @@ private fun TrickCommandCard(
                     )
                     AppText(
                         text = when {
-                            unsupported -> command.unsupportedReason ?: "Comando non disponibile"
-                            command.requiresRoot -> "Comando privilegiato"
-                            else -> "Comando standard"
+                            unsupported -> command.unsupportedReason ?: screenStrings.commandUnavailable
+                            command.requiresRoot -> screenStrings.privilegedCommand
+                            else -> screenStrings.standardCommand
                         },
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -335,18 +338,18 @@ private fun TrickCommandCard(
 
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 CommandTag(
-                    text = if (command.requiresRoot) "ROOT" else "SAFE",
+                    text = if (command.requiresRoot) screenStrings.rootTag else screenStrings.safeTag,
                     tint = if (command.requiresRoot) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary
                 )
                 if (unsupported) {
                     CommandTag(
-                        text = "NON DISP.",
+                        text = screenStrings.unavailableTag,
                         tint = MaterialTheme.colorScheme.error
                     )
                 }
                 if (command.confirmation != null) {
                     CommandTag(
-                        text = "CONFERMA",
+                        text = screenStrings.confirmationTag,
                         tint = MaterialTheme.colorScheme.secondary
                     )
                 }
@@ -370,10 +373,10 @@ private fun TrickCommandCard(
 
             AppButton(
                 text = when {
-                    runningThis -> "In esecuzione..."
-                    unsupported -> "Non disponibile"
-                    disabledByOther -> "Attendi comando corrente"
-                    else -> "Esegui comando"
+                    runningThis -> screenStrings.executing
+                    unsupported -> LocalStrings.current.commandError
+                    disabledByOther -> screenStrings.waitForCommand
+                    else -> screenStrings.executeCommand
                 },
                 onClick = onExecute,
                 enabled = !runningThis && !unsupported,
@@ -409,7 +412,8 @@ private fun TrickInlineResultSummary(
     commandTitle: String?,
     result: ShellCommandResult
 ) {
-    val title = commandTitle ?: "Comando"
+    val screenStrings = ScreenUiStrings.from(LocalStrings.current)
+    val title = commandTitle ?: screenStrings.command
     ElevatedCard(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.elevatedCardColors(
@@ -432,14 +436,14 @@ private fun TrickInlineResultSummary(
             )
             Column(modifier = Modifier.padding(start = 8.dp)) {
                 AppText(
-                    text = "$title - exit ${result.code}",
+                    text = "${screenStrings.exitCode.format(result.code)} - $title",
                     style = MaterialTheme.typography.labelLarge,
                     fontWeight = FontWeight.SemiBold
                 )
                 val subtitle = when {
                     result.stderr.isNotBlank() -> result.stderr.lineSequence().first().trim()
                     result.stdout.isNotBlank() -> result.stdout.lineSequence().first().trim()
-                    else -> "Nessun output testuale"
+                    else -> screenStrings.noTextOutput
                 }
                 AppText(
                     text = subtitle,
@@ -462,6 +466,7 @@ private fun TrickResultDialogBody(
     packageLines: List<String>,
     showPackageList: Boolean
 ) {
+    val screenStrings = ScreenUiStrings.from(LocalStrings.current)
 
     LazyColumn(
         modifier = Modifier
@@ -488,7 +493,7 @@ private fun TrickResultDialogBody(
                         )
                     }
                     AppText(
-                        text = "Exit code: ${result.code}",
+                        text = screenStrings.exitCode.format(result.code),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -499,7 +504,7 @@ private fun TrickResultDialogBody(
         if (showPackageList) {
             item {
                 AppText(
-                    text = "Pacchetti trovati: ${packageLines.size}",
+                    text = screenStrings.packagesFound.format(packageLines.size),
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -514,7 +519,7 @@ private fun TrickResultDialogBody(
         } else if (stdoutLines.isNotEmpty()) {
             item {
                 AppText(
-                    text = "Output",
+                    text = screenStrings.output,
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -531,7 +536,7 @@ private fun TrickResultDialogBody(
         if (stderrLines.isNotEmpty()) {
             item {
                 AppText(
-                    text = "Error output",
+                    text = screenStrings.errorOutput,
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.error
@@ -549,7 +554,7 @@ private fun TrickResultDialogBody(
         if (stdoutLines.isEmpty() && stderrLines.isEmpty()) {
             item {
                 TrickResultLine(
-                    text = "Nessun output testuale",
+                    text = screenStrings.noTextOutput,
                     icon = Icons.Filled.Schedule,
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
