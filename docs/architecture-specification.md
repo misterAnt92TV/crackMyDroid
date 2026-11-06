@@ -48,6 +48,11 @@ Il flusso è UDF/MVI:
 User interaction → UI event/callback → ViewModel action → UseCase → Repository/data source → result → immutable StateFlow → Compose UI
 ```
 
+Ogni nuova sezione applicativa concretizza il flusso con un `FeatureEvent` tipizzato, un singolo
+`ViewModel.onEvent(event)`, uno `StateFlow<FeatureUiState>` immutabile e, quando necessario, un
+`SharedFlow<FeatureEffect>` per effetti one-shot. La screen collega questi contratti; il content
+renderizza soltanto `FeatureUiState` e inoltra gli eventi.
+
 I ViewModel usano `BaseViewModel` per possedere uno scope cancellabile. Il lavoro asincrono deve essere lanciato nello scope del ViewModel, con dispatcher forniti tramite `AppDispatchers`, e deve pubblicare stati coerenti per loading, successo ed errore.
 
 La UI non contiene logica applicativa: Screen e composable ricevono `UiState` immutabile e callback,

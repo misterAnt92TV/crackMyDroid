@@ -24,6 +24,8 @@ La regola pratica è: il codice più vicino al dominio deve conoscere meno detta
 ## 2. ViewModel e stato
 
 - Un ViewModel espone stato immutabile e azioni pubbliche comprensibili dalla UI.
+- Una nuova feature espone `StateFlow<FeatureUiState>` e un unico `onEvent(FeatureEvent)` tipizzato;
+  gli effetti transitori usano un flusso separato, non flag consumabili nello state.
 - Le chiamate ai UseCase, la gestione degli eventi e le transizioni di stato avvengono nel ViewModel o nel Domain, mai nel composable.
 - Loading, successo, errore e stato vuoto devono essere rappresentati esplicitamente quando hanno significato per l'utente.
 - Le coroutine usano lo scope del ViewModel e devono essere cancellabili.
@@ -95,7 +97,7 @@ La regola pratica è: il codice più vicino al dominio deve conoscere meno detta
 - Stato di dominio mantenuto con `remember`/`mutableStateOf` invece che nel ViewModel.
 - Screen che formattano modelli di dominio o costruiscono direttamente righe/card complesse: usare un
   `XxxUiStateMapper`, item UI immutabili specifici della feature e un componente dedicato.
-- Flusso diretto `Screen → Repository`: il percorso corretto è `Screen(state, onAction) → ViewModel → UseCase → Repository`.
+- Flusso diretto `Screen → Repository`: il percorso corretto è `Screen(uiState, onEvent) → ViewModel.onEvent → UseCase → Repository`.
 - ViewModel che crea dipendenze con costruttori concreti o locator globali.
 - UseCase che contiene codice specifico Android/Desktop.
 - Repository che restituisce JSON grezzo, eccezioni native o tipi di UI.

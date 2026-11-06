@@ -53,6 +53,41 @@ Follow [references/feature-structure.md](references/feature-structure.md) for pa
 - Name a screen entry point `XxxScreen`; it owns state collection and dependency wiring only. Render its stateless visual subtree in `XxxContent`, which receives state and callbacks explicitly. Name reusable Compose widgets with meaningful hierarchy or interaction state `XxxComponent`; keep simple primitives such as `AppText`, `AppButton`, and `PackageIcon` descriptive without an artificial suffix.
 - Use immutable state and explicit loading, success, empty, and error states when visible to the user. Use `BaseViewModel`, injectable dispatchers, and cancellable coroutines.
 
+### Canonical feature slice and UDF events
+
+Every new app section must use this structure in `commonMain` unless a platform boundary requires otherwise:
+
+```text
+ui/<feature>/
+├── <Feature>ViewModel.kt
+├── model/
+│   ├── <Feature>UiState.kt
+│   ├── <Feature>Event.kt
+│   ├── <Feature>Effect.kt       # only for one-shot effects
+│   └── <Feature>Item.kt         # only for complex UI list items
+└── view/
+    ├── <Feature>Screen.kt
+    ├── <Feature>ScreenPreview.kt
+    └── <Feature>Component.kt
+```
+
+- The ViewModel exposes `StateFlow<FeatureUiState>` and one public event entry point:
+  `fun onEvent(event: FeatureEvent)`. Do not expose a growing set of application commands directly to the screen.
+- `FeatureEvent` is a feature-specific sealed interface with typed events and minimal stable identifiers,
+  for example `Refresh`, `FilterChanged`, `ItemSelected`, `FavoriteToggled`, `ExportRequested` and
+  `RetryRequested`. Do not use stringly typed event names or untyped maps.
+- `FeatureUiState` is immutable and UI-ready. It owns loading, empty, error and visible item state;
+  domain objects must not be exposed directly through complex UI lists.
+- Persistent rendering data belongs in `StateFlow`; transient snackbar, navigation, share and export
+  notifications belong in an optional `SharedFlow<FeatureEffect>`. Effects must not be represented by
+  one-time booleans in `FeatureUiState`.
+- `FeatureScreen` collects state and wires `viewModel::onEvent`; `FeatureContent` receives only the
+  immutable UI state, visual dependencies and event callback. It must not call ViewModel methods directly.
+- The ViewModel handles the event `when`, launches cancellable work, invokes UseCases and maps results
+  to `FeatureUiState`/`FeatureEffect`. UseCases retain business rules and repository orchestration.
+- Static sections may use a minimal state and event contract, but must not acquire artificial repository
+  or coroutine dependencies solely to satisfy the pattern.
+
 ### UDF and layer ownership
 
 Use the following ownership rules when deciding where new logic belongs:
@@ -64,7 +99,7 @@ Use the following ownership rules when deciding where new logic belongs:
 - **Screen/Composable**: declarative rendering and event forwarding only; never application logic.
 
 Forbidden flow: `Screen → Repository` or `Screen → UseCase`.
-Required flow: `Screen(state, onAction) → ViewModel → UseCase → Repository`.
+Required flow: `Screen(uiState, onEvent) → ViewModel.onEvent → UseCase → Repository`.
 
 When reviewing a feature, reject logic in the UI even if it is small or convenient. Move it to the
 UseCase when it is a domain/application rule; move it to the ViewModel only when it is presentation
