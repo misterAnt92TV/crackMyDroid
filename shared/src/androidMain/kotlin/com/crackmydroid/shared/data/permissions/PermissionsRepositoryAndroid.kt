@@ -11,7 +11,7 @@ import kotlinx.coroutines.withContext
 
 class PermissionsRepositoryAndroid(
     private val context: Context,
-    private val db: CacheDatabase
+    private val db: CacheDatabase,
 ) : PermissionsRepository {
     override suspend fun listAppPermissions(): List<AppPermissionEntry> =
         withContext(Dispatchers.IO) {
@@ -22,7 +22,7 @@ class PermissionsRepositoryAndroid(
                     AppPermissionEntry(
                         appLabel = rows.firstOrNull()?.appLabel ?: pkg,
                         packageName = pkg,
-                        permissions = rows.map { it.permission }
+                        permissions = rows.map { it.permission },
                     )
                 }.sortedBy { it.appLabel.lowercase() }
             }
@@ -35,7 +35,7 @@ class PermissionsRepositoryAndroid(
                 AppPermissionEntry(
                     appLabel = label,
                     packageName = pkg.packageName,
-                    permissions = perms
+                    permissions = perms,
                 )
             }.sortedBy { it.appLabel.lowercase() }
 
@@ -46,7 +46,7 @@ class PermissionsRepositoryAndroid(
                         db.cacheDatabaseQueries.insertPermission(
                             packageName = entry.packageName,
                             appLabel = entry.appLabel,
-                            permission = perm
+                            permission = perm,
                         )
                     }
                 }
@@ -57,7 +57,7 @@ class PermissionsRepositoryAndroid(
 
     override suspend fun listAppPermissionsPaginated(
         offset: Int,
-        limit: Int
+        limit: Int,
     ): List<AppPermissionEntry> =
         withContext(Dispatchers.IO) {
             val all = listAppPermissions()

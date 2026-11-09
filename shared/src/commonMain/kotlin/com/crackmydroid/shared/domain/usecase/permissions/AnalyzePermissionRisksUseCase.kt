@@ -1,12 +1,12 @@
 package com.crackmydroid.shared.domain.usecase.permissions
 
-import com.crackmydroid.shared.domain.model.app.AppPermissionEntry
-import com.crackmydroid.shared.domain.model.PermissionRiskFinding
-import com.crackmydroid.shared.domain.model.PermissionFindingKind
-import com.crackmydroid.shared.domain.model.PermissionRiskLevel
-import com.crackmydroid.shared.domain.model.PermissionRiskReport
 import co.touchlab.kermit.Logger
 import com.crackmydroid.shared.AppLogger
+import com.crackmydroid.shared.domain.model.PermissionFindingKind
+import com.crackmydroid.shared.domain.model.PermissionRiskFinding
+import com.crackmydroid.shared.domain.model.PermissionRiskLevel
+import com.crackmydroid.shared.domain.model.PermissionRiskReport
+import com.crackmydroid.shared.domain.model.app.AppPermissionEntry
 import com.crackmydroid.shared.domain.usecase.BaseUseCase
 import com.crackmydroid.shared.util.AppDispatchers
 import com.crackmydroid.shared.util.DefaultAppDispatchers
@@ -15,7 +15,7 @@ import kotlinx.coroutines.ensureActive
 
 class AnalyzePermissionRisksUseCase(
     dispatchers: AppDispatchers = DefaultAppDispatchers,
-    logger: Logger = AppLogger.logger
+    logger: Logger = AppLogger.logger,
 ) : BaseUseCase(TAG, dispatcher = dispatchers.default, logger = logger) {
     private companion object {
         private const val TAG = "AnalyzePermissionRisksUseCase"
@@ -51,8 +51,8 @@ class AnalyzePermissionRisksUseCase(
                     key = PATTERN_OVERLAY_ACCESSIBILITY,
                     kind = PermissionFindingKind.OVERLAY_ACCESSIBILITY_PATTERN,
                     level = PermissionRiskLevel.Critical,
-                    isPattern = true
-                )
+                    isPattern = true,
+                ),
             )
         }
 
@@ -65,15 +65,15 @@ class AnalyzePermissionRisksUseCase(
                     key = PATTERN_INSTALL_QUERY,
                     kind = PermissionFindingKind.INSTALL_QUERY_PATTERN,
                     level = PermissionRiskLevel.High,
-                    isPattern = true
-                )
+                    isPattern = true,
+                ),
             )
         }
 
         val hasBootCompleted = containsPermission(permissions, "RECEIVE_BOOT_COMPLETED")
         val hasSmsFamily = containsAnyPermission(
             permissions,
-            listOf("READ_SMS", "SEND_SMS", "RECEIVE_SMS", "RECEIVE_MMS", "RECEIVE_WAP_PUSH")
+            listOf("READ_SMS", "SEND_SMS", "RECEIVE_SMS", "RECEIVE_MMS", "RECEIVE_WAP_PUSH"),
         )
         if (hasBootCompleted && hasSmsFamily) {
             registerFinding(
@@ -82,8 +82,8 @@ class AnalyzePermissionRisksUseCase(
                     key = PATTERN_BOOT_SMS,
                     kind = PermissionFindingKind.BOOT_SMS_PATTERN,
                     level = PermissionRiskLevel.Critical,
-                    isPattern = true
-                )
+                    isPattern = true,
+                ),
             )
         }
 
@@ -96,8 +96,8 @@ class AnalyzePermissionRisksUseCase(
                     key = PATTERN_BACKGROUND_CAPTURE,
                     kind = PermissionFindingKind.BACKGROUND_LOCATION_CAPTURE_PATTERN,
                     level = PermissionRiskLevel.High,
-                    isPattern = true
-                )
+                    isPattern = true,
+                ),
             )
         }
 
@@ -107,7 +107,7 @@ class AnalyzePermissionRisksUseCase(
                 riskWeight(it.level)
             }
                 .thenByDescending { it.isPattern }
-                .thenBy { findingSortKey(it) }
+                .thenBy { findingSortKey(it) },
         )
         if (findings.isEmpty()) return@execute null
 
@@ -123,7 +123,7 @@ class AnalyzePermissionRisksUseCase(
             score = score,
             criticalCount = criticalCount,
             highCount = highCount,
-            mediumCount = mediumCount
+            mediumCount = mediumCount,
         )
     }
 
@@ -131,7 +131,7 @@ class AnalyzePermissionRisksUseCase(
         reports.sortedWith(
             compareByDescending<PermissionRiskReport> { it.score }
                 .thenByDescending { it.criticalCount }
-                .thenBy { it.appLabel.lowercase() }
+                .thenBy { it.appLabel.lowercase() },
         )
 
     private fun detectPermissionRisk(permission: String): PermissionRiskFinding? {
@@ -150,7 +150,7 @@ class AnalyzePermissionRisksUseCase(
             )
 
             "SEND_SMS" in key || "READ_SMS" in key || "RECEIVE_SMS" in key ||
-                    "RECEIVE_MMS" in key || "RECEIVE_WAP_PUSH" in key -> PermissionRiskFinding(
+                "RECEIVE_MMS" in key || "RECEIVE_WAP_PUSH" in key -> PermissionRiskFinding(
                 key = permission,
                 kind = PermissionFindingKind.SMS_MMS_ACCESS,
                 level = PermissionRiskLevel.Critical,
@@ -175,8 +175,8 @@ class AnalyzePermissionRisksUseCase(
             )
 
             "READ_CALL_LOG" in key || "WRITE_CALL_LOG" in key || "PROCESS_OUTGOING_CALLS" in key ||
-                    "READ_CONTACTS" in key || "WRITE_CONTACTS" in key ||
-                    "READ_PHONE_STATE" in key || "CALL_PHONE" in key || "ANSWER_PHONE_CALLS" in key -> PermissionRiskFinding(
+                "READ_CONTACTS" in key || "WRITE_CONTACTS" in key ||
+                "READ_PHONE_STATE" in key || "CALL_PHONE" in key || "ANSWER_PHONE_CALLS" in key -> PermissionRiskFinding(
                 key = permission,
                 kind = PermissionFindingKind.PHONE_AND_CONTACTS_ACCESS,
                 level = PermissionRiskLevel.High,
@@ -195,8 +195,8 @@ class AnalyzePermissionRisksUseCase(
             )
 
             "READ_EXTERNAL_STORAGE" in key || "WRITE_EXTERNAL_STORAGE" in key ||
-                    "READ_MEDIA_" in key || "READ_CALENDAR" in key || "WRITE_CALENDAR" in key ||
-                    "BODY_SENSORS" in key || "USE_BIOMETRIC" in key || "USE_FINGERPRINT" in key -> PermissionRiskFinding(
+                "READ_MEDIA_" in key || "READ_CALENDAR" in key || "WRITE_CALENDAR" in key ||
+                "BODY_SENSORS" in key || "USE_BIOMETRIC" in key || "USE_FINGERPRINT" in key -> PermissionRiskFinding(
                 key = permission,
                 kind = PermissionFindingKind.SENSITIVE_DATA_ACCESS,
                 level = PermissionRiskLevel.Medium,
@@ -217,7 +217,7 @@ class AnalyzePermissionRisksUseCase(
 
     private fun registerFinding(
         findingsByKey: MutableMap<String, PermissionRiskFinding>,
-        finding: PermissionRiskFinding
+        finding: PermissionRiskFinding,
     ) {
         val existing = findingsByKey[finding.key]
         if (existing == null || riskWeight(finding.level) > riskWeight(existing.level)) {

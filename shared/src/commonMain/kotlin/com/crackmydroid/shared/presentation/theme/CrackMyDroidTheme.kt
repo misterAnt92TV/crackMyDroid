@@ -31,7 +31,7 @@ private val LightColorScheme = lightColorScheme(
     surfaceVariant = Color(0xFFE9EDF4),
     onSurfaceVariant = Color(0xFF444A56),
     outline = Color(0xFF737A88),
-    outlineVariant = Color(0xFFC2C8D3)
+    outlineVariant = Color(0xFFC2C8D3),
 )
 
 private val DarkColorScheme = darkColorScheme(
@@ -58,16 +58,16 @@ private val DarkColorScheme = darkColorScheme(
     surfaceVariant = Color(0xFF3F4652),
     onSurfaceVariant = Color(0xFFC0C7D2),
     outline = Color(0xFF8A92A1),
-    outlineVariant = Color(0xFF3F4652)
+    outlineVariant = Color(0xFF3F4652),
 )
 
 @Composable
 fun CrackMyDroidTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
     MaterialTheme(
         colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme,
-        content = content
+        content = content,
     )
 }

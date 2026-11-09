@@ -15,7 +15,7 @@ data class ActivityListState(
     val expandedPackages: Set<String> = emptySet(),
     val groups: List<ActivityGroup> = emptyList(),
     val favoriteQueries: List<String> = emptyList(),
-    val guidedLaunch: GuidedLaunchState? = null
+    val guidedLaunch: GuidedLaunchState? = null,
 )
 
 data class GuidedLaunchState(val entry: ActivityEntry)
@@ -23,7 +23,7 @@ data class GuidedLaunchState(val entry: ActivityEntry)
 data class ActivityGroup(
     val packageName: String,
     val label: String?,
-    val activities: List<ActivityEntry>
+    val activities: List<ActivityEntry>,
 )
 
 data class ActivityAppReport(
@@ -40,5 +40,5 @@ data class ActivityAppReport(
     val highestRiskLevel: ActivityIntentRiskLevel,
     val recommendations: List<String>,
     val findings: List<String>,
-    val highlights: List<ActivityIntentRiskReport>
+    val highlights: List<ActivityIntentRiskReport>,
 )

@@ -53,8 +53,10 @@ class UseCaseResultRegressionTest {
 
         assertSame(failure, result.exceptionOrNull())
         assertEquals(1, messages.count { it.contains("outcome=failed") })
-        assertTrue(messages.single { it.contains("outcome=failed") }
-            .startsWith("useCase=GetActivitiesUseCase operation=invoke "))
+        assertTrue(
+            messages.single { it.contains("outcome=failed") }
+                .startsWith("useCase=GetActivitiesUseCase operation=invoke "),
+        )
     }
 
     @Test
@@ -76,18 +78,24 @@ class UseCaseResultRegressionTest {
         val cancellation = CancellationException("cancelled")
         coEvery { activities.getActivities() } throws cancellation
         coEvery { settings.setVerboseLog(false) } throws cancellation
-        assertSame(cancellation, assertFailsWith<CancellationException> {
-            GetActivitiesUseCase(activities)()
-        })
-        assertSame(cancellation, assertFailsWith<CancellationException> {
-            SetVerboseLogUseCase(settings)(false)
-        })
+        assertSame(
+            cancellation,
+            assertFailsWith<CancellationException> {
+                GetActivitiesUseCase(activities)()
+            },
+        )
+        assertSame(
+            cancellation,
+            assertFailsWith<CancellationException> {
+                SetVerboseLogUseCase(settings)(false)
+            },
+        )
     }
 
     @Test
     fun `composed analysis preserves technical failures and cancellations`() = runTest {
         val dispatchers = UseCaseTestDispatchers(
-            kotlinx.coroutines.test.StandardTestDispatcher(testScheduler)
+            kotlinx.coroutines.test.StandardTestDispatcher(testScheduler),
         )
         val analyzer = mockk<AnalyzePermissionRisksUseCase>()
         val useCase = RunPenTestChecksUseCase(analyzer, dispatchers)
@@ -99,24 +107,30 @@ class UseCaseResultRegressionTest {
         assertSame(failure, useCase("permission_risk", app, null, emptyList()).exceptionOrNull())
         val cancellation = object : CancellationException("cancelled") {}
         coEvery { analyzer(app) } returns Result.failure(cancellation)
-        assertSame(cancellation, assertFailsWith<CancellationException> {
-            useCase("permission_risk", app, null, emptyList())
-        })
+        assertSame(
+            cancellation,
+            assertFailsWith<CancellationException> {
+                useCase("permission_risk", app, null, emptyList())
+            },
+        )
         coEvery { analyzer(app) } throws cancellation
-        assertSame(cancellation, assertFailsWith<CancellationException> {
-            useCase("permission_risk", app, null, emptyList())
-        })
+        assertSame(
+            cancellation,
+            assertFailsWith<CancellationException> {
+                useCase("permission_risk", app, null, emptyList())
+            },
+        )
         coEvery { analyzer(app) } returns Result.success(null)
         assertEquals(
             PenTestCheckStatus.Success,
-            useCase("permission_risk", app, null, emptyList()).getOrThrow().status
+            useCase("permission_risk", app, null, emptyList()).getOrThrow().status,
         )
     }
 
     @Test
     fun `analysis cooperatively stops iterating after cancellation`() = runTest {
         val dispatchers = UseCaseTestDispatchers(
-            kotlinx.coroutines.test.StandardTestDispatcher(testScheduler)
+            kotlinx.coroutines.test.StandardTestDispatcher(testScheduler),
         )
         var reads = 0
         val work = async {
@@ -130,7 +144,7 @@ class UseCaseResultRegressionTest {
                 }
             }
             AnalyzePermissionRisksUseCase(dispatchers)(
-                AppPermissionEntry("App", "pkg", permissions)
+                AppPermissionEntry("App", "pkg", permissions),
             )
         }
         assertFailsWith<CancellationException> { work.await() }
@@ -140,7 +154,7 @@ class UseCaseResultRegressionTest {
     @Test
     fun `report generation cooperatively stops iterating after cancellation`() = runTest {
         val dispatchers = UseCaseTestDispatchers(
-            kotlinx.coroutines.test.StandardTestDispatcher(testScheduler)
+            kotlinx.coroutines.test.StandardTestDispatcher(testScheduler),
         )
         var reads = 0
         val work = async {
@@ -154,7 +168,7 @@ class UseCaseResultRegressionTest {
                 }
             }
             BuildPermissionsReportUseCase(AnalyzePermissionRisksUseCase(dispatchers), dispatchers)(
-                apps, emptyList(), UseCaseTexts("en")
+                apps, emptyList(), UseCaseTexts("en"),
             )
         }
         assertFailsWith<CancellationException> { work.await() }
@@ -164,7 +178,7 @@ class UseCaseResultRegressionTest {
     @Test
     fun `pentest cooperatively stops scanning activity risks after cancellation`() = runTest {
         val dispatchers = UseCaseTestDispatchers(
-            kotlinx.coroutines.test.StandardTestDispatcher(testScheduler)
+            kotlinx.coroutines.test.StandardTestDispatcher(testScheduler),
         )
         var reads = 0
         val work = async {
@@ -180,12 +194,12 @@ class UseCaseResultRegressionTest {
                         score = 3,
                         launchMode = "guided",
                         recommendation = "review",
-                        findings = emptyList()
+                        findings = emptyList(),
                     )
                 }
             }
             RunPenTestChecksUseCase(AnalyzePermissionRisksUseCase(dispatchers), dispatchers)(
-                "manifest_flags", null, null, risks
+                "manifest_flags", null, null, risks,
             )
         }
         assertFailsWith<CancellationException> { work.await() }
@@ -195,7 +209,7 @@ class UseCaseResultRegressionTest {
     @Test
     fun `device report preserves optional fields and root output`() = runTest {
         val dispatchers = UseCaseTestDispatchers(
-            kotlinx.coroutines.test.StandardTestDispatcher(testScheduler)
+            kotlinx.coroutines.test.StandardTestDispatcher(testScheduler),
         )
         val info = DeviceInfo(model = "Demo", batteryLevel = null, totalMemory = null, freeMemory = null)
         val useCase = BuildDeviceInfoReportUseCase(dispatchers)
@@ -208,7 +222,7 @@ class UseCaseResultRegressionTest {
         val rooted = useCase(
             info,
             com.crackmydroid.shared.domain.model.RootStatus(false, "unavailable"),
-            text
+            text,
         ).getOrThrow()
         assertTrue(rooted.contains("Rooted: No\nRoot details: unavailable\n"))
     }

@@ -2,10 +2,10 @@ package com.crackmydroid.shared.data.snapshot
 
 import com.crackmydroid.shared.data.DesktopScanCache
 import com.crackmydroid.shared.domain.model.ConnectedDevice
+import com.crackmydroid.shared.domain.model.PlayIntegrityResult
 import com.crackmydroid.shared.domain.model.scansnapshot.DeviceScanSnapshot
 import com.crackmydroid.shared.domain.model.scansnapshot.DeviceScanSnapshotContract
 import com.crackmydroid.shared.domain.model.scansnapshot.DeviceScanSnapshotJson
-import com.crackmydroid.shared.domain.model.PlayIntegrityResult
 import com.crackmydroid.shared.domain.model.scansnapshot.SnapshotMetadata
 import com.crackmydroid.shared.domain.model.scansnapshot.SnapshotSectionState
 import com.crackmydroid.shared.domain.repository.AdbBridge
@@ -14,7 +14,7 @@ import java.io.File
 
 class RemoteDeviceSnapshotImporter(
     private val adbBridge: AdbBridge,
-    private val cache: DesktopScanCache
+    private val cache: DesktopScanCache,
 ) {
     suspend fun import(device: ConnectedDevice, adbPath: String?): SnapshotImportOutcome {
         cache.snapshotLoadAttempted = true
@@ -26,7 +26,7 @@ class RemoteDeviceSnapshotImporter(
             serial = device.serial,
             remotePath = DeviceScanSnapshotContract.remotePath(),
             localPath = localFile.absolutePath,
-            configuredPath = adbPath
+            configuredPath = adbPath,
         )
 
         if (pulled.isFailure) {
@@ -34,25 +34,25 @@ class RemoteDeviceSnapshotImporter(
                 .ifBlank { "snapshot remoto non disponibile" }
             return SnapshotImportOutcome(
                 usedSnapshot = false,
-                message = "Snapshot non disponibile: $reason"
+                message = "Snapshot non disponibile: $reason",
             )
         }
 
         val snapshot = runCatching {
             DeviceScanSnapshotJson.format.decodeFromString<DeviceScanSnapshot>(
-                localFile.readText()
+                localFile.readText(),
             )
         }.getOrElse { error ->
             return SnapshotImportOutcome(
                 usedSnapshot = false,
-                message = "Snapshot non valido: ${error.message ?: "JSON corrotto"}"
+                message = "Snapshot non valido: ${error.message ?: "JSON corrotto"}",
             )
         }
 
         if (snapshot.schemaVersion !in DeviceScanSnapshot.MIN_SUPPORTED_SCHEMA_VERSION..DeviceScanSnapshot.SCHEMA_VERSION) {
             return SnapshotImportOutcome(
                 usedSnapshot = false,
-                message = "Snapshot incompatibile: schema ${snapshot.schemaVersion}"
+                message = "Snapshot incompatibile: schema ${snapshot.schemaVersion}",
             )
         }
 
@@ -88,7 +88,7 @@ class RemoteDeviceSnapshotImporter(
             sourceAppPackage = snapshot.sourceAppPackage,
             sourceAppVersion = snapshot.sourceAppVersion,
             deviceSerial = snapshot.deviceSerial,
-            deviceModel = snapshot.deviceModel
+            deviceModel = snapshot.deviceModel,
         )
 
         if (appliedSections == 0) {
@@ -96,7 +96,7 @@ class RemoteDeviceSnapshotImporter(
             cache.snapshotMetadata = null
             return SnapshotImportOutcome(
                 usedSnapshot = false,
-                message = "Snapshot remoto presente ma senza sezioni utilizzabili"
+                message = "Snapshot remoto presente ma senza sezioni utilizzabili",
             )
         }
 
@@ -106,7 +106,7 @@ class RemoteDeviceSnapshotImporter(
             cache.playIntegrity = PlayIntegrityResult(
                 basicIntegrity = null,
                 deviceIntegrity = null,
-                details = detail
+                details = detail,
             )
         }
         cache.snapshotMetadata = metadata
@@ -114,7 +114,7 @@ class RemoteDeviceSnapshotImporter(
         return SnapshotImportOutcome(
             usedSnapshot = true,
             message = "Snapshot Android importato ($appliedSections sezioni)",
-            metadata = metadata
+            metadata = metadata,
         )
     }
 }
@@ -122,5 +122,5 @@ class RemoteDeviceSnapshotImporter(
 data class SnapshotImportOutcome(
     val usedSnapshot: Boolean,
     val message: String,
-    val metadata: SnapshotMetadata? = null
+    val metadata: SnapshotMetadata? = null,
 )

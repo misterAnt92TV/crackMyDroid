@@ -6,5 +6,5 @@ data class ShellCommand(
     val requiresRoot: Boolean,
     val confirmation: String? = null,
     val supported: Boolean = true,
-    val unsupportedReason: String? = null
+    val unsupportedReason: String? = null,
 )

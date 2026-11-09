@@ -23,13 +23,13 @@ fun MoreScreen(
     padding: androidx.compose.foundation.layout.PaddingValues,
     onNavigate: (Screen) -> Unit,
     headerHelp: String,
-    onHelp: (String) -> Unit
+    onHelp: (String) -> Unit,
 ) {
     MoreContent(
         padding = padding,
         onNavigate = onNavigate,
         headerHelp = headerHelp,
-        onHelp = onHelp
+        onHelp = onHelp,
     )
 }
 
@@ -38,7 +38,7 @@ internal fun MoreContent(
     padding: androidx.compose.foundation.layout.PaddingValues,
     onNavigate: (Screen) -> Unit,
     headerHelp: String,
-    onHelp: (String) -> Unit
+    onHelp: (String) -> Unit,
 ) {
     val strings = LocalStrings.current
     Column(
@@ -46,31 +46,32 @@ internal fun MoreContent(
             .fillMaxSize()
             .padding(padding)
             .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         SectionHeader(title = strings.navMore, help = headerHelp, onHelp = onHelp)
         CardBlock(title = strings.navMore) {
             AppButton(
                 text = strings.navActivities,
                 leadingIcon = Icons.AutoMirrored.Filled.ListAlt,
-                onClick = { onNavigate(Screen.Activities) })
+                onClick = { onNavigate(Screen.Activities) },
+            )
             AppButton(
                 text = strings.navRoot,
                 leadingIcon = Icons.Filled.VerifiedUser,
                 onClick = { onNavigate(Screen.Root) },
-                modifier = Modifier.padding(top = 4.dp)
+                modifier = Modifier.padding(top = 4.dp),
             )
             AppButton(
                 text = strings.navTrick,
                 leadingIcon = Icons.Filled.TipsAndUpdates,
                 onClick = { onNavigate(Screen.Trick) },
-                modifier = Modifier.padding(top = 4.dp)
+                modifier = Modifier.padding(top = 4.dp),
             )
             AppButton(
                 text = strings.navLog,
                 leadingIcon = Icons.Filled.Settings,
                 onClick = { onNavigate(Screen.Log) },
-                modifier = Modifier.padding(top = 4.dp)
+                modifier = Modifier.padding(top = 4.dp),
             )
         }
     }

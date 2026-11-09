@@ -1,13 +1,13 @@
 package com.crackmydroid.shared.domain.usecase.installedapps
 
-import com.crackmydroid.shared.domain.repository.InstalledAppsRepository
 import co.touchlab.kermit.Logger
 import com.crackmydroid.shared.AppLogger
+import com.crackmydroid.shared.domain.repository.InstalledAppsRepository
 import com.crackmydroid.shared.domain.usecase.BaseUseCase
 
 class ExportApkUseCase(
     private val repository: InstalledAppsRepository,
-    logger: Logger = AppLogger.logger
+    logger: Logger = AppLogger.logger,
 ) : BaseUseCase(TAG, logger = logger) {
     private companion object {
         private const val TAG = "ExportApkUseCase"

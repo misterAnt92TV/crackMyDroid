@@ -8,12 +8,12 @@ import androidx.core.content.FileProvider
 import com.crackmydroid.database.CacheDatabase
 import com.crackmydroid.shared.data.cache.CachingRepositoryDecorator
 import com.crackmydroid.shared.data.cache.PaginationHelper
+import com.crackmydroid.shared.domain.model.InstallSourceClassification
+import com.crackmydroid.shared.domain.model.InstallSourceInfo
+import com.crackmydroid.shared.domain.model.InstalledAppEntry
 import com.crackmydroid.shared.domain.model.app.AppComponentType
 import com.crackmydroid.shared.domain.model.app.AppManifestSecurity
 import com.crackmydroid.shared.domain.model.app.ExposedComponentInfo
-import com.crackmydroid.shared.domain.model.InstalledAppEntry
-import com.crackmydroid.shared.domain.model.InstallSourceClassification
-import com.crackmydroid.shared.domain.model.InstallSourceInfo
 import com.crackmydroid.shared.domain.model.app.ManifestSecurityAnalyzer
 import com.crackmydroid.shared.domain.model.app.ManifestSecurityReport
 import com.crackmydroid.shared.domain.repository.InstalledAppsRepository
@@ -23,7 +23,7 @@ import java.io.File
 
 class InstalledAppsRepositoryAndroid(
     private val context: Context,
-    private val db: CacheDatabase
+    private val db: CacheDatabase,
 ) : InstalledAppsRepository {
     private val cacheDir = File(context.cacheDir, "extracted_apks")
     private val cachingDecorator = CachingRepositoryDecorator()
@@ -47,8 +47,8 @@ class InstalledAppsRepositoryAndroid(
                     initiatingPackageName = it.initiatingPackageName,
                     originatingPackageName = it.originatingPackageName,
                     observedAtEpochMs = it.installSourceObservedAtEpochMs,
-                    unavailableReason = it.installSourceUnavailableReason
-                )
+                    unavailableReason = it.installSourceUnavailableReason,
+                ),
             )
         }
         if (cached.isNotEmpty()) return@withContext cached
@@ -71,7 +71,7 @@ class InstalledAppsRepositoryAndroid(
                 testOnly = testOnly,
                 targetSdkVersion = pkg.applicationInfo?.targetSdkVersion,
                 minSdkVersion = pkg.applicationInfo?.minSdkVersion,
-                installSource = readInstallSource(pkg.packageName)
+                installSource = readInstallSource(pkg.packageName),
             )
         }.sortedBy { it.appLabel.lowercase() }
 
@@ -92,7 +92,7 @@ class InstalledAppsRepositoryAndroid(
                     initiatingPackageName = entry.installSource.initiatingPackageName,
                     originatingPackageName = entry.installSource.originatingPackageName,
                     installSourceObservedAtEpochMs = entry.installSource.observedAtEpochMs,
-                    installSourceUnavailableReason = entry.installSource.unavailableReason
+                    installSourceUnavailableReason = entry.installSource.unavailableReason,
                 )
             }
         }
@@ -116,7 +116,7 @@ class InstalledAppsRepositoryAndroid(
                     installingPackageName = info.installingPackageName,
                     initiatingPackageName = info.initiatingPackageName,
                     originatingPackageName = info.originatingPackageName,
-                    observedAtEpochMs = System.currentTimeMillis()
+                    observedAtEpochMs = System.currentTimeMillis(),
                 )
             } else {
                 @Suppress("DEPRECATION")
@@ -124,14 +124,14 @@ class InstalledAppsRepositoryAndroid(
                 InstallSourceInfo(
                     classification = classifyInstaller(installer),
                     installingPackageName = installer,
-                    observedAtEpochMs = System.currentTimeMillis()
+                    observedAtEpochMs = System.currentTimeMillis(),
                 )
             }
         }
         return source.getOrElse { error ->
             InstallSourceInfo(
                 classification = InstallSourceClassification.UNAVAILABLE,
-                unavailableReason = error.message ?: "Install source unavailable"
+                unavailableReason = error.message ?: "Install source unavailable",
             )
         }
     }
@@ -147,9 +147,9 @@ class InstalledAppsRepositoryAndroid(
             val pm = context.packageManager
             val packages = pm.getInstalledPackages(
                 PackageManager.GET_PERMISSIONS or
-                        PackageManager.GET_SERVICES or
-                        PackageManager.GET_RECEIVERS or
-                        PackageManager.GET_PROVIDERS
+                    PackageManager.GET_SERVICES or
+                    PackageManager.GET_RECEIVERS or
+                    PackageManager.GET_PROVIDERS,
             )
 
             packages.map { pkg ->
@@ -167,7 +167,7 @@ class InstalledAppsRepositoryAndroid(
                             type = AppComponentType.SERVICE,
                             name = service.name,
                             exported = true,
-                            permission = service.permission
+                            permission = service.permission,
                         )
                     }
                 }
@@ -177,7 +177,7 @@ class InstalledAppsRepositoryAndroid(
                             type = AppComponentType.RECEIVER,
                             name = receiver.name,
                             exported = true,
-                            permission = receiver.permission
+                            permission = receiver.permission,
                         )
                     }
                 }
@@ -187,7 +187,7 @@ class InstalledAppsRepositoryAndroid(
                             type = AppComponentType.PROVIDER,
                             name = provider.name,
                             exported = true,
-                            permission = provider.readPermission ?: provider.writePermission
+                            permission = provider.readPermission ?: provider.writePermission,
                         )
                     }
                 }
@@ -200,7 +200,7 @@ class InstalledAppsRepositoryAndroid(
                     testOnly = testOnly,
                     targetSdkVersion = pkg.applicationInfo?.targetSdkVersion,
                     minSdkVersion = pkg.applicationInfo?.minSdkVersion,
-                    exposedComponents = components
+                    exposedComponents = components,
                 )
                 ManifestSecurityAnalyzer.analyze(info)
             }
@@ -212,7 +212,7 @@ class InstalledAppsRepositoryAndroid(
                 cacheGetter = { cachingDecorator.getManifestSecurityCache() },
                 cacheSetter = { cachingDecorator.cacheManifestSecurityReport(it) },
                 timeGetter = { 0L },
-                timeSetter = { }
+                timeSetter = { },
             ) {
                 analyzeManifestSecurity()
             }
@@ -242,7 +242,7 @@ class InstalledAppsRepositoryAndroid(
                 val uri = FileProvider.getUriForFile(
                     context,
                     context.packageName + ".fileprovider",
-                    apkFile
+                    apkFile,
                 )
 
                 val sendIntent = Intent(Intent.ACTION_SEND).apply {

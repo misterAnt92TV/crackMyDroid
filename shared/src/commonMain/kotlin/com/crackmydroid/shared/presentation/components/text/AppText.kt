@@ -10,8 +10,8 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.crackmydroid.shared.presentation.components.LocalAccessibilityPrefs
 import com.crackmydroid.shared.presentation.components.AccessibilityPrefs
+import com.crackmydroid.shared.presentation.components.LocalAccessibilityPrefs
 import com.crackmydroid.shared.presentation.preview.AppComponentPreviews
 import com.crackmydroid.shared.presentation.preview.ComponentPreviewContainer
 
@@ -23,7 +23,7 @@ fun AppText(
     fontWeight: FontWeight? = null,
     color: androidx.compose.ui.graphics.Color? = null,
     maxLines: Int = Int.MAX_VALUE,
-    overflow: TextOverflow = TextOverflow.Clip
+    overflow: TextOverflow = TextOverflow.Clip,
 ) {
     val prefs = LocalAccessibilityPrefs.current
     val withWeight = if (fontWeight != null) style.copy(fontWeight = fontWeight) else style
@@ -37,7 +37,7 @@ fun AppText(
         style = sized,
         color = finalColor,
         maxLines = maxLines,
-        overflow = overflow
+        overflow = overflow,
     )
 }
 
@@ -54,7 +54,7 @@ private fun AppTextPreview() = ComponentPreviewContainer {
 @AppComponentPreviews
 @Composable
 private fun AppTextAccessibilityPreview() = ComponentPreviewContainer(
-    accessibilityPrefs = AccessibilityPrefs(highContrast = true, largeText = true)
+    accessibilityPrefs = AccessibilityPrefs(highContrast = true, largeText = true),
 ) {
     AppText("Testo accessibile ad alto contrasto e dimensione aumentata.")
 }

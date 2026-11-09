@@ -1,9 +1,9 @@
 package com.crackmydroid.shared.presentation
 
 import com.crackmydroid.shared.AppLogger
+import com.crackmydroid.shared.domain.model.ExportFormat
 import com.crackmydroid.shared.domain.model.app.AppLanguage
 import com.crackmydroid.shared.domain.model.app.AppTheme
-import com.crackmydroid.shared.domain.model.ExportFormat
 import com.crackmydroid.shared.domain.usecase.settings.GetExportFormatUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetFeatureHintsEnabledUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetHighContrastUseCase
@@ -27,7 +27,6 @@ import com.crackmydroid.shared.domain.usecase.settings.SetVerboseLogUseCase
 import com.crackmydroid.shared.presentation.components.SearchHistoryStore
 import com.crackmydroid.shared.ui.settings.SettingsViewModel
 import io.mockk.coEvery
-import io.mockk.coJustRun
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
@@ -95,7 +94,7 @@ class SettingsViewModelTest {
             getLargeText = getLargeText,
             getSuggestions = getSuggestions,
             getHints = getHints,
-            getIntroSeen = getIntroSeen
+            getIntroSeen = getIntroSeen,
         )
 
         viewModel.load()
@@ -208,16 +207,52 @@ class SettingsViewModelTest {
     }
 
     private fun viewModel(
-        getLanguage: GetLanguageUseCase = mockk<GetLanguageUseCase>().also { coEvery { it() } returns Result.success(AppLanguage.SYSTEM) },
+        getLanguage: GetLanguageUseCase = mockk<GetLanguageUseCase>().also {
+            coEvery { it() } returns Result.success(
+                AppLanguage.SYSTEM,
+            )
+        },
         getTheme: GetThemeUseCase = mockk<GetThemeUseCase>().also { coEvery { it() } returns Result.success(AppTheme.SYSTEM) },
-        getVerbose: GetVerboseLogUseCase = mockk<GetVerboseLogUseCase>().also { coEvery { it() } returns Result.success(false) },
-        getFormat: GetExportFormatUseCase = mockk<GetExportFormatUseCase>().also { coEvery { it() } returns Result.success(ExportFormat.TXT) },
-        getHighContrast: GetHighContrastUseCase = mockk<GetHighContrastUseCase>().also { coEvery { it() } returns Result.success(false) },
-        getReduceMotion: GetReduceMotionUseCase = mockk<GetReduceMotionUseCase>().also { coEvery { it() } returns Result.success(false) },
-        getLargeText: GetLargeTextUseCase = mockk<GetLargeTextUseCase>().also { coEvery { it() } returns Result.success(false) },
-        getSuggestions: GetSuggestionsEnabledUseCase = mockk<GetSuggestionsEnabledUseCase>().also { coEvery { it() } returns Result.success(true) },
-        getHints: GetFeatureHintsEnabledUseCase = mockk<GetFeatureHintsEnabledUseCase>().also { coEvery { it() } returns Result.success(true) },
-        getIntroSeen: GetIntroSeenUseCase = mockk<GetIntroSeenUseCase>().also { coEvery { it() } returns Result.success(false) },
+        getVerbose: GetVerboseLogUseCase = mockk<GetVerboseLogUseCase>().also {
+            coEvery { it() } returns Result.success(
+                false,
+            )
+        },
+        getFormat: GetExportFormatUseCase = mockk<GetExportFormatUseCase>().also {
+            coEvery { it() } returns Result.success(
+                ExportFormat.TXT,
+            )
+        },
+        getHighContrast: GetHighContrastUseCase = mockk<GetHighContrastUseCase>().also {
+            coEvery { it() } returns Result.success(
+                false,
+            )
+        },
+        getReduceMotion: GetReduceMotionUseCase = mockk<GetReduceMotionUseCase>().also {
+            coEvery { it() } returns Result.success(
+                false,
+            )
+        },
+        getLargeText: GetLargeTextUseCase = mockk<GetLargeTextUseCase>().also {
+            coEvery { it() } returns Result.success(
+                false,
+            )
+        },
+        getSuggestions: GetSuggestionsEnabledUseCase = mockk<GetSuggestionsEnabledUseCase>().also {
+            coEvery { it() } returns Result.success(
+                true,
+            )
+        },
+        getHints: GetFeatureHintsEnabledUseCase = mockk<GetFeatureHintsEnabledUseCase>().also {
+            coEvery { it() } returns Result.success(
+                true,
+            )
+        },
+        getIntroSeen: GetIntroSeenUseCase = mockk<GetIntroSeenUseCase>().also {
+            coEvery { it() } returns Result.success(
+                false,
+            )
+        },
         setTheme: SetThemeUseCase = mockk(relaxed = true),
         setVerbose: SetVerboseLogUseCase = mockk(relaxed = true),
         setFormat: SetExportFormatUseCase = mockk(relaxed = true),
@@ -227,11 +262,11 @@ class SettingsViewModelTest {
         setSuggestions: SetSuggestionsEnabledUseCase = mockk(relaxed = true),
         setHints: SetFeatureHintsEnabledUseCase = mockk(relaxed = true),
         setIntro: SetIntroSeenUseCase = mockk(relaxed = true),
-        setLanguage: SetLanguageUseCase = mockk(relaxed = true)
+        setLanguage: SetLanguageUseCase = mockk(relaxed = true),
     ) = SettingsViewModel(
         getTheme, setTheme, getVerbose, setVerbose, getFormat, setFormat,
         getHighContrast, setHighContrast, getReduceMotion, setReduceMotion,
         getLargeText, setLargeText, getSuggestions, setSuggestions,
-        getHints, setHints, getIntroSeen, setIntro, getLanguage, setLanguage
+        getHints, setHints, getIntroSeen, setIntro, getLanguage, setLanguage,
     )
 }

@@ -25,7 +25,7 @@ class ActivityLaunchabilityTest {
         assertFalse(result.launchableViaShell)
         assertEquals(
             "Activity non esportata: non avviabile da questa app",
-            result.launchabilityReason
+            result.launchabilityReason,
         )
     }
 
@@ -33,13 +33,13 @@ class ActivityLaunchabilityTest {
     fun classifyAndroidActivityLaunchability_permissionProtected_isNotLaunchable() {
         val result = classifyAndroidActivityLaunchability(
             exported = true,
-            permission = "com.example.permission.START"
+            permission = "com.example.permission.START",
         )
 
         assertFalse(result.launchableViaShell)
         assertEquals(
             "Activity protetta dalla permission com.example.permission.START",
-            result.launchabilityReason
+            result.launchabilityReason,
         )
     }
 
@@ -49,7 +49,7 @@ class ActivityLaunchabilityTest {
             label = "Details",
             appLabel = "Demo",
             packageName = "com.example.demo",
-            activityName = "com.example.demo.DetailsActivity"
+            activityName = "com.example.demo.DetailsActivity",
         ).favoriteKey()
 
         assertEquals("com.example.demo/com.example.demo.DetailsActivity", key)

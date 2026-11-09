@@ -2,8 +2,8 @@ package com.crackmydroid.shared.i18n
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNotEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNotEquals
 
 class OperationTimestampFormatterTest {
     @Test

@@ -4,11 +4,11 @@ import com.crackmydroid.shared.data.DesktopScanCache
 import com.crackmydroid.shared.data.snapshot.RemoteDeviceSnapshotImporter
 import com.crackmydroid.shared.domain.model.ConnectedDevice
 import com.crackmydroid.shared.domain.model.DeviceSessionSource
+import com.crackmydroid.shared.domain.model.DeviceSessionState
 import com.crackmydroid.shared.domain.repository.AdbBridge
 import com.crackmydroid.shared.domain.repository.DeviceSessionController
-import com.crackmydroid.shared.util.runSuspendCatching
-import com.crackmydroid.shared.domain.model.DeviceSessionState
 import com.crackmydroid.shared.domain.repository.SettingsRepository
+import com.crackmydroid.shared.util.runSuspendCatching
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,15 +19,15 @@ class DeviceSessionControllerDesktop(
     private val adbBridge: AdbBridge,
     private val settingsRepository: SettingsRepository,
     private val cache: DesktopScanCache,
-    private val snapshotImporter: RemoteDeviceSnapshotImporter? = null
+    private val snapshotImporter: RemoteDeviceSnapshotImporter? = null,
 ) : DeviceSessionController {
     private val configuredAdbPath = runBlocking { settingsRepository.getAdbPath() }
     private val _state = MutableStateFlow(
         DeviceSessionState(
             adbPath = configuredAdbPath.takeIf { it.isNotBlank() }
                 ?: runBlocking { adbBridge.resolveBinary().getOrDefault("") },
-            adbPathConfigured = configuredAdbPath.isNotBlank()
-        )
+            adbPathConfigured = configuredAdbPath.isNotBlank(),
+        ),
     )
 
     override val state: StateFlow<DeviceSessionState> = _state.asStateFlow()
@@ -49,7 +49,7 @@ class DeviceSessionControllerDesktop(
                         adbPathConfigured = it.adbPathConfigured || configured,
                         selectedDevice = selected,
                         loading = false,
-                        error = null
+                        error = null,
                     )
                 }
             }
@@ -58,7 +58,7 @@ class DeviceSessionControllerDesktop(
                     it.copy(
                         availableDevices = emptyList(),
                         loading = false,
-                        error = error.message ?: "Errore ADB"
+                        error = error.message ?: "Errore ADB",
                     )
                 }
             }
@@ -66,7 +66,7 @@ class DeviceSessionControllerDesktop(
 
     override suspend fun selectDevice(
         device: ConnectedDevice,
-        adbPathOverride: String?
+        adbPathOverride: String?,
     ): Result<Unit> {
         val adbPath = adbPathOverride?.trim().orEmpty().ifBlank { _state.value.adbPath }
         val configured = !adbPathOverride.isNullOrBlank()
@@ -85,7 +85,7 @@ class DeviceSessionControllerDesktop(
                     dataSource = if (snapshotOutcome?.usedSnapshot == true) DeviceSessionSource.SNAPSHOT else DeviceSessionSource.ADB,
                     snapshotStatus = snapshotOutcome?.message,
                     snapshotMetadata = snapshotOutcome?.metadata,
-                    sessionVersion = it.sessionVersion + 1
+                    sessionVersion = it.sessionVersion + 1,
                 )
             }
         }
@@ -99,7 +99,7 @@ class DeviceSessionControllerDesktop(
                 error = null,
                 dataSource = DeviceSessionSource.ADB,
                 snapshotStatus = null,
-                snapshotMetadata = null
+                snapshotMetadata = null,
             )
         }
     }
@@ -114,7 +114,7 @@ class DeviceSessionControllerDesktop(
                 dataSource = if (snapshotOutcome?.usedSnapshot == true) DeviceSessionSource.SNAPSHOT else DeviceSessionSource.ADB,
                 snapshotStatus = snapshotOutcome?.message,
                 snapshotMetadata = snapshotOutcome?.metadata,
-                sessionVersion = it.sessionVersion + 1
+                sessionVersion = it.sessionVersion + 1,
             )
         }
     }

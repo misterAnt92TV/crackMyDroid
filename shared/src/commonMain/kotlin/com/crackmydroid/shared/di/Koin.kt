@@ -2,31 +2,37 @@ package com.crackmydroid.shared.di
 
 import co.touchlab.kermit.Logger
 import com.crackmydroid.shared.AppLogger
-import com.crackmydroid.shared.domain.usecase.root.CheckPlayIntegrityUseCase
-import com.crackmydroid.shared.domain.usecase.root.VerifyPlayIntegrityTokenUseCase
-import com.crackmydroid.shared.domain.usecase.root.CheckRootUseCase
-import com.crackmydroid.shared.domain.usecase.trick.ExecuteShellCommandUseCase
-import com.crackmydroid.shared.domain.usecase.installedapps.ExportApkUseCase
-import com.crackmydroid.shared.domain.usecase.log.ExportLogsUseCase
 import com.crackmydroid.shared.domain.usecase.activities.GetActivitiesUseCase
+import com.crackmydroid.shared.domain.usecase.activities.LaunchActivityUseCase
+import com.crackmydroid.shared.domain.usecase.info.BuildDeviceInfoReportUseCase
+import com.crackmydroid.shared.domain.usecase.info.GetDeviceInfoUseCase
+import com.crackmydroid.shared.domain.usecase.installedapps.ExportApkUseCase
+import com.crackmydroid.shared.domain.usecase.installedapps.ListInstalledAppsUseCase
+import com.crackmydroid.shared.domain.usecase.installedapps.ShareApkUseCase
+import com.crackmydroid.shared.domain.usecase.log.ExportLogsUseCase
+import com.crackmydroid.shared.domain.usecase.log.GetLogsUseCase
+import com.crackmydroid.shared.domain.usecase.pentest.RunPenTestChecksUseCase
+import com.crackmydroid.shared.domain.usecase.permissions.AnalyzePermissionRisksUseCase
+import com.crackmydroid.shared.domain.usecase.permissions.BuildPermissionsReportUseCase
+import com.crackmydroid.shared.domain.usecase.permissions.ListPermissionsUseCase
+import com.crackmydroid.shared.domain.usecase.reports.ExportReportUseCase
+import com.crackmydroid.shared.domain.usecase.root.CheckPlayIntegrityUseCase
+import com.crackmydroid.shared.domain.usecase.root.CheckRootUseCase
+import com.crackmydroid.shared.domain.usecase.root.VerifyPlayIntegrityTokenUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetActivityFavoritesUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetActivityPackageFavoritesUseCase
-import com.crackmydroid.shared.domain.usecase.info.GetDeviceInfoUseCase
-import com.crackmydroid.shared.domain.usecase.info.BuildDeviceInfoReportUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetExportFormatUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetFeatureHintsEnabledUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetHighContrastUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetInstalledAppFavoritesUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetIntroSeenUseCase
-import com.crackmydroid.shared.domain.usecase.log.GetLogsUseCase
+import com.crackmydroid.shared.domain.usecase.settings.GetLanguageUseCase
+import com.crackmydroid.shared.domain.usecase.settings.GetLargeTextUseCase
+import com.crackmydroid.shared.domain.usecase.settings.GetPermissionFavoritesUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetReduceMotionUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetSuggestionsEnabledUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetThemeUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetVerboseLogUseCase
-import com.crackmydroid.shared.domain.usecase.activities.LaunchActivityUseCase
-import com.crackmydroid.shared.domain.usecase.installedapps.ListInstalledAppsUseCase
-import com.crackmydroid.shared.domain.usecase.permissions.ListPermissionsUseCase
-import com.crackmydroid.shared.domain.usecase.trick.ListShellCommandsUseCase
 import com.crackmydroid.shared.domain.usecase.settings.SetActivityFavoritesUseCase
 import com.crackmydroid.shared.domain.usecase.settings.SetActivityPackageFavoritesUseCase
 import com.crackmydroid.shared.domain.usecase.settings.SetExportFormatUseCase
@@ -41,21 +47,13 @@ import com.crackmydroid.shared.domain.usecase.settings.SetReduceMotionUseCase
 import com.crackmydroid.shared.domain.usecase.settings.SetSuggestionsEnabledUseCase
 import com.crackmydroid.shared.domain.usecase.settings.SetThemeUseCase
 import com.crackmydroid.shared.domain.usecase.settings.SetVerboseLogUseCase
-import com.crackmydroid.shared.domain.usecase.installedapps.ShareApkUseCase
-import com.crackmydroid.shared.domain.usecase.pentest.RunPenTestChecksUseCase
-import com.crackmydroid.shared.domain.usecase.permissions.AnalyzePermissionRisksUseCase
-import com.crackmydroid.shared.domain.usecase.permissions.BuildPermissionsReportUseCase
-import com.crackmydroid.shared.domain.usecase.reports.ExportReportUseCase
-import com.crackmydroid.shared.domain.usecase.settings.GetLanguageUseCase
-import com.crackmydroid.shared.domain.usecase.settings.GetLargeTextUseCase
-import com.crackmydroid.shared.domain.usecase.settings.GetPermissionFavoritesUseCase
-import com.crackmydroid.shared.util.AppDispatchers
-import com.crackmydroid.shared.util.DefaultAppDispatchers
-import com.crackmydroid.shared.ui.activities.ActivityListViewModel
-import com.crackmydroid.shared.ui.info.InfoViewModel
+import com.crackmydroid.shared.domain.usecase.trick.ExecuteShellCommandUseCase
+import com.crackmydroid.shared.domain.usecase.trick.ListShellCommandsUseCase
 import com.crackmydroid.shared.ui.AppPresentationDependencies
+import com.crackmydroid.shared.ui.activities.ActivityListViewModel
 import com.crackmydroid.shared.ui.appshell.AppShellViewModel
 import com.crackmydroid.shared.ui.home.HomeViewModel
+import com.crackmydroid.shared.ui.info.InfoViewModel
 import com.crackmydroid.shared.ui.installedapps.InstalledAppsViewModel
 import com.crackmydroid.shared.ui.logs.LogViewModel
 import com.crackmydroid.shared.ui.pentest.PenTestingViewModel
@@ -63,6 +61,8 @@ import com.crackmydroid.shared.ui.permissions.PermissionsViewModel
 import com.crackmydroid.shared.ui.root.RootViewModel
 import com.crackmydroid.shared.ui.settings.SettingsViewModel
 import com.crackmydroid.shared.ui.trick.TrickViewModel
+import com.crackmydroid.shared.util.AppDispatchers
+import com.crackmydroid.shared.util.DefaultAppDispatchers
 import org.koin.core.context.startKoin
 import org.koin.core.module.Module
 import org.koin.dsl.KoinAppDeclaration
@@ -151,7 +151,7 @@ fun presentationModule() = module {
                 permissions = permissions,
                 installedApps = installedApps,
                 penTesting = penTesting,
-                getVerbose = get()
+                getVerbose = get(),
             ),
             activity = activity,
             home = get(),
@@ -162,7 +162,7 @@ fun presentationModule() = module {
             logs = logs,
             permissions = permissions,
             installedApps = installedApps,
-            penTesting = penTesting
+            penTesting = penTesting,
         )
     }
     factory { RootViewModel(get(), get(), get()) }
@@ -178,8 +178,8 @@ fun presentationModule() = module {
             get(), get(), // large text
             get(), get(), // suggestions enabled
             get(), get(), // feature hints enabled
-            get(), get()  // intro seen
-            , get(), get() // language
+            get(), get(),  // intro seen
+            get(), get(), // language
         )
     }
     factory { LogViewModel(get(), get(), get()) }

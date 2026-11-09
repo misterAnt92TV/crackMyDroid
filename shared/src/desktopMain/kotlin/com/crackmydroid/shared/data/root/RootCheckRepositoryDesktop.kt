@@ -20,7 +20,7 @@ import java.util.Calendar
 class RootCheckRepositoryDesktop(
     adbBridge: AdbBridge,
     sessionController: DeviceSessionController,
-    private val cache: DesktopScanCache
+    private val cache: DesktopScanCache,
 ) : DesktopAdbRepositorySupport(adbBridge, sessionController), RootCheckRepository {
     override suspend fun checkRoot(mode: RootCheckMode): RootStatus = withContext(Dispatchers.Default) {
         if (mode == RootCheckMode.PASSIVE) cache.rootStatus?.let { return@withContext it }
@@ -34,7 +34,7 @@ class RootCheckRepositoryDesktop(
             "/sbin/su",
             "/su/bin/su",
             "/system/app/Superuser.apk",
-            "/system/priv-app/Superuser.apk"
+            "/system/priv-app/Superuser.apk",
         )
         val suBinaryFound = suPaths.any { path ->
             shell("[ -e '$path' ] && echo 1 || echo 0") == "1"
@@ -47,7 +47,7 @@ class RootCheckRepositoryDesktop(
             "/sbin/.magisk",
             "/data/adb/magisk",
             "/data/adb/ksu",
-            "/data/adb/modules"
+            "/data/adb/modules",
         )
         val magiskFound = magiskTraces.any { path ->
             shell("[ -e '$path' ] && echo 1 || echo 0") == "1"
@@ -65,11 +65,21 @@ class RootCheckRepositoryDesktop(
         val patchYear = securityPatch.take(4).toIntOrNull()
         val currentYear = Calendar.getInstance().get(Calendar.YEAR)
         val outdatedPatch = patchYear == null || patchYear <= currentYear - 2
-        checks += RootCheck(RootCheckId.SU_BINARY, if (suBinaryFound || whichSu.isNotBlank()) RootCheckOutcome.DETECTED else RootCheckOutcome.NOT_DETECTED)
-        checks += RootCheck(RootCheckId.MAGISK_TRACES, if (magiskFound) RootCheckOutcome.DETECTED else RootCheckOutcome.NOT_DETECTED)
+        checks += RootCheck(
+            RootCheckId.SU_BINARY,
+            if (suBinaryFound || whichSu.isNotBlank()) RootCheckOutcome.DETECTED else RootCheckOutcome.NOT_DETECTED,
+        )
+        checks += RootCheck(
+            RootCheckId.MAGISK_TRACES,
+            if (magiskFound) RootCheckOutcome.DETECTED else RootCheckOutcome.NOT_DETECTED,
+        )
         val busyBox = runSuspendCatching { shell("command -v busybox") }.getOrDefault("")
         val busyBoxList = runSuspendCatching { shell("busybox --list") }.getOrDefault("")
-        checks += RootCheck(RootCheckId.BUSYBOX, if (busyBox.isNotBlank()) RootCheckOutcome.DETECTED else RootCheckOutcome.NOT_DETECTED, busyBoxList.lines().count { it.isNotBlank() }.toString())
+        checks += RootCheck(
+            RootCheckId.BUSYBOX,
+            if (busyBox.isNotBlank()) RootCheckOutcome.DETECTED else RootCheckOutcome.NOT_DETECTED,
+            busyBoxList.lines().count { it.isNotBlank() }.toString(),
+        )
         val sudo = runSuspendCatching { shell("command -v sudo") }.getOrDefault("")
         val sudoProbe = if (sudo.isNotBlank()) runSuspendCatching { shell("sudo -n id") }.getOrDefault("") else ""
         checks += RootCheck(
@@ -79,10 +89,17 @@ class RootCheckRepositoryDesktop(
                 sudo.isNotBlank() -> RootCheckOutcome.DENIED
                 else -> RootCheckOutcome.NOT_DETECTED
             },
-            listOf(sudo, sudoProbe).filter { it.isNotBlank() }.joinToString(" ")
+            listOf(sudo, sudoProbe).filter { it.isNotBlank() }.joinToString(" "),
         )
-        val managerPackages = runSuspendCatching { shell("pm list packages | grep -E 'magisk|supersu|superuser|kernelsu'") }.getOrDefault("")
-        checks += RootCheck(RootCheckId.ROOT_MANAGER, if (managerPackages.isNotBlank()) RootCheckOutcome.DETECTED else RootCheckOutcome.NOT_DETECTED, managerPackages)
+        val managerPackages =
+            runSuspendCatching { shell("pm list packages | grep -E 'magisk|supersu|superuser|kernelsu'") }.getOrDefault(
+                "",
+            )
+        checks += RootCheck(
+            RootCheckId.ROOT_MANAGER,
+            if (managerPackages.isNotBlank()) RootCheckOutcome.DETECTED else RootCheckOutcome.NOT_DETECTED,
+            managerPackages,
+        )
         val suOutcome = if (mode == RootCheckMode.PRIVILEGE_ACCESS) {
             when {
                 suExec.contains("uid=0") -> RootCheckOutcome.DETECTED
@@ -90,7 +107,11 @@ class RootCheckRepositoryDesktop(
                 else -> RootCheckOutcome.NOT_DETECTED
             }
         } else RootCheckOutcome.UNAVAILABLE
-        checks += RootCheck(RootCheckId.ROOT_ACCESS, suOutcome, if (mode == RootCheckMode.PASSIVE) "prova esplicita non eseguita" else suExec.take(240))
+        checks += RootCheck(
+            RootCheckId.ROOT_ACCESS,
+            suOutcome,
+            if (mode == RootCheckMode.PASSIVE) "prova esplicita non eseguita" else suExec.take(240),
+        )
         val rooted = suOutcome == RootCheckOutcome.DETECTED
         val details = buildString {
             appendLine(if (rooted) "Possibili tracce di root rilevate." else "Nessuna traccia di root evidente.")
@@ -104,10 +125,10 @@ class RootCheckRepositoryDesktop(
                 "${
                     if (selinux.equals(
                             "Enforcing",
-                            true
+                            true,
                         )
                     ) "[OK]" else "[WARN]"
-                } SELinux: $selinux"
+                } SELinux: $selinux",
             )
             appendLine("${if (adbEnabled) "[WARN]" else "[OK]"} ADB debugging: ${if (adbEnabled) "Attivo" else "Disattivo"}")
             appendLine("${if (developerOptions) "[WARN]" else "[OK]"} Developer options: ${if (developerOptions) "Attive" else "Disattivate"}")
@@ -122,7 +143,7 @@ class RootCheckRepositoryDesktop(
         cache.playIntegrity ?: PlayIntegrityResult(
             basicIntegrity = null,
             deviceIntegrity = null,
-            details = "Non disponibile in modalita desktop adb-only"
+            details = "Non disponibile in modalita desktop adb-only",
         ).also {
             cache.playIntegrity = it
         }

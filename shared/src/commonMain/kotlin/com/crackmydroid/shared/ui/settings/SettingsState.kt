@@ -1,8 +1,8 @@
 package com.crackmydroid.shared.ui.settings
 
+import com.crackmydroid.shared.domain.model.ExportFormat
 import com.crackmydroid.shared.domain.model.app.AppLanguage
 import com.crackmydroid.shared.domain.model.app.AppTheme
-import com.crackmydroid.shared.domain.model.ExportFormat
 import com.crackmydroid.shared.ui.settings.model.ThirdPartyLibraries
 import com.crackmydroid.shared.ui.settings.model.ThirdPartyLibrary
 
@@ -19,5 +19,5 @@ data class SettingsState(
     val exportFormat: ExportFormat = ExportFormat.TXT,
     val loading: Boolean = false,
     val error: String? = null,
-    val thirdPartyLibraries: List<ThirdPartyLibrary> = ThirdPartyLibraries.catalog
+    val thirdPartyLibraries: List<ThirdPartyLibrary> = ThirdPartyLibraries.catalog,
 )

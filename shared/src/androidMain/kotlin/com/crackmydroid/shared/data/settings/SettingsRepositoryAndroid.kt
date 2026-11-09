@@ -6,25 +6,25 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import com.crackmydroid.shared.domain.model.app.AppLanguage
-import com.crackmydroid.shared.domain.model.app.AppTheme
-import com.crackmydroid.shared.domain.model.ExportFormat
-import com.crackmydroid.shared.domain.repository.SettingsRepository
-import com.crackmydroid.shared.data.settings.SettingsPreferenceKeys.ADB_PATH
 import com.crackmydroid.shared.data.settings.SettingsPreferenceKeys.ACTIVITY_FAVORITES
 import com.crackmydroid.shared.data.settings.SettingsPreferenceKeys.ACTIVITY_PACKAGE_FAVORITES
+import com.crackmydroid.shared.data.settings.SettingsPreferenceKeys.ADB_PATH
 import com.crackmydroid.shared.data.settings.SettingsPreferenceKeys.EXPORT_FORMAT
 import com.crackmydroid.shared.data.settings.SettingsPreferenceKeys.FEATURE_HINTS_ENABLED
 import com.crackmydroid.shared.data.settings.SettingsPreferenceKeys.HIGH_CONTRAST
 import com.crackmydroid.shared.data.settings.SettingsPreferenceKeys.INSTALLED_APP_FAVORITES
 import com.crackmydroid.shared.data.settings.SettingsPreferenceKeys.INTRO_SEEN
-import com.crackmydroid.shared.data.settings.SettingsPreferenceKeys.LARGE_TEXT
 import com.crackmydroid.shared.data.settings.SettingsPreferenceKeys.LANGUAGE
+import com.crackmydroid.shared.data.settings.SettingsPreferenceKeys.LARGE_TEXT
 import com.crackmydroid.shared.data.settings.SettingsPreferenceKeys.PERMISSION_FAVORITES
 import com.crackmydroid.shared.data.settings.SettingsPreferenceKeys.REDUCE_MOTION
 import com.crackmydroid.shared.data.settings.SettingsPreferenceKeys.SUGGESTIONS_ENABLED
 import com.crackmydroid.shared.data.settings.SettingsPreferenceKeys.THEME
 import com.crackmydroid.shared.data.settings.SettingsPreferenceKeys.VERBOSE_LOG
+import com.crackmydroid.shared.domain.model.ExportFormat
+import com.crackmydroid.shared.domain.model.app.AppLanguage
+import com.crackmydroid.shared.domain.model.app.AppTheme
+import com.crackmydroid.shared.domain.repository.SettingsRepository
 import kotlinx.coroutines.flow.first
 
 private val Context.settingsDataStore by preferencesDataStore(name = "settings")

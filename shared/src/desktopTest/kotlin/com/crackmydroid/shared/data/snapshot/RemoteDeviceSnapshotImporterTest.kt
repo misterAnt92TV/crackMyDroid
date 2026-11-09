@@ -1,19 +1,18 @@
 package com.crackmydroid.shared.data.snapshot
 
 import com.crackmydroid.shared.data.DesktopScanCache
-import com.crackmydroid.shared.domain.model.activity.ActivityEntry
-import com.crackmydroid.shared.domain.model.app.AppPermissionEntry
 import com.crackmydroid.shared.domain.model.ConnectedDevice
 import com.crackmydroid.shared.domain.model.DeviceInfo
-import com.crackmydroid.shared.domain.model.scansnapshot.DeviceScanSnapshot
-import com.crackmydroid.shared.domain.model.scansnapshot.DeviceScanSnapshotJson
 import com.crackmydroid.shared.domain.model.InstalledAppEntry
 import com.crackmydroid.shared.domain.model.PlayIntegrityResult
 import com.crackmydroid.shared.domain.model.RootStatus
+import com.crackmydroid.shared.domain.model.activity.ActivityEntry
+import com.crackmydroid.shared.domain.model.app.AppPermissionEntry
+import com.crackmydroid.shared.domain.model.scansnapshot.DeviceScanSnapshot
+import com.crackmydroid.shared.domain.model.scansnapshot.DeviceScanSnapshotJson
 import com.crackmydroid.shared.domain.model.scansnapshot.SnapshotSection
 import com.crackmydroid.shared.domain.repository.AdbBridge
 import kotlinx.coroutines.test.runTest
-import kotlinx.serialization.encodeToString
 import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -44,42 +43,42 @@ class RemoteDeviceSnapshotImporterTest {
                     batteryLevel = 80,
                     networkType = "Wi-Fi",
                     totalMemory = 8_000L,
-                    freeMemory = 4_000L
-                )
+                    freeMemory = 4_000L,
+                ),
             ),
             rootStatus = SnapshotSection.ready(RootStatus(false, "No root")),
             playIntegrity = SnapshotSection.skipped(
                 error = "Non eseguito automaticamente",
-                data = PlayIntegrityResult(null, null, "Non eseguito automaticamente")
+                data = PlayIntegrityResult(null, null, "Non eseguito automaticamente"),
             ),
             installedApps = SnapshotSection.ready(
-                listOf(InstalledAppEntry("Demo", "pkg.demo", "/data/app/pkg.demo/base.apk"))
+                listOf(InstalledAppEntry("Demo", "pkg.demo", "/data/app/pkg.demo/base.apk")),
             ),
             permissions = SnapshotSection.ready(
                 listOf(
                     AppPermissionEntry(
                         "Demo",
                         "pkg.demo",
-                        listOf("android.permission.INTERNET")
-                    )
-                )
+                        listOf("android.permission.INTERNET"),
+                    ),
+                ),
             ),
             activities = SnapshotSection.ready(
-                listOf(ActivityEntry("Main", "Demo", "pkg.demo", "pkg.demo.MainActivity"))
+                listOf(ActivityEntry("Main", "Demo", "pkg.demo", "pkg.demo.MainActivity")),
             ),
-            logs = SnapshotSection.ready(listOf("I/Test: ok"))
+            logs = SnapshotSection.ready(listOf("I/Test: ok")),
         )
         val cache = DesktopScanCache()
         val importer = RemoteDeviceSnapshotImporter(
             adbBridge = FakeSnapshotAdbBridge(
-                snapshotText = DeviceScanSnapshotJson.format.encodeToString(snapshot)
+                snapshotText = DeviceScanSnapshotJson.format.encodeToString(snapshot),
             ),
-            cache = cache
+            cache = cache,
         )
 
         val outcome = importer.import(
             device = ConnectedDevice(serial = "SERIAL1", state = "device"),
-            adbPath = "/usr/bin/adb"
+            adbPath = "/usr/bin/adb",
         )
 
         assertTrue(outcome.usedSnapshot)
@@ -122,14 +121,14 @@ class RemoteDeviceSnapshotImporterTest {
                       "activities": { "state": "ready", "data": [] },
                       "logs": { "state": "ready", "data": [] }
                     }
-                """.trimIndent()
+                """.trimIndent(),
             ),
-            cache = cache
+            cache = cache,
         )
 
         val outcome = importer.import(
             device = ConnectedDevice(serial = "SERIAL1", state = "device"),
-            adbPath = "/usr/bin/adb"
+            adbPath = "/usr/bin/adb",
         )
 
         assertFalse(outcome.usedSnapshot)
@@ -139,7 +138,7 @@ class RemoteDeviceSnapshotImporterTest {
 }
 
 private class FakeSnapshotAdbBridge(
-    private val snapshotText: String? = null
+    private val snapshotText: String? = null,
 ) : AdbBridge {
     override suspend fun resolveBinary(configuredPath: String?): Result<String> =
         Result.success(configuredPath ?: "/usr/bin/adb")
@@ -151,14 +150,14 @@ private class FakeSnapshotAdbBridge(
         serial: String,
         command: String,
         configuredPath: String?,
-        asRoot: Boolean
+        asRoot: Boolean,
     ): Result<String> = Result.success("")
 
     override suspend fun pull(
         serial: String,
         remotePath: String,
         localPath: String,
-        configuredPath: String?
+        configuredPath: String?,
     ): Result<String> = runCatching {
         requireNotNull(snapshotText) { "missing remote snapshot" }
         val file = File(localPath)
@@ -170,6 +169,6 @@ private class FakeSnapshotAdbBridge(
     override suspend fun logcat(
         serial: String,
         configuredPath: String?,
-        lines: Int
+        lines: Int,
     ): Result<List<String>> = Result.success(emptyList())
 }

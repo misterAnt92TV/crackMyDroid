@@ -6,7 +6,7 @@ import com.crackmydroid.shared.domain.repository.DeviceSessionController
 
 abstract class DesktopAdbRepositorySupport(
     protected val adbBridge: AdbBridge,
-    protected val sessionController: DeviceSessionController
+    protected val sessionController: DeviceSessionController,
 ) {
     protected fun selectedDevice(): ConnectedDevice =
         requireNotNull(sessionController.state.value.selectedDevice) {
@@ -23,7 +23,7 @@ abstract class DesktopAdbRepositorySupport(
             command = command,
             configuredPath = adbPath(),
             asRoot = asRoot,
-            timeoutMs = timeoutMs
+            timeoutMs = timeoutMs,
         ).getOrThrow()
     }
 }

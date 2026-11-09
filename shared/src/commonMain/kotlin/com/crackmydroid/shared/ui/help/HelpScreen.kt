@@ -42,13 +42,13 @@ fun HelpScreen(
     padding: PaddingValues,
     onHelp: (String) -> Unit,
     onMenu: () -> Unit = {},
-    onNavigate: (Screen) -> Unit
+    onNavigate: (Screen) -> Unit,
 ) {
     HelpContent(
         padding = padding,
         onHelp = onHelp,
         onMenu = onMenu,
-        onNavigate = onNavigate
+        onNavigate = onNavigate,
     )
 }
 
@@ -57,7 +57,7 @@ internal fun HelpContent(
     padding: PaddingValues,
     onHelp: (String) -> Unit,
     onMenu: () -> Unit = {},
-    onNavigate: (Screen) -> Unit
+    onNavigate: (Screen) -> Unit,
 ) {
     val strings = LocalStrings.current
     val listState = rememberLazyListState()
@@ -71,21 +71,21 @@ internal fun HelpContent(
             state = listState,
             modifier = Modifier.fillMaxSize(),
             contentPadding = screenContentPadding(padding),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             item {
                 SectionHeader(
                     title = strings.navHelp,
                     help = strings.helpOverview,
                     onHelp = onHelp,
-                    onMenu = onMenu
+                    onMenu = onMenu,
                 )
             }
             item {
                 AppText(
                     text = strings.helpOverview,
                     style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(horizontal = 4.dp, vertical = 4.dp)
+                    modifier = Modifier.padding(horizontal = 4.dp, vertical = 4.dp),
                 )
             }
             items(helpScreens) { screen ->
@@ -93,7 +93,7 @@ internal fun HelpContent(
                     title = screen.title(strings),
                     summary = sectionSummary(strings, screen),
                     icon = screen.icon,
-                    onClick = { onNavigate(screen) }
+                    onClick = { onNavigate(screen) },
                 )
             }
         }
@@ -103,7 +103,7 @@ internal fun HelpContent(
             onClick = { scope.launch { listState.animateScrollToItem(0) } },
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(12.dp)
+                .padding(12.dp),
         )
     }
 }
@@ -115,41 +115,41 @@ private fun HelpNavigationItem(title: String, summary: String, icon: ImageVector
             .fillMaxWidth()
             .heightIn(min = 72.dp),
         onClick = onClick,
-        contentPadding = PaddingValues(16.dp)
+        contentPadding = PaddingValues(16.dp),
     ) {
         Row(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalAlignment = Alignment.Top
+            verticalAlignment = Alignment.Top,
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(top = 2.dp)
+                modifier = Modifier.padding(top = 2.dp),
             )
             Column(
                 modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(6.dp)
+                verticalArrangement = Arrangement.spacedBy(6.dp),
             ) {
                 AppText(
                     text = title,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = MaterialTheme.colorScheme.onSurface,
                 )
                 AppText(
                     text = summary,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 3,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
                 )
             }
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(top = 2.dp)
+                modifier = Modifier.padding(top = 2.dp),
             )
         }
     }
@@ -165,7 +165,7 @@ private val helpScreens = listOf(
     Screen.Trick,
     Screen.Log,
     Screen.Info,
-    Screen.Settings
+    Screen.Settings,
 )
 
 private fun sectionSummary(strings: Strings, screen: Screen): String = when (screen) {

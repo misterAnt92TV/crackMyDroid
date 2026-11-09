@@ -7,26 +7,44 @@ metadata:
 
 # CrackMyDroid Unit Tests
 
-Use this skill when the user asks to add, repair, or improve unit tests in this repository. The output must protect a real behavior of the application, not merely increase the test count.
+Use this skill when the user asks to add, repair, or improve unit tests in this repository. The
+output must protect a real behavior of the application, not merely increase the test count.
 
 ## Scope and discovery
 
-1. Identify the requested production target and its Gradle module. Read the production class, its public collaborators, and any existing test before editing.
-2. Inspect the target source-set path and choose the narrowest applicable test source set using [references/platform-matrix.md](references/platform-matrix.md).
-3. Derive cases from observable behavior: returned values, emitted state, thrown errors, persisted/exported data, commands sent to collaborators, and meaningful calls to dependencies.
-4. Keep production code unchanged. Only add or update test files and, when required for compilation, the smallest test-only dependency change.
+1. Identify the requested production target and its Gradle module. Read the production class, its
+   public collaborators, and any existing test before editing.
+2. Inspect the target source-set path and choose the narrowest applicable test source set
+   using [references/platform-matrix.md](references/platform-matrix.md).
+3. Derive cases from observable behavior: returned values, emitted state, thrown errors,
+   persisted/exported data, commands sent to collaborators, and meaningful calls to dependencies.
+4. Keep production code unchanged. Only add or update test files and, when required for compilation,
+   the smallest test-only dependency change.
 
-If the request names a package or module rather than one class, work in bounded batches and prioritize ViewModels, UseCases, repositories, then pure models/parsers. Do not generate a blanket suite for unrelated code.
+If the request names a package or module rather than one class, work in bounded batches and
+prioritize ViewModels, UseCases, repositories, then pure models/parsers. Do not generate a blanket
+suite for unrelated code.
 
 ## Platform selection
 
-- `shared/src/commonMain` → `shared/src/commonTest`: use only Kotlin Multiplatform-compatible test APIs and real domain values. Do not import JVM-only MockK or JUnit.
-- Shared ViewModels, UseCases, and JVM-compatible collaborators → `shared/src/jvmCommonTest`: use MockK for external collaborators and JUnit 4 when the selected task provides it. Follow the existing coroutine-test patterns.
-- Desktop/ADB/process/filesystem implementations → `shared/src/desktopTest`: isolate process and filesystem boundaries with fakes or MockK where supported; never require a real ADB device or host-specific state.
-- Android-only production code → `androidApp/src/test` or the module's `androidUnitTest`: use MockK and JUnit 4 (`org.junit.Test`, `org.junit.Assert`), with Android framework dependencies mocked or avoided.
-- iOS/native code → the matching `iosTest` source set only when the test is Kotlin/Native-compatible. Do not force MockK or JUnit into native tests; prefer `kotlin.test` and platform-neutral fakes.
+- `shared/src/commonMain` → `shared/src/commonTest`: use only Kotlin Multiplatform-compatible test
+  APIs and real domain values. Do not import JVM-only MockK or JUnit.
+- Shared ViewModels, UseCases, and JVM-compatible collaborators → `shared/src/jvmCommonTest`: use
+  MockK for external collaborators and JUnit 4 when the selected task provides it. Follow the
+  existing coroutine-test patterns.
+- Desktop/ADB/process/filesystem implementations → `shared/src/desktopTest`: isolate process and
+  filesystem boundaries with fakes or MockK where supported; never require a real ADB device or
+  host-specific state.
+- Android-only production code → `androidApp/src/test` or the module's `androidUnitTest`: use MockK
+  and JUnit 4 (`org.junit.Test`, `org.junit.Assert`), with Android framework dependencies mocked or
+  avoided.
+- iOS/native code → the matching `iosTest` source set only when the test is
+  Kotlin/Native-compatible. Do not force MockK or JUnit into native tests; prefer `kotlin.test` and
+  platform-neutral fakes.
 
-If the requested platform cannot support the user's requested library, explain the constraint in the final report and preserve the platform-compatible test rather than creating a test that cannot compile.
+If the requested platform cannot support the user's requested library, explain the constraint in the
+final report and preserve the platform-compatible test rather than creating a test that cannot
+compile.
 
 ## Test design requirements
 
@@ -36,9 +54,13 @@ Every target must have purposeful cases covering, where applicable:
 - a meaningful failure, exception, rejected result, or dependency failure;
 - empty, boundary, duplicate, or malformed input;
 - initial/loading/empty state and asynchronous completion for stateful code;
-- observable side effects such as repository calls, persistence, exports, navigation intent, or command construction.
+- observable side effects such as repository calls, persistence, exports, navigation intent, or
+  command construction.
 
-Use real model instances for pure transformation and business-rule tests. Mock only a collaborator whose behavior is outside the unit under test. A test must assert an outcome or observable interaction; do not assert private implementation details, call counts without behavioral meaning, or a mock setup with no assertion.
+Use real model instances for pure transformation and business-rule tests. Mock only a collaborator
+whose behavior is outside the unit under test. A test must assert an outcome or observable
+interaction; do not assert private implementation details, call counts without behavioral meaning,
+or a mock setup with no assertion.
 
 For coroutine-based code:
 
@@ -54,11 +76,14 @@ For MockK-based tests:
 - clear or unmock resources in teardown when static/object mocking is used;
 - avoid relaxed mocks when their default values could hide a broken behavior.
 
-Prefer descriptive backtick test names that state the behavior and result. Arrange, Act, and Assert should be obvious from the test body. Reuse existing project fixtures and naming conventions when they are correct, but derive coverage from production code rather than copying existing tests.
+Prefer descriptive backtick test names that state the behavior and result. Arrange, Act, and Assert
+should be obvious from the test body. Reuse existing project fixtures and naming conventions when
+they are correct, but derive coverage from production code rather than copying existing tests.
 
 ## Validation
 
-Run the narrowest applicable Gradle task from the matrix, then widen validation only when shared code or dependencies require it. At minimum:
+Run the narrowest applicable Gradle task from the matrix, then widen validation only when shared
+code or dependencies require it. At minimum:
 
 - compile and execute the changed test source set;
 - run the relevant test class or method first when iterating;

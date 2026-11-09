@@ -8,15 +8,15 @@ import io.ktor.client.plugins.DefaultRequest
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.logging.LogLevel
-import io.ktor.client.plugins.logging.Logger as KtorLogger
 import io.ktor.client.plugins.logging.Logging
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
+import io.ktor.client.plugins.logging.Logger as KtorLogger
 
 internal fun <T : HttpClientEngineConfig> HttpClientConfig<T>.configureCrackMyDroidNetwork(
-    debugLogging: Boolean
+    debugLogging: Boolean,
 ) {
     expectSuccess = false
     install(ContentNegotiation) {
@@ -52,7 +52,7 @@ private val SENSITIVE_HEADERS = setOf(
     HttpHeaders.Cookie.lowercase(),
     HttpHeaders.SetCookie.lowercase(),
     "x-api-key",
-    "x-integrity-token"
+    "x-integrity-token",
 )
 
 private const val CONNECT_TIMEOUT_MS = 10_000L

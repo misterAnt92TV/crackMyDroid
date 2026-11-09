@@ -16,5 +16,5 @@ data class TrickState(
     val stdoutIsPackageList: Boolean = false,
     val running: Boolean = false,
     val interactionHint: String? = null,
-    val error: String? = null
+    val error: String? = null,
 )

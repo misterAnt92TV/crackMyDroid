@@ -55,15 +55,15 @@ porte è occupata, si interrompe senza terminare processi.
 
 ## Troubleshooting
 
-| Errore | Causa e correzione |
-| --- | --- |
-| `EADDRINUSE ... 4400` | È stata avviata una seconda istanza. Chiudi il secondo comando e riusa il bridge già attivo. |
-| `ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL` | È l’errore finale del bootstrap parallelo. Controlla il primo errore del plugin: spesso è una porta duplicata o una cache Corepack corrotta. |
-| `Cannot find ... pnpm.cjs` | La cache Corepack isolata è incompleta. Riesegui il launcher; se persiste, rimuovi solo la cache indicata dal messaggio e riprova. |
-| `No Penpot plugin instances are currently connected` | Apri `CrackMyDroid`, ricarica `http://localhost:4400/manifest.json`, apri il plugin e premi **Connect to MCP server**. Mantieni il pannello aperto. |
-| Certificato TLS non verificabile | Imposta `PENPOT_CA_BUNDLE` con la CA aziendale approvata. Non usare `--insecure`. |
-| `localhost:4401` non risponde ma il processo è attivo | Verifica il listener IPv6; per la diagnostica diretta usa `http://[::1]:4401/mcp`, lasciando il manifest su `localhost`. |
-| Plugin collegato al file sbagliato | Apri `CrackMyDroid` e riconnetti il plugin prima di modificare Penpot. |
+| Errore                                                | Causa e correzione                                                                                                                                  |
+|-------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
+| `EADDRINUSE ... 4400`                                 | È stata avviata una seconda istanza. Chiudi il secondo comando e riusa il bridge già attivo.                                                        |
+| `ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL`                   | È l’errore finale del bootstrap parallelo. Controlla il primo errore del plugin: spesso è una porta duplicata o una cache Corepack corrotta.        |
+| `Cannot find ... pnpm.cjs`                            | La cache Corepack isolata è incompleta. Riesegui il launcher; se persiste, rimuovi solo la cache indicata dal messaggio e riprova.                  |
+| `No Penpot plugin instances are currently connected`  | Apri `CrackMyDroid`, ricarica `http://localhost:4400/manifest.json`, apri il plugin e premi **Connect to MCP server**. Mantieni il pannello aperto. |
+| Certificato TLS non verificabile                      | Imposta `PENPOT_CA_BUNDLE` con la CA aziendale approvata. Non usare `--insecure`.                                                                   |
+| `localhost:4401` non risponde ma il processo è attivo | Verifica il listener IPv6; per la diagnostica diretta usa `http://[::1]:4401/mcp`, lasciando il manifest su `localhost`.                            |
+| Plugin collegato al file sbagliato                    | Apri `CrackMyDroid` e riconnetti il plugin prima di modificare Penpot.                                                                              |
 
 La procedura non usa Docker e non avvia un backend Penpot locale.
 

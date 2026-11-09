@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class HomeViewModel(
-    private val operationLogs: OperationLogRepository
+    private val operationLogs: OperationLogRepository,
 ) : BaseViewModel() {
     private companion object {
         const val MAX_RECENT_OPERATIONS = 5
@@ -27,7 +27,7 @@ class HomeViewModel(
                         recentOperations = entries
                             .filterNot(OperationEntry::hiddenFromRecent)
                             .distinctBy { entry -> entry.description to entry.success }
-                                .take(MAX_RECENT_OPERATIONS)
+                            .take(MAX_RECENT_OPERATIONS),
                     )
                 }
             }

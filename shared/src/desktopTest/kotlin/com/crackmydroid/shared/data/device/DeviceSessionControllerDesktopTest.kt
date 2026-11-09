@@ -1,10 +1,10 @@
 package com.crackmydroid.shared.data.device
 
 import com.crackmydroid.shared.data.DesktopScanCache
-import com.crackmydroid.shared.domain.model.app.AppLanguage
-import com.crackmydroid.shared.domain.model.app.AppTheme
 import com.crackmydroid.shared.domain.model.ConnectedDevice
 import com.crackmydroid.shared.domain.model.ExportFormat
+import com.crackmydroid.shared.domain.model.app.AppLanguage
+import com.crackmydroid.shared.domain.model.app.AppTheme
 import com.crackmydroid.shared.domain.repository.AdbBridge
 import com.crackmydroid.shared.domain.repository.SettingsRepository
 import kotlinx.coroutines.test.runTest
@@ -21,15 +21,15 @@ class DeviceSessionControllerDesktopTest {
                 com.crackmydroid.shared.domain.model.InstalledAppEntry(
                     "Pkg",
                     "pkg",
-                    "/tmp/pkg.apk"
-                )
+                    "/tmp/pkg.apk",
+                ),
             )
         }
         val settings = FakeSettingsRepository()
         val bridge = FakeAdbBridge(
             devices = listOf(
-                ConnectedDevice(serial = "SERIAL1", state = "device", model = "Pixel 8")
-            )
+                ConnectedDevice(serial = "SERIAL1", state = "device", model = "Pixel 8"),
+            ),
         )
         val controller = DeviceSessionControllerDesktop(bridge, settings, cache)
 
@@ -48,8 +48,8 @@ class DeviceSessionControllerDesktopTest {
         val settings = FakeSettingsRepository()
         val bridge = FakeAdbBridge(
             devices = listOf(
-                ConnectedDevice(serial = "SERIAL2", state = "device", model = "Galaxy")
-            )
+                ConnectedDevice(serial = "SERIAL2", state = "device", model = "Galaxy"),
+            ),
         )
         val controller = DeviceSessionControllerDesktop(bridge, settings, cache)
 
@@ -65,7 +65,7 @@ class DeviceSessionControllerDesktopTest {
 }
 
 private class FakeAdbBridge(
-    val devices: List<ConnectedDevice>
+    val devices: List<ConnectedDevice>,
 ) : AdbBridge {
     override suspend fun resolveBinary(configuredPath: String?): Result<String> =
         Result.success(configuredPath ?: "/usr/bin/adb")
@@ -77,20 +77,20 @@ private class FakeAdbBridge(
         serial: String,
         command: String,
         configuredPath: String?,
-        asRoot: Boolean
+        asRoot: Boolean,
     ): Result<String> = Result.success("")
 
     override suspend fun pull(
         serial: String,
         remotePath: String,
         localPath: String,
-        configuredPath: String?
+        configuredPath: String?,
     ): Result<String> = Result.success(localPath)
 
     override suspend fun logcat(
         serial: String,
         configuredPath: String?,
-        lines: Int
+        lines: Int,
     ): Result<List<String>> = Result.success(emptyList())
 }
 

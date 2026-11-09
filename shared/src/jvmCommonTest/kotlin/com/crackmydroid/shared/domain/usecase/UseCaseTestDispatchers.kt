@@ -5,7 +5,7 @@ import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestDispatcher
 
 class UseCaseTestDispatchers(
-    override val default: TestDispatcher = StandardTestDispatcher()
+    override val default: TestDispatcher = StandardTestDispatcher(),
 ) : AppDispatchers {
     override val main: TestDispatcher = default
 }

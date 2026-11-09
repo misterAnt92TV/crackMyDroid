@@ -11,7 +11,7 @@ import kotlinx.coroutines.launch
 
 class TrickViewModel(
     private val listUseCase: ListShellCommandsUseCase,
-    private val execUseCase: ExecuteShellCommandUseCase
+    private val execUseCase: ExecuteShellCommandUseCase,
 ) : BaseViewModel() {
     private val _state = MutableStateFlow(TrickState())
     val state: StateFlow<TrickState> = _state
@@ -37,7 +37,7 @@ class TrickViewModel(
                 running = true,
                 runningCommand = command,
                 interactionHint = null,
-                error = null
+                error = null,
             )
         }
         scope.launch {
@@ -56,7 +56,7 @@ class TrickViewModel(
                             stdoutIsPackageList = res.stdout.lines().map(String::trim)
                                 .filter(String::isNotEmpty).all { line -> line.startsWith("package:") },
                             running = false,
-                            runningCommand = null
+                            runningCommand = null,
                         )
                     }
                 }
@@ -66,7 +66,7 @@ class TrickViewModel(
                             error = err.message,
                             lastCommandTitle = command.title,
                             running = false,
-                            runningCommand = null
+                            runningCommand = null,
                         )
                     }
                 }
@@ -98,7 +98,7 @@ class TrickViewModel(
         _state.update {
             it.copy(
                 interactionHint = command.unsupportedReason
-                    ?: "\"${command.title}\" non disponibile sul device selezionato."
+                    ?: "\"${command.title}\" non disponibile sul device selezionato.",
             )
         }
     }

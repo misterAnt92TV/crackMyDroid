@@ -21,7 +21,7 @@ class InstalledAppsRepositoryDesktop(
     adbBridge: AdbBridge,
     sessionController: DeviceSessionController,
     private val packageManager: RemotePackageManager,
-    private val cache: DesktopScanCache
+    private val cache: DesktopScanCache,
 ) : DesktopAdbRepositorySupport(adbBridge, sessionController), InstalledAppsRepository {
     override suspend fun listInstalled(): List<InstalledAppEntry> =
         withContext(Dispatchers.IO) { packageManager.listInstalledApps() }
@@ -66,7 +66,7 @@ class InstalledAppsRepositoryDesktop(
                     serial = device.serial,
                     remotePath = remotePath,
                     localPath = localPath,
-                    configuredPath = adbPath()
+                    configuredPath = adbPath(),
                 ).getOrThrow()
             }
         }

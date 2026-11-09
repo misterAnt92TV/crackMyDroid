@@ -1,15 +1,15 @@
 package com.crackmydroid.shared.presentation
 
-import com.crackmydroid.shared.util.AppDispatchers
 import com.crackmydroid.shared.domain.model.ExportDocument
 import com.crackmydroid.shared.domain.model.ExportFormat
-import com.crackmydroid.shared.domain.repository.log.LogRepository
 import com.crackmydroid.shared.domain.repository.ReportFileRepository
+import com.crackmydroid.shared.domain.repository.log.LogRepository
 import com.crackmydroid.shared.domain.usecase.log.ExportLogsUseCase
 import com.crackmydroid.shared.domain.usecase.log.GetLogsUseCase
 import com.crackmydroid.shared.domain.usecase.reports.ExportReportUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetExportFormatUseCase
 import com.crackmydroid.shared.ui.logs.LogViewModel
+import com.crackmydroid.shared.util.AppDispatchers
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -34,14 +34,14 @@ class LogViewModelTest {
         coEvery { repository.fetchLog() } returns listOf(
             "I/App: started",
             "E/App: failed",
-            "W/App: retrying"
+            "W/App: retrying",
         )
         val viewModel = LogViewModel(
             GetLogsUseCase(repository),
             ExportLogsUseCase(
                 ExportReportUseCase(mockk<ReportFileRepository>(), mockk<GetExportFormatUseCase>()),
             ),
-            appDispatchers
+            appDispatchers,
         )
 
         viewModel.refresh()
@@ -64,7 +64,7 @@ class LogViewModelTest {
         val viewModel = LogViewModel(
             GetLogsUseCase(repository),
             ExportLogsUseCase(ExportReportUseCase(reportFiles, format)),
-            appDispatchers
+            appDispatchers,
         )
 
         viewModel.refresh()

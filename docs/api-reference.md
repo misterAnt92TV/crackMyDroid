@@ -29,7 +29,8 @@ return `UNAVAILABLE`.
 
 The integrity result applies only to CrackMyDroid and the device requesting its token. A decoded
 backend verdict can contain `appRecognitionVerdict`, `appLicensingVerdict`, device-recognition
-labels and an optional Play Protect verdict. See [the backend contract](play-integrity-backend-contract.md).
+labels and an optional Play Protect verdict.
+See [the backend contract](play-integrity-backend-contract.md).
 
 ### `AppEntry`
 

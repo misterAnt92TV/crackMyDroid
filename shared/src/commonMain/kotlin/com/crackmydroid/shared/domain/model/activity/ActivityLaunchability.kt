@@ -2,7 +2,7 @@ package com.crackmydroid.shared.domain.model.activity
 
 internal data class ActivityLaunchability(
     val launchableViaShell: Boolean,
-    val launchabilityReason: String?
+    val launchabilityReason: String?,
 )
 
 /**
@@ -11,16 +11,16 @@ internal data class ActivityLaunchability(
  */
 internal fun classifyAndroidActivityLaunchability(
     exported: Boolean,
-    permission: String?
+    permission: String?,
 ): ActivityLaunchability = when {
     !exported -> ActivityLaunchability(
         launchableViaShell = false,
-        launchabilityReason = "Activity non esportata: non avviabile da questa app"
+        launchabilityReason = "Activity non esportata: non avviabile da questa app",
     )
 
     !permission.isNullOrBlank() -> ActivityLaunchability(
         launchableViaShell = false,
-        launchabilityReason = "Activity protetta dalla permission $permission"
+        launchabilityReason = "Activity protetta dalla permission $permission",
     )
 
     else -> ActivityLaunchability(launchableViaShell = true, launchabilityReason = null)

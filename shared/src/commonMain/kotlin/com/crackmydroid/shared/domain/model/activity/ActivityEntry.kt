@@ -15,5 +15,5 @@ data class ActivityEntry(
     val launchIntentData: String? = null,
     val launchIntentMimeType: String? = null,
     val exported: Boolean = false,
-    val permission: String? = null
+    val permission: String? = null,
 )

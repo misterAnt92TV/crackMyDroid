@@ -70,8 +70,9 @@ interface UseCaseReportText {
         findingCount: Int,
         criticalCount: Int,
         highCount: Int,
-        mediumCount: Int
+        mediumCount: Int,
     ): String
+
     fun declaredPermissionCount(count: Int): String
     fun permissionFindingHeading(index: Int, finding: PermissionRiskFinding): String
     fun noSensitiveBehavior(): String

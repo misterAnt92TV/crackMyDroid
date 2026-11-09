@@ -1,11 +1,5 @@
-@file:OptIn(
-    ExperimentalFoundationApi::class,
-    ExperimentalComposeUiApi::class
-)
-
 package com.crackmydroid.shared.ui.activities.view
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -46,7 +40,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
@@ -56,6 +49,8 @@ import com.crackmydroid.shared.domain.model.activity.ActivityEntry
 import com.crackmydroid.shared.domain.model.activity.favoriteKey
 import com.crackmydroid.shared.i18n.LocalStrings
 import com.crackmydroid.shared.i18n.ScreenUiStrings
+import com.crackmydroid.shared.i18n.Strings
+import com.crackmydroid.shared.i18n.format
 import com.crackmydroid.shared.presentation.components.AppAccordion
 import com.crackmydroid.shared.presentation.components.AppButton
 import com.crackmydroid.shared.presentation.components.AppListItem
@@ -68,7 +63,11 @@ import com.crackmydroid.shared.presentation.components.SectionHeader
 import com.crackmydroid.shared.presentation.components.card.AppCard
 import com.crackmydroid.shared.presentation.components.card.ExportDetailsCard
 import com.crackmydroid.shared.presentation.components.text.AppText
+import com.crackmydroid.shared.presentation.preview.AppPreviewEnvironment
+import com.crackmydroid.shared.presentation.preview.AppScreenPreviews
 import com.crackmydroid.shared.ui.activities.ActivityAppReport
+import com.crackmydroid.shared.ui.activities.ActivityGroup
+import com.crackmydroid.shared.ui.activities.ActivityListState
 import com.crackmydroid.shared.ui.activities.ActivityListViewModel
 import com.crackmydroid.shared.ui.screens.screenContentPadding
 import kotlinx.coroutines.launch
@@ -80,11 +79,67 @@ fun ActivityListScreen(
     headerHelp: String,
     onHelp: (String) -> Unit,
     onBack: (() -> Unit)? = null,
-    onMenu: () -> Unit = {}
+    onMenu: () -> Unit = {},
 ) {
     val state by viewModel.state.collectAsState()
+    val callbacks = remember(viewModel) {
+        ActivityListCallbacks(
+            onRefresh = viewModel::refresh,
+            onSetFilter = viewModel::setFilter,
+            onBuildReport = viewModel::buildReport,
+            onExportVisualReport = viewModel::exportVisualReport,
+            onClearError = viewModel::clearError,
+            onToggleExpanded = viewModel::toggleExpanded,
+            onGroupContent = viewModel::groupContent,
+            onExportGroup = viewModel::exportGroup,
+            onToggleFavoritePackage = viewModel::toggleFavoritePackage,
+            onLaunch = viewModel::launch,
+            onOpenGuidedLaunch = viewModel::openGuidedLaunch,
+            onToggleFavorite = viewModel::toggleFavorite,
+            onLaunchGuided = viewModel::launchGuided,
+            onDismissGuidedLaunch = viewModel::dismissGuidedLaunch,
+        )
+    }
+
+    ActivityListContent(
+        state = state,
+        padding = padding,
+        headerHelp = headerHelp,
+        onHelp = onHelp,
+        onBack = onBack,
+        onMenu = onMenu,
+        callbacks = callbacks,
+    )
+}
+
+private data class ActivityListCallbacks(
+    val onRefresh: () -> Unit,
+    val onSetFilter: (String, Boolean) -> Unit,
+    val onBuildReport: (String, Strings) -> ActivityAppReport?,
+    val onExportVisualReport: suspend (String, Strings) -> Result<String>,
+    val onClearError: () -> Unit,
+    val onToggleExpanded: (String) -> Unit,
+    val onGroupContent: suspend (String) -> String?,
+    val onExportGroup: (String) -> Unit,
+    val onToggleFavoritePackage: (String) -> Unit,
+    val onLaunch: (ActivityEntry) -> Unit,
+    val onOpenGuidedLaunch: (ActivityEntry) -> Unit,
+    val onToggleFavorite: (ActivityEntry) -> Unit,
+    val onLaunchGuided: (String?, String?, String?) -> Unit,
+    val onDismissGuidedLaunch: () -> Unit,
+)
+
+@Composable
+private fun ActivityListContent(
+    state: ActivityListState,
+    padding: PaddingValues,
+    headerHelp: String,
+    onHelp: (String) -> Unit,
+    onBack: (() -> Unit)?,
+    onMenu: () -> Unit,
+    callbacks: ActivityListCallbacks,
+) {
     val strings = LocalStrings.current
-    val screenStrings = ScreenUiStrings.from(strings)
 
     @Suppress("DEPRECATION")
     val clipboard = LocalClipboardManager.current
@@ -101,13 +156,13 @@ fun ActivityListScreen(
     }
 
     Box(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier.fillMaxSize(),
     ) {
         LazyColumn(
             state = listState,
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(10.dp),
-            contentPadding = screenContentPadding(padding, horizontal = 16.dp, vertical = 10.dp)
+            contentPadding = screenContentPadding(padding, horizontal = 16.dp, vertical = 10.dp),
         ) {
             item {
                 SectionHeader(
@@ -115,16 +170,16 @@ fun ActivityListScreen(
                     help = headerHelp,
                     onHelp = onHelp,
                     beforeHelpAction = {
-                        IconButton(onClick = viewModel::refresh) {
+                        IconButton(onClick = callbacks.onRefresh) {
                             Icon(
                                 imageVector = Icons.Filled.Refresh,
                                 contentDescription = strings.refreshActivitiesContentDescription,
-                                tint = MaterialTheme.colorScheme.primary
+                                tint = MaterialTheme.colorScheme.primary,
                             )
                         }
                     },
                     onBack = onBack,
-                    onMenu = onMenu
+                    onMenu = onMenu,
                 )
             }
             item {
@@ -134,27 +189,27 @@ fun ActivityListScreen(
                     meta = favoriteQueries.takeIf { it.isNotEmpty() }?.size?.toString(),
                     expanded = searchToolsExpanded,
                     onToggle = { searchToolsExpanded = !searchToolsExpanded },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
                 ) {
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         SearchFieldWithHistoryComponent(
                             value = state.filter,
-                            onValueChange = { viewModel.setFilter(it) },
-                            onSubmit = { viewModel.setFilter(it, trackUsage = true) },
+                            onValueChange = { callbacks.onSetFilter(it, false) },
+                            onSubmit = { callbacks.onSetFilter(it, true) },
                             label = strings.filterActivities,
                             historyKey = "activities",
                             modifier = Modifier.fillMaxWidth(),
                             showClearAction = true,
                             onCleared = {
-                                viewModel.setFilter("")
+                                callbacks.onSetFilter("", false)
                                 scope.launch { snackbarHostState.showSnackbar(strings.activityUi.suggestionsCleared) }
-                            }
+                            },
                         )
                         state.topQuery?.let { top ->
                             AppText(
                                 strings.activityUi.frequentSearch.format(top),
                                 style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.primary
+                                color = MaterialTheme.colorScheme.primary,
                             )
                         }
                         if (favoriteQueries.isNotEmpty()) {
@@ -162,14 +217,14 @@ fun ActivityListScreen(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                                 contentPadding = PaddingValues(
-                                    vertical = 6.dp
-                                )
+                                    vertical = 6.dp,
+                                ),
                             ) {
                                 items(favoriteQueries, key = { it }) { fav ->
                                     FilterChip(
                                         selected = true,
-                                        onClick = { viewModel.setFilter(fav, trackUsage = true) },
-                                        label = { AppText(fav.takeLast(24)) }
+                                        onClick = { callbacks.onSetFilter(fav, true) },
+                                        label = { AppText(fav.takeLast(24)) },
                                     )
                                 }
                             }
@@ -190,14 +245,14 @@ fun ActivityListScreen(
                     AppText(
                         strings.activityUi.resultsSummary.format(currentActivities, totalActivities),
                         style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
             }
 
             selectedReportPackage?.let { packageName ->
                 item(key = "activity-report-$packageName") {
-                    viewModel.buildReport(packageName, strings)?.let { report ->
+                    callbacks.onBuildReport(packageName, strings)?.let { report ->
                         ActivityReportCard(
                             report = report,
                             lastExportPath = lastReportPath,
@@ -207,18 +262,22 @@ fun ActivityListScreen(
                             },
                             onExport = {
                                 scope.launch {
-                                    viewModel.exportVisualReport(report.packageName, strings)
+                                    callbacks.onExportVisualReport(report.packageName, strings)
                                         .onSuccess { path ->
                                             lastReportPath = path
-                                            snackbarHostState.showSnackbar(strings.activityUi.exportSuccess.format(report.appLabel))
+                                            snackbarHostState.showSnackbar(
+                                                strings.activityUi.exportSuccess.format(
+                                                    report.appLabel,
+                                                ),
+                                            )
                                         }
                                         .onFailure { err ->
                                             snackbarHostState.showSnackbar(
-                                                err.message ?: strings.activityUi.exportFailed
+                                                err.message ?: strings.activityUi.exportFailed,
                                             )
                                         }
                                 }
-                            }
+                            },
                         )
                     }
                 }
@@ -229,34 +288,43 @@ fun ActivityListScreen(
                     AppCard(modifier = Modifier.fillMaxWidth()) {
                         val hasFilter = state.filter.isNotBlank()
                         AppText(
-                            if (hasFilter) strings.activityUi.noResults.format(state.filter) else strings.activityUi.noActivities,
-                            style = MaterialTheme.typography.bodyMedium
+                            if (hasFilter) {
+                                strings.activityUi.noResults.format(
+                                    state.filter,
+                                )
+                            } else {
+                                strings.activityUi.noActivities
+                            },
+                            style = MaterialTheme.typography.bodyMedium,
                         )
                         AppText(
-                            if (hasFilter) strings.activityUi.searchHint
-                            else strings.activityUi.refresh,
+                            if (hasFilter) {
+                                strings.activityUi.searchHint
+                            } else {
+                                strings.activityUi.refresh
+                            },
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                         Row(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
                             if (hasFilter) {
                                 AppButton(
                                     text = strings.activityUi.resetFilter,
-                                    onClick = { viewModel.setFilter("") },
+                                    onClick = { callbacks.onSetFilter("", false) },
                                     variant = ButtonVariant.Secondary,
                                     modifier = Modifier.weight(1f),
-                                    fullWidth = false
+                                    fullWidth = false,
                                 )
                             }
                             AppButton(
                                 text = strings.activityUi.refresh,
-                                onClick = viewModel::refresh,
+                                onClick = callbacks.onRefresh,
                                 variant = ButtonVariant.Tonal,
                                 modifier = Modifier.weight(1f),
-                                fullWidth = false
+                                fullWidth = false,
                             )
                         }
                     }
@@ -267,7 +335,7 @@ fun ActivityListScreen(
                     AppText(
                         err,
                         modifier = Modifier.padding(horizontal = 4.dp),
-                        style = MaterialTheme.typography.bodySmall
+                        style = MaterialTheme.typography.bodySmall,
                     )
                 }
             }
@@ -279,7 +347,7 @@ fun ActivityListScreen(
                     subtitle = group.packageName,
                     meta = strings.activityUi.activityCount.format(group.activities.size),
                     expanded = expanded,
-                    onToggle = { viewModel.toggleExpanded(group.packageName) },
+                    onToggle = { callbacks.onToggleExpanded(group.packageName) },
                     titleMaxLines = 3,
                     subtitleMaxLines = 3,
                     textOverflow = TextOverflow.Clip,
@@ -289,15 +357,17 @@ fun ActivityListScreen(
                     leading = {
                         PackageIcon(
                             packageName = group.packageName,
-                            modifier = Modifier.size(44.dp)
+                            modifier = Modifier.size(44.dp),
                         )
                     },
                     actions = {
-                        IconButton(onClick = {
-                            selectedReportPackage =
-                                if (selectedReportPackage == group.packageName) null else group.packageName
-                            lastReportPath = null
-                        }) {
+                        IconButton(
+                            onClick = {
+                                selectedReportPackage =
+                                    if (selectedReportPackage == group.packageName) null else group.packageName
+                                lastReportPath = null
+                            },
+                        ) {
                             Icon(
                                 imageVector = Icons.Filled.Description,
                                 contentDescription = strings.reportActivitiesContentDescription,
@@ -305,55 +375,68 @@ fun ActivityListScreen(
                                     MaterialTheme.colorScheme.primary
                                 } else {
                                     MaterialTheme.colorScheme.onSurfaceVariant
-                                }
+                                },
                             )
                         }
-                        IconButton(onClick = {
-                            scope.launch {
-                                viewModel.groupContent(group.packageName)?.let { content ->
-                                    clipboard.setText(AnnotatedString(content))
+                        IconButton(
+                            onClick = {
+                                scope.launch {
+                                    callbacks.onGroupContent(group.packageName)?.let { content ->
+                                        clipboard.setText(AnnotatedString(content))
+                                    }
                                 }
-                            }
-                            viewModel.exportGroup(group.packageName)
-                        }) {
+                                callbacks.onExportGroup(group.packageName)
+                            },
+                        ) {
                             Icon(
                                 imageVector = Icons.Filled.Share,
                                 contentDescription = strings.shareActivitiesContentDescription,
-                                tint = MaterialTheme.colorScheme.primary
+                                tint = MaterialTheme.colorScheme.primary,
                             )
                         }
-                        IconButton(onClick = { viewModel.toggleFavoritePackage(group.packageName) }) {
+                        IconButton(onClick = { callbacks.onToggleFavoritePackage(group.packageName) }) {
                             Icon(
                                 imageVector = if (favPkg) Icons.Filled.Star else Icons.Filled.StarBorder,
                                 contentDescription = strings.favoriteContentDescription,
-                                tint = if (favPkg) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                                tint = if (favPkg) {
+                                    MaterialTheme.colorScheme.primary
+                                } else {
+                                    MaterialTheme.colorScheme.onSurfaceVariant
+                                },
                             )
                         }
                     },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 6.dp)
+                        .padding(vertical = 6.dp),
                 ) {
                     group.activities.forEach { activity ->
                         val favKey = activity.favoriteKey()
                         val activityMeta = when {
-                            !activity.launchableViaShell && activity.launchContextHint != null -> strings.activityUi.intentRequired
+                            !activity.launchableViaShell && activity.launchContextHint != null ->
+                                strings.activityUi.intentRequired
+
                             !activity.launchableViaShell -> strings.activityUi.dumpOnly
+
                             activity.launchContextHint != null -> strings.activityUi.shellWithAction
+
                             else -> strings.activityUi.shellStart
                         }
                         AppListItem(
                             title = activity.label,
                             subtitle = when {
-                                activity.launchabilityReason != null -> "${activity.activityName} • ${activity.launchabilityReason}"
-                                activity.launchContextHint != null -> "${activity.activityName} • ${activity.launchContextHint}"
+                                activity.launchabilityReason != null ->
+                                    "${activity.activityName} • ${activity.launchabilityReason}"
+
+                                activity.launchContextHint != null ->
+                                    "${activity.activityName} • ${activity.launchContextHint}"
+
                                 else -> activity.activityName
                             },
                             meta = activityMeta,
                             onClick = when {
-                                activity.launchableViaShell -> ({ viewModel.launch(activity) })
-                                !activity.launchableViaShell -> ({ viewModel.openGuidedLaunch(activity) })
-
+                                activity.launchableViaShell -> ({ callbacks.onLaunch(activity) })
+                                !activity.launchableViaShell -> ({ callbacks.onOpenGuidedLaunch(activity) })
                                 else -> null
                             },
                             titleMaxLines = 3,
@@ -366,18 +449,32 @@ fun ActivityListScreen(
                                             imageVector = Icons.Filled.Warning,
                                             contentDescription = strings.shellUnavailableContentDescription,
                                             tint = MaterialTheme.colorScheme.error,
-                                            modifier = Modifier.padding(end = 4.dp)
+                                            modifier = Modifier.padding(end = 4.dp),
                                         )
                                     }
-                                    IconButton(onClick = { viewModel.toggleFavorite(activity) }) {
+                                    IconButton(onClick = { callbacks.onToggleFavorite(activity) }) {
                                         Icon(
-                                            imageVector = if (state.favorites.contains(favKey)) Icons.Filled.Star else Icons.Filled.StarBorder,
+                                            imageVector = if (state.favorites.contains(
+                                                    favKey,
+                                                )
+                                            ) {
+                                                Icons.Filled.Star
+                                            } else {
+                                                Icons.Filled.StarBorder
+                                            },
                                             contentDescription = strings.favoriteContentDescription,
-                                            tint = if (state.favorites.contains(favKey)) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                                            tint = if (state.favorites.contains(
+                                                    favKey,
+                                                )
+                                            ) {
+                                                MaterialTheme.colorScheme.primary
+                                            } else {
+                                                MaterialTheme.colorScheme.onSurfaceVariant
+                                            },
                                         )
                                     }
                                 }
-                            }
+                            },
                         )
                     }
                 }
@@ -389,7 +486,7 @@ fun ActivityListScreen(
             onClick = { scope.launch { listState.animateScrollToItem(0) } },
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(12.dp)
+                .padding(12.dp),
         )
 
         SnackbarHost(
@@ -397,21 +494,21 @@ fun ActivityListScreen(
             snackbar = { Snackbar(it) },
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(12.dp)
+                .padding(12.dp),
         )
     }
 
     state.error?.let {
-        ErrorDialogComponent(message = it, onDismiss = viewModel::clearError)
+        ErrorDialogComponent(message = it, onDismiss = callbacks.onClearError)
     }
 
     state.guidedLaunch?.entry?.let { activity ->
         GuidedActivityLaunchDialog(
             entry = activity,
-            onDismiss = viewModel::dismissGuidedLaunch,
+            onDismiss = callbacks.onDismissGuidedLaunch,
             onLaunch = { action, dataUri, mimeType ->
-                viewModel.launchGuided(action, dataUri, mimeType)
-            }
+                callbacks.onLaunchGuided(action, dataUri, mimeType)
+            },
         )
     }
 }
@@ -420,7 +517,7 @@ fun ActivityListScreen(
 private fun GuidedActivityLaunchDialog(
     entry: ActivityEntry,
     onDismiss: () -> Unit,
-    onLaunch: (String?, String?, String?) -> Unit
+    onLaunch: (String?, String?, String?) -> Unit,
 ) {
     var action by remember(entry.activityName) { mutableStateOf(entry.launchIntentAction.orEmpty()) }
     var dataUri by remember(entry.activityName) { mutableStateOf(entry.launchIntentData.orEmpty()) }
@@ -434,18 +531,18 @@ private fun GuidedActivityLaunchDialog(
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 AppText(
                     text = entry.label,
-                    style = MaterialTheme.typography.titleSmall
+                    style = MaterialTheme.typography.titleSmall,
                 )
                 AppText(
                     text = entry.activityName,
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 entry.launchContextHint?.let { hint ->
                     AppText(
                         text = LocalStrings.current.activityUi.resolver.format(hint),
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.primary
+                        color = MaterialTheme.colorScheme.primary,
                     )
                 }
                 OutlinedTextField(
@@ -453,21 +550,21 @@ private fun GuidedActivityLaunchDialog(
                     onValueChange = { action = it },
                     label = { AppText(LocalStrings.current.activityUi.actionLabel) },
                     modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
+                    singleLine = true,
                 )
                 OutlinedTextField(
                     value = dataUri,
                     onValueChange = { dataUri = it },
                     label = { AppText(LocalStrings.current.activityUi.dataUriLabel) },
                     modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
+                    singleLine = true,
                 )
                 OutlinedTextField(
                     value = mimeType,
                     onValueChange = { mimeType = it },
                     label = { AppText(LocalStrings.current.activityUi.mimeTypeLabel) },
                     modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
+                    singleLine = true,
                 )
             }
         },
@@ -477,10 +574,11 @@ private fun GuidedActivityLaunchDialog(
                     onLaunch(
                         action.ifBlank { null },
                         dataUri.ifBlank { null },
-                        mimeType.ifBlank { null })
+                        mimeType.ifBlank { null },
+                    )
                     onDismiss()
                 },
-                enabled = canLaunch
+                enabled = canLaunch,
             ) {
                 AppText(LocalStrings.current.activityUi.launch)
             }
@@ -489,7 +587,7 @@ private fun GuidedActivityLaunchDialog(
             TextButton(onClick = onDismiss) {
                 AppText(LocalStrings.current.activityUi.cancel)
             }
-        }
+        },
     )
 }
 
@@ -498,7 +596,7 @@ private fun ActivityReportCard(
     report: ActivityAppReport,
     lastExportPath: String?,
     onDismiss: () -> Unit,
-    onExport: () -> Unit
+    onExport: () -> Unit,
 ) {
     val strings = LocalStrings.current
     val screenStrings = ScreenUiStrings.from(strings)
@@ -508,25 +606,25 @@ private fun ActivityReportCard(
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Column(
                     modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
                     AppText(
                         activityUi.reportTitle,
-                        style = MaterialTheme.typography.titleMedium
+                        style = MaterialTheme.typography.titleMedium,
                     )
                     AppText(
                         report.appLabel,
                         style = MaterialTheme.typography.titleSmall,
-                        color = MaterialTheme.colorScheme.primary
+                        color = MaterialTheme.colorScheme.primary,
                     )
                     AppText(
                         report.packageName,
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
                 TextButton(onClick = onDismiss) {
@@ -539,32 +637,32 @@ private fun ActivityReportCard(
                     report.totalActivities,
                     report.shellLaunchableCount,
                     report.guidedLaunchCount,
-                    report.dumpOnlyCount
+                    report.dumpOnlyCount,
                 ),
-                style = MaterialTheme.typography.bodyMedium
+                style = MaterialTheme.typography.bodyMedium,
             )
             AppText(
                 activityUi.riskSummary.format(
                     report.contextualLaunchCount,
                     report.favoriteActivitiesCount,
                     report.highestRiskLevel.uiLabel(activityUi),
-                    if (report.packageFavorite) activityUi.favoriteAppSuffix else ""
+                    if (report.packageFavorite) activityUi.favoriteAppSuffix else "",
                 ),
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
 
             if (report.recommendations.isNotEmpty()) {
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     AppText(
                         activityUi.recommendations,
-                        style = MaterialTheme.typography.titleSmall
+                        style = MaterialTheme.typography.titleSmall,
                     )
                     report.recommendations.forEach { recommendation ->
                         AppText(
                             screenStrings.bullet.format(recommendation),
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
                 }
@@ -575,7 +673,7 @@ private fun ActivityReportCard(
                     AppText(
                         screenStrings.bullet.format(finding),
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
             }
@@ -584,7 +682,7 @@ private fun ActivityReportCard(
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     AppText(
                         activityUi.highlights,
-                        style = MaterialTheme.typography.titleSmall
+                        style = MaterialTheme.typography.titleSmall,
                     )
                     report.highlights.forEach { activity ->
                         val detail = when {
@@ -599,7 +697,7 @@ private fun ActivityReportCard(
                                 activity.level.uiLabel(activityUi)
                             } • $detail",
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
                 }
@@ -607,21 +705,21 @@ private fun ActivityReportCard(
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 AppButton(
                     text = activityUi.exportHtml,
                     onClick = onExport,
                     variant = ButtonVariant.Tonal,
                     modifier = Modifier.weight(1f),
-                    fullWidth = false
+                    fullWidth = false,
                 )
                 AppButton(
                     text = activityUi.closeReport,
                     onClick = onDismiss,
                     variant = ButtonVariant.Secondary,
                     modifier = Modifier.weight(1f),
-                    fullWidth = false
+                    fullWidth = false,
                 )
             }
 
@@ -634,10 +732,69 @@ private fun ActivityReportCard(
                         activityUi.appDetail.format(report.appLabel),
                         activityUi.packageDetail.format(report.packageName),
                         activityUi.activitiesDetail.format(report.totalActivities),
-                        activityUi.maximumRiskDetail.format(report.highestRiskLevel.uiLabel(activityUi))
-                    )
+                        activityUi.maximumRiskDetail.format(report.highestRiskLevel.uiLabel(activityUi)),
+                    ),
                 )
             }
         }
+    }
+}
+
+@AppScreenPreviews
+@Composable
+private fun ActivityListScreenPreview() {
+    val packageName = "com.crackmydroid"
+    val mainActivity = ActivityEntry(
+        label = "Main activity",
+        appLabel = "CrackMyDroid",
+        packageName = packageName,
+        activityName = "$packageName.MainActivity",
+        exported = true,
+    )
+    val settingsActivity = ActivityEntry(
+        label = "Settings activity",
+        appLabel = "CrackMyDroid",
+        packageName = packageName,
+        activityName = "$packageName.SettingsActivity",
+        launchableViaShell = false,
+        launchabilityReason = "Requires app context",
+        launchContextHint = "Open from the app",
+    )
+    val activities = listOf(mainActivity, settingsActivity)
+    val callbacks = ActivityListCallbacks(
+        onRefresh = {},
+        onSetFilter = { _, _ -> },
+        onBuildReport = { _, _ -> null },
+        onExportVisualReport = { _, _ -> Result.failure(UnsupportedOperationException("Preview action")) },
+        onClearError = {},
+        onToggleExpanded = {},
+        onGroupContent = { null },
+        onExportGroup = {},
+        onToggleFavoritePackage = {},
+        onLaunch = {},
+        onOpenGuidedLaunch = {},
+        onToggleFavorite = {},
+        onLaunchGuided = { _, _, _ -> },
+        onDismissGuidedLaunch = {},
+    )
+
+    AppPreviewEnvironment {
+        ActivityListContent(
+            state = ActivityListState(
+                activities = activities,
+                topQuery = "com.crackmydroid",
+                favorites = setOf(mainActivity.favoriteKey()),
+                favoritePackages = setOf(packageName),
+                expandedPackages = setOf(packageName),
+                groups = listOf(ActivityGroup(packageName, "CrackMyDroid", activities)),
+                favoriteQueries = listOf("com.crackmydroid", "MainActivity"),
+            ),
+            padding = PaddingValues(),
+            headerHelp = "Ricerca e avvio delle activity installate.",
+            onHelp = {},
+            onBack = {},
+            onMenu = {},
+            callbacks = callbacks,
+        )
     }
 }

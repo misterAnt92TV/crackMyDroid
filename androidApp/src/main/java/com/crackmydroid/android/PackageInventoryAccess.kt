@@ -13,7 +13,7 @@ internal enum class PackageInventoryAccess {
  */
 internal fun packageInventoryAccess(
     sdkInt: Int,
-    queryAllPackagesPermissionGranted: Boolean
+    queryAllPackagesPermissionGranted: Boolean,
 ): PackageInventoryAccess = when {
     sdkInt < Build.VERSION_CODES.R -> PackageInventoryAccess.Full
     queryAllPackagesPermissionGranted -> PackageInventoryAccess.Full

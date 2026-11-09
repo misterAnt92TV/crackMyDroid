@@ -1,6 +1,6 @@
 @file:OptIn(
     ExperimentalFoundationApi::class,
-    ExperimentalComposeUiApi::class
+    ExperimentalComposeUiApi::class,
 )
 
 package com.crackmydroid.shared.ui.info.view
@@ -57,65 +57,65 @@ import com.crackmydroid.shared.presentation.components.ScrollToTopButton
 import com.crackmydroid.shared.presentation.components.SectionHeader
 import com.crackmydroid.shared.presentation.components.card.AppCard
 import com.crackmydroid.shared.presentation.components.text.AppText
+import com.crackmydroid.shared.presentation.preview.AppPreviewEnvironment
+import com.crackmydroid.shared.presentation.preview.AppScreenPreviews
+import com.crackmydroid.shared.ui.info.InfoState
 import com.crackmydroid.shared.ui.info.InfoViewModel
 import kotlinx.coroutines.launch
 
-private fun buildInfoContent(
-    info: DeviceInfo,
-    root: RootStatus?,
-    strings: Strings,
-): String =
-    buildString {
-        val brand = info.brand ?: strings.notAvailable
-        val device = info.device ?: strings.notAvailable
-        val product = info.product ?: strings.notAvailable
-        val buildId = info.buildId ?: strings.notAvailable
-        val display = info.buildDisplay ?: strings.notAvailable
-        val fingerprint = info.buildFingerprint ?: strings.notAvailable
-        val radio = info.radio ?: strings.notAvailable
-        val kernel = info.kernelVersion ?: strings.notAvailable
-        val battery = info.batteryLevel?.let { "$it%" } ?: strings.notAvailable
-        val screen = info.screenResolution ?: strings.notAvailable
-        val density = info.densityDpi?.toString() ?: strings.notAvailable
-        val imei = info.imei ?: strings.notAvailable
-        val serial = info.serial ?: strings.notAvailable
+private fun buildInfoContent(info: DeviceInfo, root: RootStatus?, strings: Strings): String = buildString {
+    val brand = info.brand ?: strings.notAvailable
+    val device = info.device ?: strings.notAvailable
+    val product = info.product ?: strings.notAvailable
+    val buildId = info.buildId ?: strings.notAvailable
+    val display = info.buildDisplay ?: strings.notAvailable
+    val fingerprint = info.buildFingerprint ?: strings.notAvailable
+    val radio = info.radio ?: strings.notAvailable
+    val kernel = info.kernelVersion ?: strings.notAvailable
+    val battery = info.batteryLevel?.let { "$it%" } ?: strings.notAvailable
+    val screen = info.screenResolution ?: strings.notAvailable
+    val density = info.densityDpi?.toString() ?: strings.notAvailable
+    val imei = info.imei ?: strings.notAvailable
+    val serial = info.serial ?: strings.notAvailable
 
-        appendLine(strings.infoReportTitle)
-        appendLine("${strings.manufacturer}: ${info.manufacturer}")
-        appendLine("${strings.model}: ${info.model}")
-        appendLine("${strings.infoBrand}: $brand")
-        appendLine("${strings.infoDevice}: $device")
-        appendLine("${strings.infoProduct}: $product")
-        appendLine("${strings.androidVersion}: ${info.androidVersion}")
-        appendLine("${strings.securityPatch}: ${info.securityPatch}")
-        appendLine("${strings.infoBuildId}: $buildId")
-        appendLine("${strings.infoDisplay}: $display")
-        appendLine("${strings.infoFingerprint}: $fingerprint")
-        appendLine("${strings.infoRadio}: $radio")
-        appendLine("${strings.infoKernel}: $kernel")
-        appendLine("${strings.hardware}: ${info.hardware}")
-        appendLine("${strings.bootloader}: ${info.bootloader}")
-        appendLine("${strings.battery}: $battery")
-        appendLine("${strings.network}: ${info.networkType}")
-        appendLine("${strings.infoRamTotal}: ${info.totalMemory}")
-        appendLine("${strings.infoRamFree}: ${info.freeMemory}")
-        appendLine("${strings.infoScreen}: $screen ($density ${strings.infoDpi})")
-        appendLine("${strings.infoUsbDebug}: ${if (info.adbEnabled) strings.infoEnabled else strings.infoDisabled}")
-        appendLine("${strings.infoDeveloperOptions}: ${if (info.developerOptions) strings.infoEnabledPlural else strings.infoDisabledPlural}")
-        appendLine("${strings.infoAppDebuggable}: ${if (info.appDebuggable) strings.infoYes else strings.infoNo}")
-        root?.let {
-            appendLine("${strings.infoRoot}: ${if (it.isRooted) strings.infoYes else strings.infoNo}")
-            appendLine("${strings.infoRootDetails}: ${it.details}")
-        }
-        appendLine("${strings.infoImei}: $imei")
-        appendLine("${strings.infoSerial}: $serial")
-        if (!info.systemPropDump.isNullOrBlank()) {
-            appendLine()
-            appendLine("${strings.infoSystemPropertiesSource}: ${info.systemPropSource ?: strings.notAvailable}")
-            appendLine("${strings.infoSystemPropertiesDump}:")
-            appendLine(info.systemPropDump)
-        }
+    appendLine(strings.infoReportTitle)
+    appendLine("${strings.manufacturer}: ${info.manufacturer}")
+    appendLine("${strings.model}: ${info.model}")
+    appendLine("${strings.infoBrand}: $brand")
+    appendLine("${strings.infoDevice}: $device")
+    appendLine("${strings.infoProduct}: $product")
+    appendLine("${strings.androidVersion}: ${info.androidVersion}")
+    appendLine("${strings.securityPatch}: ${info.securityPatch}")
+    appendLine("${strings.infoBuildId}: $buildId")
+    appendLine("${strings.infoDisplay}: $display")
+    appendLine("${strings.infoFingerprint}: $fingerprint")
+    appendLine("${strings.infoRadio}: $radio")
+    appendLine("${strings.infoKernel}: $kernel")
+    appendLine("${strings.hardware}: ${info.hardware}")
+    appendLine("${strings.bootloader}: ${info.bootloader}")
+    appendLine("${strings.battery}: $battery")
+    appendLine("${strings.network}: ${info.networkType}")
+    appendLine("${strings.infoRamTotal}: ${info.totalMemory}")
+    appendLine("${strings.infoRamFree}: ${info.freeMemory}")
+    appendLine("${strings.infoScreen}: $screen ($density ${strings.infoDpi})")
+    appendLine("${strings.infoUsbDebug}: ${if (info.adbEnabled) strings.infoEnabled else strings.infoDisabled}")
+    appendLine(
+        "${strings.infoDeveloperOptions}: ${if (info.developerOptions) strings.infoEnabledPlural else strings.infoDisabledPlural}",
+    )
+    appendLine("${strings.infoAppDebuggable}: ${if (info.appDebuggable) strings.infoYes else strings.infoNo}")
+    root?.let {
+        appendLine("${strings.infoRoot}: ${if (it.isRooted) strings.infoYes else strings.infoNo}")
+        appendLine("${strings.infoRootDetails}: ${it.details}")
     }
+    appendLine("${strings.infoImei}: $imei")
+    appendLine("${strings.infoSerial}: $serial")
+    if (!info.systemPropDump.isNullOrBlank()) {
+        appendLine()
+        appendLine("${strings.infoSystemPropertiesSource}: ${info.systemPropSource ?: strings.notAvailable}")
+        appendLine("${strings.infoSystemPropertiesDump}:")
+        appendLine(info.systemPropDump)
+    }
+}
 
 @Composable
 fun InfoScreen(
@@ -123,9 +123,28 @@ fun InfoScreen(
     padding: PaddingValues,
     headerHelp: String,
     onHelp: (String) -> Unit,
-    onMenu: () -> Unit = {}
+    onMenu: () -> Unit = {},
 ) {
     val state by viewModel.state.collectAsState()
+    InfoScreenContent(
+        state = state,
+        padding = padding,
+        headerHelp = headerHelp,
+        onHelp = onHelp,
+        onMenu = onMenu,
+        onShare = viewModel::share,
+    )
+}
+
+@Composable
+private fun InfoScreenContent(
+    state: InfoState,
+    padding: PaddingValues,
+    headerHelp: String,
+    onHelp: (String) -> Unit,
+    onMenu: () -> Unit,
+    onShare: (String) -> Unit,
+) {
     val strings = LocalStrings.current
     val root = state.root
 
@@ -139,45 +158,45 @@ fun InfoScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(padding)
+            .padding(padding),
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(16.dp)
                 .verticalScroll(scrollState),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             SectionHeader(
                 title = strings.navInfo,
                 help = headerHelp,
                 onHelp = onHelp,
-                onMenu = onMenu
+                onMenu = onMenu,
             )
             state.info?.let { info ->
                 AppCard(modifier = Modifier.fillMaxWidth()) {
                     Column(
-                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                        verticalArrangement = Arrangement.spacedBy(10.dp),
                     ) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
+                            verticalAlignment = Alignment.CenterVertically,
                         ) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
                             ) {
                                 Icon(
                                     Icons.Filled.Smartphone,
                                     contentDescription = null,
                                     tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(18.dp)
+                                    modifier = Modifier.size(18.dp),
                                 )
                                 AppText(
                                     strings.infoDeviceSection,
                                     style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.SemiBold
+                                    fontWeight = FontWeight.SemiBold,
                                 )
                             }
                             IconButton(
@@ -185,14 +204,14 @@ fun InfoScreen(
                                 onClick = {
                                     state.reportContent?.let { content ->
                                         clipboard.setText(AnnotatedString(content))
-                                        viewModel.share(content)
+                                        onShare(content)
                                     }
-                                }
+                                },
                             ) {
                                 Icon(
                                     Icons.Filled.Share,
                                     contentDescription = strings.shareDeviceInfoContentDescription,
-                                    tint = MaterialTheme.colorScheme.primary
+                                    tint = MaterialTheme.colorScheme.primary,
                                 )
                             }
                         }
@@ -210,18 +229,18 @@ fun InfoScreen(
                         HorizontalDivider()
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
                             Icon(
                                 Icons.Filled.Memory,
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(18.dp)
+                                modifier = Modifier.size(18.dp),
                             )
                             AppText(
                                 strings.infoSystemSection,
                                 style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.SemiBold
+                                fontWeight = FontWeight.SemiBold,
                             )
                         }
                         InfoRow(strings.androidVersion, info.androidVersion ?: strings.notAvailable)
@@ -237,58 +256,66 @@ fun InfoScreen(
                         HorizontalDivider()
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
                             Icon(
                                 Icons.Filled.Wifi,
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(18.dp)
+                                modifier = Modifier.size(18.dp),
                             )
                             AppText(
                                 strings.infoConnectionSection,
                                 style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.SemiBold
+                                fontWeight = FontWeight.SemiBold,
                             )
                         }
                         InfoRow(strings.network, info.networkType ?: strings.notAvailable)
-                        InfoRow(strings.infoUsbDebug, if (info.adbEnabled) strings.infoEnabled else strings.infoDisabled)
+                        InfoRow(
+                            strings.infoUsbDebug,
+                            if (info.adbEnabled) strings.infoEnabled else strings.infoDisabled,
+                        )
                         InfoRow(
                             strings.infoDeveloperOptions,
-                            if (info.developerOptions) strings.infoEnabledPlural else strings.infoDisabledPlural
+                            if (info.developerOptions) strings.infoEnabledPlural else strings.infoDisabledPlural,
                         )
                         InfoRow(strings.infoAppDebuggable, if (info.appDebuggable) strings.infoYes else strings.infoNo)
                         InfoRow(
                             strings.infoRoot,
                             if (root?.isRooted == true) strings.rootDetected else strings.rootNotDetected,
-                            copyValue = root?.details
+                            copyValue = root?.details,
                         )
 
                         HorizontalDivider()
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
                             Icon(
                                 Icons.Filled.Storage,
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(18.dp)
+                                modifier = Modifier.size(18.dp),
                             )
                             AppText(
                                 strings.infoDisplayMemorySection,
                                 style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.SemiBold
+                                fontWeight = FontWeight.SemiBold,
                             )
                         }
                         InfoRow(strings.infoScreen, info.screenResolution ?: strings.notAvailable)
-                        InfoRow(strings.infoDensity, info.densityDpi?.let { "$it ${strings.infoDpi}" } ?: strings.notAvailable)
+                        InfoRow(
+                            strings.infoDensity,
+                            info.densityDpi?.let { "$it ${strings.infoDpi}" } ?: strings.notAvailable,
+                        )
                         InfoRow(
                             strings.infoRamTotal,
-                            info.totalMemory?.let { "${it / 1024 / 1024} MB" } ?: strings.notAvailable)
+                            info.totalMemory?.let { "${it / 1024 / 1024} MB" } ?: strings.notAvailable,
+                        )
                         InfoRow(
                             strings.infoRamFree,
-                            info.freeMemory?.let { "${it / 1024 / 1024} MB" } ?: strings.notAvailable)
+                            info.freeMemory?.let { "${it / 1024 / 1024} MB" } ?: strings.notAvailable,
+                        )
                         InfoRow(strings.battery, info.batteryLevel?.let { "$it%" } ?: strings.notAvailable)
                         Spacer(modifier = Modifier.height(16.dp))
                     }
@@ -300,7 +327,7 @@ fun InfoScreen(
                             AppText(
                                 strings.infoSystemProperties,
                                 style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.SemiBold
+                                fontWeight = FontWeight.SemiBold,
                             )
                             InfoRow(strings.infoSystemPropertiesSource, info.systemPropSource ?: strings.notAvailable)
                             SelectionContainer {
@@ -308,12 +335,14 @@ fun InfoScreen(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .heightIn(max = 280.dp)
-                                        .verticalScroll(rememberScrollState())
+                                        .verticalScroll(rememberScrollState()),
                                 ) {
                                     AppText(
                                         text = dump,
-                                        style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        style = MaterialTheme.typography.bodySmall.copy(
+                                            fontFamily = FontFamily.Monospace,
+                                        ),
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     )
                                 }
                             }
@@ -325,7 +354,7 @@ fun InfoScreen(
                     AppText(
                         "${strings.apkExported} $path",
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.primary
+                        color = MaterialTheme.colorScheme.primary,
                     )
                 }
             }
@@ -340,7 +369,41 @@ fun InfoScreen(
             onClick = { scope.launch { scrollState.animateScrollTo(0) } },
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(12.dp)
+                .padding(12.dp),
+        )
+    }
+}
+
+@AppScreenPreviews
+@Composable
+private fun InfoScreenPreview() {
+    AppPreviewEnvironment {
+        InfoScreenContent(
+            state = InfoState(
+                info = DeviceInfo(
+                    manufacturer = "Google",
+                    model = "Pixel",
+                    brand = "Google",
+                    device = "pixel",
+                    product = "pixel",
+                    androidVersion = "15",
+                    securityPatch = "2025-01-05",
+                    buildId = "AP4A.250105.002",
+                    batteryLevel = 82,
+                    networkType = "Wi-Fi",
+                    totalMemory = 8L * 1024 * 1024 * 1024,
+                    freeMemory = 3L * 1024 * 1024 * 1024,
+                    screenResolution = "1080 x 2400",
+                    densityDpi = 420,
+                    adbEnabled = true,
+                ),
+                reportContent = "Device information report",
+            ),
+            padding = PaddingValues(),
+            headerHelp = "Informazioni tecniche sul dispositivo.",
+            onHelp = {},
+            onMenu = {},
+            onShare = {},
         )
     }
 }
@@ -356,21 +419,21 @@ private fun InfoRow(label: String, value: String, copyValue: String? = null) {
             .fillMaxWidth()
             .padding(vertical = 4.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         AppText(
             label,
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier.clickable {
                 clipboard.setText(AnnotatedString("$label: $copyText"))
-            }
+            },
         )
         Spacer(modifier = Modifier.width(12.dp))
         AppText(
             value,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             maxLines = 1,
-            overflow = TextOverflow.Ellipsis
+            overflow = TextOverflow.Ellipsis,
         )
     }
 }

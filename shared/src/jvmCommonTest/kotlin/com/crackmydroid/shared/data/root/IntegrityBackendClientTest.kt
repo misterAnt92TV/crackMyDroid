@@ -4,18 +4,17 @@ import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.request.HttpResponseData
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
 import io.ktor.serialization.kotlinx.json.json
-import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.test.runTest
+import kotlinx.serialization.json.Json
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertIs
-import kotlinx.serialization.json.Json
 
 class IntegrityBackendClientTest {
     @Test
@@ -63,10 +62,10 @@ class IntegrityBackendClientTest {
         val cancellation = CancellationException("cancelled")
         val client = IntegrityBackendClient(
             HttpClient(
-                MockEngine { throw cancellation }
+                MockEngine { throw cancellation },
             ) {
                 install(ContentNegotiation) { json(Json { ignoreUnknownKeys = true }) }
-            }
+            },
         )
 
         val thrown = assertFailsWith<CancellationException> {
@@ -81,9 +80,9 @@ class IntegrityBackendClientTest {
             respond(
                 content = body,
                 status = status,
-                headers = headersOf(HttpHeaders.ContentType, "application/json")
+                headers = headersOf(HttpHeaders.ContentType, "application/json"),
             )
-        }
+        },
     ) {
         install(ContentNegotiation) { json(Json { ignoreUnknownKeys = true }) }
     }

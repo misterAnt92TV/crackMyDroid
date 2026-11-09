@@ -1,9 +1,8 @@
 package com.crackmydroid.shared.presentation.components
 
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.error
@@ -19,7 +18,7 @@ fun AppTextField(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     singleLine: Boolean = false,
-    error: String? = null
+    error: String? = null,
 ) {
     val prefs = LocalAccessibilityPrefs.current
     OutlinedTextField(
@@ -33,6 +32,6 @@ fun AppTextField(
         modifier = modifier
             .fillMaxWidth()
             .defaultMinSize(minHeight = if (prefs.largeText) 64.dp else 56.dp)
-            .semantics { error?.let { this.error(it) } }
+            .semantics { error?.let { this.error(it) } },
     )
 }

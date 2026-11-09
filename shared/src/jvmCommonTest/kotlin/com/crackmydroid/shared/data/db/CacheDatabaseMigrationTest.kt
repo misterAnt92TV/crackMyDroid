@@ -40,7 +40,11 @@ class CacheDatabaseMigrationTest {
                 driver.execute(null, "UPDATE installed_apps_cache SET debuggable=1, targetSdkVersion=35", 0)
                 driver.execute(null, "UPDATE activities_cache SET exported=1, permission='test.permission'", 0)
                 if (oldVersion == 2L) {
-                    driver.execute(null, "UPDATE installed_apps_cache SET installingPackageName='existing.installer'", 0)
+                    driver.execute(
+                        null,
+                        "UPDATE installed_apps_cache SET installingPackageName='existing.installer'",
+                        0,
+                    )
                 }
 
                 upgrade(driver)
@@ -51,7 +55,10 @@ class CacheDatabaseMigrationTest {
                 assertEquals(1L, queries.selectAllActivities().executeAsOne().exported)
                 assertEquals("test.permission", queries.selectAllActivities().executeAsOne().permission)
                 if (oldVersion == 2L) {
-                    assertEquals("existing.installer", queries.selectAllInstalled().executeAsOne().installingPackageName)
+                    assertEquals(
+                        "existing.installer",
+                        queries.selectAllInstalled().executeAsOne().installingPackageName,
+                    )
                 }
                 assertOtherCachesPreserved(driver)
                 assertCurrentQueries(driver)
@@ -79,7 +86,11 @@ class CacheDatabaseMigrationTest {
         JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY).use { driver ->
             legacySchema(driver, manifest = false, activityFlags = true, version = 2)
             driver.execute(null, "ALTER TABLE installed_apps_cache ADD COLUMN debuggable INTEGER NOT NULL DEFAULT 0", 0)
-            driver.execute(null, "ALTER TABLE installed_apps_cache ADD COLUMN allowBackup INTEGER NOT NULL DEFAULT 0", 0)
+            driver.execute(
+                null,
+                "ALTER TABLE installed_apps_cache ADD COLUMN allowBackup INTEGER NOT NULL DEFAULT 0",
+                0,
+            )
             driver.execute(null, "ALTER TABLE installed_apps_cache ADD COLUMN testOnly INTEGER NOT NULL DEFAULT 0", 0)
             driver.execute(null, "ALTER TABLE installed_apps_cache ADD COLUMN targetSdkVersion INTEGER", 0)
 
@@ -123,7 +134,7 @@ class CacheDatabaseMigrationTest {
                         assertTrue("debuggable" in columns(it, "installed_apps_cache"))
                         assertTrue("exported" in columns(it, "activities_cache"))
                         callbacks += 2
-                    }
+                    },
                 )
             }
             assertEquals(listOf(1L, 2L), callbacks)
@@ -158,7 +169,10 @@ class CacheDatabaseMigrationTest {
             JdbcSqliteDriver(url).use { driver ->
                 upgrade(driver)
                 assertEquals(3L, scalar(driver, "PRAGMA user_version"))
-                assertEquals(1L, CacheDatabase(driver).cacheDatabaseQueries.selectAllInstalled().executeAsOne().debuggable)
+                assertEquals(
+                    1L,
+                    CacheDatabase(driver).cacheDatabaseQueries.selectAllInstalled().executeAsOne().debuggable,
+                )
             }
         } finally {
             Files.deleteIfExists(file)
@@ -189,13 +203,17 @@ class CacheDatabaseMigrationTest {
             for (query in listOf(
                 "SELECT * FROM activities_cache WHERE packageName='test.app'",
                 "SELECT * FROM permissions_cache WHERE packageName='test.app'",
-                "SELECT value FROM device_info_cache WHERE key='device_info'"
+                "SELECT value FROM device_info_cache WHERE key='device_info'",
             )) {
-                val plan = driver.executeQuery(null, "EXPLAIN QUERY PLAN $query", { cursor ->
-                    val details = mutableListOf<String>()
-                    while (cursor.next().value) details += checkNotNull(cursor.getString(3))
-                    QueryResult.Value(details)
-                }, 0).value.joinToString()
+                val plan = driver.executeQuery(
+                    null, "EXPLAIN QUERY PLAN $query",
+                    { cursor ->
+                        val details = mutableListOf<String>()
+                        while (cursor.next().value) details += checkNotNull(cursor.getString(3))
+                        QueryResult.Value(details)
+                    },
+                    0,
+                ).value.joinToString()
                 assertTrue(plan.contains("SEARCH", ignoreCase = true), plan)
                 assertTrue(plan.contains("INDEX", ignoreCase = true), plan)
             }
@@ -208,27 +226,47 @@ class CacheDatabaseMigrationTest {
             testOnly INTEGER NOT NULL DEFAULT 0, targetSdkVersion INTEGER, minSdkVersion INTEGER
         """ else ""
         val activityColumns = if (activityFlags) ", exported INTEGER NOT NULL DEFAULT 0, permission TEXT" else ""
-        driver.execute(null, """
+        driver.execute(
+            null,
+            """
             CREATE TABLE installed_apps_cache (
                 packageName TEXT NOT NULL PRIMARY KEY, appLabel TEXT NOT NULL, sourcePath TEXT NOT NULL
                 $manifestColumns
             )
-        """.trimIndent(), 0)
-        driver.execute(null, """
+        """.trimIndent(),
+            0,
+        )
+        driver.execute(
+            null,
+            """
             CREATE TABLE activities_cache (
                 packageName TEXT NOT NULL, appLabel TEXT NOT NULL, activityName TEXT NOT NULL,
                 label TEXT NOT NULL $activityColumns, PRIMARY KEY(packageName, activityName)
             )
-        """.trimIndent(), 0)
-        driver.execute(null, """
+        """.trimIndent(),
+            0,
+        )
+        driver.execute(
+            null,
+            """
             CREATE TABLE permissions_cache (
                 packageName TEXT NOT NULL, appLabel TEXT NOT NULL, permission TEXT NOT NULL,
                 PRIMARY KEY(packageName, permission)
             )
-        """.trimIndent(), 0)
+        """.trimIndent(),
+            0,
+        )
         driver.execute(null, "CREATE TABLE device_info_cache (key TEXT NOT NULL PRIMARY KEY, value TEXT NOT NULL)", 0)
-        driver.execute(null, "INSERT INTO installed_apps_cache(packageName,appLabel,sourcePath) VALUES('test.app','Test','/test.apk')", 0)
-        driver.execute(null, "INSERT INTO activities_cache(packageName,appLabel,activityName,label) VALUES('test.app','Test','Main','Main')", 0)
+        driver.execute(
+            null,
+            "INSERT INTO installed_apps_cache(packageName,appLabel,sourcePath) VALUES('test.app','Test','/test.apk')",
+            0,
+        )
+        driver.execute(
+            null,
+            "INSERT INTO activities_cache(packageName,appLabel,activityName,label) VALUES('test.app','Test','Main','Main')",
+            0,
+        )
         driver.execute(null, "INSERT INTO permissions_cache VALUES('test.app','Test','test.permission')", 0)
         driver.execute(null, "INSERT INTO device_info_cache VALUES('manufacturer','Test')", 0)
         if (version == 2L) CacheDatabase.Schema.migrate(driver, 1, 2)
@@ -272,31 +310,46 @@ class CacheDatabaseMigrationTest {
     private fun writeInstalled(driver: SqlDriver) {
         CacheDatabase(driver).cacheDatabaseQueries.insertInstalled(
             "test.app", "Test", "/test.apk", 1, 1, 0, 36, 24,
-            "OTHER", "test.installer", null, null, 123, null
+            "OTHER", "test.installer", null, null, 123, null,
         )
     }
 
     private fun writeActivity(driver: SqlDriver) {
-        CacheDatabase(driver).cacheDatabaseQueries.insertActivity("test.app", "Test", "Main", "Main", 1, "test.permission")
+        CacheDatabase(driver).cacheDatabaseQueries.insertActivity(
+            "test.app",
+            "Test",
+            "Main",
+            "Main",
+            1,
+            "test.permission",
+        )
     }
 
     private fun scalar(driver: SqlDriver, sql: String): Long =
-        driver.executeQuery(null, sql, { cursor ->
-            check(cursor.next().value)
-            QueryResult.Value(checkNotNull(cursor.getLong(0)))
-        }, 0).value
+        driver.executeQuery(
+            null, sql,
+            { cursor ->
+                check(cursor.next().value)
+                QueryResult.Value(checkNotNull(cursor.getLong(0)))
+            },
+            0,
+        ).value
 
     private fun columns(driver: SqlDriver, table: String): Map<String, List<String?>> =
-        driver.executeQuery(null, "PRAGMA table_info($table)", { cursor ->
-            val result = mutableMapOf<String, List<String?>>()
-            while (cursor.next().value) {
-                result[checkNotNull(cursor.getString(1))] = listOf(
-                    cursor.getString(2), cursor.getLong(3).toString(),
-                    cursor.getString(4), cursor.getLong(5).toString()
-                )
-            }
-            QueryResult.Value(result)
-        }, 0).value
+        driver.executeQuery(
+            null, "PRAGMA table_info($table)",
+            { cursor ->
+                val result = mutableMapOf<String, List<String?>>()
+                while (cursor.next().value) {
+                    result[checkNotNull(cursor.getString(1))] = listOf(
+                        cursor.getString(2), cursor.getLong(3).toString(),
+                        cursor.getString(4), cursor.getLong(5).toString(),
+                    )
+                }
+                QueryResult.Value(result)
+            },
+            0,
+        ).value
 
     private val tables = listOf("installed_apps_cache", "activities_cache", "permissions_cache", "device_info_cache")
 }

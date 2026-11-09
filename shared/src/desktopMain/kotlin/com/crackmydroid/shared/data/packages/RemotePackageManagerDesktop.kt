@@ -13,7 +13,7 @@ import kotlinx.coroutines.withContext
 class RemotePackageManagerDesktop(
     adbBridge: AdbBridge,
     sessionController: DeviceSessionController,
-    private val cache: DesktopScanCache
+    private val cache: DesktopScanCache,
 ) : DesktopAdbRepositorySupport(adbBridge, sessionController), RemotePackageManager {
     override suspend fun listInstalledApps(): List<InstalledAppEntry> =
         withContext(Dispatchers.IO) {

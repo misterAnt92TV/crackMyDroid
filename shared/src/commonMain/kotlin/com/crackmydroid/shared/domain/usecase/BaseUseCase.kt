@@ -14,11 +14,11 @@ abstract class BaseUseCase(
     private val name: String,
     private val dispatcher: CoroutineDispatcher? = null,
     private val logger: Logger = AppLogger.logger,
-    private val verbose: () -> Boolean = AppLogger::isVerbose
+    private val verbose: () -> Boolean = AppLogger::isVerbose,
 ) {
     protected suspend fun <T> execute(
         operation: String = "invoke",
-        block: suspend () -> T
+        block: suspend () -> T,
     ): Result<T> {
         val started = TimeSource.Monotonic.markNow()
         fun debug(outcome: String) {
@@ -43,7 +43,7 @@ abstract class BaseUseCase(
                         logger.e {
                             "useCase=$name operation=$operation outcome=failed durationMs=${started.elapsedNow().inWholeMilliseconds} category=${error::class.simpleName ?: "Exception"}"
                         }
-                    }
+                    },
                 )
             }
         } catch (cancellation: CancellationException) {

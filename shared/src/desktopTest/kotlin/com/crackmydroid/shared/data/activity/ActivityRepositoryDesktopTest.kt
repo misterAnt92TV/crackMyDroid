@@ -1,12 +1,12 @@
 package com.crackmydroid.shared.data.activity
 
 import com.crackmydroid.shared.data.DesktopScanCache
-import com.crackmydroid.shared.domain.model.activity.ActivityEntry
 import com.crackmydroid.shared.domain.model.ConnectedDevice
+import com.crackmydroid.shared.domain.model.DeviceSessionState
 import com.crackmydroid.shared.domain.model.InstalledAppEntry
+import com.crackmydroid.shared.domain.model.activity.ActivityEntry
 import com.crackmydroid.shared.domain.repository.AdbBridge
 import com.crackmydroid.shared.domain.repository.DeviceSessionController
-import com.crackmydroid.shared.domain.model.DeviceSessionState
 import com.crackmydroid.shared.domain.repository.RemotePackageManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -22,7 +22,7 @@ class ActivityRepositoryDesktopTest {
             adbBridge = adbBridge,
             sessionController = FakeActivitySessionController(),
             cache = DesktopScanCache(),
-            packageManager = FakeActivityRemotePackageManager()
+            packageManager = FakeActivityRemotePackageManager(),
         )
 
         repository.launch(
@@ -34,16 +34,16 @@ class ActivityRepositoryDesktopTest {
                 launchableViaShell = false,
                 launchIntentAction = "android.intent.action.VIEW",
                 launchIntentData = "demo://host/details",
-                launchIntentMimeType = "image/*"
+                launchIntentMimeType = "image/*",
             ),
             action = "android.intent.action.VIEW",
             dataUri = "demo://host/details",
-            mimeType = "image/*"
+            mimeType = "image/*",
         ).getOrThrow()
 
         assertEquals(
             "am start -n 'pkg.demo/pkg.demo.Settings\$DeepLinkActivity' -a 'android.intent.action.VIEW' -d 'demo://host/details' -t 'image/*'",
-            adbBridge.lastCommand
+            adbBridge.lastCommand,
         )
     }
 }
@@ -61,7 +61,7 @@ private class CapturingActivityAdbBridge : AdbBridge {
         serial: String,
         command: String,
         configuredPath: String?,
-        asRoot: Boolean
+        asRoot: Boolean,
     ): Result<String> {
         lastCommand = command
         return Result.success("Starting: Intent { ... }")
@@ -71,13 +71,13 @@ private class CapturingActivityAdbBridge : AdbBridge {
         serial: String,
         remotePath: String,
         localPath: String,
-        configuredPath: String?
+        configuredPath: String?,
     ): Result<String> = Result.success(localPath)
 
     override suspend fun logcat(
         serial: String,
         configuredPath: String?,
-        lines: Int
+        lines: Int,
     ): Result<List<String>> = Result.success(emptyList())
 }
 
@@ -85,8 +85,8 @@ private class FakeActivitySessionController : DeviceSessionController {
     private val internalState = MutableStateFlow(
         DeviceSessionState(
             adbPath = "/usr/bin/adb",
-            selectedDevice = ConnectedDevice(serial = "SERIAL1", state = "device")
-        )
+            selectedDevice = ConnectedDevice(serial = "SERIAL1", state = "device"),
+        ),
     )
 
     override val state: StateFlow<DeviceSessionState> = internalState
@@ -96,7 +96,7 @@ private class FakeActivitySessionController : DeviceSessionController {
 
     override suspend fun selectDevice(
         device: ConnectedDevice,
-        adbPathOverride: String?
+        adbPathOverride: String?,
     ): Result<Unit> =
         Result.success(Unit)
 

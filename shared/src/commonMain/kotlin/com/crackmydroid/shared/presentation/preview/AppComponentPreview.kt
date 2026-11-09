@@ -17,16 +17,27 @@ import com.crackmydroid.shared.presentation.theme.CrackMyDroidTheme
 @Composable
 internal fun ComponentPreviewContainer(
     accessibilityPrefs: AccessibilityPrefs = AccessibilityPrefs(),
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
+) {
+    AppPreviewEnvironment(accessibilityPrefs = accessibilityPrefs) {
+        Surface(color = MaterialTheme.colorScheme.background) {
+            Column(modifier = Modifier.padding(16.dp), content = { content() })
+        }
+    }
+}
+
+@Composable
+internal fun AppPreviewEnvironment(
+    languageCode: String = "it",
+    accessibilityPrefs: AccessibilityPrefs = AccessibilityPrefs(),
+    content: @Composable () -> Unit,
 ) {
     CrackMyDroidTheme {
         CompositionLocalProvider(
-            LocalStrings provides stringsFor("it"),
-            LocalAccessibilityPrefs provides accessibilityPrefs
+            LocalStrings provides stringsFor(languageCode),
+            LocalAccessibilityPrefs provides accessibilityPrefs,
         ) {
-            Surface(color = MaterialTheme.colorScheme.background) {
-                Column(modifier = Modifier.padding(16.dp), content = { content() })
-            }
+            content()
         }
     }
 }

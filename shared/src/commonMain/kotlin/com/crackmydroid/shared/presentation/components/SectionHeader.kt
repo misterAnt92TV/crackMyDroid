@@ -19,7 +19,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -43,7 +42,7 @@ fun SectionHeader(
     beforeHelpAction: (@Composable RowScope.() -> Unit)? = null,
     onBack: (() -> Unit)? = null,
     onMenu: (() -> Unit)? = null,
-    titleContent: (@Composable () -> Unit)? = null
+    titleContent: (@Composable () -> Unit)? = null,
 ) {
     val prefs = LocalAccessibilityPrefs.current
     val containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f)
@@ -58,7 +57,7 @@ fun SectionHeader(
             scrolledContainerColor = containerColor,
             navigationIconContentColor = MaterialTheme.colorScheme.primary,
             titleContentColor = MaterialTheme.colorScheme.onSurface,
-            actionIconContentColor = MaterialTheme.colorScheme.primary
+            actionIconContentColor = MaterialTheme.colorScheme.primary,
         ),
         title = {
             val content = titleContent ?: {
@@ -67,7 +66,7 @@ fun SectionHeader(
                         title,
                         style = MaterialTheme.typography.titleLarge,
                         maxLines = if (prefs.largeText) 2 else 1,
-                        overflow = TextOverflow.Ellipsis
+                        overflow = TextOverflow.Ellipsis,
                     )
                 } else {
                     Crossfade(targetState = title) {
@@ -75,7 +74,7 @@ fun SectionHeader(
                             it,
                             style = MaterialTheme.typography.titleLarge,
                             maxLines = if (prefs.largeText) 2 else 1,
-                            overflow = TextOverflow.Ellipsis
+                            overflow = TextOverflow.Ellipsis,
                         )
                     }
                 }
@@ -91,7 +90,7 @@ fun SectionHeader(
                     .size(40.dp)
                     .clip(CircleShape)
                     .background(iconContainer),
-                colors = IconButtonDefaults.iconButtonColors(contentColor = MaterialTheme.colorScheme.primary)
+                colors = IconButtonDefaults.iconButtonColors(contentColor = MaterialTheme.colorScheme.primary),
             ) {
                 Icon(icon, contentDescription = LocalStrings.current.helpContentDescription)
             }
@@ -104,9 +103,12 @@ fun SectionHeader(
                         .size(40.dp)
                         .clip(CircleShape)
                         .background(iconContainer),
-                    colors = IconButtonDefaults.iconButtonColors(contentColor = MaterialTheme.colorScheme.primary)
+                    colors = IconButtonDefaults.iconButtonColors(contentColor = MaterialTheme.colorScheme.primary),
                 ) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = LocalStrings.current.backContentDescription)
+                    Icon(
+                        Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = LocalStrings.current.backContentDescription,
+                    )
                 }
 
                 onMenu != null -> IconButton(
@@ -115,12 +117,12 @@ fun SectionHeader(
                         .size(40.dp)
                         .clip(CircleShape)
                         .background(iconContainer),
-                    colors = IconButtonDefaults.iconButtonColors(contentColor = MaterialTheme.colorScheme.primary)
+                    colors = IconButtonDefaults.iconButtonColors(contentColor = MaterialTheme.colorScheme.primary),
                 ) {
                     Icon(Icons.Filled.Menu, contentDescription = LocalStrings.current.menuContentDescription)
                 }
             }
-        }
+        },
     )
 }
 
@@ -132,13 +134,13 @@ private fun SectionHeaderPreview() = ComponentPreviewContainer {
             title = "Informazioni dispositivo",
             help = "Mostra i dettagli hardware e software.",
             onHelp = {},
-            onMenu = {}
+            onMenu = {},
         )
         SectionHeader(
             title = "Dettagli analisi",
             help = "Mostra il risultato dell'analisi.",
             onHelp = {},
-            onBack = {}
+            onBack = {},
         )
     }
 }

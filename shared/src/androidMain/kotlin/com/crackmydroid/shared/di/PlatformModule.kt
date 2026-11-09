@@ -7,12 +7,12 @@ import com.crackmydroid.shared.data.cache.CacheMaintenanceRepositoryAndroid
 import com.crackmydroid.shared.data.db.DatabaseDriverFactory
 import com.crackmydroid.shared.data.device.DeviceInfoRepositoryAndroid
 import com.crackmydroid.shared.data.log.LogRepositoryAndroid
+import com.crackmydroid.shared.data.network.createAndroidHttpClient
 import com.crackmydroid.shared.data.permissions.PermissionsRepositoryAndroid
 import com.crackmydroid.shared.data.reports.ReportFileRepositoryAndroid
-import com.crackmydroid.shared.data.root.RootCheckRepositoryAndroid
-import com.crackmydroid.shared.data.root.IntegrityVerificationRepositoryAndroid
 import com.crackmydroid.shared.data.root.IntegrityBackendClient
-import com.crackmydroid.shared.data.network.createAndroidHttpClient
+import com.crackmydroid.shared.data.root.IntegrityVerificationRepositoryAndroid
+import com.crackmydroid.shared.data.root.RootCheckRepositoryAndroid
 import com.crackmydroid.shared.data.settings.SettingsRepositoryAndroid
 import com.crackmydroid.shared.data.shell.ShellCommandRepositoryAndroid
 import com.crackmydroid.shared.data.snapshot.AndroidDeviceSnapshotCoordinator
@@ -20,21 +20,21 @@ import com.crackmydroid.shared.domain.repository.ActivityRepository
 import com.crackmydroid.shared.domain.repository.CacheMaintenance
 import com.crackmydroid.shared.domain.repository.DeviceInfoRepository
 import com.crackmydroid.shared.domain.repository.InstalledAppsRepository
-import com.crackmydroid.shared.domain.repository.log.LogRepository
-import com.crackmydroid.shared.domain.repository.log.OperationLogRepository
+import com.crackmydroid.shared.domain.repository.IntegrityVerificationRepository
 import com.crackmydroid.shared.domain.repository.PermissionsRepository
 import com.crackmydroid.shared.domain.repository.ReportFileRepository
 import com.crackmydroid.shared.domain.repository.RootCheckRepository
-import com.crackmydroid.shared.domain.repository.IntegrityVerificationRepository
 import com.crackmydroid.shared.domain.repository.SettingsRepository
 import com.crackmydroid.shared.domain.repository.ShellCommandRepository
+import com.crackmydroid.shared.domain.repository.log.LogRepository
+import com.crackmydroid.shared.domain.repository.log.OperationLogRepository
 import com.crackmydroid.shared.presentation.operations.DefaultOperationLogRepository
 import com.crackmydroid.shared.presentation.operations.OperationLogPersistence
 import com.crackmydroid.shared.presentation.operations.OperationLogPersistenceAndroid
+import io.ktor.client.HttpClient
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.Module
 import org.koin.dsl.module
-import io.ktor.client.HttpClient
 
 actual fun platformModule(): Module = module {
     single { DatabaseDriverFactory(androidContext()) }
@@ -64,7 +64,7 @@ actual fun platformModule(): Module = module {
             get(),
             get(),
             get(),
-            get()
+            get(),
         )
     }
 }

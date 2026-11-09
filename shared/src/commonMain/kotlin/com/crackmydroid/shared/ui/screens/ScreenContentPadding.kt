@@ -12,13 +12,13 @@ import androidx.compose.ui.unit.dp
 internal fun screenContentPadding(
     systemPadding: PaddingValues,
     horizontal: Dp = 16.dp,
-    vertical: Dp = 16.dp
+    vertical: Dp = 16.dp,
 ): PaddingValues {
     val layoutDirection = LocalLayoutDirection.current
     return PaddingValues(
         start = systemPadding.calculateStartPadding(layoutDirection) + horizontal,
         top = systemPadding.calculateTopPadding() + vertical,
         end = systemPadding.calculateEndPadding(layoutDirection) + horizontal,
-        bottom = systemPadding.calculateBottomPadding() + vertical
+        bottom = systemPadding.calculateBottomPadding() + vertical,
     )
 }

@@ -16,7 +16,7 @@ class VerifyPlayIntegrityTokenUseCaseTest {
         val expected = PlayIntegrityResult(
             details = "verified",
             appRecognitionVerdict = "PLAY_RECOGNIZED",
-            appLicensingVerdict = "LICENSED"
+            appLicensingVerdict = "LICENSED",
         )
         coEvery { backend.verify("encrypted-token", "scan-nonce") } returns expected
 

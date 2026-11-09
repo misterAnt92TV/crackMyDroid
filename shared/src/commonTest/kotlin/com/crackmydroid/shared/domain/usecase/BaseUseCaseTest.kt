@@ -114,12 +114,18 @@ class BaseUseCaseTest {
     fun explicitAndResultWrappedCancellationAreRethrown() = runTest {
         val useCase = TestUseCase()
         val cancellation = CancellationException("cancel")
-        assertSame(cancellation, assertFailsWith<CancellationException> {
-            useCase.run<Unit> { throw cancellation }
-        })
-        assertSame(cancellation, assertFailsWith<CancellationException> {
-            useCase.run { Result.failure<Unit>(cancellation).getOrThrow() }
-        })
+        assertSame(
+            cancellation,
+            assertFailsWith<CancellationException> {
+                useCase.run<Unit> { throw cancellation }
+            },
+        )
+        assertSame(
+            cancellation,
+            assertFailsWith<CancellationException> {
+                useCase.run { Result.failure<Unit>(cancellation).getOrThrow() }
+            },
+        )
     }
 
     @Test
@@ -168,12 +174,12 @@ class BaseUseCaseTest {
     private class TestUseCase(
         writer: RecordingWriter = RecordingWriter(),
         dispatcher: CoroutineDispatcher? = null,
-        verbose: () -> Boolean = { false }
+        verbose: () -> Boolean = { false },
     ) : BaseUseCase(
         name = TAG,
         dispatcher = dispatcher,
         logger = Logger(StaticConfig(logWriterList = listOf(writer)), "UseCaseTest"),
-        verbose = verbose
+        verbose = verbose,
     ) {
         private companion object {
             private const val TAG = "TestUseCase"

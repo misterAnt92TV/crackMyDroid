@@ -1,6 +1,5 @@
 package com.crackmydroid.shared.ui.activities
 
-import com.crackmydroid.shared.domain.model.ExportFormat
 import com.crackmydroid.shared.domain.model.activity.ActivityEntry
 import com.crackmydroid.shared.domain.model.activity.ActivityIntentRiskAnalyzer
 import com.crackmydroid.shared.domain.model.activity.ActivityIntentRiskLevel
@@ -18,6 +17,7 @@ import com.crackmydroid.shared.domain.usecase.settings.GetExportFormatUseCase
 import com.crackmydroid.shared.domain.usecase.settings.SetActivityFavoritesUseCase
 import com.crackmydroid.shared.domain.usecase.settings.SetActivityPackageFavoritesUseCase
 import com.crackmydroid.shared.i18n.Strings
+import com.crackmydroid.shared.i18n.format
 import com.crackmydroid.shared.i18n.stringsFor
 import com.crackmydroid.shared.presentation.BaseViewModel
 import com.crackmydroid.shared.presentation.operations.NoOpOperationLogRepository
@@ -388,9 +388,11 @@ class ActivityListViewModel(
                 appendLine("Finding:")
                 risk.findings.forEach { finding ->
                     appendLine(
-                        "- ${ActivityIntentRiskAnalyzer.formatLevel(
-                            finding.level,
-                        )} • ${finding.title}: ${finding.detail}",
+                        "- ${
+                            ActivityIntentRiskAnalyzer.formatLevel(
+                                finding.level,
+                            )
+                        } • ${finding.title}: ${finding.detail}",
                     )
                 }
             }

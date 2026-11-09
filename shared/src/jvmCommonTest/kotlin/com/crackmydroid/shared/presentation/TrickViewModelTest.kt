@@ -62,12 +62,14 @@ class TrickViewModelTest {
             delay(120)
             Result.success(ShellCommandResult(success = true, stdout = "package:com.test", stderr = "", code = 0))
         }
-        coEvery { execUseCase(top) } returns Result.success(ShellCommandResult(
-            success = true,
-            stdout = "ok",
-            stderr = "",
-            code = 0
-        ))
+        coEvery { execUseCase(top) } returns Result.success(
+            ShellCommandResult(
+                success = true,
+                stdout = "ok",
+                stderr = "",
+                code = 0,
+            ),
+        )
         val vm = TrickViewModel(listUseCase, execUseCase)
 
         vm.execute(packages)

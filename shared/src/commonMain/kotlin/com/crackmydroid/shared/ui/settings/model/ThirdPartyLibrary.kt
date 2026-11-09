@@ -3,7 +3,7 @@ package com.crackmydroid.shared.ui.settings.model
 /** Public project information shown in Settings; versions remain owned by the Gradle catalog. */
 data class ThirdPartyLibrary(
     val name: String,
-    val url: String
+    val url: String,
 )
 
 object ThirdPartyLibraries {
@@ -20,7 +20,10 @@ object ThirdPartyLibraries {
         ThirdPartyLibrary("RootBeer", "https://github.com/scottyab/rootbeer"),
         ThirdPartyLibrary("Play Integrity API", "https://developer.android.com/google/play/integrity"),
         ThirdPartyLibrary("AndroidX Core KTX", "https://developer.android.com/kotlin/ktx"),
-        ThirdPartyLibrary("AndroidX Activity Compose", "https://developer.android.com/develop/ui/compose/migrate/interoperability-apis/activity-compose"),
-        ThirdPartyLibrary("WorkManager", "https://developer.android.com/topic/libraries/architecture/workmanager")
+        ThirdPartyLibrary(
+            "AndroidX Activity Compose",
+            "https://developer.android.com/develop/ui/compose/migrate/interoperability-apis/activity-compose",
+        ),
+        ThirdPartyLibrary("WorkManager", "https://developer.android.com/topic/libraries/architecture/workmanager"),
     )
 }

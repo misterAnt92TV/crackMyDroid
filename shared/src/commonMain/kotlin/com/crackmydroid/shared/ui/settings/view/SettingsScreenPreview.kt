@@ -2,49 +2,48 @@ package com.crackmydroid.shared.ui.settings.view
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import com.crackmydroid.shared.domain.model.app.AppLanguage
 import com.crackmydroid.shared.domain.model.app.AppTheme
-import com.crackmydroid.shared.i18n.LocalStrings
 import com.crackmydroid.shared.i18n.stringsFor
+import com.crackmydroid.shared.presentation.preview.AppLocalePreviews
+import com.crackmydroid.shared.presentation.preview.AppPreviewEnvironment
 import com.crackmydroid.shared.presentation.preview.AppScreenPreviews
-import com.crackmydroid.shared.presentation.theme.CrackMyDroidTheme
+import com.crackmydroid.shared.ui.settings.SettingsState
 import com.crackmydroid.shared.ui.settings.model.SettingsActions
 import com.crackmydroid.shared.ui.settings.model.SettingsAppInfo
-import com.crackmydroid.shared.ui.settings.SettingsState
 
 @AppScreenPreviews
 @Composable
 private fun SettingsScreenPreview() = SettingsLocalePreview(AppLanguage.ITALIAN)
 
-@AppScreenPreviews
+@AppLocalePreviews
 @Composable
 private fun SettingsEnglishPreview() = SettingsLocalePreview(AppLanguage.ENGLISH)
 
-@AppScreenPreviews
+@AppLocalePreviews
 @Composable
 private fun SettingsGermanPreview() = SettingsLocalePreview(AppLanguage.GERMAN)
 
-@AppScreenPreviews
+@AppLocalePreviews
 @Composable
 private fun SettingsFrenchPreview() = SettingsLocalePreview(AppLanguage.FRENCH)
 
-@AppScreenPreviews
+@AppLocalePreviews
 @Composable
 private fun SettingsSpanishPreview() = SettingsLocalePreview(AppLanguage.SPANISH)
 
-@AppScreenPreviews
+@AppLocalePreviews
 @Composable
 private fun SettingsWithoutPermissionsPreview() = SettingsLocalePreview(
     language = AppLanguage.ENGLISH,
-    appInfo = SettingsAppInfo("1.2", "com.example.preview", null, null, emptyList())
+    appInfo = SettingsAppInfo("1.2", "com.example.preview", null, null, emptyList()),
 )
 
-@AppScreenPreviews
+@AppLocalePreviews
 @Composable
 private fun SettingsErrorPreview() = SettingsLocalePreview(
     language = AppLanguage.ENGLISH,
-    error = "Synthetic storage error"
+    error = "Synthetic storage error",
 )
 
 @Composable
@@ -56,25 +55,23 @@ private fun SettingsLocalePreview(
         packageName = "com.crackmydroid.android",
         minSdk = 24,
         targetSdk = 35,
-        requestedPermissions = listOf("android.permission.QUERY_ALL_PACKAGES")
-    )
+        requestedPermissions = listOf("android.permission.QUERY_ALL_PACKAGES"),
+    ),
 ) {
     val strings = stringsFor(language.code)
-    CrackMyDroidTheme {
-        CompositionLocalProvider(LocalStrings provides strings) {
-            SettingsContent(
-                state = SettingsState(
-                    language = language,
-                    theme = AppTheme.SYSTEM,
-                    suggestionsEnabled = true,
-                    featureHintsEnabled = true,
-                    error = error
-                ),
-                padding = PaddingValues(),
-                headerHelp = strings.helpSettings,
-                appInfo = appInfo,
-                actions = SettingsActions()
-            )
-        }
+    AppPreviewEnvironment(languageCode = language.code) {
+        SettingsContent(
+            state = SettingsState(
+                language = language,
+                theme = AppTheme.SYSTEM,
+                suggestionsEnabled = true,
+                featureHintsEnabled = true,
+                error = error,
+            ),
+            padding = PaddingValues(),
+            headerHelp = strings.helpSettings,
+            appInfo = appInfo,
+            actions = SettingsActions(),
+        )
     }
 }

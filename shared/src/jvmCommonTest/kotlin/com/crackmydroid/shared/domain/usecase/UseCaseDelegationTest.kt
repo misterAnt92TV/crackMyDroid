@@ -1,24 +1,24 @@
 package com.crackmydroid.shared.domain.usecase
 
-import com.crackmydroid.shared.domain.model.activity.ActivityEntry
+import com.crackmydroid.shared.domain.model.DeviceInfo
 import com.crackmydroid.shared.domain.model.ExportDocument
 import com.crackmydroid.shared.domain.model.ExportFormat
 import com.crackmydroid.shared.domain.model.InstalledAppEntry
-import com.crackmydroid.shared.domain.model.DeviceInfo
 import com.crackmydroid.shared.domain.model.PlayIntegrityResult
 import com.crackmydroid.shared.domain.model.RootStatus
+import com.crackmydroid.shared.domain.model.activity.ActivityEntry
 import com.crackmydroid.shared.domain.model.app.AppPermissionEntry
 import com.crackmydroid.shared.domain.model.root.RootCheckMode
 import com.crackmydroid.shared.domain.model.shell.ShellCommand
 import com.crackmydroid.shared.domain.model.shell.ShellCommandResult
 import com.crackmydroid.shared.domain.repository.ActivityRepository
-import com.crackmydroid.shared.domain.repository.InstalledAppsRepository
-import com.crackmydroid.shared.domain.repository.ShellCommandRepository
 import com.crackmydroid.shared.domain.repository.DeviceInfoRepository
+import com.crackmydroid.shared.domain.repository.InstalledAppsRepository
 import com.crackmydroid.shared.domain.repository.PermissionsRepository
-import com.crackmydroid.shared.domain.repository.RootCheckRepository
-import com.crackmydroid.shared.domain.repository.log.LogRepository
 import com.crackmydroid.shared.domain.repository.ReportFileRepository
+import com.crackmydroid.shared.domain.repository.RootCheckRepository
+import com.crackmydroid.shared.domain.repository.ShellCommandRepository
+import com.crackmydroid.shared.domain.repository.log.LogRepository
 import com.crackmydroid.shared.domain.usecase.activities.GetActivitiesUseCase
 import com.crackmydroid.shared.domain.usecase.activities.LaunchActivityUseCase
 import com.crackmydroid.shared.domain.usecase.info.GetDeviceInfoUseCase
@@ -27,18 +27,18 @@ import com.crackmydroid.shared.domain.usecase.installedapps.ListInstalledAppsUse
 import com.crackmydroid.shared.domain.usecase.installedapps.ShareApkUseCase
 import com.crackmydroid.shared.domain.usecase.log.ExportLogsUseCase
 import com.crackmydroid.shared.domain.usecase.log.GetLogsUseCase
-import com.crackmydroid.shared.domain.usecase.reports.ExportReportUseCase
-import com.crackmydroid.shared.domain.usecase.settings.GetExportFormatUseCase
 import com.crackmydroid.shared.domain.usecase.permissions.ListPermissionsUseCase
+import com.crackmydroid.shared.domain.usecase.reports.ExportReportUseCase
 import com.crackmydroid.shared.domain.usecase.root.CheckPlayIntegrityUseCase
 import com.crackmydroid.shared.domain.usecase.root.CheckRootUseCase
+import com.crackmydroid.shared.domain.usecase.settings.GetExportFormatUseCase
 import com.crackmydroid.shared.domain.usecase.trick.ExecuteShellCommandUseCase
 import com.crackmydroid.shared.domain.usecase.trick.ListShellCommandsUseCase
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
-import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -50,8 +50,20 @@ class UseCaseDelegationTest {
     fun getActivities_delegatesToRepository() = runTest {
         val repository = mockk<ActivityRepository>()
         val expected = listOf(
-            ActivityEntry(label = "Act A", appLabel = "App A", packageName = "pkg.a", activityName = "A", exported = true),
-            ActivityEntry(label = "Act B", appLabel = "App B", packageName = "pkg.b", activityName = "B", exported = false)
+            ActivityEntry(
+                label = "Act A",
+                appLabel = "App A",
+                packageName = "pkg.a",
+                activityName = "A",
+                exported = true,
+            ),
+            ActivityEntry(
+                label = "Act B",
+                appLabel = "App B",
+                packageName = "pkg.b",
+                activityName = "B",
+                exported = false,
+            ),
         )
         coEvery { repository.getActivities() } returns expected
 
@@ -67,7 +79,7 @@ class UseCaseDelegationTest {
         val repository = mockk<InstalledAppsRepository>()
         val expected = listOf(
             InstalledAppEntry("App A", "pkg.a", "1.0", true),
-            InstalledAppEntry("App B", "pkg.b", "2.0", false)
+            InstalledAppEntry("App B", "pkg.b", "2.0", false),
         )
         coEvery { repository.listInstalled() } returns expected
 
@@ -247,7 +259,7 @@ class UseCaseDelegationTest {
         coEvery { repository.execute(command) } throws IllegalStateException("Shell unavailable")
         assertEquals(
             "Shell unavailable",
-            ExecuteShellCommandUseCase(repository)(command).exceptionOrNull()?.message
+            ExecuteShellCommandUseCase(repository)(command).exceptionOrNull()?.message,
         )
     }
 }

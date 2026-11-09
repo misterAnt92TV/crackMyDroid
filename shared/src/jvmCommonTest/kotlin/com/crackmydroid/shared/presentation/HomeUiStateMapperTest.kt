@@ -2,9 +2,9 @@ package com.crackmydroid.shared.presentation
 
 import com.crackmydroid.shared.domain.model.operation.OperationEntry
 import com.crackmydroid.shared.i18n.stringsFor
+import com.crackmydroid.shared.ui.home.OperationOutcome
 import com.crackmydroid.shared.ui.home.model.HomeState
 import com.crackmydroid.shared.ui.home.model.HomeUiStateMapper
-import com.crackmydroid.shared.ui.home.OperationOutcome
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -18,7 +18,7 @@ class HomeUiStateMapperTest {
             description = "legacy description",
             success = true,
             timestamp = 0L,
-            operationId = "operation-1"
+            operationId = "operation-1",
         )
 
         val item = mapper.map(HomeState(recentOperations = listOf(entry)), stringsFor("en"), "en")
@@ -36,7 +36,7 @@ class HomeUiStateMapperTest {
             description = "scan",
             success = false,
             details = "",
-            timestamp = 42L
+            timestamp = 42L,
         )
 
         val item = mapper.map(HomeState(recentOperations = listOf(entry)), stringsFor("it"), "it")

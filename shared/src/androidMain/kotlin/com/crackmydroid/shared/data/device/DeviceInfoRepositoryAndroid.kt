@@ -14,9 +14,9 @@ import android.telephony.TelephonyManager
 import com.crackmydroid.database.CacheDatabase
 import com.crackmydroid.shared.domain.model.DeviceInfo
 import com.crackmydroid.shared.domain.repository.DeviceInfoRepository
-import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.io.File
 
 class DeviceInfoRepositoryAndroid(private val context: Context, private val db: CacheDatabase) : DeviceInfoRepository {
     override suspend fun getDeviceInfo(): DeviceInfo = withContext(Dispatchers.Default) {

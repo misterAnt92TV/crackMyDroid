@@ -1,6 +1,7 @@
 # CrackMyDroid
 
-🌐 **Languages:** [Italiano](README.it.md) · [Deutsch](README.de.md) · [Français](README.fr.md) · [Español](README.es.md)
+🌐
+**Languages:** [Italiano](README.it.md) · [Deutsch](README.de.md) · [Français](README.fr.md) · [Español](README.es.md)
 
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.3.21-blue.svg)](https://kotlinlang.org)
 [![Compose Multiplatform](https://img.shields.io/badge/Compose%20Multiplatform-1.10.3-purple.svg)](https://www.jetbrains.com/lf/compose-multiplatform)
@@ -32,14 +33,14 @@
 |---------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | **Home**                  | Quick overview, app purpose, expandable FAQ                                                                                                                                                          |
 | **Device Info**           | Hardware/software, security patch, fingerprint, radio, kernel, bootloader, battery/network, debug flags (ADB, developer options, debuggable), root status; every row copyable, exportable TXT report |
-| **Root / Play Integrity** | Root verification via RootBeer and backend-verifiable Play Integrity verdicts for CrackMyDroid and its device                                                                                     |
+| **Root / Play Integrity** | Root verification via RootBeer and backend-verifiable Play Integrity verdicts for CrackMyDroid and its device                                                                                        |
 | **PenTesting**            | Automated security check suite (single target or full sweep); queued/ok/error states, counters, error details, export/share report; history up to 240 events and 12 saved snapshots                  |
 | **Activities**            | Per-app activity browser with search/history, favorites, package expansion, direct launch, exposure risk analysis (intent/exported), export                                                          |
-| **Installed Apps (APK)**  | Full-text search, filters, favorites, installer provenance (reported Google Play/other/unavailable), app icons, manifest security analysis, APK export to storage and direct sharing                |
+| **Installed Apps (APK)**  | Full-text search, filters, favorites, installer provenance (reported Google Play/other/unavailable), app icons, manifest security analysis, APK export to storage and direct sharing                 |
 | **Permissions**           | Installed app permissions overview with risk classification (Critical/High/Medium/Low), search and details                                                                                           |
 | **Shell/Tricks**          | Pre-configured ADB/shell commands (with root-required flag), optional confirmation, output and exit code                                                                                             |
 | **Log**                   | App operation log viewer with export                                                                                                                                                                 |
-| **Settings**              | Theme (light/dark/system), language (system, IT/EN/DE/FR/ES), log verbosity, accessibility (high contrast, reduced animations, large text), library licenses, app version                          |
+| **Settings**              | Theme (light/dark/system), language (system, IT/EN/DE/FR/ES), log verbosity, accessibility (high contrast, reduced animations, large text), library licenses, app version                            |
 
 ---
 
@@ -231,24 +232,24 @@ newCrackMyDroid/
 
 ## Tech Stack
 
-| Layer              | Library                             | Version        |
-|--------------------|-------------------------------------|----------------|
-| **UI**             | Compose Multiplatform               | 1.10.3         |
-| **UI**             | Material3                           | 1.9.0          |
-| **Language**       | Kotlin                              | 2.3.21         |
-| **DI**             | Koin                                | 3.5.6          |
-| **Async**          | Kotlin Coroutines                   | 1.8.1          |
-| **Database**       | SQLDelight                          | 2.0.1          |
-| **Serialization**  | kotlinx.serialization               | 1.6.3          |
-| **Networking**     | Ktor Client                         | 3.5.0          |
-| **Root detection** | RootBeer                            | 0.1.1          |
-| **Security**       | Play Integrity API                  | 1.4.0          |
-| **Preferences**    | DataStore Preferences               | 1.1.7          |
-| **Background work**| WorkManager                         | 2.12.0         |
-| **Logging**        | Kermit                              | 2.0.4          |
-| **Testing**        | kotlin-test, MockK, coroutines-test | —              |
-| **Android**        | AGP                                 | 8.13.2         |
-| **Android**        | Core KTX / Activity Compose         | 1.13.1 / 1.8.2 |
+| Layer               | Library                             | Version        |
+|---------------------|-------------------------------------|----------------|
+| **UI**              | Compose Multiplatform               | 1.10.3         |
+| **UI**              | Material3                           | 1.9.0          |
+| **Language**        | Kotlin                              | 2.3.21         |
+| **DI**              | Koin                                | 3.5.6          |
+| **Async**           | Kotlin Coroutines                   | 1.8.1          |
+| **Database**        | SQLDelight                          | 2.0.1          |
+| **Serialization**   | kotlinx.serialization               | 1.6.3          |
+| **Networking**      | Ktor Client                         | 3.5.0          |
+| **Root detection**  | RootBeer                            | 0.1.1          |
+| **Security**        | Play Integrity API                  | 1.4.0          |
+| **Preferences**     | DataStore Preferences               | 1.1.7          |
+| **Background work** | WorkManager                         | 2.12.0         |
+| **Logging**         | Kermit                              | 2.0.4          |
+| **Testing**         | kotlin-test, MockK, coroutines-test | —              |
+| **Android**         | AGP                                 | 8.13.2         |
+| **Android**         | Core KTX / Activity Compose         | 1.13.1 / 1.8.2 |
 
 ---
 

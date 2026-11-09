@@ -14,7 +14,8 @@ class PackageChangeReceiver : BroadcastReceiver() {
         when (intent.action) {
             Intent.ACTION_PACKAGE_ADDED,
             Intent.ACTION_PACKAGE_REPLACED,
-            Intent.ACTION_PACKAGE_REMOVED -> {
+            Intent.ACTION_PACKAGE_REMOVED,
+                -> {
                 goAsync().apply {
                     try {
                         kotlinx.coroutines.runBlocking {
@@ -30,7 +31,7 @@ class PackageChangeReceiver : BroadcastReceiver() {
 }
 
 class CacheMaintenanceRepositoryAndroid(
-    private val db: CacheDatabase
+    private val db: CacheDatabase,
 ) : CacheMaintenance {
     override suspend fun clearAllCaches() = withContext(Dispatchers.IO) {
         db.cacheDatabaseQueries.transaction {

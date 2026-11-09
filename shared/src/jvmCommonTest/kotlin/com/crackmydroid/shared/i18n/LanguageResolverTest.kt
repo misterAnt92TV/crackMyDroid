@@ -55,7 +55,7 @@ class LanguageResolverTest {
                 strings.desktopRescan,
                 strings.desktopAdbSettingsDescription,
                 strings.desktopSave,
-                strings.desktopCancel
+                strings.desktopCancel,
             ).forEach { desktopString -> assertTrue(desktopString.isNotBlank()) }
             assertTrue(strings.desktopDataSourceLabel.contains("%s"))
             listOf(
@@ -79,7 +79,7 @@ class LanguageResolverTest {
                 strings.penTestErrorContentDescription,
                 strings.penTestQueuedContentDescription,
                 strings.penTestPendingContentDescription,
-                strings.hideRecentOperationContentDescription
+                strings.hideRecentOperationContentDescription,
             ).forEach { accessibilityString -> assertTrue(accessibilityString.isNotBlank()) }
             assertTrue(strings.removeSearchHistoryContentDescription.contains("%s"))
             assertTrue(strings.penTestProgressSummary.contains("%1${'$'}d"))
@@ -106,7 +106,7 @@ class LanguageResolverTest {
             assertTrue(strings.homeOperationHistoryTitleWithCount.format(3).contains("3"))
             assertEquals(
                 "Demo App · com.example.demo",
-                strings.permissionsExpandedAppLabel.format("Demo App", "com.example.demo")
+                strings.permissionsExpandedAppLabel.format("Demo App", "com.example.demo"),
             )
         }
     }
@@ -118,7 +118,7 @@ class LanguageResolverTest {
             "manifest_flags",
             "file_scout",
             "network_monitor",
-            "permission_risk"
+            "permission_risk",
         )
         val italian = stringsFor("it")
         val italianLabels = checkIds.map { italian.pentestChecks.getValue(it).first }
@@ -137,7 +137,7 @@ class LanguageResolverTest {
                 assertNotEquals(
                     italian.clearSearchHistoryContentDescription,
                     strings.clearSearchHistoryContentDescription,
-                    "$languageCode/clearSearchHistoryContentDescription still uses Italian"
+                    "$languageCode/clearSearchHistoryContentDescription still uses Italian",
                 )
             }
         }
@@ -154,7 +154,7 @@ class LanguageResolverTest {
                 ui.reportTitle, ui.totals, ui.riskSummary, ui.recommendations,
                 ui.highlights, ui.exportHtml, ui.closeReport, ui.exportedTitle,
                 ui.exportedSummary, ui.appDetail, ui.packageDetail, ui.activitiesDetail,
-                ui.maximumRiskDetail, ui.riskLow, ui.riskMedium, ui.riskHigh, ui.riskCritical
+                ui.maximumRiskDetail, ui.riskLow, ui.riskMedium, ui.riskHigh, ui.riskCritical,
             ).forEach { value -> assertTrue(value.isNotBlank(), "$languageCode has blank Activity UI text") }
             assertTrue(ui.resultsSummary.contains("%d"), languageCode)
             assertTrue(ui.riskSummary.contains("%s"), languageCode)

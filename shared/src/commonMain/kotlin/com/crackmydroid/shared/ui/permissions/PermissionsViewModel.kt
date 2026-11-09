@@ -206,7 +206,7 @@ class PermissionsViewModel(
             runSuspendCatching {
                 val content =
                     contentOverride ?: app?.let { buildPermissionsReport.single(it, risk, reportText).getOrThrow() }
-                        ?: noData
+                    ?: noData
                 reportExporter.shareTextReport(
                     buildPermissionsReport.singleFileName(packageName).removeSuffix(".txt"),
                     "permissions",

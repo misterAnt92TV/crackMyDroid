@@ -4,19 +4,18 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Info
 import com.crackmydroid.shared.presentation.components.text.AppText
 import com.crackmydroid.shared.presentation.preview.AppComponentPreviews
 import com.crackmydroid.shared.presentation.preview.ComponentPreviewContainer
@@ -30,7 +29,7 @@ fun AppButton(
     enabled: Boolean = true,
     variant: ButtonVariant = ButtonVariant.Primary,
     leadingIcon: ImageVector? = null,
-    fullWidth: Boolean = true
+    fullWidth: Boolean = true,
 ) {
     val prefs = LocalAccessibilityPrefs.current
     val baseStyle = MaterialTheme.typography.labelLarge
@@ -44,7 +43,7 @@ fun AppButton(
             text,
             style = finalStyle,
             maxLines = if (prefs.largeText) 2 else 1,
-            overflow = TextOverflow.Ellipsis
+            overflow = TextOverflow.Ellipsis,
         )
     }
     val widthModifier = if (fullWidth) Modifier.fillMaxWidth() else Modifier
@@ -59,8 +58,8 @@ fun AppButton(
             modifier = buttonModifier,
             contentPadding = PaddingValues(
                 horizontal = 18.dp,
-                vertical = if (prefs.largeText) 16.dp else 14.dp
-            )
+                vertical = if (prefs.largeText) 16.dp else 14.dp,
+            ),
         ) { content() }
 
         ButtonVariant.Secondary -> OutlinedButton(
@@ -69,8 +68,8 @@ fun AppButton(
             modifier = buttonModifier,
             contentPadding = PaddingValues(
                 horizontal = 18.dp,
-                vertical = if (prefs.largeText) 16.dp else 14.dp
-            )
+                vertical = if (prefs.largeText) 16.dp else 14.dp,
+            ),
         ) { content() }
 
         ButtonVariant.Tonal -> FilledTonalButton(
@@ -79,8 +78,8 @@ fun AppButton(
             modifier = buttonModifier,
             contentPadding = PaddingValues(
                 horizontal = 18.dp,
-                vertical = if (prefs.largeText) 16.dp else 14.dp
-            )
+                vertical = if (prefs.largeText) 16.dp else 14.dp,
+            ),
         ) { content() }
     }
 }
@@ -89,7 +88,7 @@ fun AppButton(
 @Composable
 private fun AppButtonPreview() = ComponentPreviewContainer {
     androidx.compose.foundation.layout.Column(
-        verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(8.dp)
+        verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(8.dp),
     ) {
         AppButton("Analizza dispositivo", onClick = {}, leadingIcon = Icons.Filled.Info)
         AppButton("Azione secondaria", onClick = {}, variant = ButtonVariant.Secondary)

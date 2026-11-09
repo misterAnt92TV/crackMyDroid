@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import com.crackmydroid.shared.i18n.LocalStrings
+import com.crackmydroid.shared.i18n.format
 import com.crackmydroid.shared.presentation.components.text.AppText
 import com.crackmydroid.shared.presentation.preview.AppComponentPreviews
 import com.crackmydroid.shared.presentation.preview.ComponentPreviewContainer
@@ -16,7 +17,7 @@ fun ExportDetailsCard(
     modifier: Modifier = Modifier,
     title: String? = null,
     summary: String? = null,
-    details: List<String> = emptyList()
+    details: List<String> = emptyList(),
 ) {
     val normalizedPath = path.trim()
     val fileName = normalizedPath.substringAfterLast('/').substringAfterLast('\\')
@@ -32,40 +33,40 @@ fun ExportDetailsCard(
         AppText(
             text = title ?: strings.exportDetailsTitle,
             style = MaterialTheme.typography.titleSmall,
-            fontWeight = FontWeight.SemiBold
+            fontWeight = FontWeight.SemiBold,
         )
         summary?.takeIf { it.isNotBlank() }?.let {
             AppText(
                 text = it,
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
         AppText(
             text = strings.exportFile.format(fileName),
             style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurface
+            color = MaterialTheme.colorScheme.onSurface,
         )
         AppText(
             text = strings.exportFormat.format(extension),
             style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.primary
+            color = MaterialTheme.colorScheme.primary,
         )
         AppText(
             text = strings.exportPath.format(normalizedPath),
             style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         AppText(
             text = strings.exportDirectory.format(directory),
             style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         details.forEach { line ->
             AppText(
                 text = "• $line",
                 style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
     }
@@ -78,6 +79,6 @@ private fun ExportDetailsCardPreview() = ComponentPreviewContainer {
         path = "/storage/emulated/0/Download/crackmydroid-report.txt",
         title = "Dettagli export",
         summary = "Report PenTest generato correttamente",
-        details = listOf("12 controlli eseguiti", "2 avvisi da verificare")
+        details = listOf("12 controlli eseguiti", "2 avvisi da verificare"),
     )
 }

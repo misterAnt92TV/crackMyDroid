@@ -32,7 +32,7 @@ fun rememberSystemMotionReduction(): Boolean {
         context.contentResolver.registerContentObserver(
             Settings.Global.getUriFor(Settings.Global.ANIMATOR_DURATION_SCALE),
             false,
-            observer
+            observer,
         )
         onDispose {
             accessibilityManager?.removeTouchExplorationStateChangeListener(touchExplorationListener)

@@ -12,7 +12,7 @@ import androidx.compose.ui.tooling.preview.Preview
     group = "Phone",
     device = Devices.PHONE,
     showBackground = true,
-    showSystemUi = true
+    showSystemUi = true,
 )
 @Preview(
     name = "Phone Dark",
@@ -20,14 +20,14 @@ import androidx.compose.ui.tooling.preview.Preview
     device = Devices.PHONE,
     uiMode = UI_MODE_NIGHT_YES or UI_MODE_TYPE_NORMAL,
     showBackground = true,
-    showSystemUi = true
+    showSystemUi = true,
 )
 @Preview(
     name = "Tablet Light",
     group = "Tablet",
     device = Devices.TABLET,
     showBackground = true,
-    showSystemUi = true
+    showSystemUi = true,
 )
 @Preview(
     name = "Tablet Dark",
@@ -35,6 +35,6 @@ import androidx.compose.ui.tooling.preview.Preview
     device = Devices.TABLET,
     uiMode = UI_MODE_NIGHT_YES or UI_MODE_TYPE_NORMAL,
     showBackground = true,
-    showSystemUi = true
+    showSystemUi = true,
 )
 annotation class AppScreenPreviews

@@ -10,5 +10,5 @@ data class InfoState(
     val error: String? = null,
     val lastExportPath: String? = null,
     val reportContent: String? = null,
-    val reportLoading: Boolean = false
+    val reportLoading: Boolean = false,
 )

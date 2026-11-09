@@ -27,7 +27,7 @@ data class PermissionRiskFinding(
     val key: String,
     val kind: PermissionFindingKind,
     val level: PermissionRiskLevel,
-    val isPattern: Boolean = false
+    val isPattern: Boolean = false,
 )
 
 data class PermissionRiskReport(
@@ -37,5 +37,5 @@ data class PermissionRiskReport(
     val score: Int,
     val criticalCount: Int,
     val highCount: Int,
-    val mediumCount: Int
+    val mediumCount: Int,
 )

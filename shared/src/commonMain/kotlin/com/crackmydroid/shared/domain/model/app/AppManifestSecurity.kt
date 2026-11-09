@@ -14,7 +14,7 @@ data class ExposedComponentInfo(
     val type: AppComponentType,
     val name: String,
     val exported: Boolean,
-    val permission: String? = null
+    val permission: String? = null,
 )
 
 @Serializable
@@ -30,7 +30,7 @@ data class AppManifestSecurity(
     val minSdkVersion: Int? = null,
     val debugCertSigned: Boolean = false,
     val exposedComponents: List<ExposedComponentInfo> = emptyList(),
-    val supportsComponentAnalysis: Boolean = true
+    val supportsComponentAnalysis: Boolean = true,
 ) {
     val unprotectedExportedComponents: List<ExposedComponentInfo>
         get() = exposedComponents.filter { it.exported && it.permission.isNullOrBlank() }
@@ -48,7 +48,7 @@ enum class ManifestRiskLevel {
 data class ManifestSecurityFinding(
     val level: ManifestRiskLevel,
     val title: String,
-    val detail: String
+    val detail: String,
 )
 
 @Serializable
@@ -56,7 +56,7 @@ data class ManifestSecurityReport(
     val info: AppManifestSecurity,
     val level: ManifestRiskLevel,
     val score: Int,
-    val findings: List<ManifestSecurityFinding>
+    val findings: List<ManifestSecurityFinding>,
 )
 
 object ManifestSecurityAnalyzer {
@@ -67,7 +67,7 @@ object ManifestSecurityAnalyzer {
             findings += ManifestSecurityFinding(
                 level = ManifestRiskLevel.Critical,
                 title = "App debuggable in produzione",
-                detail = "android:debuggable=true consente di attaccare un debugger, dumpare memoria ed eseguire codice nel processo dell'app."
+                detail = "android:debuggable=true consente di attaccare un debugger, dumpare memoria ed eseguire codice nel processo dell'app.",
             )
         }
 
@@ -75,7 +75,7 @@ object ManifestSecurityAnalyzer {
             findings += ManifestSecurityFinding(
                 level = ManifestRiskLevel.High,
                 title = "Package testOnly",
-                detail = "L'app e' marcata testOnly: verifica che non sia una build di sviluppo esposta per errore."
+                detail = "L'app e' marcata testOnly: verifica che non sia una build di sviluppo esposta per errore.",
             )
         }
 
@@ -84,13 +84,13 @@ object ManifestSecurityAnalyzer {
                 findings += ManifestSecurityFinding(
                     level = ManifestRiskLevel.Medium,
                     title = "Backup abilitato con BackupAgent custom",
-                    detail = "allowBackup=true con BackupAgent dedicato: verifica comunque quali dati vengono incluso nel backup."
+                    detail = "allowBackup=true con BackupAgent dedicato: verifica comunque quali dati vengono incluso nel backup.",
                 )
             } else {
                 findings += ManifestSecurityFinding(
                     level = ManifestRiskLevel.High,
                     title = "Backup dati abilitato (allowBackup)",
-                    detail = "allowBackup=true senza BackupAgent custom: dati privati estraibili via 'adb backup' anche senza root."
+                    detail = "allowBackup=true senza BackupAgent custom: dati privati estraibili via 'adb backup' anche senza root.",
                 )
             }
         }
@@ -99,7 +99,7 @@ object ManifestSecurityAnalyzer {
             findings += ManifestSecurityFinding(
                 level = ManifestRiskLevel.Medium,
                 title = "Traffico cleartext consentito",
-                detail = "usesCleartextTraffic=true: possibile downgrade HTTP e MITM su reti non trusted."
+                detail = "usesCleartextTraffic=true: possibile downgrade HTTP e MITM su reti non trusted.",
             )
         }
 
@@ -107,7 +107,7 @@ object ManifestSecurityAnalyzer {
             findings += ManifestSecurityFinding(
                 level = ManifestRiskLevel.High,
                 title = "Firmata con certificato di debug",
-                detail = "L'APK risulta firmato con il certificato di debug standard: build non da rilasciare in produzione."
+                detail = "L'APK risulta firmato con il certificato di debug standard: build non da rilasciare in produzione.",
             )
         }
 
@@ -123,7 +123,7 @@ object ManifestSecurityAnalyzer {
                     detail = "Provider esportati e non protetti da permission possono esporre dati o SQL injection: ${
                         unprotected.filter { it.type == AppComponentType.PROVIDER }.take(3)
                             .joinToString(", ") { it.name }
-                    }."
+                    }.",
                 )
             }
             if (services > 0) {
@@ -133,7 +133,7 @@ object ManifestSecurityAnalyzer {
                     detail = "Service raggiungibili da altre app senza controllo permessi: ${
                         unprotected.filter { it.type == AppComponentType.SERVICE }.take(3)
                             .joinToString(", ") { it.name }
-                    }."
+                    }.",
                 )
             }
             if (receivers > 0) {
@@ -143,14 +143,14 @@ object ManifestSecurityAnalyzer {
                     detail = "Receiver che accettano broadcast esterni senza permission: ${
                         unprotected.filter { it.type == AppComponentType.RECEIVER }.take(3)
                             .joinToString(", ") { it.name }
-                    }."
+                    }.",
                 )
             }
         } else if (!info.supportsComponentAnalysis) {
             findings += ManifestSecurityFinding(
                 level = ManifestRiskLevel.Low,
                 title = "Analisi componenti non disponibile",
-                detail = "Superficie service/receiver/provider non analizzabile in questa modalita' (richiede scansione diretta sul device Android)."
+                detail = "Superficie service/receiver/provider non analizzabile in questa modalita' (richiede scansione diretta sul device Android).",
             )
         }
 

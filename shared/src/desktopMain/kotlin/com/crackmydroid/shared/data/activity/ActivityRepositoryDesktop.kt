@@ -7,10 +7,10 @@ import com.crackmydroid.shared.data.cache.PaginationHelper
 import com.crackmydroid.shared.domain.model.activity.ActivityEntry
 import com.crackmydroid.shared.domain.model.app.AppComponent
 import com.crackmydroid.shared.domain.repository.ActivityRepository
-import com.crackmydroid.shared.util.runSuspendCatching
 import com.crackmydroid.shared.domain.repository.AdbBridge
 import com.crackmydroid.shared.domain.repository.DeviceSessionController
 import com.crackmydroid.shared.domain.repository.RemotePackageManager
+import com.crackmydroid.shared.util.runSuspendCatching
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -18,7 +18,7 @@ class ActivityRepositoryDesktop(
     adbBridge: AdbBridge,
     sessionController: DeviceSessionController,
     private val cache: DesktopScanCache,
-    private val packageManager: RemotePackageManager
+    private val packageManager: RemotePackageManager,
 ) : DesktopAdbRepositorySupport(adbBridge, sessionController), ActivityRepository {
     override suspend fun getActivities(): List<ActivityEntry> = withContext(Dispatchers.IO) {
         cache.activities?.let { return@withContext it }
@@ -52,7 +52,7 @@ class ActivityRepositoryDesktop(
         entry: ActivityEntry,
         action: String?,
         dataUri: String?,
-        mimeType: String?
+        mimeType: String?,
     ): Result<Unit> = withContext(Dispatchers.IO) {
         runSuspendCatching {
             val normalizedAction = action?.trim().orEmpty().ifBlank { null }

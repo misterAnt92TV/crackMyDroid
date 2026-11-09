@@ -15,18 +15,18 @@ class HomeUiStateMapper {
         }
         return HomeUiState(
             latestOperations = operations,
-            operationHistory = operations
+            operationHistory = operations,
         )
     }
 
     private fun OperationEntry.toLastOperationItem(
         strings: Strings,
-        languageCode: String
+        languageCode: String,
     ): LastOperationItem = LastOperationItem(
         operationId = operationId.ifBlank { "$timestamp:$description:$success" },
         description = event?.let(strings::renderOperation) ?: legacyDescription ?: description,
         result = details ?: if (success) strings.operationSuccess else strings.operationFailed,
         timestamp = formatOperationTimestamp(timestamp, languageCode),
-        outcome = if (success) OperationOutcome.Success else OperationOutcome.Failure
+        outcome = if (success) OperationOutcome.Success else OperationOutcome.Failure,
     )
 }

@@ -10,15 +10,15 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.isSuccess
-import kotlinx.serialization.Serializable
 import kotlinx.coroutines.CancellationException
+import kotlinx.serialization.Serializable
 
 class IntegrityBackendClient(private val httpClient: HttpClient) {
     suspend fun verify(
         endpoint: String,
         integrityToken: String,
         requestBinding: String,
-        userAgent: String
+        userAgent: String,
     ): PlayIntegrityResult {
         val response = httpClient.post(endpoint) {
             header("User-Agent", userAgent)
@@ -41,7 +41,7 @@ class IntegrityBackendClient(private val httpClient: HttpClient) {
 @Serializable
 internal data class IntegrityVerificationRequest(
     val integrityToken: String,
-    val requestBinding: String
+    val requestBinding: String,
 )
 
 @Serializable
@@ -54,7 +54,7 @@ internal data class IntegrityVerificationResponse(
     val deviceRecognitionVerdicts: List<String> = emptyList(),
     val playProtectVerdict: String? = null,
     val verifiedAtEpochMs: Long? = null,
-    val details: String? = null
+    val details: String? = null,
 ) {
     fun toDomain() = PlayIntegrityResult(
         basicIntegrity = basicIntegrity,
@@ -64,7 +64,7 @@ internal data class IntegrityVerificationResponse(
         appLicensingVerdict = appLicensingVerdict,
         deviceRecognitionVerdicts = deviceRecognitionVerdicts,
         playProtectVerdict = playProtectVerdict,
-        verifiedAtEpochMs = verifiedAtEpochMs
+        verifiedAtEpochMs = verifiedAtEpochMs,
     )
 }
 

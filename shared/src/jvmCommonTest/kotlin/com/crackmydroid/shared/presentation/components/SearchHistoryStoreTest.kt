@@ -27,7 +27,7 @@ class SearchHistoryStoreTest {
 
         assertEquals(
             listOf("Second Query", "demo query"),
-            SearchHistoryStore.suggestions("apps")
+            SearchHistoryStore.suggestions("apps"),
         )
     }
 

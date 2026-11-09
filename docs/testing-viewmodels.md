@@ -341,13 +341,13 @@ vm.toggleFavorite(deepLink)                    // attività preferita
 ```kotlin
 val report = vm.buildReport("com.demo.app")
 
-assertEquals(3,                          report.totalActivities)
-assertEquals(1,                          report.shellLaunchableCount)
-assertEquals(1,                          report.guidedLaunchCount)
-assertEquals(1,                          report.dumpOnlyCount)
-assertEquals(2,                          report.riskyActivitiesCount)
-assertEquals(1,                          report.favoriteActivitiesCount)
-assertTrue(                              report.packageFavorite)
+assertEquals(3, report.totalActivities)
+assertEquals(1, report.shellLaunchableCount)
+assertEquals(1, report.guidedLaunchCount)
+assertEquals(1, report.dumpOnlyCount)
+assertEquals(2, report.riskyActivitiesCount)
+assertEquals(1, report.favoriteActivitiesCount)
+assertTrue(report.packageFavorite)
 assertEquals(ActivityIntentRiskLevel.High, report.highestRiskLevel)
 ```
 

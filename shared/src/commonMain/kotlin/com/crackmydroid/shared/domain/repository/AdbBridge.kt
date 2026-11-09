@@ -9,7 +9,7 @@ interface AdbBridge {
         serial: String,
         command: String,
         configuredPath: String? = null,
-        asRoot: Boolean = false
+        asRoot: Boolean = false,
     ): Result<String>
 
     suspend fun shellWithTimeout(
@@ -17,19 +17,19 @@ interface AdbBridge {
         command: String,
         configuredPath: String? = null,
         asRoot: Boolean = false,
-        timeoutMs: Long = 60_000L
+        timeoutMs: Long = 60_000L,
     ): Result<String> = shell(serial, command, configuredPath, asRoot)
 
     suspend fun pull(
         serial: String,
         remotePath: String,
         localPath: String,
-        configuredPath: String? = null
+        configuredPath: String? = null,
     ): Result<String>
 
     suspend fun logcat(
         serial: String,
         configuredPath: String? = null,
-        lines: Int = 1500
+        lines: Int = 1500,
     ): Result<List<String>>
 }

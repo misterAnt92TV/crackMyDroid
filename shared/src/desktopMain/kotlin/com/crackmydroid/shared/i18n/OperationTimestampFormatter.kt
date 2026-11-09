@@ -10,7 +10,7 @@ actual fun formatOperationTimestamp(timestamp: Long, languageCode: String): Stri
         DateFormat.getDateTimeInstance(
             DateFormat.SHORT,
             DateFormat.SHORT,
-            Locale.forLanguageTag(languageCode)
+            Locale.forLanguageTag(languageCode),
         ).format(Date(timestamp))
     }.getOrDefault("—")
 }

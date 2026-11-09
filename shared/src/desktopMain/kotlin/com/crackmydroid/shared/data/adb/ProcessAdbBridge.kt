@@ -28,7 +28,7 @@ class ProcessAdbBridge : AdbBridge {
         serial: String,
         command: String,
         configuredPath: String?,
-        asRoot: Boolean
+        asRoot: Boolean,
     ): Result<String> = shellWithTimeout(serial, command, configuredPath, asRoot)
 
     override suspend fun shellWithTimeout(
@@ -36,7 +36,7 @@ class ProcessAdbBridge : AdbBridge {
         command: String,
         configuredPath: String?,
         asRoot: Boolean,
-        timeoutMs: Long
+        timeoutMs: Long,
     ): Result<String> = runSuspendCatching {
         val adb = resolveBinaryPath(configuredPath)
         val shellArgs = if (asRoot) {
@@ -53,7 +53,7 @@ class ProcessAdbBridge : AdbBridge {
         serial: String,
         remotePath: String,
         localPath: String,
-        configuredPath: String?
+        configuredPath: String?,
     ): Result<String> = runSuspendCatching {
         val adb = resolveBinaryPath(configuredPath)
         File(localPath).parentFile?.mkdirs()
@@ -65,7 +65,7 @@ class ProcessAdbBridge : AdbBridge {
     override suspend fun logcat(
         serial: String,
         configuredPath: String?,
-        lines: Int
+        lines: Int,
     ): Result<List<String>> = runSuspendCatching {
         val adb = resolveBinaryPath(configuredPath)
         val output = runCommand(
@@ -78,8 +78,8 @@ class ProcessAdbBridge : AdbBridge {
                 "-t",
                 lines.toString(),
                 "-v",
-                "time"
-            )
+                "time",
+            ),
         )
         ensureSuccess(output, "Lettura logcat fallita")
         output.stdout.lines().filter { it.isNotBlank() }
@@ -122,7 +122,7 @@ class ProcessAdbBridge : AdbBridge {
                     CommandOutput(
                         exitCode = process.exitValue(),
                         stdout = stdout.await().trim(),
-                        stderr = stderr.await().trim()
+                        stderr = stderr.await().trim(),
                     )
                 } finally {
                     if (process.isAlive) process.destroyForcibly()
@@ -139,6 +139,6 @@ class ProcessAdbBridge : AdbBridge {
     private data class CommandOutput(
         val exitCode: Int,
         val stdout: String,
-        val stderr: String
+        val stderr: String,
     )
 }

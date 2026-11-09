@@ -1,9 +1,9 @@
 package com.crackmydroid.shared.data.adb
 
+import com.crackmydroid.shared.domain.model.InstallSourceClassification
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
-import com.crackmydroid.shared.domain.model.InstallSourceClassification
 
 class AdbParsersTest {
     @Test
@@ -42,7 +42,7 @@ class AdbParsersTest {
     @Test
     fun parsesReportedGooglePlayInstaller() {
         val apps = AdbParsers.parseInstalledApps(
-            "package:/data/app/demo/base.apk=com.example.demo installer=com.android.vending"
+            "package:/data/app/demo/base.apk=com.example.demo installer=com.android.vending",
         )
 
         assertEquals(InstallSourceClassification.GOOGLE_PLAY, apps.single().installSource.classification)
@@ -93,7 +93,7 @@ class AdbParsersTest {
 
         assertEquals(
             listOf("android.permission.CAMERA", "android.permission.INTERNET"),
-            permissions
+            permissions,
         )
         assertEquals(3, activities.size)
         assertEquals("com.example.demo.MainActivity", activities[0].activityName)
@@ -105,7 +105,7 @@ class AdbParsersTest {
         assertEquals(false, activities[1].launchableViaShell)
         assertEquals(
             "action android.intent.action.VIEW • scheme demo • authority host.example • type image/* • path /details",
-            activities[1].launchContextHint
+            activities[1].launchContextHint,
         )
         assertTrue(activities[1].launchabilityReason?.contains("intent contestualizzato") == true)
         assertEquals("android.intent.action.VIEW", activities[1].launchIntentAction)

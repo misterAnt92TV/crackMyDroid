@@ -31,11 +31,11 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.crackmydroid.shared.i18n.LocalStrings
 import com.crackmydroid.shared.presentation.components.card.AppCard
 import com.crackmydroid.shared.presentation.components.text.AppText
 import com.crackmydroid.shared.presentation.preview.AppComponentPreviews
 import com.crackmydroid.shared.presentation.preview.ComponentPreviewContainer
-import com.crackmydroid.shared.i18n.LocalStrings
 
 @Composable
 fun AppAccordion(
@@ -54,7 +54,7 @@ fun AppAccordion(
     headerVerticalPadding: androidx.compose.ui.unit.Dp = 2.dp,
     headerMinHeight: androidx.compose.ui.unit.Dp = 0.dp,
     actionsBelowHeader: Boolean = false,
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
     val prefs = LocalAccessibilityPrefs.current
     val reduceMotion = LocalAccessibilityPrefs.current.reduceMotion
@@ -63,7 +63,7 @@ fun AppAccordion(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .heightIn(min = headerMinHeight)
+                .heightIn(min = headerMinHeight),
         ) {
             Row(
                 modifier = Modifier
@@ -79,21 +79,21 @@ fun AppAccordion(
                     }
                     .padding(vertical = headerVerticalPadding),
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
-                verticalAlignment = if (prefs.largeText) Alignment.Top else Alignment.CenterVertically
+                verticalAlignment = if (prefs.largeText) Alignment.Top else Alignment.CenterVertically,
             ) {
                 leading?.let {
                     Box(modifier = Modifier.size(44.dp), contentAlignment = Alignment.Center) { it() }
                 }
                 Column(
                     modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(2.dp)
+                    verticalArrangement = Arrangement.spacedBy(2.dp),
                 ) {
                     title?.let {
                         AppText(
                             it,
                             style = MaterialTheme.typography.titleMedium,
                             maxLines = titleMaxLines ?: if (prefs.largeText) 3 else 1,
-                            overflow = textOverflow
+                            overflow = textOverflow,
                         )
                     }
                     subtitle?.let {
@@ -102,7 +102,7 @@ fun AppAccordion(
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             maxLines = subtitleMaxLines ?: if (prefs.largeText) 3 else 1,
-                            overflow = textOverflow
+                            overflow = textOverflow,
                         )
                     }
                     if (actionsBelowHeader) meta?.let {
@@ -111,7 +111,7 @@ fun AppAccordion(
                             style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.primary,
                             maxLines = 2,
-                            overflow = textOverflow
+                            overflow = textOverflow,
                         )
                     }
                 }
@@ -121,13 +121,13 @@ fun AppAccordion(
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.primary,
                         maxLines = if (prefs.largeText || actionsBelowHeader) 2 else 1,
-                        overflow = textOverflow
+                        overflow = textOverflow,
                     )
                 }
                 if (!actionsBelowHeader) {
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(4.dp),
-                        verticalAlignment = if (prefs.largeText) Alignment.Top else Alignment.CenterVertically
+                        verticalAlignment = if (prefs.largeText) Alignment.Top else Alignment.CenterVertically,
                     ) {
                         actions()
                     }
@@ -135,14 +135,14 @@ fun AppAccordion(
                 Icon(
                     imageVector = if (expanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary
+                    tint = MaterialTheme.colorScheme.primary,
                 )
             }
             if (actionsBelowHeader) {
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
                     horizontalArrangement = Arrangement.End,
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     actions()
                 }
@@ -162,7 +162,7 @@ fun AppAccordion(
             AnimatedVisibility(
                 visible = expanded,
                 enter = fadeIn(animationSpec = androidx.compose.animation.core.tween(220)) + slideInVertically { it / 8 },
-                exit = fadeOut()
+                exit = fadeOut(),
             ) { accordionContent() }
         }
     }
@@ -185,22 +185,23 @@ private fun AppAccordionPreview() = ComponentPreviewContainer {
             headerMinHeight = 88.dp,
             actionsBelowHeader = true,
             actions = { AppText("⋮") },
-            leading = { Icon(Icons.Filled.Info, contentDescription = null) }
-        ) { AppText("Contenuto non visibile") }}
-        AppAccordion(
-            title = "com.example.security.long.application.label",
-            subtitle = "com.example.security.long.application.package.name",
-            meta = "3 risultati",
-            expanded = true,
-            onToggle = {},
-            titleMaxLines = 3,
-            subtitleMaxLines = 3,
-            textOverflow = TextOverflow.Clip,
-            headerVerticalPadding = 10.dp,
-            headerMinHeight = 88.dp,
-            actionsBelowHeader = true,
-            actions = { AppText("⋮") },
-            leading = { Icon(Icons.Filled.Info, contentDescription = null) }
-        ) { AppText("Il dispositivo non espone backup, debug o permessi inattesi.") }
+            leading = { Icon(Icons.Filled.Info, contentDescription = null) },
+        ) { AppText("Contenuto non visibile") }
+    }
+    AppAccordion(
+        title = "com.example.security.long.application.label",
+        subtitle = "com.example.security.long.application.package.name",
+        meta = "3 risultati",
+        expanded = true,
+        onToggle = {},
+        titleMaxLines = 3,
+        subtitleMaxLines = 3,
+        textOverflow = TextOverflow.Clip,
+        headerVerticalPadding = 10.dp,
+        headerMinHeight = 88.dp,
+        actionsBelowHeader = true,
+        actions = { AppText("⋮") },
+        leading = { Icon(Icons.Filled.Info, contentDescription = null) },
+    ) { AppText("Il dispositivo non espone backup, debug o permessi inattesi.") }
 
 }

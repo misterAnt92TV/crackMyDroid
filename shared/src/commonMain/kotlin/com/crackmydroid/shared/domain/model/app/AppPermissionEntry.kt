@@ -6,5 +6,5 @@ import kotlinx.serialization.Serializable
 data class AppPermissionEntry(
     val appLabel: String,
     val packageName: String,
-    val permissions: List<String>
+    val permissions: List<String>,
 )

@@ -24,6 +24,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.crackmydroid.shared.i18n.LocalStrings
+import com.crackmydroid.shared.i18n.format
 import com.crackmydroid.shared.presentation.components.card.AppCard
 import com.crackmydroid.shared.presentation.components.text.AppText
 import com.crackmydroid.shared.presentation.preview.AppComponentPreviews
@@ -36,7 +37,7 @@ fun LastOperationItemComponent(
     item: LastOperationItem,
     actionContentDescription: String,
     onAction: (String) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val statusColor = when (item.outcome) {
         OperationOutcome.Success -> MaterialTheme.colorScheme.secondary
@@ -46,12 +47,12 @@ fun LastOperationItemComponent(
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalAlignment = Alignment.Top
+            verticalAlignment = Alignment.Top,
         ) {
             Box(
                 modifier = Modifier.size(36.dp).clip(CircleShape)
                     .background(statusColor.copy(alpha = 0.16f)),
-                contentAlignment = Alignment.Center
+                contentAlignment = Alignment.Center,
             ) {
                 Icon(
                     imageVector = if (item.outcome == OperationOutcome.Success) {
@@ -60,12 +61,12 @@ fun LastOperationItemComponent(
                         Icons.Filled.Error
                     },
                     contentDescription = null,
-                    tint = statusColor
+                    tint = statusColor,
                 )
             }
             Column(
                 modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(2.dp)
+                verticalArrangement = Arrangement.spacedBy(2.dp),
             ) {
                 AppText(item.description, style = MaterialTheme.typography.bodyMedium)
                 item.result?.takeIf(String::isNotEmpty)?.let { result ->
@@ -74,20 +75,20 @@ fun LastOperationItemComponent(
                             LocalStrings.current.operationResultLabel,
                             style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.SemiBold,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                         Spacer(Modifier.width(4.dp))
                         AppText(
                             result,
                             style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
                 }
                 AppText(
                     item.timestamp,
                     style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
             IconButton(onClick = { onAction(item.operationId) }, modifier = Modifier.size(48.dp)) {
@@ -95,7 +96,7 @@ fun LastOperationItemComponent(
                     imageVector = Icons.Filled.Close,
                     contentDescription = actionContentDescription.format(item.description),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(16.dp)
+                    modifier = Modifier.size(16.dp),
                 )
             }
         }
@@ -111,10 +112,10 @@ private fun LastOperationItemSuccessPreview() = ComponentPreviewContainer {
             description = "Scansione APK completata",
             result = "42 applicazioni",
             timestamp = "Oggi, 10:30",
-            outcome = OperationOutcome.Success
+            outcome = OperationOutcome.Success,
         ),
         actionContentDescription = LocalStrings.current.hideRecentOperationContentDescription,
-        onAction = {}
+        onAction = {},
     )
 }
 
@@ -127,10 +128,10 @@ private fun LastOperationItemFailurePreview() = ComponentPreviewContainer {
             description = "Avvio activity",
             result = "Activity non esportata",
             timestamp = "Ieri, 18:05",
-            outcome = OperationOutcome.Failure
+            outcome = OperationOutcome.Failure,
         ),
         actionContentDescription = LocalStrings.current.hideRecentOperationContentDescription,
-        onAction = {}
+        onAction = {},
     )
 }
 
@@ -143,9 +144,9 @@ private fun LastOperationItemWithoutResultPreview() = ComponentPreviewContainer 
             description = "Aggiornamento completato",
             result = "",
             timestamp = "Adesso",
-            outcome = OperationOutcome.Success
+            outcome = OperationOutcome.Success,
         ),
         actionContentDescription = LocalStrings.current.hideRecentOperationContentDescription,
-        onAction = {}
+        onAction = {},
     )
 }

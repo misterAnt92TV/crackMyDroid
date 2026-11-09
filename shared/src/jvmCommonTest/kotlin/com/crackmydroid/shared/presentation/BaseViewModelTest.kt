@@ -2,10 +2,10 @@ package com.crackmydroid.shared.presentation
 
 import com.crackmydroid.shared.util.AppDispatchers
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -21,7 +21,7 @@ class BaseViewModelTest {
             object : AppDispatchers {
                 override val main: CoroutineDispatcher = dispatcher
                 override val default: CoroutineDispatcher = dispatcher
-            }
+            },
         )
         var cleanupRan = false
         val job = viewModel.launch {

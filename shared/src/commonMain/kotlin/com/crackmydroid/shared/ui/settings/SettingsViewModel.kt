@@ -1,9 +1,9 @@
 package com.crackmydroid.shared.ui.settings
 
 import com.crackmydroid.shared.AppLogger
+import com.crackmydroid.shared.domain.model.ExportFormat
 import com.crackmydroid.shared.domain.model.app.AppLanguage
 import com.crackmydroid.shared.domain.model.app.AppTheme
-import com.crackmydroid.shared.domain.model.ExportFormat
 import com.crackmydroid.shared.domain.usecase.settings.GetExportFormatUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetFeatureHintsEnabledUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetHighContrastUseCase
@@ -51,7 +51,7 @@ class SettingsViewModel(
     private val getIntroSeen: GetIntroSeenUseCase,
     private val setIntroSeen: SetIntroSeenUseCase,
     private val getLanguage: GetLanguageUseCase,
-    private val setLanguage: SetLanguageUseCase
+    private val setLanguage: SetLanguageUseCase,
 ) : BaseViewModel() {
     private val _state = MutableStateFlow(SettingsState())
     val state: StateFlow<SettingsState> = _state
@@ -74,7 +74,7 @@ class SettingsViewModel(
                 largeText = getLargeText().getOrThrow(),
                 suggestionsEnabled = getSuggestionsEnabled().getOrThrow(),
                 featureHintsEnabled = getFeatureHintsEnabled().getOrThrow(),
-                introSeen = getIntroSeen().getOrThrow()
+                introSeen = getIntroSeen().getOrThrow(),
             )
         }.onSuccess { loaded ->
             _state.update {
@@ -89,7 +89,7 @@ class SettingsViewModel(
                     suggestionsEnabled = loaded.suggestionsEnabled,
                     featureHintsEnabled = loaded.featureHintsEnabled,
                     showIntroOnLaunch = !loaded.introSeen,
-                    loading = false
+                    loading = false,
                 )
             }
         }.onFailure { err ->
@@ -117,25 +117,31 @@ class SettingsViewModel(
     }
 
     fun setHighContrast(enabled: Boolean) {
-        persistSetting(persist = {
-            setHighContrast.invoke(enabled)
-        }) {
+        persistSetting(
+            persist = {
+                setHighContrast.invoke(enabled)
+            },
+        ) {
             _state.update { it.copy(highContrast = enabled, error = null) }
         }
     }
 
     fun setReduceMotion(enabled: Boolean) {
-        persistSetting(persist = {
-            setReduceMotion.invoke(enabled)
-        }) {
+        persistSetting(
+            persist = {
+                setReduceMotion.invoke(enabled)
+            },
+        ) {
             _state.update { it.copy(reduceMotion = enabled, error = null) }
         }
     }
 
     fun setLargeText(enabled: Boolean) {
-        persistSetting(persist = {
-            setLargeText.invoke(enabled)
-        }) {
+        persistSetting(
+            persist = {
+                setLargeText.invoke(enabled)
+            },
+        ) {
             _state.update { it.copy(largeText = enabled, error = null) }
         }
     }
@@ -145,27 +151,33 @@ class SettingsViewModel(
     }
 
     fun setSuggestionsEnabled(enabled: Boolean) {
-        persistSetting(persist = {
-            setSuggestionsEnabled.invoke(enabled).onSuccess {
-                com.crackmydroid.shared.presentation.components.SearchHistoryStore.setEnabled(enabled)
-            }
-        }) {
+        persistSetting(
+            persist = {
+                setSuggestionsEnabled.invoke(enabled).onSuccess {
+                    com.crackmydroid.shared.presentation.components.SearchHistoryStore.setEnabled(enabled)
+                }
+            },
+        ) {
             _state.update { it.copy(suggestionsEnabled = enabled, error = null) }
         }
     }
 
     fun setFeatureHintsEnabled(enabled: Boolean) {
-        persistSetting(persist = {
-            setFeatureHintsEnabled.invoke(enabled)
-        }) {
+        persistSetting(
+            persist = {
+                setFeatureHintsEnabled.invoke(enabled)
+            },
+        ) {
             _state.update { it.copy(featureHintsEnabled = enabled, error = null) }
         }
     }
 
     fun setShowIntroOnLaunch(enabled: Boolean) {
-        persistSetting(persist = {
-            setIntroSeen(!enabled)
-        }) {
+        persistSetting(
+            persist = {
+                setIntroSeen(!enabled)
+            },
+        ) {
             _state.update { it.copy(showIntroOnLaunch = enabled, error = null) }
         }
     }
@@ -211,5 +223,5 @@ private data class LoadedSettings(
     val largeText: Boolean,
     val suggestionsEnabled: Boolean,
     val featureHintsEnabled: Boolean,
-    val introSeen: Boolean
+    val introSeen: Boolean,
 )

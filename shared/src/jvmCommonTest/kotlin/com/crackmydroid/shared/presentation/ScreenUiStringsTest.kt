@@ -28,7 +28,7 @@ class ScreenUiStringsTest {
         assertEquals("Exit code: 1", strings.exitCode.format(1))
         assertNotEquals(
             strings.searchFilters,
-            ScreenUiStrings.from(stringsFor("en")).searchFilters
+            ScreenUiStrings.from(stringsFor("en")).searchFilters,
         )
     }
 }

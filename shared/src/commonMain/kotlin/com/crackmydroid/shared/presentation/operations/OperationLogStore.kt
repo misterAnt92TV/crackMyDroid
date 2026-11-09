@@ -33,7 +33,7 @@ class InMemoryOperationLogPersistence : OperationLogPersistence {
 
 class DefaultOperationLogRepository(
     private val persistence: OperationLogPersistence,
-    private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default),
 ) : OperationLogRepository {
     private val maxEntries = 50
     private val persistenceMutex = Mutex()
@@ -62,7 +62,7 @@ class DefaultOperationLogRepository(
                 details = details,
                 timestamp = currentTimeMillis(),
                 operationId = newOperationId(),
-            )
+            ),
         )
     }
 
@@ -76,7 +76,7 @@ class DefaultOperationLogRepository(
                 event = event,
                 legacyDescription = null,
                 operationId = newOperationId(),
-            )
+            ),
         )
     }
 

@@ -7,7 +7,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 
 open class BaseViewModel(
-    protected val dispatchers: AppDispatchers = DefaultAppDispatchers
+    protected val dispatchers: AppDispatchers = DefaultAppDispatchers,
 ) {
     private val job = SupervisorJob()
     protected val scope = CoroutineScope(job + dispatchers.main)

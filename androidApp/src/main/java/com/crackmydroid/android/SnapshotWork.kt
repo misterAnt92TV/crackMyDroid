@@ -10,10 +10,10 @@ import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import com.crackmydroid.shared.AppLogger
 import com.crackmydroid.shared.data.snapshot.AndroidDeviceSnapshotCoordinator
-import java.io.IOException
-import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.CancellationException
 import org.koin.core.context.GlobalContext
+import java.io.IOException
+import java.util.concurrent.TimeUnit
 
 internal object SnapshotWorkScheduler {
     private const val UNIQUE_WORK_NAME = "android-device-snapshot"
@@ -28,7 +28,7 @@ internal object SnapshotWorkScheduler {
         WorkManager.getInstance(context.applicationContext).enqueueUniqueWork(
             UNIQUE_WORK_NAME,
             ExistingWorkPolicy.KEEP,
-            request
+            request,
         )
     }
 
@@ -40,7 +40,7 @@ internal object SnapshotWorkScheduler {
 
 class AndroidSnapshotWorker(
     appContext: Context,
-    workerParameters: WorkerParameters
+    workerParameters: WorkerParameters,
 ) : CoroutineWorker(appContext, workerParameters) {
     override suspend fun doWork(): Result = when (
         executeSnapshot {

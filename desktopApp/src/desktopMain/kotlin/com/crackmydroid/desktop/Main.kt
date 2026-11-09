@@ -8,7 +8,7 @@ fun main() = application {
     initKoin()
     Window(
         onCloseRequest = ::exitApplication,
-        title = "CrackMyDroid Desktop"
+        title = "CrackMyDroid Desktop",
     ) {
         DesktopCrackMyDroidApp()
     }

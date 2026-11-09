@@ -16,7 +16,7 @@ class PermissionsRepositoryDesktop(
     adbBridge: AdbBridge,
     sessionController: DeviceSessionController,
     private val cache: DesktopScanCache,
-    private val packageManager: RemotePackageManager
+    private val packageManager: RemotePackageManager,
 ) : DesktopAdbRepositorySupport(adbBridge, sessionController), PermissionsRepository {
     override suspend fun listAppPermissions(): List<AppPermissionEntry> =
         withContext(Dispatchers.IO) {
@@ -28,7 +28,7 @@ class PermissionsRepositoryDesktop(
                 AppPermissionEntry(
                     appLabel = app.appLabel,
                     packageName = app.packageName,
-                    permissions = AdbParsers.parseRequestedPermissions(dump)
+                    permissions = AdbParsers.parseRequestedPermissions(dump),
                 )
             }.sortedBy { it.appLabel.lowercase() }
             cache.permissions = fresh
@@ -37,7 +37,7 @@ class PermissionsRepositoryDesktop(
 
     override suspend fun listAppPermissionsPaginated(
         offset: Int,
-        limit: Int
+        limit: Int,
     ): List<AppPermissionEntry> =
         withContext(Dispatchers.IO) {
             val all = listAppPermissions()

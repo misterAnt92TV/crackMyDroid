@@ -8,14 +8,13 @@ import com.crackmydroid.shared.domain.model.root.RootCheck
 import com.crackmydroid.shared.domain.model.root.RootCheckId
 import com.crackmydroid.shared.domain.model.root.RootCheckMode
 import com.crackmydroid.shared.domain.model.root.RootCheckOutcome
-import com.crackmydroid.shared.domain.repository.RootCheckRepository
 import com.crackmydroid.shared.domain.repository.IntegrityVerificationRepository
+import com.crackmydroid.shared.domain.repository.RootCheckRepository
 import com.crackmydroid.shared.i18n.platformLanguage
 import com.crackmydroid.shared.i18n.stringsFor
 import com.scottyab.rootbeer.RootBeer
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -25,19 +24,19 @@ import kotlin.coroutines.resumeWithException
 
 class RootCheckRepositoryAndroid(
     private val context: Context,
-    private val integrityVerificationRepository: IntegrityVerificationRepository
+    private val integrityVerificationRepository: IntegrityVerificationRepository,
 ) : RootCheckRepository {
     private data class RootSignal(
         val label: String,
         val detected: Boolean,
-        val detail: String
+        val detail: String,
     )
 
     private data class ShellCommandOutput(
         val success: Boolean,
         val stdout: String,
         val stderr: String,
-        val exitCode: Int?
+        val exitCode: Int?,
     )
 
     override suspend fun checkRoot(mode: RootCheckMode): RootStatus = withContext(Dispatchers.Default) {
@@ -51,7 +50,7 @@ class RootCheckRepositoryAndroid(
             "/sbin/su",
             "/su/bin/su",
             "/system/app/Superuser.apk",
-            "/system/priv-app/Superuser.apk"
+            "/system/priv-app/Superuser.apk",
         )
         val suBinaryFound = suPaths.any { path -> File(path).exists() }
         val whichSu = runShellCommand("which su")
@@ -61,8 +60,8 @@ class RootCheckRepositoryAndroid(
             if (suBinaryFound || whichSuDetected) RootCheckOutcome.DETECTED else RootCheckOutcome.NOT_DETECTED,
             listOf(
                 if (suBinaryFound) "${suPaths.count { File(it).exists() }} path match" else "nessun path noto",
-                whichSu.stdout.lineSequence().firstOrNull().orEmpty()
-            ).filter { it.isNotBlank() }.joinToString("; ")
+                whichSu.stdout.lineSequence().firstOrNull().orEmpty(),
+            ).filter { it.isNotBlank() }.joinToString("; "),
         )
 
         val magiskPaths = listOf(
@@ -70,13 +69,13 @@ class RootCheckRepositoryAndroid(
             "/data/adb/magisk",
             "/cache/.disable_magisk",
             "/data/adb/ksu",
-            "/data/adb/modules"
+            "/data/adb/modules",
         )
         val magiskFound = magiskPaths.any { path -> File(path).exists() }
         checks += RootCheck(
             RootCheckId.MAGISK_TRACES,
             if (magiskFound) RootCheckOutcome.DETECTED else RootCheckOutcome.NOT_DETECTED,
-            "${magiskPaths.count { File(it).exists() }} path match"
+            "${magiskPaths.count { File(it).exists() }} path match",
         )
 
         val rootManagers = listOf(
@@ -87,13 +86,13 @@ class RootCheckRepositoryAndroid(
             "com.noshufou.android.su",
             "com.kingroot.kinguser",
             "com.kingo.root",
-            "me.weishu.kernelsu"
+            "me.weishu.kernelsu",
         )
         val detectedManagers = rootManagers.filter { pkg -> isPackageInstalled(pkg) }
         checks += RootCheck(
             RootCheckId.ROOT_MANAGER,
             if (detectedManagers.isNotEmpty()) RootCheckOutcome.DETECTED else RootCheckOutcome.NOT_DETECTED,
-            detectedManagers.joinToString(", ")
+            detectedManagers.joinToString(", "),
         )
 
         val busyBoxDetected = runCatching { rootBeer.checkForBusyBoxBinary() }.getOrDefault(false) ||
@@ -102,7 +101,7 @@ class RootCheckRepositoryAndroid(
         checks += RootCheck(
             RootCheckId.BUSYBOX,
             if (busyBoxDetected) RootCheckOutcome.DETECTED else RootCheckOutcome.NOT_DETECTED,
-            if (busyBoxDetected) "${busyBoxList.stdout.lineSequence().count { it.isNotBlank() }} applet lines" else ""
+            if (busyBoxDetected) "${busyBoxList.stdout.lineSequence().count { it.isNotBlank() }} applet lines" else "",
         )
 
         val sudo = runShellCommand("command -v sudo")
@@ -116,7 +115,7 @@ class RootCheckRepositoryAndroid(
                 sudo.success && sudo.stdout.isNotBlank() -> RootCheckOutcome.DENIED
                 else -> RootCheckOutcome.NOT_DETECTED
             },
-            listOf(sudo.stdout, sudoProbe?.stderr.orEmpty()).filter { it.isNotBlank() }.joinToString(" ")
+            listOf(sudo.stdout, sudoProbe?.stderr.orEmpty()).filter { it.isNotBlank() }.joinToString(" "),
         )
 
         if (mode == RootCheckMode.PRIVILEGE_ACCESS) {
@@ -132,7 +131,7 @@ class RootCheckRepositoryAndroid(
             checks += RootCheck(
                 RootCheckId.ROOT_ACCESS,
                 RootCheckOutcome.UNAVAILABLE,
-                "prova esplicita non eseguita"
+                "prova esplicita non eseguita",
             )
         }
 
@@ -142,21 +141,21 @@ class RootCheckRepositoryAndroid(
         hardeningSignals += RootSignal(
             label = "Dangerous props",
             detected = dangerousProps,
-            detail = if (dangerousProps) "Proprieta sistema sospette rilevate." else "Nessuna proprieta sospetta rilevata."
+            detail = if (dangerousProps) "Proprieta sistema sospette rilevate." else "Nessuna proprieta sospetta rilevata.",
         )
 
         val rwPaths = runCatching { rootBeer.checkForRWPaths() }.getOrDefault(false)
         hardeningSignals += RootSignal(
             label = "RW system paths",
             detected = rwPaths,
-            detail = if (rwPaths) "Path di sistema montati RW." else "Path di sistema non RW (o non rilevati)."
+            detail = if (rwPaths) "Path di sistema montati RW." else "Path di sistema non RW (o non rilevati).",
         )
 
         val rootBeerAggregate = runCatching { rootBeer.isRooted }.getOrDefault(false)
         checks += RootCheck(
             RootCheckId.ROOTBEER,
             if (rootBeerAggregate) RootCheckOutcome.DETECTED else RootCheckOutcome.NOT_DETECTED,
-            "RootBeer aggregate"
+            "RootBeer aggregate",
         )
         hardeningSignals += RootSignal("Build test-keys", testKeys, "test-keys=$testKeys")
 
@@ -169,7 +168,7 @@ class RootCheckRepositoryAndroid(
                 "1" -> "Enforcing"
                 "0" -> "Permissive"
                 else -> "Stato non disponibile"
-            }
+            },
         )
 
         val adbEnabled =
@@ -177,18 +176,18 @@ class RootCheckRepositoryAndroid(
         hardeningSignals += RootSignal(
             label = "ADB debugging",
             detected = adbEnabled,
-            detail = if (adbEnabled) "Attivo" else "Disattivo"
+            detail = if (adbEnabled) "Attivo" else "Disattivo",
         )
 
         val developerOptionsEnabled = Settings.Global.getInt(
             context.contentResolver,
             Settings.Global.DEVELOPMENT_SETTINGS_ENABLED,
-            0
+            0,
         ) == 1
         hardeningSignals += RootSignal(
             label = "Developer options",
             detected = developerOptionsEnabled,
-            detail = if (developerOptionsEnabled) "Attive" else "Disattivate"
+            detail = if (developerOptionsEnabled) "Attive" else "Disattivate",
         )
 
         val securityPatch = Build.VERSION.SECURITY_PATCH ?: "unknown"
@@ -202,7 +201,7 @@ class RootCheckRepositoryAndroid(
                 "Patch vecchia/non disponibile ($securityPatch)."
             } else {
                 "Patch dichiarata: $securityPatch"
-            }
+            },
         )
 
         val rooted = checks.any { it.id == RootCheckId.ROOT_ACCESS && it.outcome == RootCheckOutcome.DETECTED }
@@ -247,7 +246,7 @@ class RootCheckRepositoryAndroid(
                 com.crackmydroid.shared.domain.model.PlayIntegrityResult(
                     basicIntegrity = null,
                     deviceIntegrity = null,
-                    details = "Play Integrity error: ${error.message}"
+                    details = "Play Integrity error: ${error.message}",
                 )
             }
         }
@@ -285,7 +284,7 @@ class RootCheckRepositoryAndroid(
                     success = false,
                     stdout = "",
                     stderr = "timeout",
-                    exitCode = null
+                    exitCode = null,
                 )
             }
 
@@ -295,14 +294,14 @@ class RootCheckRepositoryAndroid(
                 success = exitCode == 0,
                 stdout = stdout,
                 stderr = stderr,
-                exitCode = exitCode
+                exitCode = exitCode,
             )
         }.getOrElse { err ->
             ShellCommandOutput(
                 success = false,
                 stdout = "",
                 stderr = err.message ?: "errore shell",
-                exitCode = null
+                exitCode = null,
             )
         }
     }

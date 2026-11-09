@@ -14,30 +14,30 @@ import kotlinx.coroutines.withContext
 class ShellCommandRepositoryDesktop(
     adbBridge: AdbBridge,
     sessionController: DeviceSessionController,
-    private val cache: DesktopScanCache
+    private val cache: DesktopScanCache,
 ) : DesktopAdbRepositorySupport(adbBridge, sessionController), ShellCommandRepository {
     private val commands = listOf(
         ShellCommand(
             "Riavvia",
             "reboot",
             requiresRoot = true,
-            confirmation = "Riavviare il dispositivo?"
+            confirmation = "Riavviare il dispositivo?",
         ),
         ShellCommand(
             "Force stop SystemUI",
             "am force-stop com.android.systemui",
             requiresRoot = true,
-            confirmation = "Forzare l'arresto di SystemUI?"
+            confirmation = "Forzare l'arresto di SystemUI?",
         ),
         ShellCommand(
             "Toggle animazioni 0",
             "settings put global window_animation_scale 0; settings put global transition_animation_scale 0; settings put global animator_duration_scale 0",
-            true
+            true,
         ),
         ShellCommand(
             "Toggle animazioni 1",
             "settings put global window_animation_scale 1; settings put global transition_animation_scale 1; settings put global animator_duration_scale 1",
-            true
+            true,
         ),
         ShellCommand("Attiva debug USB", "settings put global adb_enabled 1", true),
         ShellCommand("Disattiva debug USB", "settings put global adb_enabled 0", true),
@@ -47,9 +47,9 @@ class ShellCommandRepositoryDesktop(
             "Riavvia SystemUI",
             "pkill -TERM com.android.systemui",
             true,
-            "Riavviare SystemUI?"
+            "Riavviare SystemUI?",
         ),
-        ShellCommand("Forza luminosita 50%", "settings put system screen_brightness 128", true)
+        ShellCommand("Forza luminosita 50%", "settings put system screen_brightness 128", true),
     )
 
     override suspend fun listCommands(): List<ShellCommand> {
@@ -59,7 +59,7 @@ class ShellCommandRepositoryDesktop(
             if (!command.requiresRoot) return@map command
             command.copy(
                 supported = false,
-                unsupportedReason = "Il device selezionato non espone root via su, quindi questo comando non e disponibile in modalita adb-only."
+                unsupportedReason = "Il device selezionato non espone root via su, quindi questo comando non e disponibile in modalita adb-only.",
             )
         }
     }
@@ -72,7 +72,7 @@ class ShellCommandRepositoryDesktop(
                     stdout = "",
                     stderr = command.unsupportedReason
                         ?: "Comando non supportato sul device selezionato",
-                    code = 126
+                    code = 126,
                 )
             }
             runSuspendCatching {
@@ -81,14 +81,14 @@ class ShellCommandRepositoryDesktop(
                     success = true,
                     stdout = stdout,
                     stderr = "",
-                    code = 0
+                    code = 0,
                 )
             }.getOrElse { error ->
                 ShellCommandResult(
                     success = false,
                     stdout = "",
                     stderr = error.message ?: "Errore esecuzione comando",
-                    code = -1
+                    code = -1,
                 )
             }
         }

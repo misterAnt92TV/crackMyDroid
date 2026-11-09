@@ -1,6 +1,6 @@
 @file:OptIn(
     ExperimentalFoundationApi::class,
-    ExperimentalComposeUiApi::class
+    ExperimentalComposeUiApi::class,
 )
 
 package com.crackmydroid.shared.ui.permissions.view
@@ -65,10 +65,11 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
-import com.crackmydroid.shared.ui.permissions.PermissionFindingUi
 import com.crackmydroid.shared.domain.model.PermissionRiskLevel
+import com.crackmydroid.shared.domain.model.app.AppPermissionEntry
 import com.crackmydroid.shared.i18n.LocalStrings
 import com.crackmydroid.shared.i18n.ScreenUiStrings
+import com.crackmydroid.shared.i18n.format
 import com.crackmydroid.shared.presentation.components.AppAccordion
 import com.crackmydroid.shared.presentation.components.AppButton
 import com.crackmydroid.shared.presentation.components.ButtonVariant
@@ -80,6 +81,10 @@ import com.crackmydroid.shared.presentation.components.SectionHeader
 import com.crackmydroid.shared.presentation.components.card.AppCard
 import com.crackmydroid.shared.presentation.components.card.ExportDetailsCard
 import com.crackmydroid.shared.presentation.components.text.AppText
+import com.crackmydroid.shared.presentation.preview.AppPreviewEnvironment
+import com.crackmydroid.shared.presentation.preview.AppScreenPreviews
+import com.crackmydroid.shared.ui.permissions.PermissionFindingUi
+import com.crackmydroid.shared.ui.permissions.PermissionsState
 import com.crackmydroid.shared.ui.permissions.PermissionsViewModel
 import com.crackmydroid.shared.ui.screens.screenContentPadding
 import kotlinx.coroutines.launch
@@ -91,11 +96,9 @@ fun PermissionsScreen(
     headerHelp: String,
     onHelp: (String) -> Unit,
     onBack: (() -> Unit)? = null,
-    onMenu: () -> Unit = {}
+    onMenu: () -> Unit = {},
 ) {
     val state by viewModel.state.collectAsState()
-    val strings = LocalStrings.current
-    val screenStrings = ScreenUiStrings.from(strings)
 
     @Suppress("DEPRECATION")
     val clipboard = LocalClipboardManager.current
@@ -111,6 +114,46 @@ fun PermissionsScreen(
             viewModel.dismissReportPreview()
         }
     }
+    PermissionsScreenContent(
+        state = state,
+        padding = padding,
+        headerHelp = headerHelp,
+        onHelp = onHelp,
+        onBack = onBack,
+        onMenu = onMenu,
+        onRefresh = viewModel::refresh,
+        onStartAutoRiskScan = viewModel::startAutoRiskScan,
+        onCancelAutoRiskScan = viewModel::cancelAutoRiskScan,
+        onFilterChange = viewModel::setFilter,
+        onToggleShowOnlyRisky = viewModel::toggleShowOnlyRisky,
+        onSetShowOnlyRisky = viewModel::setShowOnlyRisky,
+        onRequestReportPreview = viewModel::requestReportPreview,
+        onToggleFavorite = viewModel::toggleFavorite,
+        onClearError = viewModel::clearError,
+    )
+}
+
+@Composable
+private fun PermissionsScreenContent(
+    state: PermissionsState,
+    padding: PaddingValues,
+    headerHelp: String,
+    onHelp: (String) -> Unit,
+    onBack: (() -> Unit)?,
+    onMenu: () -> Unit,
+    onRefresh: () -> Unit,
+    onStartAutoRiskScan: () -> Unit,
+    onCancelAutoRiskScan: () -> Unit,
+    onFilterChange: (String, Boolean) -> Unit,
+    onToggleShowOnlyRisky: () -> Unit,
+    onSetShowOnlyRisky: (Boolean) -> Unit,
+    onRequestReportPreview: (String) -> Unit,
+    onToggleFavorite: (String) -> Unit,
+    onClearError: () -> Unit,
+) {
+    val strings = LocalStrings.current
+    val screenStrings = ScreenUiStrings.from(strings)
+
     val expandedPackages = remember { mutableStateMapOf<String, Boolean>() }
     val favoriteQueries = state.favoriteQueries
     val filteredApps = state.visibleApps
@@ -132,13 +175,13 @@ fun PermissionsScreen(
     }
 
     Box(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier.fillMaxSize(),
     ) {
         LazyColumn(
             state = listState,
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(10.dp),
-            contentPadding = screenContentPadding(padding, horizontal = 16.dp, vertical = 10.dp)
+            contentPadding = screenContentPadding(padding, horizontal = 16.dp, vertical = 10.dp),
         ) {
             item {
                 SectionHeader(
@@ -146,23 +189,23 @@ fun PermissionsScreen(
                     help = headerHelp,
                     onHelp = onHelp,
                     beforeHelpAction = {
-                        IconButton(onClick = viewModel::refresh) {
+                        IconButton(onClick = onRefresh) {
                             Icon(
                                 imageVector = Icons.Filled.Refresh,
                                 contentDescription = strings.refreshPermissionsContentDescription,
-                                tint = MaterialTheme.colorScheme.primary
+                                tint = MaterialTheme.colorScheme.primary,
                             )
                         }
                     },
                     onBack = onBack,
-                    onMenu = onMenu
+                    onMenu = onMenu,
                 )
             }
             item {
                 AppText(
                     strings.helpPermissions,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
             item {
@@ -170,36 +213,36 @@ fun PermissionsScreen(
                     AppText(
                         screenStrings.riskScanTitle,
                         style = MaterialTheme.typography.titleSmall,
-                        color = MaterialTheme.colorScheme.onSurface
+                        color = MaterialTheme.colorScheme.onSurface,
                     )
                     AppText(
                         screenStrings.riskScanDescription,
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(top = 8.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         AppButton(
                             text = screenStrings.startScan,
-                            onClick = viewModel::startAutoRiskScan,
+                            onClick = onStartAutoRiskScan,
                             enabled = state.apps.isNotEmpty() && !state.autoScanRunning,
                             variant = ButtonVariant.Tonal,
                             modifier = Modifier.weight(1f),
                             fullWidth = false,
-                            leadingIcon = Icons.Filled.Warning
+                            leadingIcon = Icons.Filled.Warning,
                         )
                         AppButton(
                             text = screenStrings.stopScan,
-                            onClick = viewModel::cancelAutoRiskScan,
+                            onClick = onCancelAutoRiskScan,
                             enabled = state.autoScanRunning,
                             variant = ButtonVariant.Secondary,
                             modifier = Modifier.weight(1f),
                             fullWidth = false,
-                            leadingIcon = Icons.Filled.Stop
+                            leadingIcon = Icons.Filled.Stop,
                         )
                     }
 
@@ -208,29 +251,34 @@ fun PermissionsScreen(
                             screenStrings.scanProgress.format(state.autoScanScannedApps, state.autoScanTotalApps),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.padding(top = 8.dp)
+                            modifier = Modifier.padding(top = 8.dp),
                         )
                         state.autoScanCurrentLabel?.let { label ->
                             AppText(
                                 screenStrings.analysis.format(label),
                                 style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }
                         LinearProgressIndicator(
                             progress = { scanProgress.coerceIn(0f, 1f) },
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(top = 6.dp)
+                                .padding(top = 6.dp),
                         )
                     }
 
                     if (state.riskReports.isNotEmpty()) {
                         AppText(
-                            screenStrings.riskSummary.format(state.riskReports.size, criticalTotal, highTotal, mediumTotal),
+                            screenStrings.riskSummary.format(
+                                state.riskReports.size,
+                                criticalTotal,
+                                highTotal,
+                                mediumTotal,
+                            ),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.padding(top = 8.dp)
+                            modifier = Modifier.padding(top = 8.dp),
                         )
                     }
                 }
@@ -248,25 +296,25 @@ fun PermissionsScreen(
                     }.ifBlank { null },
                     expanded = searchToolsExpanded,
                     onToggle = { searchToolsExpanded = !searchToolsExpanded },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
                 ) {
                     SearchFieldWithHistoryComponent(
                         value = state.filter,
-                        onValueChange = { viewModel.setFilter(it) },
-                        onSubmit = { viewModel.setFilter(it, trackUsage = true) },
+                        onValueChange = { onFilterChange(it, false) },
+                        onSubmit = { onFilterChange(it, true) },
                         label = strings.permissionsSearch,
                         historyKey = "permissions",
                         modifier = Modifier.fillMaxWidth(),
                         showClearAction = true,
                         onCleared = {
-                            viewModel.setFilter("")
-                        }
+                            onFilterChange("", false)
+                        },
                     )
                     state.topQuery?.let { top ->
                         AppText(
                             screenStrings.frequentSearch.format(top),
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.primary
+                            color = MaterialTheme.colorScheme.primary,
                         )
                     }
                     if (favoriteQueries.isNotEmpty()) {
@@ -274,14 +322,14 @@ fun PermissionsScreen(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                             contentPadding = PaddingValues(
-                                vertical = 6.dp
-                            )
+                                vertical = 6.dp,
+                            ),
                         ) {
                             items(favoriteQueries, key = { it }) { fav ->
                                 FilterChip(
                                     selected = true,
-                                    onClick = { viewModel.setFilter(fav, trackUsage = true) },
-                                    label = { AppText(fav) }
+                                    onClick = { onFilterChange(fav, true) },
+                                    label = { AppText(fav) },
                                 )
                             }
                         }
@@ -291,35 +339,35 @@ fun PermissionsScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(top = 6.dp),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
                             FilterChip(
                                 selected = state.showOnlyRisky,
-                                onClick = viewModel::toggleShowOnlyRisky,
-                                label = { AppText(screenStrings.riskOnly) }
+                                onClick = onToggleShowOnlyRisky,
+                                label = { AppText(screenStrings.riskOnly) },
                             )
                             FilterChip(
                                 selected = false,
-                                onClick = { viewModel.setFilter("") },
-                                label = { AppText(screenStrings.resetFilter) }
+                                onClick = { onFilterChange("", false) },
+                                label = { AppText(screenStrings.resetFilter) },
                             )
                         }
                         LazyRow(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(top = 4.dp),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
                             items(state.riskReports.take(8), key = { it.packageName }) { report ->
                                 FilterChip(
                                     selected = false,
                                     onClick = {
-                                        viewModel.setFilter(
+                                        onFilterChange(
                                             report.packageName,
-                                            trackUsage = true
+                                            true,
                                         )
                                     },
-                                    label = { AppText("${report.appLabel} (${report.findings.size})") }
+                                    label = { AppText("${report.appLabel} (${report.findings.size})") },
                                 )
                             }
                         }
@@ -332,7 +380,7 @@ fun PermissionsScreen(
                     AppText(
                         screenStrings.resultsSummary.format(filteredApps.size, state.apps.size),
                         style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
             }
@@ -345,8 +393,8 @@ fun PermissionsScreen(
                         summary = screenStrings.permissionsExportSummary,
                         details = listOf(
                             screenStrings.permissionsExportDetails,
-                            screenStrings.readableFormat
-                        )
+                            screenStrings.readableFormat,
+                        ),
                     )
                 }
             }
@@ -362,40 +410,40 @@ fun PermissionsScreen(
                         val hasFilter = state.filter.isNotBlank() || state.showOnlyRisky
                         AppText(
                             if (hasFilter) screenStrings.noRiskResults else screenStrings.noPermissions,
-                            style = MaterialTheme.typography.bodyMedium
+                            style = MaterialTheme.typography.bodyMedium,
                         )
                         AppText(
                             if (hasFilter) screenStrings.riskFilterHint else screenStrings.refreshPermissionsHint,
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                         Row(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
                             if (state.showOnlyRisky) {
                                 AppButton(
                                     text = screenStrings.allApps,
-                                    onClick = { viewModel.setShowOnlyRisky(false) },
+                                    onClick = { onSetShowOnlyRisky(false) },
                                     variant = ButtonVariant.Secondary,
                                     modifier = Modifier.weight(1f),
-                                    fullWidth = false
+                                    fullWidth = false,
                                 )
                             } else if (state.filter.isNotBlank()) {
                                 AppButton(
                                     text = screenStrings.resetFilter,
-                                    onClick = { viewModel.setFilter("") },
+                                    onClick = { onFilterChange("", false) },
                                     variant = ButtonVariant.Secondary,
                                     modifier = Modifier.weight(1f),
-                                    fullWidth = false
+                                    fullWidth = false,
                                 )
                             }
                             AppButton(
                                 text = screenStrings.refresh,
-                                onClick = viewModel::refresh,
+                                onClick = onRefresh,
                                 variant = ButtonVariant.Tonal,
                                 modifier = Modifier.weight(1f),
-                                fullWidth = false
+                                fullWidth = false,
                             )
                         }
                     }
@@ -433,49 +481,60 @@ fun PermissionsScreen(
                     leading = {
                         PackageIcon(
                             packageName = app.packageName,
-                            modifier = Modifier.size(44.dp)
+                            modifier = Modifier.size(44.dp),
                         )
                     },
                     actions = {
-                        IconButton(onClick = {
-                            viewModel.requestReportPreview(app.packageName)
-                        }) {
+                        IconButton(
+                            onClick = {
+                                onRequestReportPreview(app.packageName)
+                            },
+                        ) {
                             Icon(
                                 imageVector = Icons.Filled.Share,
                                 contentDescription = strings.sharePermissionsContentDescription,
-                                tint = MaterialTheme.colorScheme.primary
+                                tint = MaterialTheme.colorScheme.primary,
                             )
                         }
-                        IconButton(onClick = { viewModel.toggleFavorite(app.packageName) }) {
+                        IconButton(onClick = { onToggleFavorite(app.packageName) }) {
                             Icon(
                                 imageVector = if (isFavorite) Icons.Filled.Star else Icons.Filled.StarBorder,
                                 contentDescription = strings.favoriteContentDescription,
-                                tint = if (isFavorite) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                                tint = if (isFavorite) {
+                                    MaterialTheme.colorScheme.primary
+                                } else {
+                                    MaterialTheme.colorScheme.onSurfaceVariant
+                                },
                             )
                         }
                     },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 6.dp)
+                        .padding(vertical = 6.dp),
                 ) {
                     AppText(
                         if (expanded) {
                             strings.permissionsExpandedAppLabel.format(
                                 app.appLabel,
-                                app.packageName
+                                app.packageName,
                             )
                         } else {
                             strings.helpPermissions
                         },
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.primary
+                        color = MaterialTheme.colorScheme.primary,
                     )
                     riskReport?.let { report ->
                         AppText(
-                            screenStrings.risksDetected.format(report.findings.size, report.criticalCount, report.highCount, report.mediumCount),
+                            screenStrings.risksDetected.format(
+                                report.findings.size,
+                                report.criticalCount,
+                                report.highCount,
+                                report.mediumCount,
+                            ),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.error,
-                            modifier = Modifier.padding(vertical = 4.dp)
+                            modifier = Modifier.padding(vertical = 4.dp),
                         )
                         state.findingsByPackage[app.packageName].orEmpty().take(6).forEach { finding ->
                             RiskFindingRow(finding = finding)
@@ -484,19 +543,19 @@ fun PermissionsScreen(
                             AppText(
                                 screenStrings.findingAdditional.format(report.findings.size - 6),
                                 style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }
                     }
                     Column(
                         verticalArrangement = Arrangement.spacedBy(
-                            4.dp
-                        )
+                            4.dp,
+                        ),
                     ) {
                         app.permissions.forEach { perm ->
                             PermissionRow(
                                 permission = perm,
-                                finding = permissionFindings[perm]
+                                finding = permissionFindings[perm],
                             )
                         }
                     }
@@ -509,11 +568,50 @@ fun PermissionsScreen(
             onClick = { scope.launch { listState.animateScrollToItem(0) } },
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(12.dp)
+                .padding(12.dp),
         )
     }
 
-    state.error?.let { ErrorDialogComponent(it, viewModel::clearError) }
+    state.error?.let { ErrorDialogComponent(it, onClearError) }
+}
+
+@AppScreenPreviews
+@Composable
+private fun PermissionsScreenPreview() {
+    val apps = listOf(
+        AppPermissionEntry(
+            appLabel = "CrackMyDroid",
+            packageName = "com.crackmydroid",
+            permissions = listOf(
+                "android.permission.CAMERA",
+                "android.permission.ACCESS_FINE_LOCATION",
+                "android.permission.INTERNET",
+            ),
+        ),
+    )
+    AppPreviewEnvironment {
+        PermissionsScreenContent(
+            state = PermissionsState(
+                apps = apps,
+                visibleApps = apps,
+                favoriteQueries = listOf("camera"),
+            ),
+            padding = PaddingValues(),
+            headerHelp = "Esamina i permessi e i rischi delle app.",
+            onHelp = {},
+            onBack = {},
+            onMenu = {},
+            onRefresh = {},
+            onStartAutoRiskScan = {},
+            onCancelAutoRiskScan = {},
+            onFilterChange = { _, _ -> },
+            onToggleShowOnlyRisky = {},
+            onSetShowOnlyRisky = {},
+            onRequestReportPreview = {},
+            onToggleFavorite = {},
+            onClearError = {},
+        )
+    }
 }
 
 @Composable
@@ -522,53 +620,50 @@ private fun RiskFindingRow(finding: PermissionFindingUi) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 2.dp),
-        verticalArrangement = Arrangement.spacedBy(2.dp)
+        verticalArrangement = Arrangement.spacedBy(2.dp),
     ) {
         AppText(
             "[${finding.levelLabel}] ${finding.title}",
             style = MaterialTheme.typography.bodySmall,
-            color = riskLevelColor(finding.level)
+            color = riskLevelColor(finding.level),
         )
         AppText(
             finding.reason,
             style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
 }
 
 @Composable
-private fun PermissionRow(
-    permission: String,
-    finding: PermissionFindingUi? = null
-) {
+private fun PermissionRow(permission: String, finding: PermissionFindingUi? = null) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 2.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Icon(
             imageVector = permissionIconFor(permission),
             contentDescription = permission,
             tint = finding?.let { riskLevelColor(it.level) } ?: permissionColor(permission),
-            modifier = Modifier.size(18.dp)
+            modifier = Modifier.size(18.dp),
         )
         Column(
             modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(1.dp)
+            verticalArrangement = Arrangement.spacedBy(1.dp),
         ) {
             AppText(
                 permission,
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             finding?.let {
                 AppText(
                     "${it.levelLabel}: ${it.reason}",
                     style = MaterialTheme.typography.labelSmall,
-                    color = riskLevelColor(it.level)
+                    color = riskLevelColor(it.level),
                 )
             }
         }

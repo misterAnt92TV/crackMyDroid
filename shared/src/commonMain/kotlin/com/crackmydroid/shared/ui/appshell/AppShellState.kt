@@ -7,5 +7,5 @@ data class AppShellState(
     val showIntro: Boolean = true,
     val pendingHintScreen: Screen? = null,
     val helpDialog: String? = null,
-    val initialized: Boolean = false
+    val initialized: Boolean = false,
 )

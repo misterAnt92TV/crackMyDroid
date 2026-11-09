@@ -64,7 +64,7 @@ class HomeViewModelTest {
             entry("hidden", 3, hidden = true),
             entry("one", 2),
             entry("two", 1),
-            entry("three", 0)
+            entry("three", 0),
         )
         val repository = FakeOperationLogRepository(entries)
         val viewModel = HomeViewModel(repository)
@@ -73,7 +73,7 @@ class HomeViewModelTest {
 
         assertEquals(
             listOf("duplicate", "duplicate", "one", "two", "three"),
-            viewModel.state.value.recentOperations.map { it.description }
+            viewModel.state.value.recentOperations.map { it.description },
         )
         viewModel.onCleared()
     }
@@ -82,13 +82,13 @@ class HomeViewModelTest {
         description: String,
         timestamp: Long,
         success: Boolean = true,
-        hidden: Boolean = false
+        hidden: Boolean = false,
     ) = OperationEntry(
         description = description,
         success = success,
         timestamp = timestamp,
         operationId = "$description-$timestamp",
-        hiddenFromRecent = hidden
+        hiddenFromRecent = hidden,
     )
 
     private class FakeOperationLogRepository(initialEntries: List<OperationEntry> = emptyList()) :

@@ -1,6 +1,5 @@
 package com.crackmydroid.shared.ui.installedapps
 
-import com.crackmydroid.shared.domain.model.ExportFormat
 import com.crackmydroid.shared.domain.model.InstalledAppEntry
 import com.crackmydroid.shared.domain.repository.log.OperationLogRepository
 import com.crackmydroid.shared.domain.usecase.installedapps.ExportApkUseCase

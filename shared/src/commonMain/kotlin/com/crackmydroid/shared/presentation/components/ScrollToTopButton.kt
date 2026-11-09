@@ -20,7 +20,7 @@ fun ScrollToTopButton(
     visible: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    contentDescription: String? = null
+    contentDescription: String? = null,
 ) {
     val reduceMotion = LocalAccessibilityPrefs.current.reduceMotion
     val strings = LocalStrings.current
@@ -28,16 +28,16 @@ fun ScrollToTopButton(
         visible = visible,
         modifier = modifier,
         enter = if (reduceMotion) fadeIn() else fadeIn() + slideInVertically { it / 2 },
-        exit = fadeOut()
+        exit = fadeOut(),
     ) {
         FloatingActionButton(
             onClick = onClick,
             containerColor = MaterialTheme.colorScheme.primary,
-            contentColor = MaterialTheme.colorScheme.onPrimary
+            contentColor = MaterialTheme.colorScheme.onPrimary,
         ) {
             Icon(
                 imageVector = Icons.Filled.KeyboardArrowUp,
-                contentDescription = contentDescription ?: strings.scrollToTopContentDescription
+                contentDescription = contentDescription ?: strings.scrollToTopContentDescription,
             )
         }
     }

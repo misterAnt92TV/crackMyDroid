@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.first
 private val Context.operationLogDataStore by preferencesDataStore(name = "operation_log")
 
 private val logKey = stringPreferencesKey("entries")
+
 class OperationLogPersistenceAndroid(private val context: Context) : OperationLogPersistence {
     override suspend fun load(): List<OperationEntry> {
         val prefs = context.operationLogDataStore.data.first()

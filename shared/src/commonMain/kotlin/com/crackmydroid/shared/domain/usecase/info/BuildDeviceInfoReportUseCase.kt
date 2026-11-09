@@ -1,18 +1,18 @@
 package com.crackmydroid.shared.domain.usecase.info
 
-import com.crackmydroid.shared.domain.model.DeviceInfo
-import com.crackmydroid.shared.domain.model.RootStatus
-import com.crackmydroid.shared.domain.model.ReportLabel
-import com.crackmydroid.shared.domain.model.UseCaseReportText
 import co.touchlab.kermit.Logger
 import com.crackmydroid.shared.AppLogger
+import com.crackmydroid.shared.domain.model.DeviceInfo
+import com.crackmydroid.shared.domain.model.ReportLabel
+import com.crackmydroid.shared.domain.model.RootStatus
+import com.crackmydroid.shared.domain.model.UseCaseReportText
 import com.crackmydroid.shared.domain.usecase.BaseUseCase
 import com.crackmydroid.shared.util.AppDispatchers
 import com.crackmydroid.shared.util.DefaultAppDispatchers
 
 class BuildDeviceInfoReportUseCase(
     dispatchers: AppDispatchers = DefaultAppDispatchers,
-    logger: Logger = AppLogger.logger
+    logger: Logger = AppLogger.logger,
 ) : BaseUseCase(TAG, dispatcher = dispatchers.default, logger = logger) {
     private companion object {
         private const val TAG = "BuildDeviceInfoReportUseCase"
@@ -21,7 +21,7 @@ class BuildDeviceInfoReportUseCase(
     suspend operator fun invoke(
         info: DeviceInfo,
         root: RootStatus?,
-        text: UseCaseReportText
+        text: UseCaseReportText,
     ): Result<String> = execute {
         buildString {
             appendLine(text.label(ReportLabel.DEVICE_INFO_TITLE))

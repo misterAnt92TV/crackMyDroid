@@ -8,8 +8,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -19,9 +22,6 @@ import androidx.compose.ui.unit.dp
 import com.crackmydroid.shared.presentation.components.text.AppText
 import com.crackmydroid.shared.presentation.preview.AppComponentPreviews
 import com.crackmydroid.shared.presentation.preview.ComponentPreviewContainer
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.MoreVert
 
 @Composable
 fun AppListItem(
@@ -34,7 +34,7 @@ fun AppListItem(
     onClick: (() -> Unit)? = null,
     titleMaxLines: Int? = null,
     subtitleMaxLines: Int? = null,
-    textOverflow: TextOverflow = TextOverflow.Ellipsis
+    textOverflow: TextOverflow = TextOverflow.Ellipsis,
 ) {
     val prefs = LocalAccessibilityPrefs.current
     val rowModifier = modifier
@@ -49,7 +49,7 @@ fun AppListItem(
     Row(
         modifier = rowModifier,
         horizontalArrangement = Arrangement.spacedBy(10.dp),
-        verticalAlignment = if (prefs.largeText) Alignment.Top else Alignment.CenterVertically
+        verticalAlignment = if (prefs.largeText) Alignment.Top else Alignment.CenterVertically,
     ) {
         leading?.let {
             Box(modifier = Modifier.size(44.dp), contentAlignment = Alignment.Center) { it() }
@@ -59,7 +59,7 @@ fun AppListItem(
                 title,
                 style = MaterialTheme.typography.titleMedium,
                 maxLines = titleMaxLines ?: if (prefs.largeText) 3 else 1,
-                overflow = textOverflow
+                overflow = textOverflow,
             )
             subtitle?.let {
                 AppText(
@@ -67,7 +67,7 @@ fun AppListItem(
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = subtitleMaxLines ?: if (prefs.largeText) 3 else 1,
-                    overflow = textOverflow
+                    overflow = textOverflow,
                 )
             }
             if (meta != null && prefs.largeText) {
@@ -76,7 +76,7 @@ fun AppListItem(
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.primary,
                     maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
                 )
             }
         }
@@ -86,7 +86,7 @@ fun AppListItem(
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.primary,
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                overflow = TextOverflow.Ellipsis,
             )
         }
         trailing?.invoke()
@@ -105,6 +105,6 @@ private fun AppListItemPreview() = ComponentPreviewContainer {
         textOverflow = TextOverflow.Clip,
         leading = { Icon(Icons.Filled.Info, contentDescription = null) },
         trailing = { Icon(Icons.Filled.MoreVert, contentDescription = null) },
-        onClick = {}
+        onClick = {},
     )
 }

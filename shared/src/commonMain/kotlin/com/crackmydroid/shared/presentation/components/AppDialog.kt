@@ -15,7 +15,7 @@ fun AppDialog(
     dismissLabel: String? = null,
     onDismissAction: (() -> Unit)? = null,
     confirmEnabled: Boolean = true,
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
     AlertDialog(
         modifier = modifier,
@@ -31,9 +31,9 @@ fun AppDialog(
                     dismissLabel,
                     onDismissAction,
                     variant = ButtonVariant.Tonal,
-                    fullWidth = false
+                    fullWidth = false,
                 )
             }
-        } else null
+        } else null,
     )
 }

@@ -2,11 +2,11 @@ package com.crackmydroid.shared.ui.appshell
 
 import com.crackmydroid.shared.AppLogger
 import com.crackmydroid.shared.domain.usecase.settings.GetIntroSeenUseCase
-import com.crackmydroid.shared.domain.usecase.settings.SetIntroSeenUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetVerboseLogUseCase
-import com.crackmydroid.shared.presentation.BaseViewModel
+import com.crackmydroid.shared.domain.usecase.settings.SetIntroSeenUseCase
 import com.crackmydroid.shared.i18n.platformLanguage
 import com.crackmydroid.shared.i18n.resolveLanguageCode
+import com.crackmydroid.shared.presentation.BaseViewModel
 import com.crackmydroid.shared.presentation.navigation.Screen
 import com.crackmydroid.shared.ui.activities.ActivityListViewModel
 import com.crackmydroid.shared.ui.info.InfoViewModel
@@ -16,12 +16,12 @@ import com.crackmydroid.shared.ui.pentest.PenTestingViewModel
 import com.crackmydroid.shared.ui.permissions.PermissionsViewModel
 import com.crackmydroid.shared.ui.settings.SettingsViewModel
 import com.crackmydroid.shared.ui.trick.TrickViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class AppShellViewModel(
@@ -35,7 +35,7 @@ class AppShellViewModel(
     private val permissions: PermissionsViewModel,
     private val installedApps: InstalledAppsViewModel,
     private val penTesting: PenTestingViewModel,
-    private val getVerbose: GetVerboseLogUseCase
+    private val getVerbose: GetVerboseLogUseCase,
 ) : BaseViewModel() {
     private val _state = MutableStateFlow(AppShellState())
     val state: StateFlow<AppShellState> = _state
@@ -71,7 +71,15 @@ class AppShellViewModel(
     }
 
     fun navigate(screen: Screen, hintsEnabled: Boolean) {
-        if (hintsEnabled && screen in setOf(Screen.Permissions, Screen.InstalledApps, Screen.Pentest, Screen.Activities, Screen.Root, Screen.Trick)) {
+        if (hintsEnabled && screen in setOf(
+                Screen.Permissions,
+                Screen.InstalledApps,
+                Screen.Pentest,
+                Screen.Activities,
+                Screen.Root,
+                Screen.Trick,
+            )
+        ) {
             _state.update { it.copy(pendingHintScreen = screen) }
         } else {
             _state.update { it.copy(selectedScreen = screen) }

@@ -6,7 +6,7 @@ data class LastOperationItem(
     val description: String,
     val result: String?,
     val timestamp: String,
-    val outcome: OperationOutcome
+    val outcome: OperationOutcome,
 )
 
 enum class OperationOutcome {
@@ -16,5 +16,5 @@ enum class OperationOutcome {
 
 data class HomeUiState(
     val latestOperations: List<LastOperationItem> = emptyList(),
-    val operationHistory: List<LastOperationItem> = emptyList()
+    val operationHistory: List<LastOperationItem> = emptyList(),
 )

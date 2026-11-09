@@ -1,10 +1,10 @@
 package com.crackmydroid.shared.domain.usecase.permissions
 
-import com.crackmydroid.shared.domain.model.app.AppPermissionEntry
-import com.crackmydroid.shared.domain.model.PermissionRiskFinding
 import com.crackmydroid.shared.domain.model.PermissionFindingKind
+import com.crackmydroid.shared.domain.model.PermissionRiskFinding
 import com.crackmydroid.shared.domain.model.PermissionRiskLevel
 import com.crackmydroid.shared.domain.model.PermissionRiskReport
+import com.crackmydroid.shared.domain.model.app.AppPermissionEntry
 import com.crackmydroid.shared.domain.usecase.UseCaseTestDispatchers
 import com.crackmydroid.shared.i18n.UseCaseTexts
 import kotlinx.coroutines.test.runTest
@@ -55,9 +55,9 @@ class BuildPermissionsReportUseCaseTest {
             listOf(zulu, alpha),
             listOf(
                 riskReport(zulu).copy(highCount = 2, mediumCount = 3),
-                riskReport(alpha).copy(criticalCount = 2, highCount = 1, mediumCount = 1)
+                riskReport(alpha).copy(criticalCount = 2, highCount = 1, mediumCount = 1),
             ),
-            text
+            text,
         ).getOrThrow()
         assertTrue(report.contains("2 apps analyzed"))
         assertTrue(report.contains("2 permissions found"))
@@ -110,12 +110,12 @@ class BuildPermissionsReportUseCaseTest {
             PermissionRiskFinding(
                 key = "CAMERA",
                 kind = PermissionFindingKind.MICROPHONE_CAMERA_ACCESS,
-                level = PermissionRiskLevel.Critical
-            )
+                level = PermissionRiskLevel.Critical,
+            ),
         ),
         score = 70,
         criticalCount = 1,
         highCount = 0,
-        mediumCount = 0
+        mediumCount = 0,
     )
 }

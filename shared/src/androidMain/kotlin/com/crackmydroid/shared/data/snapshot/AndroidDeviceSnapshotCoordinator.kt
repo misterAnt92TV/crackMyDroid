@@ -3,18 +3,17 @@ package com.crackmydroid.shared.data.snapshot
 import android.content.Context
 import com.crackmydroid.database.CacheDatabase
 import com.crackmydroid.shared.AppLogger
+import com.crackmydroid.shared.domain.model.PlayIntegrityResult
 import com.crackmydroid.shared.domain.model.scansnapshot.DeviceScanSnapshot
 import com.crackmydroid.shared.domain.model.scansnapshot.DeviceScanSnapshotContract
 import com.crackmydroid.shared.domain.model.scansnapshot.DeviceScanSnapshotJson
-import com.crackmydroid.shared.domain.model.PlayIntegrityResult
 import com.crackmydroid.shared.domain.model.scansnapshot.SnapshotSection
 import com.crackmydroid.shared.domain.repository.ActivityRepository
 import com.crackmydroid.shared.domain.repository.DeviceInfoRepository
 import com.crackmydroid.shared.domain.repository.InstalledAppsRepository
-import com.crackmydroid.shared.domain.repository.log.LogRepository
 import com.crackmydroid.shared.domain.repository.PermissionsRepository
 import com.crackmydroid.shared.domain.repository.RootCheckRepository
-import kotlinx.serialization.encodeToString
+import com.crackmydroid.shared.domain.repository.log.LogRepository
 import java.io.File
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -26,7 +25,7 @@ class AndroidDeviceSnapshotCoordinator(
     private val rootCheckRepository: RootCheckRepository,
     private val logRepository: LogRepository,
     private val permissionsRepository: PermissionsRepository,
-    private val installedAppsRepository: InstalledAppsRepository
+    private val installedAppsRepository: InstalledAppsRepository,
 ) {
     private val running = AtomicBoolean(false)
 
@@ -59,8 +58,8 @@ class AndroidDeviceSnapshotCoordinator(
             data = PlayIntegrityResult(
                 basicIntegrity = null,
                 deviceIntegrity = null,
-                details = "Play Integrity non eseguito automaticamente in background"
-            )
+                details = "Play Integrity non eseguito automaticamente in background",
+            ),
         )
 
         val deviceInfo = deviceInfoSection.data
@@ -77,7 +76,7 @@ class AndroidDeviceSnapshotCoordinator(
             permissions = permissionsSection,
             activities = activitiesSection,
             logs = logsSection,
-            manifestSecurityReports = manifestSecuritySection
+            manifestSecurityReports = manifestSecuritySection,
         )
 
         writeAtomically(snapshot)
@@ -116,7 +115,7 @@ class AndroidDeviceSnapshotCoordinator(
 
     private fun targetFile(): File {
         val baseDir = requireNotNull(
-            context.getExternalFilesDir(DeviceScanSnapshotContract.SNAPSHOT_DIRECTORY)
+            context.getExternalFilesDir(DeviceScanSnapshotContract.SNAPSHOT_DIRECTORY),
         ) {
             "Storage esterno app non disponibile"
         }

@@ -9,5 +9,5 @@ data class ConnectedDevice(
     val model: String? = null,
     val product: String? = null,
     val device: String? = null,
-    val transportId: String? = null
+    val transportId: String? = null,
 )

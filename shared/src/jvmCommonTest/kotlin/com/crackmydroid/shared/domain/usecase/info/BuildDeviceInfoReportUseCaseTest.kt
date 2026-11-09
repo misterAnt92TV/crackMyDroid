@@ -28,7 +28,7 @@ class BuildDeviceInfoReportUseCaseTest {
                 appDebuggable = true,
                 imei = "123456789",
                 systemPropSource = "build fingerprint",
-                systemPropDump = "ro.build.version.release=16"
+                systemPropDump = "ro.build.version.release=16",
             )
             val root = RootStatus(isRooted = false, details = "su unavailable")
 

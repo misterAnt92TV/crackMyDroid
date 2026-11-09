@@ -16,7 +16,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 
 sealed class Screen(
     val title: (com.crackmydroid.shared.i18n.Strings) -> String,
-    val icon: ImageVector
+    val icon: ImageVector,
 ) {
     object Home : Screen({ it.navHome }, Icons.Rounded.Home)
     object Activities : Screen({ it.navActivities }, Icons.AutoMirrored.Rounded.List)
@@ -34,7 +34,7 @@ sealed class Screen(
 val bottomScreens = listOf(
     Screen.Home,
     Screen.Info,
-    Screen.Settings
+    Screen.Settings,
 )
 
 val drawerScreens = listOf(
@@ -45,5 +45,5 @@ val drawerScreens = listOf(
     Screen.Root,
     Screen.Trick,
     Screen.Log,
-    Screen.Help
+    Screen.Help,
 )

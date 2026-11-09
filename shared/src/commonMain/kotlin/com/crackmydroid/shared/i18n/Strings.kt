@@ -11,60 +11,320 @@ class ActivityUiStrings(private val language: String) {
         "fr" -> fr
         else -> en
     }
-    val searchToolsSubtitle get() = text("Suggerimenti e filtri", "Suggestions and filters", "Vorschläge und Filter", "Sugerencias y filtros", "Suggestions et filtres")
-    val suggestionsCleared get() = text("Suggerimenti svuotati", "Suggestions cleared", "Vorschläge gelöscht", "Sugerencias borradas", "Suggestions effacées")
-    val exportSuccess get() = text("Report HTML esportato per %s", "HTML report exported for %s", "HTML-Bericht für %s exportiert", "Informe HTML exportado para %s", "Rapport HTML exporté pour %s")
-    val exportFailed get() = text("Export report non riuscito", "Report export failed", "Berichtexport fehlgeschlagen", "Error al exportar el informe", "Échec de l’export du rapport")
-    val frequentSearch get() = text("Ricerca frequente: %s", "Frequent search: %s", "Häufige Suche: %s", "Búsqueda frecuente: %s", "Recherche fréquente : %s")
-    val resultsSummary get() = text("Risultati: %d / %d attività", "Results: %d / %d activities", "Ergebnisse: %d / %d Aktivitäten", "Resultados: %d / %d actividades", "Résultats : %d / %d activités")
-    val noResults get() = text("Nessun risultato per \"%s\".", "No results for \"%s\".", "Keine Ergebnisse für \"%s\".", "Sin resultados para \"%s\".", "Aucun résultat pour \"%s\".")
-    val noActivities get() = text("Nessuna activity disponibile.", "No activities available.", "Keine Aktivitäten verfügbar.", "No hay actividades disponibles.", "Aucune activité disponible.")
-    val searchHint get() = text("Prova con package, nome app o nome activity.", "Try a package, app name or activity name.", "Versuche ein Package, einen App- oder Activity-Namen.", "Prueba con package, nombre de app o actividad.", "Essayez un package, un nom d’app ou d’activité.")
-    val resetFilter get() = text("Reset filtro", "Reset filter", "Filter zurücksetzen", "Restablecer filtro", "Réinitialiser le filtre")
+
+    val searchToolsSubtitle
+        get() = text(
+            "Suggerimenti e filtri",
+            "Suggestions and filters",
+            "Vorschläge und Filter",
+            "Sugerencias y filtros",
+            "Suggestions et filtres",
+        )
+    val suggestionsCleared
+        get() = text(
+            "Suggerimenti svuotati",
+            "Suggestions cleared",
+            "Vorschläge gelöscht",
+            "Sugerencias borradas",
+            "Suggestions effacées",
+        )
+    val exportSuccess
+        get() = text(
+            "Report HTML esportato per %s",
+            "HTML report exported for %s",
+            "HTML-Bericht für %s exportiert",
+            "Informe HTML exportado para %s",
+            "Rapport HTML exporté pour %s",
+        )
+    val exportFailed
+        get() = text(
+            "Export report non riuscito",
+            "Report export failed",
+            "Berichtexport fehlgeschlagen",
+            "Error al exportar el informe",
+            "Échec de l’export du rapport",
+        )
+    val frequentSearch
+        get() = text(
+            "Ricerca frequente: %s",
+            "Frequent search: %s",
+            "Häufige Suche: %s",
+            "Búsqueda frecuente: %s",
+            "Recherche fréquente : %s",
+        )
+    val resultsSummary
+        get() = text(
+            "Risultati: %d / %d attività",
+            "Results: %d / %d activities",
+            "Ergebnisse: %d / %d Aktivitäten",
+            "Resultados: %d / %d actividades",
+            "Résultats : %d / %d activités",
+        )
+    val noResults
+        get() = text(
+            "Nessun risultato per \"%s\".",
+            "No results for \"%s\".",
+            "Keine Ergebnisse für \"%s\".",
+            "Sin resultados para \"%s\".",
+            "Aucun résultat pour \"%s\".",
+        )
+    val noActivities
+        get() = text(
+            "Nessuna activity disponibile.",
+            "No activities available.",
+            "Keine Aktivitäten verfügbar.",
+            "No hay actividades disponibles.",
+            "Aucune activité disponible.",
+        )
+    val searchHint
+        get() = text(
+            "Prova con package, nome app o nome activity.",
+            "Try a package, app name or activity name.",
+            "Versuche ein Package, einen App- oder Activity-Namen.",
+            "Prueba con package, nombre de app o actividad.",
+            "Essayez un package, un nom d’app ou d’activité.",
+        )
+    val resetFilter
+        get() = text(
+            "Reset filtro",
+            "Reset filter",
+            "Filter zurücksetzen",
+            "Restablecer filtro",
+            "Réinitialiser le filtre",
+        )
     val refresh get() = text("Aggiorna", "Refresh", "Aktualisieren", "Actualizar", "Actualiser")
     val activityCount get() = text("%d attività", "%d activities", "%d Aktivitäten", "%d actividades", "%d activités")
-    val intentRequired get() = text("intent richiesto", "intent required", "Intent erforderlich", "intent requerido", "intent requis")
+    val intentRequired
+        get() = text(
+            "intent richiesto",
+            "intent required",
+            "Intent erforderlich",
+            "intent requerido",
+            "intent requis",
+        )
     val dumpOnly get() = text("solo dump", "dump only", "nur Dump", "solo volcado", "dump uniquement")
-    val shellWithAction get() = text("am start + action", "am start + action", "am start + Aktion", "am start + acción", "am start + action")
+    val shellWithAction
+        get() = text(
+            "am start + action",
+            "am start + action",
+            "am start + Aktion",
+            "am start + acción",
+            "am start + action",
+        )
     val shellStart get() = text("am start", "am start", "am start", "am start", "am start")
-    val guidedLauncherTitle get() = text("Launcher guidato", "Guided launcher", "Geführter Launcher", "Lanzador guiado", "Lanceur guidé")
+    val guidedLauncherTitle
+        get() = text(
+            "Launcher guidato",
+            "Guided launcher",
+            "Geführter Launcher",
+            "Lanzador guiado",
+            "Lanceur guidé",
+        )
     val actionLabel get() = "Action"
     val dataUriLabel get() = "Data URI"
     val mimeTypeLabel get() = "MIME type"
     val resolver get() = text("Resolver: %s", "Resolver: %s", "Resolver: %s", "Resolver: %s", "Résolveur : %s")
     val launch get() = text("Avvia", "Launch", "Starten", "Iniciar", "Lancer")
     val cancel get() = text("Annulla", "Cancel", "Abbrechen", "Cancelar", "Annuler")
-    val reportTitle get() = text("Report activity desktop", "Desktop activity report", "Desktop-Aktivitätsbericht", "Informe de actividades de escritorio", "Rapport d’activités bureau")
+    val reportTitle
+        get() = text(
+            "Report activity desktop",
+            "Desktop activity report",
+            "Desktop-Aktivitätsbericht",
+            "Informe de actividades de escritorio",
+            "Rapport d’activités bureau",
+        )
     val close get() = text("Chiudi", "Close", "Schließen", "Cerrar", "Fermer")
-    val totals get() = text("Totale %d activity • shell %d • guided %d • dump only %d", "Total %d activities • shell %d • guided %d • dump only %d", "Gesamt %d Aktivitäten • Shell %d • geführt %d • nur Dump %d", "Total %d actividades • shell %d • guiado %d • solo volcado %d", "Total : %d activités • shell %d • guidées %d • dump uniquement %d")
-    val riskSummary get() = text("Hint contestuali %d • preferite %d • rischio %s%s", "Contextual hints %d • favorites %d • risk %s%s", "Kontexthinweise %d • Favoriten %d • Risiko %s%s", "Pistas contextuales %d • favoritas %d • riesgo %s%s", "Indices contextuels %d • favorites %d • risque %s%s")
-    val favoriteAppSuffix get() = text(" • app preferita", " • favorite app", " • bevorzugte App", " • app favorita", " • app favorite")
-    val recommendations get() = text("Raccomandazioni PenTest", "PenTest recommendations", "PenTest-Empfehlungen", "Recomendaciones PenTest", "Recommandations PenTest")
-    val highlights get() = text("Activity in evidenza", "Highlighted activities", "Hervorgehobene Aktivitäten", "Actividades destacadas", "Activités mises en avant")
-    val noAdditionalHint get() = text("Nessun hint aggiuntivo", "No additional hint", "Kein zusätzlicher Hinweis", "No hay pista adicional", "Aucun indice supplémentaire")
-    val exportHtml get() = text("Esporta report HTML", "Export HTML report", "HTML-Bericht exportieren", "Exportar informe HTML", "Exporter le rapport HTML")
-    val closeReport get() = text("Chiudi report", "Close report", "Bericht schließen", "Cerrar informe", "Fermer le rapport")
-    val exportedTitle get() = text("Report activity esportato", "Activity report exported", "Aktivitätsbericht exportiert", "Informe de actividades exportado", "Rapport d’activités exporté")
-    val exportedSummary get() = text("Report HTML pronto per consultazione desktop.", "HTML report ready for desktop viewing.", "HTML-Bericht zur Desktop-Anzeige bereit.", "Informe HTML listo para consultar en escritorio.", "Rapport HTML prêt pour la consultation sur bureau.")
+    val totals
+        get() = text(
+            "Totale %d activity • shell %d • guided %d • dump only %d",
+            "Total %d activities • shell %d • guided %d • dump only %d",
+            "Gesamt %d Aktivitäten • Shell %d • geführt %d • nur Dump %d",
+            "Total %d actividades • shell %d • guiado %d • solo volcado %d",
+            "Total : %d activités • shell %d • guidées %d • dump uniquement %d",
+        )
+    val riskSummary
+        get() = text(
+            "Hint contestuali %d • preferite %d • rischio %s%s",
+            "Contextual hints %d • favorites %d • risk %s%s",
+            "Kontexthinweise %d • Favoriten %d • Risiko %s%s",
+            "Pistas contextuales %d • favoritas %d • riesgo %s%s",
+            "Indices contextuels %d • favorites %d • risque %s%s",
+        )
+    val favoriteAppSuffix
+        get() = text(
+            " • app preferita",
+            " • favorite app",
+            " • bevorzugte App",
+            " • app favorita",
+            " • app favorite",
+        )
+    val recommendations
+        get() = text(
+            "Raccomandazioni PenTest",
+            "PenTest recommendations",
+            "PenTest-Empfehlungen",
+            "Recomendaciones PenTest",
+            "Recommandations PenTest",
+        )
+    val highlights
+        get() = text(
+            "Activity in evidenza",
+            "Highlighted activities",
+            "Hervorgehobene Aktivitäten",
+            "Actividades destacadas",
+            "Activités mises en avant",
+        )
+    val noAdditionalHint
+        get() = text(
+            "Nessun hint aggiuntivo",
+            "No additional hint",
+            "Kein zusätzlicher Hinweis",
+            "No hay pista adicional",
+            "Aucun indice supplémentaire",
+        )
+    val exportHtml
+        get() = text(
+            "Esporta report HTML",
+            "Export HTML report",
+            "HTML-Bericht exportieren",
+            "Exportar informe HTML",
+            "Exporter le rapport HTML",
+        )
+    val closeReport
+        get() = text(
+            "Chiudi report",
+            "Close report",
+            "Bericht schließen",
+            "Cerrar informe",
+            "Fermer le rapport",
+        )
+    val exportedTitle
+        get() = text(
+            "Report activity esportato",
+            "Activity report exported",
+            "Aktivitätsbericht exportiert",
+            "Informe de actividades exportado",
+            "Rapport d’activités exporté",
+        )
+    val exportedSummary
+        get() = text(
+            "Report HTML pronto per consultazione desktop.",
+            "HTML report ready for desktop viewing.",
+            "HTML-Bericht zur Desktop-Anzeige bereit.",
+            "Informe HTML listo para consultar en escritorio.",
+            "Rapport HTML prêt pour la consultation sur bureau.",
+        )
     val appDetail get() = text("App: %s", "App: %s", "App: %s", "App: %s", "App : %s")
     val packageDetail get() = text("Package: %s", "Package: %s", "Package: %s", "Package: %s", "Package : %s")
-    val activitiesDetail get() = text("Activity incluse: %d", "Activities included: %d", "Enthaltene Aktivitäten: %d", "Actividades incluidas: %d", "Activités incluses : %d")
-    val maximumRiskDetail get() = text("Pericolosità massima: %s", "Maximum risk: %s", "Maximales Risiko: %s", "Riesgo máximo: %s", "Risque maximal : %s")
+    val activitiesDetail
+        get() = text(
+            "Activity incluse: %d",
+            "Activities included: %d",
+            "Enthaltene Aktivitäten: %d",
+            "Actividades incluidas: %d",
+            "Activités incluses : %d",
+        )
+    val maximumRiskDetail
+        get() = text(
+            "Pericolosità massima: %s",
+            "Maximum risk: %s",
+            "Maximales Risiko: %s",
+            "Riesgo máximo: %s",
+            "Risque maximal : %s",
+        )
     val riskLow get() = text("BASSA", "LOW", "NIEDRIG", "BAJO", "FAIBLE")
     val riskMedium get() = text("MEDIA", "MEDIUM", "MITTEL", "MEDIO", "MOYEN")
     val riskHigh get() = text("ALTA", "HIGH", "HOCH", "ALTO", "ÉLEVÉ")
     val riskCritical get() = text("CRITICA", "CRITICAL", "KRITISCH", "CRÍTICO", "CRITIQUE")
-    val findingDumpOnly get() = text("%d activity compaiono solo nel dump del package e richiedono verifica manuale.", "%d activities appear only in the package dump and require manual review.", "%d Aktivitäten erscheinen nur im Package-Dump und müssen manuell geprüft werden.", "%d actividades solo aparecen en el volcado del package y requieren revisión manual.", "%d activités apparaissent uniquement dans le dump du package et nécessitent une vérification manuelle.")
-    val findingGuided get() = text("%d activity richiedono un intent contestualizzato per essere testate.", "%d activities require a contextual intent to be tested.", "%d Aktivitäten benötigen zum Testen einen Kontext-Intent.", "%d actividades requieren un intent contextual para probarse.", "%d activités nécessitent un intent contextuel pour être testées.")
-    val findingContextual get() = text("%d activity espongono hint utili per un lancio guidato o per test deeplink.", "%d activities expose hints useful for guided launch or deeplink testing.", "%d Aktivitäten bieten Hinweise für geführte Starts oder Deeplink-Tests.", "%d actividades exponen pistas útiles para lanzamientos guiados o pruebas de deeplink.", "%d activités exposent des indices utiles pour un lancement guidé ou des tests de deeplink.")
-    val findingFavoritePackage get() = text("L'app è stata marcata come preferita nella sezione Activity.", "The app was marked as a favorite in the Activity section.", "Die App wurde im Activity-Bereich als Favorit markiert.", "La app se marcó como favorita en la sección Actividades.", "L’app a été ajoutée aux favoris dans la section Activités.")
-    val findingFavoriteActivities get() = text("%d activity sono state segnate come preferite per analisi ripetute.", "%d activities were marked as favorites for repeated analysis.", "%d Aktivitäten wurden für wiederholte Analysen favorisiert.", "%d actividades se marcaron como favoritas para análisis repetidos.", "%d activités ont été ajoutées aux favoris pour des analyses répétées.")
-    val findingRisky get() = text("%d activity espongono superfici intent/deeplink con rischio %s.", "%d activities expose intent/deeplink surfaces with %s risk.", "%d Aktivitäten bieten Intent-/Deeplink-Oberflächen mit Risiko %s.", "%d actividades exponen superficies intent/deeplink con riesgo %s.", "%d activités exposent des surfaces intent/deeplink avec un risque %s.")
-    val findingAllShell get() = text("Tutte le activity rilevate risultano avviabili via shell senza metadati aggiuntivi.", "All detected activities can be launched via shell without additional metadata.", "Alle erkannten Aktivitäten können ohne zusätzliche Metadaten über die Shell gestartet werden.", "Todas las actividades detectadas se pueden iniciar mediante shell sin metadatos adicionales.", "Toutes les activités détectées peuvent être lancées via shell sans métadonnées supplémentaires.")
-    val recommendationCritical get() = text("Usa un device di test isolato, payload controllati e osserva gli effetti collaterali su file/provider/canali sensibili.", "Use an isolated test device, controlled payloads and observe side effects on sensitive files/providers/channels.", "Verwende ein isoliertes Testgerät, kontrollierte Payloads und beobachte Nebenwirkungen auf sensible Dateien/Provider/Kanäle.", "Usa un dispositivo de prueba aislado, payloads controlados y observa efectos secundarios en archivos/proveedores/canales sensibles.", "Utilisez un appareil de test isolé, des payloads contrôlés et observez les effets secondaires sur fichiers/fournisseurs/canaux sensibles.")
-    val recommendationHigh get() = text("Avvia l'intent con dati innocui e aumenta gradualmente i payload per verificare sanitizzazione e routing.", "Launch the intent with harmless data, then increase payloads to verify sanitization and routing.", "Starte den Intent mit harmlosen Daten und erhöhe die Payloads schrittweise, um Sanitization und Routing zu prüfen.", "Inicia el intent con datos inocuos y aumenta gradualmente los payloads para verificar la sanitización y el enrutamiento.", "Lancez l’intent avec des données inoffensives, puis augmentez les payloads pour vérifier la sanitisation et le routage.")
-    val recommendationMedium get() = text("Verifica host, parametri e comportamento con input malformati prima di test più invasivi.", "Check hosts, parameters and behavior with malformed input before more invasive tests.", "Prüfe Hosts, Parameter und Verhalten mit fehlerhaften Eingaben vor invasiveren Tests.", "Verifica hosts, parámetros y comportamiento con entradas malformadas antes de pruebas más invasivas.", "Vérifiez les hôtes, paramètres et comportements avec des entrées malformées avant des tests plus invasifs.")
-    val recommendationLow get() = text("Nessuna pericolosità evidente: mantieni comunque test base di raggiungibilità.", "No obvious danger: still keep basic reachability tests.", "Keine offensichtliche Gefahr: behalte dennoch grundlegende Erreichbarkeitstests bei.", "No se observa peligro evidente: mantén pruebas básicas de accesibilidad.", "Aucun danger évident : maintenez toutefois des tests de joignabilité de base.")
+    val findingDumpOnly
+        get() = text(
+            "%d activity compaiono solo nel dump del package e richiedono verifica manuale.",
+            "%d activities appear only in the package dump and require manual review.",
+            "%d Aktivitäten erscheinen nur im Package-Dump und müssen manuell geprüft werden.",
+            "%d actividades solo aparecen en el volcado del package y requieren revisión manual.",
+            "%d activités apparaissent uniquement dans le dump du package et nécessitent une vérification manuelle.",
+        )
+    val findingGuided
+        get() = text(
+            "%d activity richiedono un intent contestualizzato per essere testate.",
+            "%d activities require a contextual intent to be tested.",
+            "%d Aktivitäten benötigen zum Testen einen Kontext-Intent.",
+            "%d actividades requieren un intent contextual para probarse.",
+            "%d activités nécessitent un intent contextuel pour être testées.",
+        )
+    val findingContextual
+        get() = text(
+            "%d activity espongono hint utili per un lancio guidato o per test deeplink.",
+            "%d activities expose hints useful for guided launch or deeplink testing.",
+            "%d Aktivitäten bieten Hinweise für geführte Starts oder Deeplink-Tests.",
+            "%d actividades exponen pistas útiles para lanzamientos guiados o pruebas de deeplink.",
+            "%d activités exposent des indices utiles pour un lancement guidé ou des tests de deeplink.",
+        )
+    val findingFavoritePackage
+        get() = text(
+            "L'app è stata marcata come preferita nella sezione Activity.",
+            "The app was marked as a favorite in the Activity section.",
+            "Die App wurde im Activity-Bereich als Favorit markiert.",
+            "La app se marcó como favorita en la sección Actividades.",
+            "L’app a été ajoutée aux favoris dans la section Activités.",
+        )
+    val findingFavoriteActivities
+        get() = text(
+            "%d activity sono state segnate come preferite per analisi ripetute.",
+            "%d activities were marked as favorites for repeated analysis.",
+            "%d Aktivitäten wurden für wiederholte Analysen favorisiert.",
+            "%d actividades se marcaron como favoritas para análisis repetidos.",
+            "%d activités ont été ajoutées aux favoris pour des analyses répétées.",
+        )
+    val findingRisky
+        get() = text(
+            "%d activity espongono superfici intent/deeplink con rischio %s.",
+            "%d activities expose intent/deeplink surfaces with %s risk.",
+            "%d Aktivitäten bieten Intent-/Deeplink-Oberflächen mit Risiko %s.",
+            "%d actividades exponen superficies intent/deeplink con riesgo %s.",
+            "%d activités exposent des surfaces intent/deeplink avec un risque %s.",
+        )
+    val findingAllShell
+        get() = text(
+            "Tutte le activity rilevate risultano avviabili via shell senza metadati aggiuntivi.",
+            "All detected activities can be launched via shell without additional metadata.",
+            "Alle erkannten Aktivitäten können ohne zusätzliche Metadaten über die Shell gestartet werden.",
+            "Todas las actividades detectadas se pueden iniciar mediante shell sin metadatos adicionales.",
+            "Toutes les activités détectées peuvent être lancées via shell sans métadonnées supplémentaires.",
+        )
+    val recommendationCritical
+        get() = text(
+            "Usa un device di test isolato, payload controllati e osserva gli effetti collaterali su file/provider/canali sensibili.",
+            "Use an isolated test device, controlled payloads and observe side effects on sensitive files/providers/channels.",
+            "Verwende ein isoliertes Testgerät, kontrollierte Payloads und beobachte Nebenwirkungen auf sensible Dateien/Provider/Kanäle.",
+            "Usa un dispositivo de prueba aislado, payloads controlados y observa efectos secundarios en archivos/proveedores/canales sensibles.",
+            "Utilisez un appareil de test isolé, des payloads contrôlés et observez les effets secondaires sur fichiers/fournisseurs/canaux sensibles.",
+        )
+    val recommendationHigh
+        get() = text(
+            "Avvia l'intent con dati innocui e aumenta gradualmente i payload per verificare sanitizzazione e routing.",
+            "Launch the intent with harmless data, then increase payloads to verify sanitization and routing.",
+            "Starte den Intent mit harmlosen Daten und erhöhe die Payloads schrittweise, um Sanitization und Routing zu prüfen.",
+            "Inicia el intent con datos inocuos y aumenta gradualmente los payloads para verificar la sanitización y el enrutamiento.",
+            "Lancez l’intent avec des données inoffensives, puis augmentez les payloads pour vérifier la sanitisation et le routage.",
+        )
+    val recommendationMedium
+        get() = text(
+            "Verifica host, parametri e comportamento con input malformati prima di test più invasivi.",
+            "Check hosts, parameters and behavior with malformed input before more invasive tests.",
+            "Prüfe Hosts, Parameter und Verhalten mit fehlerhaften Eingaben vor invasiveren Tests.",
+            "Verifica hosts, parámetros y comportamiento con entradas malformadas antes de pruebas más invasivas.",
+            "Vérifiez les hôtes, paramètres et comportements avec des entrées malformées avant des tests plus invasifs.",
+        )
+    val recommendationLow
+        get() = text(
+            "Nessuna pericolosità evidente: mantieni comunque test base di raggiungibilità.",
+            "No obvious danger: still keep basic reachability tests.",
+            "Keine offensichtliche Gefahr: behalte dennoch grundlegende Erreichbarkeitstests bei.",
+            "No se observa peligro evidente: mantén pruebas básicas de accesibilidad.",
+            "Aucun danger évident : maintenez toutefois des tests de joignabilité de base.",
+        )
 }
 
 /** Localized copy shared by screen-level controls that are not domain data. */
@@ -77,55 +337,321 @@ class ScreenUiStrings(private val language: String) {
         else -> en
     }
 
-    val searchFilters get() = text("Ricerca e filtri", "Search and filters", "Suche und Filter", "Búsqueda y filtros", "Recherche et filtres")
-    val suggestionsCleared get() = text("Suggerimenti svuotati", "Suggestions cleared", "Vorschläge gelöscht", "Sugerencias borradas", "Suggestions effacées")
-    val frequentSearch get() = text("Ricerca frequente: %s", "Frequent search: %s", "Häufige Suche: %s", "Búsqueda frecuente: %s", "Recherche fréquente : %s")
-    val removedFromFavorites get() = text("Rimosso dai preferiti", "Removed from favorites", "Aus Favoriten entfernt", "Eliminado de favoritos", "Supprimé des favoris")
-    val exportReady get() = text("Stato: pronto per invio.", "Status: ready to send.", "Status: bereit zum Senden.", "Estado: listo para enviar.", "État : prêt à envoyer.")
-    val resultsSummary get() = text("Risultati: %d / %d", "Results: %d / %d", "Ergebnisse: %d / %d", "Resultados: %d / %d", "Résultats : %d / %d")
-    val noApps get() = text("Nessuna app disponibile al momento.", "No apps available right now.", "Derzeit keine Apps verfügbar.", "No hay apps disponibles.", "Aucune application disponible pour le moment.")
-    val noResultsFor get() = text("Nessun risultato per \"%s\".", "No results for \"%s\".", "Keine Ergebnisse für \"%s\".", "Sin resultados para \"%s\".", "Aucun résultat pour \"%s\".")
-    val changeFilter get() = text("Rimuovi o cambia filtro per vedere altre app.", "Remove or change the filter to see more apps.", "Entferne oder ändere den Filter, um weitere Apps zu sehen.", "Quita o cambia el filtro para ver más apps.", "Supprimez ou modifiez le filtre pour voir d’autres applications.")
-    val refreshAppsHint get() = text("Prova ad aggiornare la lista per rileggere le app installate.", "Refresh the list to read installed apps again.", "Aktualisiere die Liste, um installierte Apps erneut zu laden.", "Actualiza la lista para volver a leer las apps instaladas.", "Actualisez la liste pour relire les applications installées.")
-    val resetFilter get() = text("Reset filtro", "Reset filter", "Filter zurücksetzen", "Restablecer filtro", "Réinitialiser le filtre")
+    val searchFilters
+        get() = text(
+            "Ricerca e filtri",
+            "Search and filters",
+            "Suche und Filter",
+            "Búsqueda y filtros",
+            "Recherche et filtres",
+        )
+    val suggestionsCleared
+        get() = text(
+            "Suggerimenti svuotati",
+            "Suggestions cleared",
+            "Vorschläge gelöscht",
+            "Sugerencias borradas",
+            "Suggestions effacées",
+        )
+    val frequentSearch
+        get() = text(
+            "Ricerca frequente: %s",
+            "Frequent search: %s",
+            "Häufige Suche: %s",
+            "Búsqueda frecuente: %s",
+            "Recherche fréquente : %s",
+        )
+    val removedFromFavorites
+        get() = text(
+            "Rimosso dai preferiti",
+            "Removed from favorites",
+            "Aus Favoriten entfernt",
+            "Eliminado de favoritos",
+            "Supprimé des favoris",
+        )
+    val exportReady
+        get() = text(
+            "Stato: pronto per invio.",
+            "Status: ready to send.",
+            "Status: bereit zum Senden.",
+            "Estado: listo para enviar.",
+            "État : prêt à envoyer.",
+        )
+    val resultsSummary
+        get() = text(
+            "Risultati: %d / %d",
+            "Results: %d / %d",
+            "Ergebnisse: %d / %d",
+            "Resultados: %d / %d",
+            "Résultats : %d / %d",
+        )
+    val noApps
+        get() = text(
+            "Nessuna app disponibile al momento.",
+            "No apps available right now.",
+            "Derzeit keine Apps verfügbar.",
+            "No hay apps disponibles.",
+            "Aucune application disponible pour le moment.",
+        )
+    val noResultsFor
+        get() = text(
+            "Nessun risultato per \"%s\".",
+            "No results for \"%s\".",
+            "Keine Ergebnisse für \"%s\".",
+            "Sin resultados para \"%s\".",
+            "Aucun résultat pour \"%s\".",
+        )
+    val changeFilter
+        get() = text(
+            "Rimuovi o cambia filtro per vedere altre app.",
+            "Remove or change the filter to see more apps.",
+            "Entferne oder ändere den Filter, um weitere Apps zu sehen.",
+            "Quita o cambia el filtro para ver más apps.",
+            "Supprimez ou modifiez le filtre pour voir d’autres applications.",
+        )
+    val refreshAppsHint
+        get() = text(
+            "Prova ad aggiornare la lista per rileggere le app installate.",
+            "Refresh the list to read installed apps again.",
+            "Aktualisiere die Liste, um installierte Apps erneut zu laden.",
+            "Actualiza la lista para volver a leer las apps instaladas.",
+            "Actualisez la liste pour relire les applications installées.",
+        )
+    val resetFilter
+        get() = text(
+            "Reset filtro",
+            "Reset filter",
+            "Filter zurücksetzen",
+            "Restablecer filtro",
+            "Réinitialiser le filtre",
+        )
     val refresh get() = text("Aggiorna", "Refresh", "Aktualisieren", "Actualizar", "Actualiser")
-    val logWrapLines get() = text("Avvolgi righe", "Wrap lines", "Zeilen umbrechen", "Ajustar líneas", "Renvoyer les lignes")
-    val logColorByLevel get() = text("Colora per livello", "Color by level", "Nach Ebene einfärben", "Colorear por nivel", "Colorer par niveau")
+    val logWrapLines
+        get() = text(
+            "Avvolgi righe",
+            "Wrap lines",
+            "Zeilen umbrechen",
+            "Ajustar líneas",
+            "Renvoyer les lignes",
+        )
+    val logColorByLevel
+        get() = text(
+            "Colora per livello",
+            "Color by level",
+            "Nach Ebene einfärben",
+            "Colorear por nivel",
+            "Colorer par niveau",
+        )
     val logTextSize get() = text("Dimensione testo", "Text size", "Textgröße", "Tamaño del texto", "Taille du texte")
-    val logTrimmed get() = text("Mostro solo le ultime 1500 righe del log per prestazioni.", "Showing only the latest 1500 log lines for performance.", "Aus Leistungsgründen werden nur die letzten 1500 Logzeilen angezeigt.", "Solo se muestran las últimas 1500 líneas del registro por rendimiento.", "Seules les 1500 dernières lignes du journal sont affichées pour les performances.")
-    val confirmCommand get() = text("Conferma comando", "Confirm command", "Befehl bestätigen", "Confirmar comando", "Confirmer la commande")
+    val logTrimmed
+        get() = text(
+            "Mostro solo le ultime 1500 righe del log per prestazioni.",
+            "Showing only the latest 1500 log lines for performance.",
+            "Aus Leistungsgründen werden nur die letzten 1500 Logzeilen angezeigt.",
+            "Solo se muestran las últimas 1500 líneas del registro por rendimiento.",
+            "Seules les 1500 dernières lignes du journal sont affichées pour les performances.",
+        )
+    val confirmCommand
+        get() = text(
+            "Conferma comando",
+            "Confirm command",
+            "Befehl bestätigen",
+            "Confirmar comando",
+            "Confirmer la commande",
+        )
     val execute get() = text("Esegui", "Run", "Ausführen", "Ejecutar", "Exécuter")
-    val executing get() = text("In esecuzione...", "Running...", "Wird ausgeführt...", "En ejecución...", "Exécution...")
+    val executing
+        get() = text(
+            "In esecuzione...",
+            "Running...",
+            "Wird ausgeführt...",
+            "En ejecución...",
+            "Exécution...",
+        )
     val cancel get() = text("Annulla", "Cancel", "Abbrechen", "Cancelar", "Annuler")
-    val privilegedCommand get() = text("Comando privilegiato", "Privileged command", "Privilegierter Befehl", "Comando privilegiado", "Commande privilégiée")
-    val standardCommand get() = text("Comando standard", "Standard command", "Standardbefehl", "Comando estándar", "Commande standard")
-    val waitForCommand get() = text("Attendi comando corrente", "Wait for the current command", "Warte auf den aktuellen Befehl", "Espera al comando actual", "Attendez la commande en cours")
-    val executeCommand get() = text("Esegui comando", "Run command", "Befehl ausführen", "Ejecutar comando", "Exécuter la commande")
+    val privilegedCommand
+        get() = text(
+            "Comando privilegiato",
+            "Privileged command",
+            "Privilegierter Befehl",
+            "Comando privilegiado",
+            "Commande privilégiée",
+        )
+    val standardCommand
+        get() = text(
+            "Comando standard",
+            "Standard command",
+            "Standardbefehl",
+            "Comando estándar",
+            "Commande standard",
+        )
+    val waitForCommand
+        get() = text(
+            "Attendi comando corrente",
+            "Wait for the current command",
+            "Warte auf den aktuellen Befehl",
+            "Espera al comando actual",
+            "Attendez la commande en cours",
+        )
+    val executeCommand
+        get() = text(
+            "Esegui comando",
+            "Run command",
+            "Befehl ausführen",
+            "Ejecutar comando",
+            "Exécuter la commande",
+        )
     val command get() = text("Comando", "Command", "Befehl", "Comando", "Commande")
-    val noTextOutput get() = text("Nessun output testuale", "No text output", "Keine Textausgabe", "Sin salida de texto", "Aucune sortie texte")
+    val noTextOutput
+        get() = text(
+            "Nessun output testuale",
+            "No text output",
+            "Keine Textausgabe",
+            "Sin salida de texto",
+            "Aucune sortie texte",
+        )
     val output get() = text("Output", "Output", "Ausgabe", "Salida", "Sortie")
     val errorOutput get() = text("Error output", "Error output", "Fehlerausgabe", "Salida de error", "Sortie d’erreur")
-    val exitCode get() = text("Exit code: %d", "Exit code: %d", "Exit-Code: %d", "Código de salida: %d", "Code de sortie : %d")
-    val packagesFound get() = text("Pacchetti trovati: %d", "Packages found: %d", "Gefundene Pakete: %d", "Paquetes encontrados: %d", "Paquets trouvés : %d")
-    val riskScanTitle get() = text("Scansione automatica permessi rischiosi", "Automatic risky-permission scan", "Automatischer Scan riskanter Berechtigungen", "Escaneo automático de permisos de riesgo", "Analyse automatique des permissions à risque")
-    val riskScanDescription get() = text("Analizza tutte le app installate e segnala permessi pericolosi o pattern potenzialmente malevoli.", "Analyze all installed apps and flag dangerous permissions or potentially malicious patterns.", "Analysiert alle installierten Apps und meldet gefährliche Berechtigungen oder potenziell schädliche Muster.", "Analiza todas las apps instaladas y señala permisos peligrosos o patrones potencialmente maliciosos.", "Analyse toutes les applications installées et signale les permissions dangereuses ou les motifs potentiellement malveillants.")
+    val exitCode
+        get() = text(
+            "Exit code: %d",
+            "Exit code: %d",
+            "Exit-Code: %d",
+            "Código de salida: %d",
+            "Code de sortie : %d",
+        )
+    val packagesFound
+        get() = text(
+            "Pacchetti trovati: %d",
+            "Packages found: %d",
+            "Gefundene Pakete: %d",
+            "Paquetes encontrados: %d",
+            "Paquets trouvés : %d",
+        )
+    val riskScanTitle
+        get() = text(
+            "Scansione automatica permessi rischiosi",
+            "Automatic risky-permission scan",
+            "Automatischer Scan riskanter Berechtigungen",
+            "Escaneo automático de permisos de riesgo",
+            "Analyse automatique des permissions à risque",
+        )
+    val riskScanDescription
+        get() = text(
+            "Analizza tutte le app installate e segnala permessi pericolosi o pattern potenzialmente malevoli.",
+            "Analyze all installed apps and flag dangerous permissions or potentially malicious patterns.",
+            "Analysiert alle installierten Apps und meldet gefährliche Berechtigungen oder potenziell schädliche Muster.",
+            "Analiza todas las apps instaladas y señala permisos peligrosos o patrones potencialmente maliciosos.",
+            "Analyse toutes les applications installées et signale les permissions dangereuses ou les motifs potentiellement malveillants.",
+        )
     val startScan get() = text("Avvia scansione", "Start scan", "Scan starten", "Iniciar escaneo", "Lancer l’analyse")
     val stopScan get() = text("Interrompi", "Stop", "Stopp", "Detener", "Arrêter")
-    val scanProgress get() = text("Scansione in corso: %d/%d app", "Scanning: %d/%d apps", "Scan läuft: %d/%d Apps", "Escaneando: %d/%d apps", "Analyse en cours : %d/%d applications")
+    val scanProgress
+        get() = text(
+            "Scansione in corso: %d/%d app",
+            "Scanning: %d/%d apps",
+            "Scan läuft: %d/%d Apps",
+            "Escaneando: %d/%d apps",
+            "Analyse en cours : %d/%d applications",
+        )
     val analysis get() = text("Analisi: %s", "Analysis: %s", "Analyse: %s", "Análisis: %s", "Analyse : %s")
-    val riskOnly get() = text("Solo app a rischio", "Risky apps only", "Nur riskante Apps", "Solo apps de riesgo", "Applications à risque uniquement")
+    val riskOnly
+        get() = text(
+            "Solo app a rischio",
+            "Risky apps only",
+            "Nur riskante Apps",
+            "Solo apps de riesgo",
+            "Applications à risque uniquement",
+        )
     val allApps get() = text("Mostra tutte", "Show all", "Alle anzeigen", "Mostrar todas", "Tout afficher")
-    val additionalFindings get() = text("+%d finding aggiuntivi nel report condivisibile", "+%d additional findings in the shareable report", "+%d zusätzliche Findings im teilbaren Bericht", "+%d hallazgos adicionales en el informe compartible", "+%d findings supplémentaires dans le rapport partageable")
-    val riskSummary get() = text("Riepilogo: %d app a rischio • Critici %d • Alti %d • Medi %d", "Summary: %d risky apps • Critical %d • High %d • Medium %d", "Zusammenfassung: %d riskante Apps • Kritisch %d • Hoch %d • Mittel %d", "Resumen: %d apps de riesgo • Críticas %d • Altas %d • Medias %d", "Résumé : %d applications à risque • Critiques %d • Élevées %d • Moyennes %d")
-    val noRiskResults get() = text("Nessun risultato con i filtri correnti.", "No results with the current filters.", "Keine Ergebnisse mit den aktuellen Filtern.", "No hay resultados con los filtros actuales.", "Aucun résultat avec les filtres actuels.")
-    val noPermissions get() = text("Nessun permesso disponibile.", "No permissions available.", "Keine Berechtigungen verfügbar.", "No hay permisos disponibles.", "Aucune permission disponible.")
-    val riskFilterHint get() = text("Prova a disattivare \"Solo app a rischio\" o a cambiare ricerca.", "Disable \"Risky apps only\" or change the search.", "Deaktiviere \"Nur riskante Apps\" oder ändere die Suche.", "Desactiva \"Solo apps de riesgo\" o cambia la búsqueda.", "Désactivez \"Applications à risque uniquement\" ou modifiez la recherche.")
-    val refreshPermissionsHint get() = text("Aggiorna i dati permessi per iniziare l'analisi.", "Refresh permissions data to start the analysis.", "Aktualisiere die Berechtigungsdaten, um die Analyse zu starten.", "Actualiza los datos de permisos para iniciar el análisis.", "Actualisez les données de permissions pour commencer l’analyse.")
-    val permissionsExportSummary get() = text("Report permessi esportato in formato testuale, già pronto alla condivisione.", "Permissions report exported as text, ready to share.", "Berechtigungsbericht als Text exportiert und bereit zum Teilen.", "Informe de permisos exportado en texto, listo para compartir.", "Rapport de permissions exporté en texte, prêt à être partagé.")
-    val permissionsExportDetails get() = text("Contiene riepilogo rischi (critici/alti/medi) e lista permessi per app.", "Contains risk summary (critical/high/medium) and permissions per app.", "Enthält eine Risikoübersicht (kritisch/hoch/mittel) und Berechtigungen pro App.", "Contiene resumen de riesgos (críticos/altos/medios) y permisos por app.", "Contient un résumé des risques (critiques/élevés/moyens) et les permissions par application.")
-    val readableFormat get() = text("Formato leggibile: blocchi separati per app e finding.", "Readable format: separate blocks for each app and finding.", "Lesbares Format: getrennte Blöcke für Apps und Findings.", "Formato legible: bloques separados por app y hallazgo.", "Format lisible : blocs séparés par application et finding.")
-    val appsExportSummary get() = text("Esportazione completata. Puoi usare il file per backup o condivisione tecnica.", "Export completed. You can use the file for backup or technical sharing.", "Export abgeschlossen. Du kannst die Datei für Backup oder technisches Teilen verwenden.", "Exportación completada. Puedes usar el archivo para copia o uso técnico.", "Exportation terminée. Vous pouvez utiliser le fichier pour sauvegarde ou partage technique.")
-    val appsExportContent get() = text("Contenuto: lista applicazioni installate (label, package, path APK).", "Content: installed application list (label, package, APK path).", "Inhalt: Liste installierter Anwendungen (Label, Package, APK-Pfad).", "Contenido: lista de aplicaciones instaladas (etiqueta, package, ruta APK).", "Contenu : liste des applications installées (libellé, package, chemin APK).")
+    val additionalFindings
+        get() = text(
+            "+%d finding aggiuntivi nel report condivisibile",
+            "+%d additional findings in the shareable report",
+            "+%d zusätzliche Findings im teilbaren Bericht",
+            "+%d hallazgos adicionales en el informe compartible",
+            "+%d findings supplémentaires dans le rapport partageable",
+        )
+    val riskSummary
+        get() = text(
+            "Riepilogo: %d app a rischio • Critici %d • Alti %d • Medi %d",
+            "Summary: %d risky apps • Critical %d • High %d • Medium %d",
+            "Zusammenfassung: %d riskante Apps • Kritisch %d • Hoch %d • Mittel %d",
+            "Resumen: %d apps de riesgo • Críticas %d • Altas %d • Medias %d",
+            "Résumé : %d applications à risque • Critiques %d • Élevées %d • Moyennes %d",
+        )
+    val noRiskResults
+        get() = text(
+            "Nessun risultato con i filtri correnti.",
+            "No results with the current filters.",
+            "Keine Ergebnisse mit den aktuellen Filtern.",
+            "No hay resultados con los filtros actuales.",
+            "Aucun résultat avec les filtres actuels.",
+        )
+    val noPermissions
+        get() = text(
+            "Nessun permesso disponibile.",
+            "No permissions available.",
+            "Keine Berechtigungen verfügbar.",
+            "No hay permisos disponibles.",
+            "Aucune permission disponible.",
+        )
+    val riskFilterHint
+        get() = text(
+            "Prova a disattivare \"Solo app a rischio\" o a cambiare ricerca.",
+            "Disable \"Risky apps only\" or change the search.",
+            "Deaktiviere \"Nur riskante Apps\" oder ändere die Suche.",
+            "Desactiva \"Solo apps de riesgo\" o cambia la búsqueda.",
+            "Désactivez \"Applications à risque uniquement\" ou modifiez la recherche.",
+        )
+    val refreshPermissionsHint
+        get() = text(
+            "Aggiorna i dati permessi per iniziare l'analisi.",
+            "Refresh permissions data to start the analysis.",
+            "Aktualisiere die Berechtigungsdaten, um die Analyse zu starten.",
+            "Actualiza los datos de permisos para iniciar el análisis.",
+            "Actualisez les données de permissions pour commencer l’analyse.",
+        )
+    val permissionsExportSummary
+        get() = text(
+            "Report permessi esportato in formato testuale, già pronto alla condivisione.",
+            "Permissions report exported as text, ready to share.",
+            "Berechtigungsbericht als Text exportiert und bereit zum Teilen.",
+            "Informe de permisos exportado en texto, listo para compartir.",
+            "Rapport de permissions exporté en texte, prêt à être partagé.",
+        )
+    val permissionsExportDetails
+        get() = text(
+            "Contiene riepilogo rischi (critici/alti/medi) e lista permessi per app.",
+            "Contains risk summary (critical/high/medium) and permissions per app.",
+            "Enthält eine Risikoübersicht (kritisch/hoch/mittel) und Berechtigungen pro App.",
+            "Contiene resumen de riesgos (críticos/altos/medios) y permisos por app.",
+            "Contient un résumé des risques (critiques/élevés/moyens) et les permissions par application.",
+        )
+    val readableFormat
+        get() = text(
+            "Formato leggibile: blocchi separati per app e finding.",
+            "Readable format: separate blocks for each app and finding.",
+            "Lesbares Format: getrennte Blöcke für Apps und Findings.",
+            "Formato legible: bloques separados por app y hallazgo.",
+            "Format lisible : blocs séparés par application et finding.",
+        )
+    val appsExportSummary
+        get() = text(
+            "Esportazione completata. Puoi usare il file per backup o condivisione tecnica.",
+            "Export completed. You can use the file for backup or technical sharing.",
+            "Export abgeschlossen. Du kannst die Datei für Backup oder technisches Teilen verwenden.",
+            "Exportación completada. Puedes usar el archivo para copia o uso técnico.",
+            "Exportation terminée. Vous pouvez utiliser le fichier pour sauvegarde ou partage technique.",
+        )
+    val appsExportContent
+        get() = text(
+            "Contenuto: lista applicazioni installate (label, package, path APK).",
+            "Content: installed application list (label, package, APK path).",
+            "Inhalt: Liste installierter Anwendungen (Label, Package, APK-Pfad).",
+            "Contenido: lista de aplicaciones instaladas (etiqueta, package, ruta APK).",
+            "Contenu : liste des applications installées (libellé, package, chemin APK).",
+        )
     val selected get() = text("✔︎ %s", "✔︎ %s", "✔︎ %s", "✔︎ %s", "✔︎ %s")
     val bullet get() = text("• %s", "• %s", "• %s", "• %s", "• %s")
     val missingValue get() = text("?", "?", "?", "?", "?")
@@ -133,7 +659,14 @@ class ScreenUiStrings(private val language: String) {
     val summaryBullet get() = text("• %s: %d/%d", "• %s: %d/%d", "• %s: %d/%d", "• %s: %d/%d", "• %s : %d/%d")
     val additionalCount get() = text("+%d", "+%d", "+%d", "+%d", "+%d")
     val rootEvidence get() = text("%s: %s — %s", "%s: %s — %s", "%s: %s — %s", "%s: %s — %s", "%s : %s — %s")
-    val commandUnavailable get() = text("Comando non disponibile", "Command unavailable", "Befehl nicht verfügbar", "Comando no disponible", "Commande indisponible")
+    val commandUnavailable
+        get() = text(
+            "Comando non disponibile",
+            "Command unavailable",
+            "Befehl nicht verfügbar",
+            "Comando no disponible",
+            "Commande indisponible",
+        )
     val rootTag get() = text("ROOT", "ROOT", "ROOT", "ROOT", "ROOT")
     val safeTag get() = text("SAFE", "SAFE", "SICHER", "SEGURO", "SÛR")
     val unavailableTag get() = text("NON DISP.", "UNAVAILABLE", "NICHT VERF.", "NO DISP.", "INDISP.")
@@ -142,9 +675,30 @@ class ScreenUiStrings(private val language: String) {
     val errorDetail get() = text("%s: %s", "%s: %s", "%s: %s", "%s: %s", "%s : %s")
     val noTargetValue get() = text("-", "-", "-", "-", "-")
     val permissionsCount get() = text("%d perm", "%d permissions", "%d Berechtigungen", "%d permisos", "%d permissions")
-    val permissionsRiskCount get() = text("%d perm • rischi %d", "%d permissions • risks %d", "%d Berechtigungen • Risiken %d", "%d permisos • riesgos %d", "%d permissions • risques %d")
-    val risksDetected get() = text("Rischi rilevati: %d (Critici %d, Alti %d, Medi %d)", "Risks detected: %d (Critical %d, High %d, Medium %d)", "Risiken: %d (Kritisch %d, Hoch %d, Mittel %d)", "Riesgos detectados: %d (Críticos %d, Altos %d, Medios %d)", "Risques détectés : %d (Critiques %d, Élevés %d, Moyens %d)")
-    val findingAdditional get() = text("+%d finding aggiuntivi nel report condivisibile", "+%d additional findings in the shareable report", "+%d zusätzliche Findings im teilbaren Bericht", "+%d hallazgos adicionales en el informe compartible", "+%d findings supplémentaires dans le rapport partageable")
+    val permissionsRiskCount
+        get() = text(
+            "%d perm • rischi %d",
+            "%d permissions • risks %d",
+            "%d Berechtigungen • Risiken %d",
+            "%d permisos • riesgos %d",
+            "%d permissions • risques %d",
+        )
+    val risksDetected
+        get() = text(
+            "Rischi rilevati: %d (Critici %d, Alti %d, Medi %d)",
+            "Risks detected: %d (Critical %d, High %d, Medium %d)",
+            "Risiken: %d (Kritisch %d, Hoch %d, Mittel %d)",
+            "Riesgos detectados: %d (Críticos %d, Altos %d, Medios %d)",
+            "Risques détectés : %d (Critiques %d, Élevés %d, Moyens %d)",
+        )
+    val findingAdditional
+        get() = text(
+            "+%d finding aggiuntivi nel report condivisibile",
+            "+%d additional findings in the shareable report",
+            "+%d zusätzliche Findings im teilbaren Bericht",
+            "+%d hallazgos adicionales en el informe compartible",
+            "+%d findings supplémentaires dans le rapport partageable",
+        )
     val riskCritical get() = text("CRITICO", "CRITICAL", "KRITISCH", "CRÍTICO", "CRITIQUE")
     val riskHigh get() = text("ALTO", "HIGH", "HOCH", "ALTO", "ÉLEVÉ")
     val riskMedium get() = text("MEDIO", "MEDIUM", "MITTEL", "MEDIO", "MOYEN")
@@ -204,94 +758,222 @@ data class PenTestUiStrings(
     val reportSavedDetails: String,
     val statusOk: String,
     val statusError: String,
-    val statusQueued: String
+    val statusQueued: String,
 ) {
     companion object {
         fun forLanguage(language: String): PenTestUiStrings = when (language.lowercase().take(2)) {
             "it" -> PenTestUiStrings(
-                "Selezione app", "Scelta test", "Esecuzione", "Report",
+                "Selezione app",
+                "Scelta test",
+                "Esecuzione",
+                "Report",
                 "Step 1: scegli un'app target per test manuali, oppure salta direttamente allo scan automatico.",
-                "Step 2: seleziona i controlli PenTest da eseguire.", "Scansione automatica",
+                "Step 2: seleziona i controlli PenTest da eseguire.",
+                "Scansione automatica",
                 "Avvia una scansione semplice su tutte le app installate (%d). Se non selezioni test, verranno usati automaticamente tutti.",
-                "Vai ai test", "Auto scan", "Seleziona tutti", "Svuota", "Test selezionati: %d/%d",
-                "Esegui test selezionati", "Scansione automatica (tutte le app)", "Interrompi scansione",
-                "Step 3: monitoraggio scansione automatica su tutte le app.", "Step 3: monitoraggio dei PenTest eseguiti.",
-                "Controlli completati: %d/%d • App %d/%d", "Analisi: %s", "Anomalie trovate: %d • Verifiche OK: %d",
-                "App analizzate: %d • App con anomalie: %d", "Nessuna app con anomalie rilevate dai test selezionati.",
-                "Modifica test", "Riesegui auto scan", "Riesegui", "Interrompi scansione automatica", "Vai al report",
-                "Nessuna esecuzione", "Avvia i test manuali su un target o la scansione automatica per ottenere i risultati.",
-                "Nessuna anomalia rilevata su %s", "Possibile vulnerabilita da approfondire su %s",
-                "Step 4: visualizzazione risultati e report condivisibile.", "Torna esecuzione", "Nuova run",
-                "Stato report • %d/%d OK • %d errori", "Modalita: scansione automatica • App analizzate: %d",
-                "Report vuoto", "Nessun test eseguito. Puoi comunque condividere/esportare questo report formattato.",
-                "Report PenTest salvati", "Storico report visibile in app. Condividi ogni report con l'icona dedicata.",
-                "Report #%d", "Target singolo", "Test %d • OK %d • Errori %d • In coda %d", "+%d test aggiuntivi",
-                "Report PenTest salvato correttamente.", "Contiene esiti check, target analizzati e dettaglio errori.",
-                "OK", "Errore", "In coda"
+                "Vai ai test",
+                "Auto scan",
+                "Seleziona tutti",
+                "Svuota",
+                "Test selezionati: %d/%d",
+                "Esegui test selezionati",
+                "Scansione automatica (tutte le app)",
+                "Interrompi scansione",
+                "Step 3: monitoraggio scansione automatica su tutte le app.",
+                "Step 3: monitoraggio dei PenTest eseguiti.",
+                "Controlli completati: %d/%d • App %d/%d",
+                "Analisi: %s",
+                "Anomalie trovate: %d • Verifiche OK: %d",
+                "App analizzate: %d • App con anomalie: %d",
+                "Nessuna app con anomalie rilevate dai test selezionati.",
+                "Modifica test",
+                "Riesegui auto scan",
+                "Riesegui",
+                "Interrompi scansione automatica",
+                "Vai al report",
+                "Nessuna esecuzione",
+                "Avvia i test manuali su un target o la scansione automatica per ottenere i risultati.",
+                "Nessuna anomalia rilevata su %s",
+                "Possibile vulnerabilita da approfondire su %s",
+                "Step 4: visualizzazione risultati e report condivisibile.",
+                "Torna esecuzione",
+                "Nuova run",
+                "Stato report • %d/%d OK • %d errori",
+                "Modalita: scansione automatica • App analizzate: %d",
+                "Report vuoto",
+                "Nessun test eseguito. Puoi comunque condividere/esportare questo report formattato.",
+                "Report PenTest salvati",
+                "Storico report visibile in app. Condividi ogni report con l'icona dedicata.",
+                "Report #%d",
+                "Target singolo",
+                "Test %d • OK %d • Errori %d • In coda %d",
+                "+%d test aggiuntivi",
+                "Report PenTest salvato correttamente.",
+                "Contiene esiti check, target analizzati e dettaglio errori.",
+                "OK",
+                "Errore",
+                "In coda",
             )
+
             "de" -> PenTestUiStrings(
-                "App-Auswahl", "Prüfungen auswählen", "Ausführung", "Bericht",
+                "App-Auswahl",
+                "Prüfungen auswählen",
+                "Ausführung",
+                "Bericht",
                 "Schritt 1: Wähle eine Ziel-App für manuelle Tests oder starte direkt den automatischen Scan.",
-                "Schritt 2: Wähle die auszuführenden PenTest-Prüfungen.", "Automatischer Scan",
+                "Schritt 2: Wähle die auszuführenden PenTest-Prüfungen.",
+                "Automatischer Scan",
                 "Einfachen Scan über alle installierten Apps starten (%d). Ohne Auswahl werden alle Prüfungen verwendet.",
-                "Zu den Prüfungen", "Auto-Scan", "Alle auswählen", "Leeren", "Ausgewählte Tests: %d/%d",
-                "Ausgewählte Tests ausführen", "Automatischer Scan (alle Apps)", "Scan stoppen",
-                "Schritt 3: Automatischen Scan aller Apps überwachen.", "Schritt 3: Ausgeführte PenTests überwachen.",
-                "Prüfungen abgeschlossen: %d/%d • Apps %d/%d", "Analyse: %s", "Gefundene Auffälligkeiten: %d • OK-Prüfungen: %d",
-                "Analysierte Apps: %d • Apps mit Auffälligkeiten: %d", "Keine Auffälligkeiten in den ausgewählten Tests gefunden.",
-                "Prüfungen ändern", "Auto-Scan wiederholen", "Wiederholen", "Automatischen Scan stoppen", "Zum Bericht",
-                "Keine Ausführung", "Manuelle Tests für ein Ziel oder den automatischen Scan starten, um Ergebnisse zu erhalten.",
-                "Keine Auffälligkeit bei %s", "Mögliche Schwachstelle bei %s",
-                "Schritt 4: Ergebnisse und teilbaren Bericht anzeigen.", "Zur Ausführung", "Neuer Lauf",
-                "Berichtstatus • %d/%d OK • %d Fehler", "Modus: automatischer Scan • Analysierte Apps: %d",
-                "Leerer Bericht", "Keine Tests ausgeführt. Dieser formatierte Bericht kann trotzdem geteilt/exportiert werden.",
-                "Gespeicherte PenTest-Berichte", "Berichtsverlauf in der App. Teile jeden Bericht über das entsprechende Symbol.",
-                "Bericht #%d", "Einzelnes Ziel", "Tests %d • OK %d • Fehler %d • Warteschlange %d", "+%d weitere Tests",
-                "PenTest-Bericht erfolgreich gespeichert.", "Enthält Prüfergebnisse, analysierte Ziele und Fehlerdetails.",
-                "OK", "Fehler", "Warteschlange"
+                "Zu den Prüfungen",
+                "Auto-Scan",
+                "Alle auswählen",
+                "Leeren",
+                "Ausgewählte Tests: %d/%d",
+                "Ausgewählte Tests ausführen",
+                "Automatischer Scan (alle Apps)",
+                "Scan stoppen",
+                "Schritt 3: Automatischen Scan aller Apps überwachen.",
+                "Schritt 3: Ausgeführte PenTests überwachen.",
+                "Prüfungen abgeschlossen: %d/%d • Apps %d/%d",
+                "Analyse: %s",
+                "Gefundene Auffälligkeiten: %d • OK-Prüfungen: %d",
+                "Analysierte Apps: %d • Apps mit Auffälligkeiten: %d",
+                "Keine Auffälligkeiten in den ausgewählten Tests gefunden.",
+                "Prüfungen ändern",
+                "Auto-Scan wiederholen",
+                "Wiederholen",
+                "Automatischen Scan stoppen",
+                "Zum Bericht",
+                "Keine Ausführung",
+                "Manuelle Tests für ein Ziel oder den automatischen Scan starten, um Ergebnisse zu erhalten.",
+                "Keine Auffälligkeit bei %s",
+                "Mögliche Schwachstelle bei %s",
+                "Schritt 4: Ergebnisse und teilbaren Bericht anzeigen.",
+                "Zur Ausführung",
+                "Neuer Lauf",
+                "Berichtstatus • %d/%d OK • %d Fehler",
+                "Modus: automatischer Scan • Analysierte Apps: %d",
+                "Leerer Bericht",
+                "Keine Tests ausgeführt. Dieser formatierte Bericht kann trotzdem geteilt/exportiert werden.",
+                "Gespeicherte PenTest-Berichte",
+                "Berichtsverlauf in der App. Teile jeden Bericht über das entsprechende Symbol.",
+                "Bericht #%d",
+                "Einzelnes Ziel",
+                "Tests %d • OK %d • Fehler %d • Warteschlange %d",
+                "+%d weitere Tests",
+                "PenTest-Bericht erfolgreich gespeichert.",
+                "Enthält Prüfergebnisse, analysierte Ziele und Fehlerdetails.",
+                "OK",
+                "Fehler",
+                "Warteschlange",
             )
+
             "es" -> PenTestUiStrings(
-                "Selección de app", "Elegir pruebas", "Ejecución", "Informe",
+                "Selección de app",
+                "Elegir pruebas",
+                "Ejecución",
+                "Informe",
                 "Paso 1: elige una app objetivo para pruebas manuales o inicia directamente el escaneo automático.",
-                "Paso 2: selecciona las comprobaciones PenTest que se ejecutarán.", "Escaneo automático",
+                "Paso 2: selecciona las comprobaciones PenTest que se ejecutarán.",
+                "Escaneo automático",
                 "Inicia un escaneo sencillo de todas las apps instaladas (%d). Sin selección se usarán todas las pruebas.",
-                "Ir a las pruebas", "Escaneo automático", "Seleccionar todo", "Vaciar", "Pruebas seleccionadas: %d/%d",
-                "Ejecutar pruebas seleccionadas", "Escaneo automático (todas las apps)", "Detener escaneo",
-                "Paso 3: supervisión del escaneo automático de todas las apps.", "Paso 3: supervisión de los PenTests ejecutados.",
-                "Comprobaciones completadas: %d/%d • Apps %d/%d", "Analizando: %s", "Anomalías encontradas: %d • Comprobaciones OK: %d",
-                "Apps analizadas: %d • Apps con anomalías: %d", "No se detectaron anomalías en las pruebas seleccionadas.",
-                "Modificar pruebas", "Repetir escaneo automático", "Repetir", "Detener escaneo automático", "Ir al informe",
-                "Ninguna ejecución", "Inicia pruebas manuales sobre un objetivo o el escaneo automático para obtener resultados.",
-                "No se detectaron anomalías en %s", "Posible vulnerabilidad para revisar en %s",
-                "Paso 4: visualización de resultados e informe compartible.", "Volver a la ejecución", "Nueva ejecución",
-                "Estado del informe • %d/%d OK • %d errores", "Modo: escaneo automático • Apps analizadas: %d",
-                "Informe vacío", "No se ejecutaron pruebas. Aun así puedes compartir/exportar este informe formateado.",
-                "Informes PenTest guardados", "Historial de informes en la app. Comparte cada informe con su icono.",
-                "Informe #%d", "Objetivo único", "Pruebas %d • OK %d • Errores %d • En cola %d", "+%d pruebas adicionales",
-                "Informe PenTest guardado correctamente.", "Contiene resultados, objetivos analizados y detalles de errores.",
-                "OK", "Error", "En cola"
+                "Ir a las pruebas",
+                "Escaneo automático",
+                "Seleccionar todo",
+                "Vaciar",
+                "Pruebas seleccionadas: %d/%d",
+                "Ejecutar pruebas seleccionadas",
+                "Escaneo automático (todas las apps)",
+                "Detener escaneo",
+                "Paso 3: supervisión del escaneo automático de todas las apps.",
+                "Paso 3: supervisión de los PenTests ejecutados.",
+                "Comprobaciones completadas: %d/%d • Apps %d/%d",
+                "Analizando: %s",
+                "Anomalías encontradas: %d • Comprobaciones OK: %d",
+                "Apps analizadas: %d • Apps con anomalías: %d",
+                "No se detectaron anomalías en las pruebas seleccionadas.",
+                "Modificar pruebas",
+                "Repetir escaneo automático",
+                "Repetir",
+                "Detener escaneo automático",
+                "Ir al informe",
+                "Ninguna ejecución",
+                "Inicia pruebas manuales sobre un objetivo o el escaneo automático para obtener resultados.",
+                "No se detectaron anomalías en %s",
+                "Posible vulnerabilidad para revisar en %s",
+                "Paso 4: visualización de resultados e informe compartible.",
+                "Volver a la ejecución",
+                "Nueva ejecución",
+                "Estado del informe • %d/%d OK • %d errores",
+                "Modo: escaneo automático • Apps analizadas: %d",
+                "Informe vacío",
+                "No se ejecutaron pruebas. Aun así puedes compartir/exportar este informe formateado.",
+                "Informes PenTest guardados",
+                "Historial de informes en la app. Comparte cada informe con su icono.",
+                "Informe #%d",
+                "Objetivo único",
+                "Pruebas %d • OK %d • Errores %d • En cola %d",
+                "+%d pruebas adicionales",
+                "Informe PenTest guardado correctamente.",
+                "Contiene resultados, objetivos analizados y detalles de errores.",
+                "OK",
+                "Error",
+                "En cola",
             )
+
             "fr" -> PenTestUiStrings(
-                "Sélection de l'app", "Choix des tests", "Exécution", "Rapport",
+                "Sélection de l'app",
+                "Choix des tests",
+                "Exécution",
+                "Rapport",
                 "Étape 1 : choisissez une app cible pour les tests manuels ou lancez directement l'analyse automatique.",
-                "Étape 2 : sélectionnez les contrôles PenTest à exécuter.", "Analyse automatique",
+                "Étape 2 : sélectionnez les contrôles PenTest à exécuter.",
+                "Analyse automatique",
                 "Lancer une analyse simple de toutes les apps installées (%d). Sans sélection, tous les tests seront utilisés.",
-                "Aller aux tests", "Analyse automatique", "Tout sélectionner", "Vider", "Tests sélectionnés : %d/%d",
-                "Exécuter les tests sélectionnés", "Analyse automatique (toutes les apps)", "Arrêter l'analyse",
-                "Étape 3 : suivi de l'analyse automatique de toutes les apps.", "Étape 3 : suivi des PenTests exécutés.",
-                "Contrôles terminés : %d/%d • Apps %d/%d", "Analyse : %s", "Anomalies trouvées : %d • Contrôles OK : %d",
-                "Apps analysées : %d • Apps avec anomalies : %d", "Aucune anomalie détectée dans les tests sélectionnés.",
-                "Modifier les tests", "Relancer l'analyse automatique", "Relancer", "Arrêter l'analyse automatique", "Aller au rapport",
-                "Aucune exécution", "Lancez les tests manuels sur une cible ou l'analyse automatique pour obtenir des résultats.",
-                "Aucune anomalie détectée sur %s", "Vulnérabilité possible à examiner sur %s",
-                "Étape 4 : afficher les résultats et le rapport partageable.", "Retour à l'exécution", "Nouvelle exécution",
-                "État du rapport • %d/%d OK • %d erreurs", "Mode : analyse automatique • Apps analysées : %d",
-                "Rapport vide", "Aucun test exécuté. Vous pouvez tout de même partager/exporter ce rapport formaté.",
-                "Rapports PenTest enregistrés", "Historique des rapports dans l'app. Partagez chaque rapport avec son icône.",
-                "Rapport #%d", "Cible unique", "Tests %d • OK %d • Erreurs %d • En attente %d", "+%d tests supplémentaires",
-                "Rapport PenTest enregistré.", "Contient les résultats, les cibles analysées et les détails des erreurs.",
-                "OK", "Erreur", "En attente"
+                "Aller aux tests",
+                "Analyse automatique",
+                "Tout sélectionner",
+                "Vider",
+                "Tests sélectionnés : %d/%d",
+                "Exécuter les tests sélectionnés",
+                "Analyse automatique (toutes les apps)",
+                "Arrêter l'analyse",
+                "Étape 3 : suivi de l'analyse automatique de toutes les apps.",
+                "Étape 3 : suivi des PenTests exécutés.",
+                "Contrôles terminés : %d/%d • Apps %d/%d",
+                "Analyse : %s",
+                "Anomalies trouvées : %d • Contrôles OK : %d",
+                "Apps analysées : %d • Apps avec anomalies : %d",
+                "Aucune anomalie détectée dans les tests sélectionnés.",
+                "Modifier les tests",
+                "Relancer l'analyse automatique",
+                "Relancer",
+                "Arrêter l'analyse automatique",
+                "Aller au rapport",
+                "Aucune exécution",
+                "Lancez les tests manuels sur une cible ou l'analyse automatique pour obtenir des résultats.",
+                "Aucune anomalie détectée sur %s",
+                "Vulnérabilité possible à examiner sur %s",
+                "Étape 4 : afficher les résultats et le rapport partageable.",
+                "Retour à l'exécution",
+                "Nouvelle exécution",
+                "État du rapport • %d/%d OK • %d erreurs",
+                "Mode : analyse automatique • Apps analysées : %d",
+                "Rapport vide",
+                "Aucun test exécuté. Vous pouvez tout de même partager/exporter ce rapport formaté.",
+                "Rapports PenTest enregistrés",
+                "Historique des rapports dans l'app. Partagez chaque rapport avec son icône.",
+                "Rapport #%d",
+                "Cible unique",
+                "Tests %d • OK %d • Erreurs %d • En attente %d",
+                "+%d tests supplémentaires",
+                "Rapport PenTest enregistré.",
+                "Contient les résultats, les cibles analysées et les détails des erreurs.",
+                "OK",
+                "Erreur",
+                "En attente",
             )
+
             else -> PenTestUiStrings(
                 "App selection", "Choose checks", "Execution", "Report",
                 "Step 1: choose a target app for manual tests, or start the automatic scan directly.",
@@ -311,7 +993,7 @@ data class PenTestUiStrings(
                 "Saved PenTest reports", "Report history in the app. Share each report with its dedicated icon.",
                 "Report #%d", "Single target", "Tests %d • OK %d • Errors %d • Queued %d", "+%d additional tests",
                 "PenTest report saved successfully.", "Contains check results, analyzed targets and error details.",
-                "OK", "Error", "Queued"
+                "OK", "Error", "Queued",
             )
         }
     }
@@ -561,7 +1243,7 @@ data class Strings(
     val penTestErrorContentDescription: String = "Error",
     val penTestQueuedContentDescription: String = "Queued",
     val penTestPendingContentDescription: String = "Pending",
-    val penTestProgressSummary: String = "%1${'$'}d successful, %2${'$'}d errors, %3${'$'}d queued"
+    val penTestProgressSummary: String = "%1${'$'}d successful, %2${'$'}d errors, %3${'$'}d queued",
 )
 
 val LocalStrings = staticCompositionLocalOf { stringsFor("en") }
@@ -603,8 +1285,22 @@ private val itStrings = Strings(
     rootPrivilegeTest = "Prova accesso root",
     rootPassiveHint = "Le verifiche passive non richiedono privilegi.",
     rootChecking = "Verifica root in corso…",
-    rootCheckLabels = mapOf("SU_BINARY" to "Binario su", "BUSYBOX" to "BusyBox", "SUDO" to "sudo", "ROOT_MANAGER" to "Gestore root", "MAGISK_TRACES" to "Tracce Magisk", "ROOTBEER" to "RootBeer", "ROOT_ACCESS" to "Accesso root"),
-    rootOutcomeLabels = mapOf("DETECTED" to "Rilevato", "NOT_DETECTED" to "Non rilevato", "DENIED" to "Negato", "TIMEOUT" to "Timeout", "UNAVAILABLE" to "Non eseguito"),
+    rootCheckLabels = mapOf(
+        "SU_BINARY" to "Binario su",
+        "BUSYBOX" to "BusyBox",
+        "SUDO" to "sudo",
+        "ROOT_MANAGER" to "Gestore root",
+        "MAGISK_TRACES" to "Tracce Magisk",
+        "ROOTBEER" to "RootBeer",
+        "ROOT_ACCESS" to "Accesso root",
+    ),
+    rootOutcomeLabels = mapOf(
+        "DETECTED" to "Rilevato",
+        "NOT_DETECTED" to "Non rilevato",
+        "DENIED" to "Negato",
+        "TIMEOUT" to "Timeout",
+        "UNAVAILABLE" to "Non eseguito",
+    ),
     playIntegrityTitle = "Play Integrity",
     playIntegrityBasic = "basicIntegrity",
     playIntegrityDevice = "deviceIntegrity",
@@ -720,7 +1416,7 @@ private val itStrings = Strings(
     faqItems = listOf(
         "Serve il root?" to "Alcune funzioni (Trick, comandi avanzati) richiedono root; le altre funzionano anche senza.",
         "Cosa restituisce Play Integrity?" to "Un token JWS da validare lato backend; qui vedi il token ricevuto.",
-        "Posso danneggiare il dispositivo?" to "Comandi invasivi possono riavviare o modificare impostazioni. Usali solo se sai cosa stai facendo."
+        "Posso danneggiare il dispositivo?" to "Comandi invasivi possono riavviare o modificare impostazioni. Usali solo se sai cosa stai facendo.",
     ),
     permissionsSearch = "Cerca app o permesso",
     permissionsExpandedAppLabel = "%s · %s",
@@ -742,7 +1438,7 @@ private val itStrings = Strings(
         "manifest_flags" to ("Analisi manifest" to "Verifica flag debuggable/backup/exported e schema di deeplink."),
         "file_scout" to ("File sensibili" to "Cerca log, backup e database world-readable nel sandbox dell'app."),
         "network_monitor" to ("Superficie rete" to "Suggerisce proxy/traffic sniffing e verifica pinning TLS."),
-        "permission_risk" to ("Rischio permessi" to "Valuta i permessi richiesti e segnala combinazioni potenzialmente abusive.")
+        "permission_risk" to ("Rischio permessi" to "Valuta i permessi richiesti e segnala combinazioni potenzialmente abusive."),
     ),
     navApk = "APK",
     apkSearch = "Cerca app o package",
@@ -830,7 +1526,7 @@ private val itStrings = Strings(
     penTestPendingContentDescription = "In attesa",
     penTestProgressSummary = "%1${'$'}d riusciti, %2${'$'}d errori, %3${'$'}d in coda",
     activityUi = ActivityUiStrings("it"),
-    penTestUi = PenTestUiStrings.forLanguage("it")
+    penTestUi = PenTestUiStrings.forLanguage("it"),
 )
 
 private val enStrings = Strings(
@@ -860,8 +1556,22 @@ private val enStrings = Strings(
     rootPrivilegeTest = "Test root access",
     rootPassiveHint = "Passive checks do not request privileges.",
     rootChecking = "Checking root…",
-    rootCheckLabels = mapOf("SU_BINARY" to "su binary", "BUSYBOX" to "BusyBox", "SUDO" to "sudo", "ROOT_MANAGER" to "Root manager", "MAGISK_TRACES" to "Magisk traces", "ROOTBEER" to "RootBeer", "ROOT_ACCESS" to "Root access"),
-    rootOutcomeLabels = mapOf("DETECTED" to "Detected", "NOT_DETECTED" to "Not detected", "DENIED" to "Denied", "TIMEOUT" to "Timeout", "UNAVAILABLE" to "Not run"),
+    rootCheckLabels = mapOf(
+        "SU_BINARY" to "su binary",
+        "BUSYBOX" to "BusyBox",
+        "SUDO" to "sudo",
+        "ROOT_MANAGER" to "Root manager",
+        "MAGISK_TRACES" to "Magisk traces",
+        "ROOTBEER" to "RootBeer",
+        "ROOT_ACCESS" to "Root access",
+    ),
+    rootOutcomeLabels = mapOf(
+        "DETECTED" to "Detected",
+        "NOT_DETECTED" to "Not detected",
+        "DENIED" to "Denied",
+        "TIMEOUT" to "Timeout",
+        "UNAVAILABLE" to "Not run",
+    ),
     playIntegrityTitle = "Play Integrity",
     playIntegrityBasic = "basicIntegrity",
     playIntegrityDevice = "deviceIntegrity",
@@ -977,7 +1687,7 @@ private val enStrings = Strings(
     faqItems = listOf(
         "Do I need root?" to "Some actions (Trick commands) need root; others work without it.",
         "What does Play Integrity return?" to "A JWS token to validate on backend; the app shows the received token.",
-        "Can I harm my device?" to "Invasive commands may reboot or change settings. Use only if you know what you’re doing."
+        "Can I harm my device?" to "Invasive commands may reboot or change settings. Use only if you know what you’re doing.",
     ),
     permissionsSearch = "Search app or permission",
     permissionsExpandedAppLabel = "%s · %s",
@@ -999,7 +1709,7 @@ private val enStrings = Strings(
         "manifest_flags" to ("Manifest review" to "Review debuggable/backup/exported flags and deep-link schemes."),
         "file_scout" to ("Sensitive files" to "Look for logs, backups or databases left world-readable in the app sandbox."),
         "network_monitor" to ("Network surface" to "Plan traffic sniffing / proxy tests and detect missing TLS pinning."),
-        "permission_risk" to ("Permission risk" to "Assess declared permissions and flag potentially abusive combinations.")
+        "permission_risk" to ("Permission risk" to "Assess declared permissions and flag potentially abusive combinations."),
     ),
     navApk = "APKs",
     apkSearch = "Search app or package",
@@ -1087,7 +1797,7 @@ private val enStrings = Strings(
     penTestPendingContentDescription = "Pending",
     penTestProgressSummary = "%1${'$'}d successful, %2${'$'}d errors, %3${'$'}d queued",
     activityUi = ActivityUiStrings("en"),
-    penTestUi = PenTestUiStrings.forLanguage("en")
+    penTestUi = PenTestUiStrings.forLanguage("en"),
 )
 
 private val deStrings = Strings(
@@ -1117,8 +1827,22 @@ private val deStrings = Strings(
     rootPrivilegeTest = "Root-Zugriff testen",
     rootPassiveHint = "Passive Prüfungen fordern keine Berechtigungen an.",
     rootChecking = "Root wird geprüft…",
-    rootCheckLabels = mapOf("SU_BINARY" to "su-Binärdatei", "BUSYBOX" to "BusyBox", "SUDO" to "sudo", "ROOT_MANAGER" to "Root-Manager", "MAGISK_TRACES" to "Magisk-Spuren", "ROOTBEER" to "RootBeer", "ROOT_ACCESS" to "Root-Zugriff"),
-    rootOutcomeLabels = mapOf("DETECTED" to "Erkannt", "NOT_DETECTED" to "Nicht erkannt", "DENIED" to "Verweigert", "TIMEOUT" to "Zeitüberschreitung", "UNAVAILABLE" to "Nicht ausgeführt"),
+    rootCheckLabels = mapOf(
+        "SU_BINARY" to "su-Binärdatei",
+        "BUSYBOX" to "BusyBox",
+        "SUDO" to "sudo",
+        "ROOT_MANAGER" to "Root-Manager",
+        "MAGISK_TRACES" to "Magisk-Spuren",
+        "ROOTBEER" to "RootBeer",
+        "ROOT_ACCESS" to "Root-Zugriff",
+    ),
+    rootOutcomeLabels = mapOf(
+        "DETECTED" to "Erkannt",
+        "NOT_DETECTED" to "Nicht erkannt",
+        "DENIED" to "Verweigert",
+        "TIMEOUT" to "Zeitüberschreitung",
+        "UNAVAILABLE" to "Nicht ausgeführt",
+    ),
     playIntegrityTitle = "Play Integrity",
     playIntegrityBasic = "basicIntegrity",
     playIntegrityDevice = "deviceIntegrity",
@@ -1234,7 +1958,7 @@ private val deStrings = Strings(
     faqItems = listOf(
         "Brauche ich Root?" to "Einige Aktionen (Trick-Befehle) benötigen Root; anderes funktioniert ohne.",
         "Was liefert Play Integrity?" to "Ein JWS-Token zur Backend-Validierung; die App zeigt das empfangene Token.",
-        "Kann ich das Gerät beschädigen?" to "Eingreifende Befehle können Neustarts/Änderungen bewirken. Nur nutzen, wenn du weißt, was du tust."
+        "Kann ich das Gerät beschädigen?" to "Eingreifende Befehle können Neustarts/Änderungen bewirken. Nur nutzen, wenn du weißt, was du tust.",
     ),
     permissionsSearch = "App oder Berechtigung suchen",
     permissionsExpandedAppLabel = "%s · %s",
@@ -1256,7 +1980,7 @@ private val deStrings = Strings(
         "manifest_flags" to ("Manifest-Review" to "Prüft Flags debuggable/backup/exported und Deep-Link-Schemen."),
         "file_scout" to ("Sensible Dateien" to "Sucht Logs, Backups oder Datenbanken, die im App-Sandbox lesbar bleiben."),
         "network_monitor" to ("Netzwerkfläche" to "Plant Traffic-Sniffing/Proxy-Tests und erkennt fehlendes TLS-Pinning."),
-        "permission_risk" to ("Berechtigungsrisiko" to "Bewertet angeforderte Berechtigungen und markiert riskante Kombinationen.")
+        "permission_risk" to ("Berechtigungsrisiko" to "Bewertet angeforderte Berechtigungen und markiert riskante Kombinationen."),
     ),
     navApk = "APKs",
     apkSearch = "App oder Paket suchen",
@@ -1344,7 +2068,7 @@ private val deStrings = Strings(
     penTestPendingContentDescription = "Ausstehend",
     penTestProgressSummary = "%1${'$'}d erfolgreich, %2${'$'}d Fehler, %3${'$'}d in Warteschlange",
     activityUi = ActivityUiStrings("de"),
-    penTestUi = PenTestUiStrings.forLanguage("de")
+    penTestUi = PenTestUiStrings.forLanguage("de"),
 )
 
 private val esStrings = Strings(
@@ -1374,8 +2098,22 @@ private val esStrings = Strings(
     rootPrivilegeTest = "Probar acceso root",
     rootPassiveHint = "Las comprobaciones pasivas no solicitan privilegios.",
     rootChecking = "Comprobando root…",
-    rootCheckLabels = mapOf("SU_BINARY" to "Binario su", "BUSYBOX" to "BusyBox", "SUDO" to "sudo", "ROOT_MANAGER" to "Gestor root", "MAGISK_TRACES" to "Rastros de Magisk", "ROOTBEER" to "RootBeer", "ROOT_ACCESS" to "Acceso root"),
-    rootOutcomeLabels = mapOf("DETECTED" to "Detectado", "NOT_DETECTED" to "No detectado", "DENIED" to "Denegado", "TIMEOUT" to "Tiempo agotado", "UNAVAILABLE" to "No ejecutado"),
+    rootCheckLabels = mapOf(
+        "SU_BINARY" to "Binario su",
+        "BUSYBOX" to "BusyBox",
+        "SUDO" to "sudo",
+        "ROOT_MANAGER" to "Gestor root",
+        "MAGISK_TRACES" to "Rastros de Magisk",
+        "ROOTBEER" to "RootBeer",
+        "ROOT_ACCESS" to "Acceso root",
+    ),
+    rootOutcomeLabels = mapOf(
+        "DETECTED" to "Detectado",
+        "NOT_DETECTED" to "No detectado",
+        "DENIED" to "Denegado",
+        "TIMEOUT" to "Tiempo agotado",
+        "UNAVAILABLE" to "No ejecutado",
+    ),
     playIntegrityTitle = "Play Integrity",
     playIntegrityBasic = "basicIntegrity",
     playIntegrityDevice = "deviceIntegrity",
@@ -1491,7 +2229,7 @@ private val esStrings = Strings(
     faqItems = listOf(
         "¿Necesito root?" to "Algunas acciones (Trick) requieren root; otras funcionan sin él.",
         "¿Qué devuelve Play Integrity?" to "Un token JWS para validar en backend; aquí se muestra el token recibido.",
-        "¿Puedo dañar el dispositivo?" to "Comandos invasivos pueden reiniciar o cambiar ajustes. Úsalos solo si sabes lo que haces."
+        "¿Puedo dañar el dispositivo?" to "Comandos invasivos pueden reiniciar o cambiar ajustes. Úsalos solo si sabes lo que haces.",
     ),
     permissionsSearch = "Buscar app o permiso",
     permissionsExpandedAppLabel = "%s · %s",
@@ -1513,7 +2251,7 @@ private val esStrings = Strings(
         "manifest_flags" to ("Revisión de manifiesto" to "Comprueba flags debuggable/backup/exported y esquemas de deep-link."),
         "file_scout" to ("Archivos sensibles" to "Busca logs, backups o bases de datos legibles en el sandbox de la app."),
         "network_monitor" to ("Superficie de red" to "Planifica sniffing/proxy y detecta falta de pinning TLS."),
-        "permission_risk" to ("Riesgo de permisos" to "Evalúa permisos solicitados y señala combinaciones potencialmente abusivas.")
+        "permission_risk" to ("Riesgo de permisos" to "Evalúa permisos solicitados y señala combinaciones potencialmente abusivas."),
     ),
     navApk = "APKs",
     apkSearch = "Buscar app o paquete",
@@ -1601,7 +2339,7 @@ private val esStrings = Strings(
     penTestPendingContentDescription = "Pendiente",
     penTestProgressSummary = "%1${'$'}d correctos, %2${'$'}d errores, %3${'$'}d en cola",
     activityUi = ActivityUiStrings("es"),
-    penTestUi = PenTestUiStrings.forLanguage("es")
+    penTestUi = PenTestUiStrings.forLanguage("es"),
 )
 
 private val frStrings = Strings(
@@ -1631,8 +2369,22 @@ private val frStrings = Strings(
     rootPrivilegeTest = "Tester l’accès root",
     rootPassiveHint = "Les vérifications passives ne demandent aucun privilège.",
     rootChecking = "Vérification du root…",
-    rootCheckLabels = mapOf("SU_BINARY" to "Binaire su", "BUSYBOX" to "BusyBox", "SUDO" to "sudo", "ROOT_MANAGER" to "Gestionnaire root", "MAGISK_TRACES" to "Traces Magisk", "ROOTBEER" to "RootBeer", "ROOT_ACCESS" to "Accès root"),
-    rootOutcomeLabels = mapOf("DETECTED" to "Détecté", "NOT_DETECTED" to "Non détecté", "DENIED" to "Refusé", "TIMEOUT" to "Délai dépassé", "UNAVAILABLE" to "Non exécuté"),
+    rootCheckLabels = mapOf(
+        "SU_BINARY" to "Binaire su",
+        "BUSYBOX" to "BusyBox",
+        "SUDO" to "sudo",
+        "ROOT_MANAGER" to "Gestionnaire root",
+        "MAGISK_TRACES" to "Traces Magisk",
+        "ROOTBEER" to "RootBeer",
+        "ROOT_ACCESS" to "Accès root",
+    ),
+    rootOutcomeLabels = mapOf(
+        "DETECTED" to "Détecté",
+        "NOT_DETECTED" to "Non détecté",
+        "DENIED" to "Refusé",
+        "TIMEOUT" to "Délai dépassé",
+        "UNAVAILABLE" to "Non exécuté",
+    ),
     playIntegrityTitle = "Play Integrity",
     playIntegrityBasic = "basicIntegrity",
     playIntegrityDevice = "deviceIntegrity",
@@ -1748,7 +2500,7 @@ private val frStrings = Strings(
     faqItems = listOf(
         "Faut-il le root ?" to "Certaines actions (Trick) nécessitent le root; le reste fonctionne sans.",
         "Que renvoie Play Integrity ?" to "Un jeton JWS à valider côté backend; l'app affiche le jeton reçu.",
-        "Puis-je endommager l'appareil ?" to "Des commandes intrusives peuvent redémarrer ou modifier des réglages. À utiliser seulement en connaissance de cause."
+        "Puis-je endommager l'appareil ?" to "Des commandes intrusives peuvent redémarrer ou modifier des réglages. À utiliser seulement en connaissance de cause.",
     ),
     permissionsSearch = "Rechercher app ou permission",
     permissionsExpandedAppLabel = "%s · %s",
@@ -1770,7 +2522,7 @@ private val frStrings = Strings(
         "manifest_flags" to ("Revue du manifeste" to "Analyse les flags debuggable/backup/exported et les schémas de deep-link."),
         "file_scout" to ("Fichiers sensibles" to "Recherche logs, backups ou bases de données lisibles dans le sandbox de l'app."),
         "network_monitor" to ("Surface réseau" to "Planifie sniffing/proxy et détecte l'absence de pinning TLS."),
-        "permission_risk" to ("Risque permissions" to "Évalue les permissions demandées et signale les combinaisons potentiellement abusives.")
+        "permission_risk" to ("Risque permissions" to "Évalue les permissions demandées et signale les combinaisons potentiellement abusives."),
     ),
     navApk = "APKs",
     apkSearch = "Chercher appli ou package",
@@ -1858,5 +2610,5 @@ private val frStrings = Strings(
     penTestPendingContentDescription = "En attente",
     penTestProgressSummary = "%1${'$'}d réussis, %2${'$'}d erreurs, %3${'$'}d en attente",
     activityUi = ActivityUiStrings("fr"),
-    penTestUi = PenTestUiStrings.forLanguage("fr")
+    penTestUi = PenTestUiStrings.forLanguage("fr"),
 )

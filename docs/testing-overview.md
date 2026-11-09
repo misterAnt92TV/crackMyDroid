@@ -224,23 +224,23 @@ Il conteggio complessivo e i source set sono riepilogati nella sezione iniziale.
 
 ### `jvmCommonTest`
 
-| File                            | Classe testata           | # Test | Aree coperte                                                               |
-|---------------------------------|--------------------------|--------|----------------------------------------------------------------------------|
-| `UseCaseTests.kt`               | Deleghe e report         | 6      | Delegazione a repository, valori di ritorno, ordine save/share |
-| `UseCaseDelegationTest.kt`      | 13 UseCase deleganti      | 11     | Risultati, default, parametri, liste vuote, fallimenti ed eccezioni |
-| `SettingsUseCasesTest.kt`       | 28 UseCase settings       | 7      | Tutti i valori, effetti di ogni setter, errori lettura/scrittura |
-| `pentest/RunPenTestChecksUseCaseTest.kt` | `RunPenTestChecksUseCase` | 12 | Check success/finding, dati assenti, soglie e fallback |
-| `permissions/AnalyzePermissionRisksUseCaseTest.kt` | `AnalyzePermissionRisksUseCase` | 8 | Famiglie, pattern, score, normalizzazione, etichette e ordinamento |
-| `permissions/BuildPermissionsReportUseCaseTest.kt` | `BuildPermissionsReportUseCase` | 5 | Report vuoti/singoli/aggregati, totali, ordinamento, filename |
-| `reports/ExportReportUseCaseTest.kt` | `ExportReportUseCase` | 5 | Save/share, ordine, Result.failure ed eccezioni |
-| `PenTestingViewModelTest.kt`    | `PenTestingViewModel`    | 2      | Manifest check con intent exposure, deduplicazione chiamate permessi       |
-| `PermissionsViewModelTest.kt`   | `PermissionsViewModel`   | 2      | Frequency tracking query, filtro "solo a rischio" post-scan                |
-| `ActivityListViewModelTest.kt`  | `ActivityListViewModel`  | 5      | Load, filtro, top-query, guided launch, report aggregation                 |
-| `InstalledAppsViewModelTest.kt` | `InstalledAppsViewModel` | 7      | Load, export, exportAll, share OK, share error, filtro+preferiti, topQuery |
-| `LogViewModelTest.kt`           | `LogViewModel`           | 1      | Filtro immediato su stato                                                  |
-| `TrickViewModelTest.kt`         | `TrickViewModel`         | 2      | Load comandi, blocco esecuzione concorrente                                |
-| `DeviceScanSnapshotJsonTest.kt` | serializzazione snapshot | 2      | Round-trip completo, tolleranza campi sconosciuti                          |
-| `SearchHistoryStoreTest.kt`     | `SearchHistoryStore`     | 3      | Deduplication, prefix sorting, disabled mode                               |
+| File                                               | Classe testata                  | # Test | Aree coperte                                                               |
+|----------------------------------------------------|---------------------------------|--------|----------------------------------------------------------------------------|
+| `UseCaseTests.kt`                                  | Deleghe e report                | 6      | Delegazione a repository, valori di ritorno, ordine save/share             |
+| `UseCaseDelegationTest.kt`                         | 13 UseCase deleganti            | 11     | Risultati, default, parametri, liste vuote, fallimenti ed eccezioni        |
+| `SettingsUseCasesTest.kt`                          | 28 UseCase settings             | 7      | Tutti i valori, effetti di ogni setter, errori lettura/scrittura           |
+| `pentest/RunPenTestChecksUseCaseTest.kt`           | `RunPenTestChecksUseCase`       | 12     | Check success/finding, dati assenti, soglie e fallback                     |
+| `permissions/AnalyzePermissionRisksUseCaseTest.kt` | `AnalyzePermissionRisksUseCase` | 8      | Famiglie, pattern, score, normalizzazione, etichette e ordinamento         |
+| `permissions/BuildPermissionsReportUseCaseTest.kt` | `BuildPermissionsReportUseCase` | 5      | Report vuoti/singoli/aggregati, totali, ordinamento, filename              |
+| `reports/ExportReportUseCaseTest.kt`               | `ExportReportUseCase`           | 5      | Save/share, ordine, Result.failure ed eccezioni                            |
+| `PenTestingViewModelTest.kt`                       | `PenTestingViewModel`           | 2      | Manifest check con intent exposure, deduplicazione chiamate permessi       |
+| `PermissionsViewModelTest.kt`                      | `PermissionsViewModel`          | 2      | Frequency tracking query, filtro "solo a rischio" post-scan                |
+| `ActivityListViewModelTest.kt`                     | `ActivityListViewModel`         | 5      | Load, filtro, top-query, guided launch, report aggregation                 |
+| `InstalledAppsViewModelTest.kt`                    | `InstalledAppsViewModel`        | 7      | Load, export, exportAll, share OK, share error, filtro+preferiti, topQuery |
+| `LogViewModelTest.kt`                              | `LogViewModel`                  | 1      | Filtro immediato su stato                                                  |
+| `TrickViewModelTest.kt`                            | `TrickViewModel`                | 2      | Load comandi, blocco esecuzione concorrente                                |
+| `DeviceScanSnapshotJsonTest.kt`                    | serializzazione snapshot        | 2      | Round-trip completo, tolleranza campi sconosciuti                          |
+| `SearchHistoryStoreTest.kt`                        | `SearchHistoryStore`            | 3      | Deduplication, prefix sorting, disabled mode                               |
 
 ### `desktopTest`
 
@@ -254,7 +254,7 @@ Il conteggio complessivo e i source set sono riepilogati nella sezione iniziale.
 | `RemotePackageManagerDesktopTest.kt`    | `RemotePackageManagerDesktop`    | 1      | Caching ADB: ogni comando eseguito esattamente una volta per sessione            |
 | `DeviceSessionControllerDesktopTest.kt` | `DeviceSessionControllerDesktop` | 2      | Selezione device + invalidazione cache, rescan + clear selection                 |
 | `RemoteDeviceSnapshotImporterTest.kt`   | `RemoteDeviceSnapshotImporter`   | 2      | Import snapshot valido in cache, fallback su schema incompatibile                |
-| `ReportFileRepositoryDesktopTest.kt`    | `ReportFileRepositoryDesktop`    | 3      | PDF multipagina e accenti, salvataggio PDF, envelope JSON                         |
+| `ReportFileRepositoryDesktopTest.kt`    | `ReportFileRepositoryDesktop`    | 3      | PDF multipagina e accenti, salvataggio PDF, envelope JSON                        |
 
 ---
 
@@ -262,8 +262,8 @@ Il conteggio complessivo e i source set sono riepilogati nella sezione iniziale.
 
 Vedi i file specifici per la documentazione completa test-per-test:
 
-| Documento                                                  | Contenuto                                                                                                                   |
-|------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------|
+| Documento                                                  | Contenuto                                                                                                                         |
+|------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------|
 | [`testing-viewmodels.md`](testing-viewmodels.md)           | Sei suite ViewModel selezionate (PenTesting, Permissions, ActivityList, InstalledApps, Log, Trick) con fixture, mock e assertions |
-| [`testing-usecases-models.md`](testing-usecases-models.md) | Test dei use case, modelli di dominio, serializzazione snapshot, SearchHistoryStore                                         |
-| [`testing-desktop-adb.md`](testing-desktop-adb.md)         | Test del layer Desktop/ADB: parser, bridge, repository, session controller, snapshot importer                               |
+| [`testing-usecases-models.md`](testing-usecases-models.md) | Test dei use case, modelli di dominio, serializzazione snapshot, SearchHistoryStore                                               |
+| [`testing-desktop-adb.md`](testing-desktop-adb.md)         | Test del layer Desktop/ADB: parser, bridge, repository, session controller, snapshot importer                                     |

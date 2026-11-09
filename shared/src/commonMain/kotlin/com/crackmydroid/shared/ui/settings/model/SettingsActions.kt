@@ -1,8 +1,8 @@
 package com.crackmydroid.shared.ui.settings.model
 
+import com.crackmydroid.shared.domain.model.ExportFormat
 import com.crackmydroid.shared.domain.model.app.AppLanguage
 import com.crackmydroid.shared.domain.model.app.AppTheme
-import com.crackmydroid.shared.domain.model.ExportFormat
 
 data class SettingsActions(
     val onSelectTheme: (AppTheme) -> Unit = {},
@@ -19,5 +19,5 @@ data class SettingsActions(
     val onOpenUri: (String) -> Unit = {},
     val onHelp: (String) -> Unit = {},
     val onMenu: () -> Unit = {},
-    val onClearError: () -> Unit = {}
+    val onClearError: () -> Unit = {},
 )

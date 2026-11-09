@@ -10,8 +10,15 @@ data class PermissionFindingUi(
     val reason: String,
     val level: PermissionRiskLevel,
     val levelLabel: String,
-    val isPattern: Boolean
+    val isPattern: Boolean,
 )
 
 internal fun PermissionRiskFinding.toUi(text: UseCaseReportText): PermissionFindingUi =
-    PermissionFindingUi(key, text.permissionTitle(this), text.permissionReason(this), level, text.riskLevel(level), isPattern)
+    PermissionFindingUi(
+        key,
+        text.permissionTitle(this),
+        text.permissionReason(this),
+        level,
+        text.riskLevel(level),
+        isPattern,
+    )

@@ -57,6 +57,9 @@ import com.crackmydroid.shared.presentation.components.ScrollToTopButton
 import com.crackmydroid.shared.presentation.components.SearchFieldWithHistoryComponent
 import com.crackmydroid.shared.presentation.components.SectionHeader
 import com.crackmydroid.shared.presentation.components.text.AppText
+import com.crackmydroid.shared.presentation.preview.AppPreviewEnvironment
+import com.crackmydroid.shared.presentation.preview.AppScreenPreviews
+import com.crackmydroid.shared.ui.logs.LogState
 import com.crackmydroid.shared.ui.logs.LogViewModel
 import kotlinx.coroutines.launch
 
@@ -67,9 +70,40 @@ fun LogScreen(
     headerHelp: String,
     onHelp: (String) -> Unit,
     onBack: (() -> Unit)? = null,
-    onMenu: () -> Unit = {}
+    onMenu: () -> Unit = {},
 ) {
     val state by viewModel.state.collectAsState()
+    LogScreenContent(
+        state = state,
+        padding = padding,
+        headerHelp = headerHelp,
+        onHelp = onHelp,
+        onBack = onBack,
+        onMenu = onMenu,
+        onFilterChange = viewModel::setFilter,
+        onLevelToggle = viewModel::toggleLevel,
+        onRefresh = viewModel::refresh,
+        onExport = viewModel::export,
+        onColorByLevelChange = viewModel::setColorByLevel,
+        onClearError = viewModel::clearError,
+    )
+}
+
+@Composable
+private fun LogScreenContent(
+    state: LogState,
+    padding: PaddingValues,
+    headerHelp: String,
+    onHelp: (String) -> Unit,
+    onBack: (() -> Unit)?,
+    onMenu: () -> Unit,
+    onFilterChange: (String) -> Unit,
+    onLevelToggle: (Char) -> Unit,
+    onRefresh: () -> Unit,
+    onExport: () -> Unit,
+    onColorByLevelChange: (Boolean) -> Unit,
+    onClearError: () -> Unit,
+) {
     val strings = LocalStrings.current
     val screenStrings = ScreenUiStrings.from(strings)
     val fontSize = remember { mutableStateOf(13f) }
@@ -85,17 +119,17 @@ fun LogScreen(
         modifier = Modifier
             .fillMaxSize()
             .padding(padding)
-            .padding(16.dp)
+            .padding(16.dp),
     ) {
         Column(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize(),
         ) {
             SectionHeader(
                 title = strings.navLog,
                 help = headerHelp,
                 onHelp = onHelp,
                 onBack = onBack,
-                onMenu = onMenu
+                onMenu = onMenu,
             )
             AppAccordion(
                 title = screenStrings.searchFilters,
@@ -104,27 +138,27 @@ fun LogScreen(
                 onToggle = { optionsExpanded = !optionsExpanded },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 8.dp)
+                    .padding(bottom = 8.dp),
             ) {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     SearchFieldWithHistoryComponent(
                         value = state.filter,
-                        onValueChange = viewModel::setFilter,
-                        onSubmit = viewModel::setFilter,
+                        onValueChange = onFilterChange,
+                        onSubmit = onFilterChange,
                         label = strings.searchLog,
                         historyKey = "logs",
                         modifier = Modifier.fillMaxWidth(),
                         showClearAction = true,
                         onCleared = {
-                            viewModel.setFilter("")
-                        }
+                            onFilterChange("")
+                        },
                     )
                     val levels = listOf('E', 'W', 'I', 'D', 'V')
                     LazyRow(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 4.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         items(levels) { lv ->
                             val lvlColor = levelColor(lv)
@@ -133,14 +167,14 @@ fun LogScreen(
                                 selectedContainerColor = lvlColor.copy(alpha = 0.32f),
                                 selectedLabelColor = lvlColor,
                                 labelColor = lvlColor,
-                                disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant
+                                disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
                             )
                             FilterChip(
                                 selected = state.levels.contains(lv),
-                                onClick = { viewModel.toggleLevel(lv) },
+                                onClick = { onLevelToggle(lv) },
                                 label = { AppText(lv.toString()) },
                                 colors = chipColors,
-                                shape = CircleShape
+                                shape = CircleShape,
                             )
                         }
                     }
@@ -149,19 +183,19 @@ fun LogScreen(
                             .fillMaxWidth()
                             .padding(vertical = 4.dp),
                         horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
                         AppButton(
                             text = strings.refreshLog,
                             leadingIcon = Icons.Filled.Refresh,
-                            onClick = { viewModel.refresh() },
-                            modifier = Modifier.weight(1f)
+                            onClick = onRefresh,
+                            modifier = Modifier.weight(1f),
                         )
-                        IconButton(onClick = { viewModel.export() }) {
+                        IconButton(onClick = onExport) {
                             Icon(
                                 imageVector = Icons.Filled.Share,
                                 contentDescription = strings.exportLog,
-                                tint = MaterialTheme.colorScheme.primary
+                                tint = MaterialTheme.colorScheme.primary,
                             )
                         }
                     }
@@ -169,7 +203,7 @@ fun LogScreen(
                         modifier = Modifier
                             .fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
                         AppText(screenStrings.logWrapLines, style = MaterialTheme.typography.bodySmall)
                         Switch(checked = wrap.value, onCheckedChange = { wrap.value = it })
@@ -178,30 +212,30 @@ fun LogScreen(
                         modifier = Modifier
                             .fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
                         AppText(screenStrings.logColorByLevel, style = MaterialTheme.typography.bodySmall)
                         Switch(
                             checked = state.colorByLevel,
-                            onCheckedChange = { viewModel.setColorByLevel(it) }
+                            onCheckedChange = onColorByLevelChange,
                         )
                     }
                     Row(
                         modifier = Modifier
                             .fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
                         AppText(screenStrings.logTextSize, style = MaterialTheme.typography.bodySmall)
                         Slider(
                             value = fontSize.value,
                             onValueChange = { fontSize.value = it },
                             valueRange = 10f..18f,
-                            modifier = Modifier.weight(1f)
+                            modifier = Modifier.weight(1f),
                         )
                         AppText(
                             "${fontSize.value.toInt()}sp",
-                            style = MaterialTheme.typography.labelSmall
+                            style = MaterialTheme.typography.labelSmall,
                         )
                     }
                 }
@@ -215,14 +249,14 @@ fun LogScreen(
                 AppText(
                     it,
                     color = MaterialTheme.colorScheme.primary,
-                    style = MaterialTheme.typography.bodySmall
+                    style = MaterialTheme.typography.bodySmall,
                 )
             }
             if (state.trimmed) {
                 AppText(
                     screenStrings.logTrimmed,
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
 
@@ -230,7 +264,7 @@ fun LogScreen(
                 AppText(
                     it,
                     color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.bodySmall
+                    style = MaterialTheme.typography.bodySmall,
                 )
             }
 
@@ -241,23 +275,23 @@ fun LogScreen(
                     .fillMaxWidth(),
                 color = MaterialTheme.colorScheme.surfaceVariant,
                 shape = RoundedCornerShape(12.dp),
-                tonalElevation = 2.dp
+                tonalElevation = 2.dp,
             ) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .horizontalScroll(horizontalScrollState)
+                        .horizontalScroll(horizontalScrollState),
                 ) {
                     LazyColumn(
                         state = logListState,
                         modifier = Modifier
                             .fillMaxHeight()
                             .wrapContentWidth(unbounded = true)
-                            .padding(horizontal = 12.dp, vertical = 10.dp)
+                            .padding(horizontal = 12.dp, vertical = 10.dp),
                     ) {
                         itemsIndexed(
                             items = state.visibleLogs,
-                            key = { index, _ -> index }
+                            key = { index, _ -> index },
                         ) { _, line ->
                             val lvl = extractLevel(line)
                             val lineColor =
@@ -266,11 +300,11 @@ fun LogScreen(
                                 line,
                                 style = MaterialTheme.typography.bodySmall.copy(
                                     fontFamily = FontFamily.Monospace,
-                                    fontSize = fontSize.value.sp
+                                    fontSize = fontSize.value.sp,
                                 ),
                                 softWrap = wrap.value,
                                 color = lineColor,
-                                modifier = Modifier.padding(vertical = 2.dp)
+                                modifier = Modifier.padding(vertical = 2.dp),
                             )
                         }
                         item { Spacer(modifier = Modifier.height(40.dp)) }
@@ -284,11 +318,41 @@ fun LogScreen(
             onClick = { scope.launch { logListState.animateScrollToItem(0) } },
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(12.dp)
+                .padding(12.dp),
         )
     }
 
-    state.error?.let { ErrorDialogComponent(it, viewModel::clearError) }
+    state.error?.let { ErrorDialogComponent(it, onClearError) }
+}
+
+@AppScreenPreviews
+@Composable
+private fun LogScreenPreview() {
+    val lines = listOf(
+        "I/CrackMyDroid: Application initialized",
+        "W/PackageManager: Optional package not found",
+        "E/ActivityManager: Activity launch failed",
+    )
+    AppPreviewEnvironment {
+        LogScreenContent(
+            state = LogState(
+                logs = lines,
+                levels = setOf('E', 'W', 'I'),
+                visibleLogs = lines,
+            ),
+            padding = PaddingValues(),
+            headerHelp = "Visualizza e filtra i log del dispositivo.",
+            onHelp = {},
+            onBack = {},
+            onMenu = {},
+            onFilterChange = {},
+            onLevelToggle = {},
+            onRefresh = {},
+            onExport = {},
+            onColorByLevelChange = {},
+            onClearError = {},
+        )
+    }
 }
 
 private fun extractLevel(line: String): Char? {
@@ -297,13 +361,11 @@ private fun extractLevel(line: String): Char? {
 }
 
 @Composable
-private fun levelColor(level: Char?): Color {
-    return when (level) {
-        'E' -> Color(0xFFFF6B6B)
-        'W' -> Color(0xFFF4A261)
-        'I' -> Color(0xFF2A9D8F)
-        'D' -> Color(0xFF4D6DE3)
-        'V' -> Color(0xFF9AA0A6)
-        else -> MaterialTheme.colorScheme.onBackground
-    }
+private fun levelColor(level: Char?): Color = when (level) {
+    'E' -> Color(0xFFFF6B6B)
+    'W' -> Color(0xFFF4A261)
+    'I' -> Color(0xFF2A9D8F)
+    'D' -> Color(0xFF4D6DE3)
+    'V' -> Color(0xFF9AA0A6)
+    else -> MaterialTheme.colorScheme.onBackground
 }

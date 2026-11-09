@@ -9,5 +9,5 @@ data class LogState(
     val message: String? = null,
     val error: String? = null,
     val visibleLogs: List<String> = emptyList(),
-    val trimmed: Boolean = false
+    val trimmed: Boolean = false,
 )

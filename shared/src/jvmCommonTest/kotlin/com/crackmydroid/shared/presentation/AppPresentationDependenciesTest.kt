@@ -1,14 +1,12 @@
 package com.crackmydroid.shared.presentation
 
 import com.crackmydroid.shared.AppLogger
-import com.crackmydroid.shared.util.AppDispatchers
-import com.crackmydroid.shared.domain.model.ReportLabel
-import com.crackmydroid.shared.i18n.UseCaseTexts
 import com.crackmydroid.shared.di.commonModule
 import com.crackmydroid.shared.di.presentationModule
 import com.crackmydroid.shared.domain.model.DeviceInfo
 import com.crackmydroid.shared.domain.model.ExportFormat
 import com.crackmydroid.shared.domain.model.InstalledAppEntry
+import com.crackmydroid.shared.domain.model.ReportLabel
 import com.crackmydroid.shared.domain.model.RootStatus
 import com.crackmydroid.shared.domain.model.app.AppLanguage
 import com.crackmydroid.shared.domain.model.app.AppTheme
@@ -23,9 +21,11 @@ import com.crackmydroid.shared.domain.repository.SettingsRepository
 import com.crackmydroid.shared.domain.repository.ShellCommandRepository
 import com.crackmydroid.shared.domain.repository.log.LogRepository
 import com.crackmydroid.shared.domain.repository.log.OperationLogRepository
+import com.crackmydroid.shared.i18n.UseCaseTexts
 import com.crackmydroid.shared.presentation.navigation.Screen
 import com.crackmydroid.shared.presentation.operations.NoOpOperationLogRepository
 import com.crackmydroid.shared.ui.AppPresentationDependencies
+import com.crackmydroid.shared.util.AppDispatchers
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -63,7 +63,7 @@ class AppPresentationDependenciesTest {
     private lateinit var application: KoinApplication
     private val device = DeviceInfo(
         manufacturer = "Acme", model = "Device under test",
-        batteryLevel = 75, totalMemory = 4096L, freeMemory = 2048L
+        batteryLevel = 75, totalMemory = 4096L, freeMemory = 2048L,
     )
     private val root = RootStatus(false, "not rooted")
     private val apps = listOf(InstalledAppEntry("Test app", "test.app", "/test.apk"))
@@ -97,24 +97,27 @@ class AppPresentationDependenciesTest {
         coEvery { shellRepository.listCommands() } returns commands
         coEvery { logRepository.fetchLog() } returns listOf("I/Test: loaded")
         application = koinApplication {
-            modules(commonModule(), presentationModule(), module {
-                single { deviceRepository }
-                single { rootRepository }
-                single { settingsRepository }
-                single { activityRepository }
-                single { installedRepository }
-                single { permissionsRepository }
-                single { shellRepository }
-                single { logRepository }
-                single<ReportFileRepository> { mockk() }
-                single<OperationLogRepository> { NoOpOperationLogRepository }
-                single<AppDispatchers> {
-                    object : AppDispatchers {
-                        override val main = dispatcher
-                        override val default = dispatcher
+            modules(
+                commonModule(), presentationModule(),
+                module {
+                    single { deviceRepository }
+                    single { rootRepository }
+                    single { settingsRepository }
+                    single { activityRepository }
+                    single { installedRepository }
+                    single { permissionsRepository }
+                    single { shellRepository }
+                    single { logRepository }
+                    single<ReportFileRepository> { mockk() }
+                    single<OperationLogRepository> { NoOpOperationLogRepository }
+                    single<AppDispatchers> {
+                        object : AppDispatchers {
+                            override val main = dispatcher
+                            override val default = dispatcher
+                        }
                     }
-                }
-            })
+                },
+            )
         }
     }
 
@@ -133,11 +136,17 @@ class AppPresentationDependenciesTest {
         val graph = resolveGraph()
         graph.shell.initialize()
         advanceUntilIdle()
-        assertTrue(graph.info.state.value.reportContent.orEmpty().startsWith(UseCaseTexts("fr").label(ReportLabel.DEVICE_INFO_TITLE)))
+        assertTrue(
+            graph.info.state.value.reportContent.orEmpty()
+                .startsWith(UseCaseTexts("fr").label(ReportLabel.DEVICE_INFO_TITLE)),
+        )
 
         graph.settings.selectLanguage(AppLanguage.GERMAN)
         advanceUntilIdle()
-        assertTrue(graph.info.state.value.reportContent.orEmpty().startsWith(UseCaseTexts("de").label(ReportLabel.DEVICE_INFO_TITLE)))
+        assertTrue(
+            graph.info.state.value.reportContent.orEmpty()
+                .startsWith(UseCaseTexts("de").label(ReportLabel.DEVICE_INFO_TITLE)),
+        )
         coVerify(exactly = 1) { deviceRepository.getDeviceInfo() }
         coVerify(exactly = 1) { rootRepository.checkRoot() }
     }

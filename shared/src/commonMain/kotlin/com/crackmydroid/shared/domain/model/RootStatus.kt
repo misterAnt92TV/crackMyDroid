@@ -7,5 +7,5 @@ import kotlinx.serialization.Serializable
 data class RootStatus(
     val isRooted: Boolean,
     val details: String,
-    val checks: List<RootCheck> = emptyList()
+    val checks: List<RootCheck> = emptyList(),
 )

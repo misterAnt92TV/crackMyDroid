@@ -1,18 +1,18 @@
 package com.crackmydroid.shared.presentation
 
-import com.crackmydroid.shared.domain.model.activity.ActivityEntry
 import com.crackmydroid.shared.domain.model.ExportFormat
+import com.crackmydroid.shared.domain.model.activity.ActivityEntry
 import com.crackmydroid.shared.domain.model.activity.favoriteKey
 import com.crackmydroid.shared.domain.repository.ReportFileRepository
 import com.crackmydroid.shared.domain.repository.SettingsRepository
 import com.crackmydroid.shared.domain.usecase.activities.GetActivitiesUseCase
+import com.crackmydroid.shared.domain.usecase.activities.LaunchActivityUseCase
+import com.crackmydroid.shared.domain.usecase.reports.ExportReportUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetActivityFavoritesUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetActivityPackageFavoritesUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetExportFormatUseCase
-import com.crackmydroid.shared.domain.usecase.activities.LaunchActivityUseCase
 import com.crackmydroid.shared.domain.usecase.settings.SetActivityFavoritesUseCase
 import com.crackmydroid.shared.domain.usecase.settings.SetActivityPackageFavoritesUseCase
-import com.crackmydroid.shared.domain.usecase.reports.ExportReportUseCase
 import com.crackmydroid.shared.ui.activities.ActivityListViewModel
 import io.mockk.coEvery
 import io.mockk.coJustRun
@@ -50,7 +50,7 @@ class ActivityFavoriteViewModelTest {
             label = "Details",
             appLabel = "Demo",
             packageName = "com.example.demo",
-            activityName = "com.example.demo.DetailsActivity"
+            activityName = "com.example.demo.DetailsActivity",
         )
         val getActivities = mockk<GetActivitiesUseCase>()
         val launchActivity = mockk<LaunchActivityUseCase>()
@@ -71,7 +71,7 @@ class ActivityFavoriteViewModelTest {
             setFavorites = SetActivityFavoritesUseCase(settings),
             getPackageFavorites = GetActivityPackageFavoritesUseCase(settings),
             setPackageFavorites = SetActivityPackageFavoritesUseCase(settings),
-            reportExporter = ExportReportUseCase(mockk<ReportFileRepository>(relaxed = true))
+            reportExporter = ExportReportUseCase(mockk<ReportFileRepository>(relaxed = true)),
         )
 
         viewModel.refresh()

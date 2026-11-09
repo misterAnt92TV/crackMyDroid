@@ -1,9 +1,11 @@
 # CrackMyDroid
 
-🌐 **Lingue:** [English](README.md) · [Deutsch](README.de.md) · [Français](README.fr.md) · [Español](README.es.md)
+🌐
+**Lingue:** [English](README.md) · [Deutsch](README.de.md) · [Français](README.fr.md) · [Español](README.es.md)
 
 > **Kotlin Multiplatform** (Android · Desktop · iOS) — sicurezza mobile, reverse engineering e
-> diagnostica del dispositivo, tutto in un'unica UI condivisa costruita con **Compose Multiplatform**.
+> diagnostica del dispositivo, tutto in un'unica UI condivisa costruita con **Compose
+Multiplatform**.
 
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.3.21-blue.svg)](https://kotlinlang.org)
 [![Compose Multiplatform](https://img.shields.io/badge/Compose%20Multiplatform-1.10.3-purple.svg)](https://www.jetbrains.com/lf/compose-multiplatform)
@@ -37,18 +39,20 @@
 | **Root / Play Integrity** | Verifica root con RootBeer e verdict Play Integrity verificabili dal backend, riferiti alla sola CrackMyDroid e al device                                                                                     |
 | **PenTesting**            | Suite di check di sicurezza automatizzati (singolo target o scansione completa); stati queued/ok/error, contatori, dettaglio errori, export/share report; cronologia fino a 240 eventi e 12 snapshot salvati  |
 | **Attività (Activities)** | Lista attività per app con ricerca/cronologia, preferiti, espansione per pacchetto, lancio diretto, analisi dei rischi di esposizione (intent/exported) ed export                                             |
-| **App installate (APK)**  | Ricerca full-text, filtri, preferiti, provenienza installer (Google Play segnalato/altro/non disponibile), icone app, analisi sicurezza manifest, export APK e condivisione diretta                         |
+| **App installate (APK)**  | Ricerca full-text, filtri, preferiti, provenienza installer (Google Play segnalato/altro/non disponibile), icone app, analisi sicurezza manifest, export APK e condivisione diretta                           |
 | **Permessi**              | Panoramica permessi app installate con classificazione del rischio (Critical/High/Medium/Low), ricerca e dettagli                                                                                             |
 | **Shell/Trick**           | Comandi ADB/shell preconfigurati (con flag root-required), conferma opzionale, output ed exit code                                                                                                            |
 | **Log**                   | Visualizzazione log applicativi con export                                                                                                                                                                    |
-| **Impostazioni**          | Tema (chiaro/scuro/sistema), lingua (sistema, IT/EN/DE/FR/ES), verbosità log, accessibilità (alto contrasto, animazioni ridotte, testo grande), licenze librerie, versione app                       |
+| **Impostazioni**          | Tema (chiaro/scuro/sistema), lingua (sistema, IT/EN/DE/FR/ES), verbosità log, accessibilità (alto contrasto, animazioni ridotte, testo grande), licenze librerie, versione app                                |
 
 ---
 
 ## Schermate UI / UI Screens
 
-> Mockup ASCII illustrativi della UI Compose Multiplatform. Vedi [`docs/screens.md`](docs/screens.md)
-> per la guida visiva completa e [`docs/README.md`](docs/README.md) per l'indice della documentazione tecnica.
+> Mockup ASCII illustrativi della UI Compose Multiplatform. Vedi [
+`docs/screens.md`](docs/screens.md)
+> per la guida visiva completa e [`docs/README.md`](docs/README.md) per l'indice della
+> documentazione tecnica.
 
 ### Home & Navigazione
 
@@ -313,7 +317,8 @@ li visualizza su computer via ADB.
 7. L'app importa lo snapshot e mostra la UI completa.
 
 > **Nota:** se l'app Android non è installata o lo snapshot non è ancora stato generato, la desktop
-> app segnala *"Snapshot non disponibile"* e mostra comunque la UI con le informazioni base ricavabili
+> app segnala *"Snapshot non disponibile"* e mostra comunque la UI con le informazioni base
+> ricavabili
 > via ADB (package list, shell commands, ecc.).
 
 ---
@@ -365,24 +370,24 @@ newCrackMyDroid/
 
 ## Stack tecnico
 
-| Layer               | Libreria                            | Versione       |
-|---------------------|-------------------------------------|----------------|
-| **UI**              | Compose Multiplatform               | 1.10.3         |
-| **UI**              | Material3                           | 1.9.0          |
-| **Linguaggio**      | Kotlin                              | 2.3.21         |
-| **DI**              | Koin                                | 3.5.6          |
-| **Async**           | Kotlin Coroutines                   | 1.8.1          |
-| **Database**        | SQLDelight                          | 2.0.1          |
-| **Serializzazione** | kotlinx.serialization               | 1.6.3          |
-| **Networking**      | Ktor Client                         | 3.5.0          |
-| **Root detection**  | RootBeer                            | 0.1.1          |
-| **Sicurezza**       | Play Integrity API                  | 1.4.0          |
-| **Preferenze**      | DataStore Preferences               | 1.1.7          |
-| **Lavoro in background** | WorkManager                    | 2.12.0         |
-| **Logging**         | Kermit                              | 2.0.4          |
-| **Test**            | kotlin-test, MockK, coroutines-test | —              |
-| **Android**         | AGP                                 | 8.13.2         |
-| **Android**         | Core KTX / Activity Compose         | 1.13.1 / 1.8.2 |
+| Layer                    | Libreria                            | Versione       |
+|--------------------------|-------------------------------------|----------------|
+| **UI**                   | Compose Multiplatform               | 1.10.3         |
+| **UI**                   | Material3                           | 1.9.0          |
+| **Linguaggio**           | Kotlin                              | 2.3.21         |
+| **DI**                   | Koin                                | 3.5.6          |
+| **Async**                | Kotlin Coroutines                   | 1.8.1          |
+| **Database**             | SQLDelight                          | 2.0.1          |
+| **Serializzazione**      | kotlinx.serialization               | 1.6.3          |
+| **Networking**           | Ktor Client                         | 3.5.0          |
+| **Root detection**       | RootBeer                            | 0.1.1          |
+| **Sicurezza**            | Play Integrity API                  | 1.4.0          |
+| **Preferenze**           | DataStore Preferences               | 1.1.7          |
+| **Lavoro in background** | WorkManager                         | 2.12.0         |
+| **Logging**              | Kermit                              | 2.0.4          |
+| **Test**                 | kotlin-test, MockK, coroutines-test | —              |
+| **Android**              | AGP                                 | 8.13.2         |
+| **Android**              | Core KTX / Activity Compose         | 1.13.1 / 1.8.2 |
 
 ---
 

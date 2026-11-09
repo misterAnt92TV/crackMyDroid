@@ -17,7 +17,7 @@ class OperationLogRepositoryTest {
         val persistence = RecordingPersistence()
         val repository = DefaultOperationLogRepository(
             persistence = persistence,
-            scope = CoroutineScope(StandardTestDispatcher(testScheduler))
+            scope = CoroutineScope(StandardTestDispatcher(testScheduler)),
         )
 
         repository.record("first", success = true)
@@ -32,7 +32,7 @@ class OperationLogRepositoryTest {
         val persistence = RecordingPersistence()
         val repository = DefaultOperationLogRepository(
             persistence = persistence,
-            scope = CoroutineScope(StandardTestDispatcher(testScheduler))
+            scope = CoroutineScope(StandardTestDispatcher(testScheduler)),
         )
 
         repository.record("first", success = true)
@@ -53,7 +53,7 @@ class OperationLogRepositoryTest {
         val persistence = RecordingPersistence(initialEntries = listOf(first, second))
         val repository = DefaultOperationLogRepository(
             persistence = persistence,
-            scope = CoroutineScope(StandardTestDispatcher(testScheduler))
+            scope = CoroutineScope(StandardTestDispatcher(testScheduler)),
         )
         advanceUntilIdle()
 
@@ -71,7 +71,7 @@ class OperationLogRepositoryTest {
         val persistence = RecordingPersistence(initialEntries = listOf(first, second))
         val repository = DefaultOperationLogRepository(
             persistence = persistence,
-            scope = CoroutineScope(StandardTestDispatcher(testScheduler))
+            scope = CoroutineScope(StandardTestDispatcher(testScheduler)),
         )
         advanceUntilIdle()
 
@@ -85,17 +85,17 @@ class OperationLogRepositoryTest {
     @Test
     fun noOpRepositoryDoesNotRemoveEntries() {
         NoOpOperationLogRepository.hideFromRecent(
-            OperationEntry("operation", success = true, timestamp = 0L)
+            OperationEntry("operation", success = true, timestamp = 0L),
         )
         NoOpOperationLogRepository.remove(
-            OperationEntry("operation", success = true, timestamp = 0L)
+            OperationEntry("operation", success = true, timestamp = 0L),
         )
 
         assertTrue(NoOpOperationLogRepository.entries.value.isEmpty())
     }
 
     private class RecordingPersistence(
-        private val initialEntries: List<OperationEntry> = emptyList()
+        private val initialEntries: List<OperationEntry> = emptyList(),
     ) : OperationLogPersistence {
         var savedEntries = emptyList<OperationEntry>()
 

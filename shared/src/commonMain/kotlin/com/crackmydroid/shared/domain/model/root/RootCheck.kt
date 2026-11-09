@@ -26,7 +26,7 @@ enum class RootCheckOutcome {
 data class RootCheck(
     val id: RootCheckId,
     val outcome: RootCheckOutcome,
-    val evidence: String = ""
+    val evidence: String = "",
 )
 
 @Serializable

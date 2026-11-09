@@ -12,5 +12,5 @@ data class InstalledAppsState(
     val topQuery: String? = null,
     val favorites: Set<String> = emptySet(),
     val visibleApps: List<InstalledAppEntry> = emptyList(),
-    val favoriteQueries: List<String> = emptyList()
+    val favoriteQueries: List<String> = emptyList(),
 )

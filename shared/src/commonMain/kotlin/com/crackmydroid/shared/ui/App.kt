@@ -56,17 +56,18 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.crackmydroid.shared.domain.model.app.AppTheme
 import com.crackmydroid.shared.domain.model.app.AppLanguage
+import com.crackmydroid.shared.domain.model.app.AppTheme
 import com.crackmydroid.shared.i18n.LocalStrings
 import com.crackmydroid.shared.i18n.Strings
+import com.crackmydroid.shared.i18n.format
 import com.crackmydroid.shared.i18n.platformLanguage
 import com.crackmydroid.shared.i18n.resolveLanguageCode
 import com.crackmydroid.shared.i18n.stringsFor
 import com.crackmydroid.shared.presentation.components.AccessibilityPrefs
-import com.crackmydroid.shared.presentation.components.effectiveReduceMotion
 import com.crackmydroid.shared.presentation.components.LocalAccessibilityPrefs
 import com.crackmydroid.shared.presentation.components.PackageIcon
+import com.crackmydroid.shared.presentation.components.effectiveReduceMotion
 import com.crackmydroid.shared.presentation.components.text.AppText
 import com.crackmydroid.shared.presentation.navigation.Screen
 import com.crackmydroid.shared.presentation.navigation.bottomScreens
@@ -92,7 +93,7 @@ import kotlinx.coroutines.launch
 fun CrackMyDroidApp(
     dependencies: AppPresentationDependencies,
     onLanguageChanged: (AppLanguage) -> Unit = {},
-    systemMotionReductionEnabled: Boolean = false
+    systemMotionReductionEnabled: Boolean = false,
 ) {
     val drawerState: DrawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -117,9 +118,9 @@ fun CrackMyDroidApp(
         highContrast = settingsState.value.highContrast,
         reduceMotion = effectiveReduceMotion(
             preferenceEnabled = settingsState.value.reduceMotion,
-            systemMotionReductionEnabled = systemMotionReductionEnabled
+            systemMotionReductionEnabled = systemMotionReductionEnabled,
         ),
-        largeText = settingsState.value.largeText
+        largeText = settingsState.value.largeText,
     )
 
     LaunchedEffect(Unit) { shellVm.initialize() }
@@ -146,7 +147,7 @@ fun CrackMyDroidApp(
     CrackMyDroidTheme(darkTheme = darkTheme) {
         CompositionLocalProvider(
             LocalStrings provides strings,
-            LocalAccessibilityPrefs provides accessibilityPrefs
+            LocalAccessibilityPrefs provides accessibilityPrefs,
         ) {
             val navigateFromDrawer: (Screen) -> Unit = { target ->
                 scope.launch { drawerState.close() }
@@ -162,29 +163,29 @@ fun CrackMyDroidApp(
                                 modifier = Modifier
                                     .fillMaxSize()
                                     .padding(horizontal = 12.dp, vertical = 16.dp),
-                                verticalArrangement = Arrangement.spacedBy(10.dp)
+                                verticalArrangement = Arrangement.spacedBy(10.dp),
                             ) {
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
                                     horizontalArrangement = Arrangement.spacedBy(12.dp),
-                                    verticalAlignment = Alignment.CenterVertically
+                                    verticalAlignment = Alignment.CenterVertically,
                                 ) {
                                     PackageIcon(
                                         packageName = appPackageName(),
                                         size = 40.dp,
-                                        contentPadding = 0.dp
+                                        contentPadding = 0.dp,
                                     )
                                     Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                                         AppText(
                                             text = "CrackMyDroid",
                                             style = MaterialTheme.typography.titleLarge,
-                                            color = MaterialTheme.colorScheme.onSurface
+                                            color = MaterialTheme.colorScheme.onSurface,
                                         )
                                         AppText(
                                             text = "Toolkit Android per test rapidi di sicurezza",
                                             style = MaterialTheme.typography.bodySmall,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                            maxLines = if (accessibilityPrefs.largeText) 3 else 2
+                                            maxLines = if (accessibilityPrefs.largeText) 3 else 2,
                                         )
                                     }
                                 }
@@ -193,7 +194,7 @@ fun CrackMyDroidApp(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .weight(1f),
-                                    verticalArrangement = Arrangement.spacedBy(2.dp)
+                                    verticalArrangement = Arrangement.spacedBy(2.dp),
                                 ) {
                                     drawerScreens.forEach { screen ->
                                         NavigationDrawerItem(
@@ -203,7 +204,7 @@ fun CrackMyDroidApp(
                                             onClick = { navigateFromDrawer(screen) },
                                             modifier = Modifier
                                                 .fillMaxWidth()
-                                                .padding(vertical = 2.dp)
+                                                .padding(vertical = 2.dp),
                                         )
                                     }
                                 }
@@ -213,11 +214,11 @@ fun CrackMyDroidApp(
                                     style = MaterialTheme.typography.labelMedium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     modifier = Modifier
-                                        .padding(vertical = 8.dp)
+                                        .padding(vertical = 8.dp),
                                 )
                             }
                         }
-                    }
+                    },
                 ) {
                     Scaffold(
                         modifier = Modifier.fillMaxSize(),
@@ -225,7 +226,7 @@ fun CrackMyDroidApp(
                         bottomBar = {
                             NavigationBar(
                                 windowInsets = NavigationBarDefaults.windowInsets,
-                                tonalElevation = 3.dp
+                                tonalElevation = 3.dp,
                             ) {
                                 val itemIconSize = 20.dp
                                 bottomScreens.forEach { screen ->
@@ -236,21 +237,21 @@ fun CrackMyDroidApp(
                                             Icon(
                                                 screen.icon,
                                                 contentDescription = screen.title(strings),
-                                                modifier = Modifier.size(itemIconSize)
+                                                modifier = Modifier.size(itemIconSize),
                                             )
                                         },
                                         label = {
                                             AppText(
                                                 screen.title(strings),
                                                 maxLines = if (accessibilityPrefs.largeText) 2 else 1,
-                                                overflow = TextOverflow.Ellipsis
+                                                overflow = TextOverflow.Ellipsis,
                                             )
                                         },
-                                        alwaysShowLabel = true
+                                        alwaysShowLabel = true,
                                     )
                                 }
                             }
-                        }
+                        },
                     ) { padding ->
                         val focusManager = LocalFocusManager.current
                         val adjustedPadding = padding
@@ -269,7 +270,7 @@ fun CrackMyDroidApp(
                                         }
                                     }
                                 }
-                                .background(MaterialTheme.colorScheme.background)
+                                .background(MaterialTheme.colorScheme.background),
                         ) {
                             val reduceMotion = accessibilityPrefs.reduceMotion
                             AnimatedContent(
@@ -281,7 +282,7 @@ fun CrackMyDroidApp(
                                         fadeIn(tween(250)) togetherWith fadeOut(tween(200))
                                     }
                                 },
-                                modifier = Modifier.weight(1f)
+                                modifier = Modifier.weight(1f),
                             ) { screen ->
                                 when (screen) {
                                     Screen.Home -> HomeScreen(
@@ -290,7 +291,7 @@ fun CrackMyDroidApp(
                                         headerHelp = strings.helpHome,
                                         onHelp = shellVm::showHelp,
                                         onMenu = openDrawer,
-                                        languageCode = languageCode
+                                        languageCode = languageCode,
                                     )
 
                                     Screen.Activities -> ActivityListScreen(
@@ -299,7 +300,7 @@ fun CrackMyDroidApp(
                                         headerHelp = strings.helpActivities,
                                         onHelp = shellVm::showHelp,
                                         onBack = backToHome,
-                                        onMenu = openDrawer
+                                        onMenu = openDrawer,
                                     )
 
                                     Screen.Root -> RootScreen(
@@ -308,7 +309,7 @@ fun CrackMyDroidApp(
                                         headerHelp = strings.helpRoot,
                                         onHelp = shellVm::showHelp,
                                         onBack = backToHome,
-                                        onMenu = openDrawer
+                                        onMenu = openDrawer,
                                     )
 
                                     Screen.Info -> InfoScreen(
@@ -316,7 +317,7 @@ fun CrackMyDroidApp(
                                         adjustedPadding,
                                         headerHelp = strings.helpInfo,
                                         onHelp = shellVm::showHelp,
-                                        onMenu = openDrawer
+                                        onMenu = openDrawer,
                                     )
 
                                     Screen.Trick -> TrickScreen(
@@ -325,7 +326,7 @@ fun CrackMyDroidApp(
                                         headerHelp = strings.helpTrick,
                                         onHelp = shellVm::showHelp,
                                         onBack = backToHome,
-                                        onMenu = openDrawer
+                                        onMenu = openDrawer,
                                     )
 
                                     Screen.Pentest -> PenTestingScreen(
@@ -334,7 +335,7 @@ fun CrackMyDroidApp(
                                         headerHelp = strings.helpPentest,
                                         onHelp = shellVm::showHelp,
                                         onBack = backToHome,
-                                        onMenu = openDrawer
+                                        onMenu = openDrawer,
                                     )
 
                                     Screen.InstalledApps -> InstalledAppsScreen(
@@ -343,7 +344,7 @@ fun CrackMyDroidApp(
                                         headerHelp = strings.helpApk,
                                         onHelp = shellVm::showHelp,
                                         onBack = backToHome,
-                                        onMenu = openDrawer
+                                        onMenu = openDrawer,
                                     )
 
                                     Screen.Permissions -> PermissionsScreen(
@@ -352,7 +353,7 @@ fun CrackMyDroidApp(
                                         headerHelp = strings.helpPermissions,
                                         onHelp = shellVm::showHelp,
                                         onBack = backToHome,
-                                        onMenu = openDrawer
+                                        onMenu = openDrawer,
                                     )
 
                                     Screen.Log -> LogScreen(
@@ -361,7 +362,7 @@ fun CrackMyDroidApp(
                                         headerHelp = strings.helpLog,
                                         onHelp = shellVm::showHelp,
                                         onBack = backToHome,
-                                        onMenu = openDrawer
+                                        onMenu = openDrawer,
                                     )
 
                                     Screen.Settings -> SettingsScreen(
@@ -369,14 +370,14 @@ fun CrackMyDroidApp(
                                         adjustedPadding,
                                         headerHelp = strings.helpSettings,
                                         onHelp = shellVm::showHelp,
-                                        onMenu = openDrawer
+                                        onMenu = openDrawer,
                                     )
 
                                     Screen.Help -> HelpScreen(
                                         padding = adjustedPadding,
                                         onHelp = shellVm::showHelp,
                                         onMenu = openDrawer,
-                                        onNavigate = { target -> shellVm.navigate(target, false) }
+                                        onNavigate = { target -> shellVm.navigate(target, false) },
                                     )
                                 }
                             }
@@ -388,7 +389,7 @@ fun CrackMyDroidApp(
                         .align(Alignment.TopCenter)
                         .fillMaxWidth()
                         .windowInsetsTopHeight(WindowInsets.statusBars)
-                        .background(MaterialTheme.colorScheme.background)
+                        .background(MaterialTheme.colorScheme.background),
                 )
             }
         }
@@ -402,7 +403,7 @@ fun CrackMyDroidApp(
                     androidx.compose.material3.Button(onClick = shellVm::dismissIntro) {
                         AppText(strings.introAgree)
                     }
-                }
+                },
             )
         }
 
@@ -417,11 +418,11 @@ fun CrackMyDroidApp(
                             AppText(hint)
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically
+                                verticalAlignment = Alignment.CenterVertically,
                             ) {
                                 Checkbox(
                                     checked = disableHintsForever,
-                                    onCheckedChange = { disableHintsForever = it }
+                                    onCheckedChange = { disableHintsForever = it },
                                 )
                                 AppText(strings.sectionHintDisable)
                             }
@@ -432,9 +433,9 @@ fun CrackMyDroidApp(
                             onClick = {
                                 shellVm.confirmHint(
                                     disableHints = disableHintsForever,
-                                    target = target
+                                    target = target,
                                 )
-                            }
+                            },
                         ) {
                             AppText(strings.sectionHintConfirm)
                         }
@@ -443,11 +444,11 @@ fun CrackMyDroidApp(
                         TextButton(
                             onClick = {
                                 shellVm.dismissHint()
-                            }
+                            },
                         ) {
                             AppText(strings.close)
                         }
-                    }
+                    },
                 )
             }
         }
@@ -461,7 +462,7 @@ fun CrackMyDroidApp(
                     }
                 },
                 title = { AppText(strings.faqTitle) },
-                text = { AppText(msg) }
+                text = { AppText(msg) },
             )
         }
     }

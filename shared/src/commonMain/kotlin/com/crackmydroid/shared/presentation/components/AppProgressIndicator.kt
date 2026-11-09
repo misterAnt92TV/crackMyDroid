@@ -9,7 +9,7 @@ import com.crackmydroid.shared.presentation.components.text.AppText
 @Composable
 fun AppProgressIndicator(
     label: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     if (LocalAccessibilityPrefs.current.reduceMotion) {
         AppText(label, modifier = modifier)

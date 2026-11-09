@@ -5,5 +5,5 @@ data class SettingsAppInfo(
     val packageName: String,
     val minSdk: Int?,
     val targetSdk: Int?,
-    val requestedPermissions: List<String>
+    val requestedPermissions: List<String>,
 )

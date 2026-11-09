@@ -23,5 +23,5 @@ data class AppPresentationDependencies(
     val logs: LogViewModel,
     val permissions: PermissionsViewModel,
     val installedApps: InstalledAppsViewModel,
-    val penTesting: PenTestingViewModel
+    val penTesting: PenTestingViewModel,
 )

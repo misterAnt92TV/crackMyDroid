@@ -1,14 +1,13 @@
 package com.crackmydroid.shared.domain.model
 
 import com.crackmydroid.shared.domain.model.activity.ActivityEntry
+import com.crackmydroid.shared.domain.model.root.RootCheck
+import com.crackmydroid.shared.domain.model.root.RootCheckId
+import com.crackmydroid.shared.domain.model.root.RootCheckOutcome
 import com.crackmydroid.shared.domain.model.scansnapshot.DeviceScanSnapshot
 import com.crackmydroid.shared.domain.model.scansnapshot.DeviceScanSnapshotJson
 import com.crackmydroid.shared.domain.model.scansnapshot.SnapshotSection
 import com.crackmydroid.shared.domain.model.scansnapshot.SnapshotSectionState
-import com.crackmydroid.shared.domain.model.root.RootCheck
-import com.crackmydroid.shared.domain.model.root.RootCheckId
-import com.crackmydroid.shared.domain.model.root.RootCheckOutcome
-import kotlinx.serialization.encodeToString
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -36,25 +35,25 @@ class DeviceScanSnapshotJsonTest {
                     batteryLevel = 88,
                     networkType = "Wi-Fi",
                     totalMemory = 8_000L,
-                    freeMemory = 4_000L
-                )
+                    freeMemory = 4_000L,
+                ),
             ),
             rootStatus = SnapshotSection.ready(
                 RootStatus(
                     isRooted = false,
                     details = "Nessuna traccia di root",
                     checks = listOf(
-                        RootCheck(RootCheckId.BUSYBOX, RootCheckOutcome.NOT_DETECTED)
-                    )
-                )
+                        RootCheck(RootCheckId.BUSYBOX, RootCheckOutcome.NOT_DETECTED),
+                    ),
+                ),
             ),
             playIntegrity = SnapshotSection.skipped(
                 error = "Non eseguito automaticamente",
                 data = PlayIntegrityResult(
                     basicIntegrity = null,
                     deviceIntegrity = null,
-                    details = "Non eseguito automaticamente"
-                )
+                    details = "Non eseguito automaticamente",
+                ),
             ),
             installedApps = SnapshotSection.ready(
                 listOf(
@@ -64,16 +63,16 @@ class DeviceScanSnapshotJsonTest {
                         "/data/app/pkg.demo/base.apk",
                         installSource = InstallSourceInfo(
                             classification = InstallSourceClassification.GOOGLE_PLAY,
-                            installingPackageName = "com.android.vending"
-                        )
-                    )
-                )
+                            installingPackageName = "com.android.vending",
+                        ),
+                    ),
+                ),
             ),
             permissions = SnapshotSection.failed("Permessi non disponibili"),
             activities = SnapshotSection.ready(
-                listOf(ActivityEntry("Main", "Demo", "pkg.demo", "pkg.demo.MainActivity"))
+                listOf(ActivityEntry("Main", "Demo", "pkg.demo", "pkg.demo.MainActivity")),
             ),
-            logs = SnapshotSection.ready(listOf("I/Test: ok"))
+            logs = SnapshotSection.ready(listOf("I/Test: ok")),
         )
 
         val json = DeviceScanSnapshotJson.format.encodeToString(snapshot)
@@ -88,7 +87,7 @@ class DeviceScanSnapshotJsonTest {
         assertEquals(RootCheckOutcome.NOT_DETECTED, decoded.rootStatus.data?.checks?.single()?.outcome)
         assertEquals(
             InstallSourceClassification.GOOGLE_PLAY,
-            decoded.installedApps.data?.single()?.installSource?.classification
+            decoded.installedApps.data?.single()?.installSource?.classification,
         )
     }
 

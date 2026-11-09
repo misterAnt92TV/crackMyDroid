@@ -17,57 +17,58 @@
 ## Copertura diretta degli UseCase
 
 I **45 UseCase** in `shared/src/commonMain/kotlin/com/crackmydroid/shared/domain/usecase/`
-sono esercitati direttamente dai test in `shared/src/jvmCommonTest/kotlin/com/crackmydroid/shared/domain/usecase/`.
+sono esercitati direttamente dai test in
+`shared/src/jvmCommonTest/kotlin/com/crackmydroid/shared/domain/usecase/`.
 La matrice indica test che costruiscono ed eseguono il soggetto reale: i mock di UseCase nei test
 ViewModel non sono considerati copertura diretta.
 
-| UseCase | Suite diretta | Comportamenti verificati |
-|---------|---------------|--------------------------|
-| `GetActivitiesUseCase` | `UseCaseDelegationTest` | Lista completa/vuota, errore repository |
-| `LaunchActivityUseCase` | `UseCaseDelegationTest` | Parametri intent espliciti/default, successo, Result.failure, eccezione |
-| `GetDeviceInfoUseCase` | `UseCaseDelegationTest` | Modello restituito con campi opzionali assenti, errore |
-| `ExportApkUseCase` | `UseCaseTests`, `UseCaseDelegationTest` | Successo, fallimento ed eccezione |
-| `ListInstalledAppsUseCase` | `UseCaseDelegationTest` | Lista completa/vuota, errore |
-| `ShareApkUseCase` | `UseCaseDelegationTest` | Entrambi i valori bluetoothOnly, successo, fallimento ed eccezione |
-| `ExportLogsUseCase` | `log/ExportLogsUseCaseTest`, `UseCaseDelegationTest` | Formati TXT/JSON/PDF, contenuto e nome file, percorso, fallimento ed eccezione |
-| `GetLogsUseCase` | `UseCaseDelegationTest` | Lista completa/vuota, ordine e duplicati, errore |
-| `RunPenTestChecksUseCase` | `pentest/RunPenTestChecksUseCaseTest` | Success/finding per ogni check, dati assenti, soglie library e fallback |
-| `AnalyzePermissionRisksUseCase` | `permissions/AnalyzePermissionRisksUseCaseTest` | Famiglie e pattern, normalizzazione, duplicati, score, conteggi, etichette e ordinamento |
-| `BuildPermissionsReportUseCase` | `permissions/BuildPermissionsReportUseCaseTest` | Report vuoto/singolo/aggregato, totali, ordinamento, filename |
-| `ListPermissionsUseCase` | `UseCaseDelegationTest` | Lista completa/vuota, errore |
-| `ExportReportUseCase` | `reports/ExportReportUseCaseTest` | Save/share, percorso e ordine, Result.failure/eccezioni, nessuna share dopo save fallita |
-| `CheckPlayIntegrityUseCase` | `UseCaseDelegationTest` | Nonce default/esplicito, esito disponibile/non disponibile, errore |
-| `CheckRootUseCase` | `UseCaseDelegationTest` | Modalità PASSIVE default e PRIVILEGE_ACCESS, root presente/assente, errore |
-| `ExecuteShellCommandUseCase` | `UseCaseDelegationTest` | Comando e flag root, output successo/fallimento, eccezione |
-| `ListShellCommandsUseCase` | `UseCaseDelegationTest` | Lista completa/vuota, errore |
-| `GetActivityFavoritesUseCase` | `SettingsUseCasesTest` | Set vuoto/popolato, errore lettura |
-| `SetActivityFavoritesUseCase` | `SettingsUseCasesTest` | Valore scritto vuoto/popolato, errore scrittura |
-| `GetActivityPackageFavoritesUseCase` | `SettingsUseCasesTest` | Set vuoto/popolato, errore lettura |
-| `SetActivityPackageFavoritesUseCase` | `SettingsUseCasesTest` | Valore scritto vuoto/popolato, errore scrittura |
-| `GetExportFormatUseCase` | `SettingsUseCasesTest` | Tutti i formati, errore lettura |
-| `SetExportFormatUseCase` | `SettingsUseCasesTest` | Ogni formato scritto, errore scrittura |
-| `GetFeatureHintsEnabledUseCase` | `SettingsUseCasesTest` | True/false, errore lettura |
-| `SetFeatureHintsEnabledUseCase` | `SettingsUseCasesTest` | True/false scritti, errore scrittura |
-| `GetHighContrastUseCase` | `SettingsUseCasesTest` | True/false, errore lettura |
-| `SetHighContrastUseCase` | `SettingsUseCasesTest` | True/false scritti, errore scrittura |
-| `GetInstalledAppFavoritesUseCase` | `SettingsUseCasesTest` | Set vuoto/popolato, errore lettura |
-| `SetInstalledAppFavoritesUseCase` | `SettingsUseCasesTest` | Valore scritto vuoto/popolato, errore scrittura |
-| `GetIntroSeenUseCase` | `SettingsUseCasesTest` | True/false, errore lettura |
-| `SetIntroSeenUseCase` | `SettingsUseCasesTest` | True/false scritti, errore scrittura |
-| `GetLanguageUseCase` | `SettingsUseCasesTest` | Tutte le lingue incluso SYSTEM, errore lettura |
-| `SetLanguageUseCase` | `SettingsUseCasesTest` | Ogni lingua scritta incluso SYSTEM, errore scrittura |
-| `GetLargeTextUseCase` | `SettingsUseCasesTest` | True/false, errore lettura |
-| `SetLargeTextUseCase` | `SettingsUseCasesTest` | True/false scritti, errore scrittura |
-| `GetPermissionFavoritesUseCase` | `SettingsUseCasesTest` | Set vuoto/popolato, errore lettura |
-| `SetPermissionFavoritesUseCase` | `SettingsUseCasesTest` | Valore scritto vuoto/popolato, errore scrittura |
-| `GetReduceMotionUseCase` | `SettingsUseCasesTest` | True/false, errore lettura |
-| `SetReduceMotionUseCase` | `SettingsUseCasesTest` | True/false scritti, errore scrittura |
-| `GetSuggestionsEnabledUseCase` | `SettingsUseCasesTest` | True/false, errore lettura |
-| `SetSuggestionsEnabledUseCase` | `SettingsUseCasesTest` | True/false scritti, errore scrittura |
-| `GetThemeUseCase` | `SettingsUseCasesTest` | Tutti i temi incluso SYSTEM, errore lettura |
-| `SetThemeUseCase` | `SettingsUseCasesTest` | Ogni tema scritto incluso SYSTEM, errore scrittura |
-| `GetVerboseLogUseCase` | `SettingsUseCasesTest` | True/false, errore lettura |
-| `SetVerboseLogUseCase` | `SettingsUseCasesTest` | True/false scritti, errore scrittura |
+| UseCase                              | Suite diretta                                        | Comportamenti verificati                                                                 |
+|--------------------------------------|------------------------------------------------------|------------------------------------------------------------------------------------------|
+| `GetActivitiesUseCase`               | `UseCaseDelegationTest`                              | Lista completa/vuota, errore repository                                                  |
+| `LaunchActivityUseCase`              | `UseCaseDelegationTest`                              | Parametri intent espliciti/default, successo, Result.failure, eccezione                  |
+| `GetDeviceInfoUseCase`               | `UseCaseDelegationTest`                              | Modello restituito con campi opzionali assenti, errore                                   |
+| `ExportApkUseCase`                   | `UseCaseTests`, `UseCaseDelegationTest`              | Successo, fallimento ed eccezione                                                        |
+| `ListInstalledAppsUseCase`           | `UseCaseDelegationTest`                              | Lista completa/vuota, errore                                                             |
+| `ShareApkUseCase`                    | `UseCaseDelegationTest`                              | Entrambi i valori bluetoothOnly, successo, fallimento ed eccezione                       |
+| `ExportLogsUseCase`                  | `log/ExportLogsUseCaseTest`, `UseCaseDelegationTest` | Formati TXT/JSON/PDF, contenuto e nome file, percorso, fallimento ed eccezione           |
+| `GetLogsUseCase`                     | `UseCaseDelegationTest`                              | Lista completa/vuota, ordine e duplicati, errore                                         |
+| `RunPenTestChecksUseCase`            | `pentest/RunPenTestChecksUseCaseTest`                | Success/finding per ogni check, dati assenti, soglie library e fallback                  |
+| `AnalyzePermissionRisksUseCase`      | `permissions/AnalyzePermissionRisksUseCaseTest`      | Famiglie e pattern, normalizzazione, duplicati, score, conteggi, etichette e ordinamento |
+| `BuildPermissionsReportUseCase`      | `permissions/BuildPermissionsReportUseCaseTest`      | Report vuoto/singolo/aggregato, totali, ordinamento, filename                            |
+| `ListPermissionsUseCase`             | `UseCaseDelegationTest`                              | Lista completa/vuota, errore                                                             |
+| `ExportReportUseCase`                | `reports/ExportReportUseCaseTest`                    | Save/share, percorso e ordine, Result.failure/eccezioni, nessuna share dopo save fallita |
+| `CheckPlayIntegrityUseCase`          | `UseCaseDelegationTest`                              | Nonce default/esplicito, esito disponibile/non disponibile, errore                       |
+| `CheckRootUseCase`                   | `UseCaseDelegationTest`                              | Modalità PASSIVE default e PRIVILEGE_ACCESS, root presente/assente, errore               |
+| `ExecuteShellCommandUseCase`         | `UseCaseDelegationTest`                              | Comando e flag root, output successo/fallimento, eccezione                               |
+| `ListShellCommandsUseCase`           | `UseCaseDelegationTest`                              | Lista completa/vuota, errore                                                             |
+| `GetActivityFavoritesUseCase`        | `SettingsUseCasesTest`                               | Set vuoto/popolato, errore lettura                                                       |
+| `SetActivityFavoritesUseCase`        | `SettingsUseCasesTest`                               | Valore scritto vuoto/popolato, errore scrittura                                          |
+| `GetActivityPackageFavoritesUseCase` | `SettingsUseCasesTest`                               | Set vuoto/popolato, errore lettura                                                       |
+| `SetActivityPackageFavoritesUseCase` | `SettingsUseCasesTest`                               | Valore scritto vuoto/popolato, errore scrittura                                          |
+| `GetExportFormatUseCase`             | `SettingsUseCasesTest`                               | Tutti i formati, errore lettura                                                          |
+| `SetExportFormatUseCase`             | `SettingsUseCasesTest`                               | Ogni formato scritto, errore scrittura                                                   |
+| `GetFeatureHintsEnabledUseCase`      | `SettingsUseCasesTest`                               | True/false, errore lettura                                                               |
+| `SetFeatureHintsEnabledUseCase`      | `SettingsUseCasesTest`                               | True/false scritti, errore scrittura                                                     |
+| `GetHighContrastUseCase`             | `SettingsUseCasesTest`                               | True/false, errore lettura                                                               |
+| `SetHighContrastUseCase`             | `SettingsUseCasesTest`                               | True/false scritti, errore scrittura                                                     |
+| `GetInstalledAppFavoritesUseCase`    | `SettingsUseCasesTest`                               | Set vuoto/popolato, errore lettura                                                       |
+| `SetInstalledAppFavoritesUseCase`    | `SettingsUseCasesTest`                               | Valore scritto vuoto/popolato, errore scrittura                                          |
+| `GetIntroSeenUseCase`                | `SettingsUseCasesTest`                               | True/false, errore lettura                                                               |
+| `SetIntroSeenUseCase`                | `SettingsUseCasesTest`                               | True/false scritti, errore scrittura                                                     |
+| `GetLanguageUseCase`                 | `SettingsUseCasesTest`                               | Tutte le lingue incluso SYSTEM, errore lettura                                           |
+| `SetLanguageUseCase`                 | `SettingsUseCasesTest`                               | Ogni lingua scritta incluso SYSTEM, errore scrittura                                     |
+| `GetLargeTextUseCase`                | `SettingsUseCasesTest`                               | True/false, errore lettura                                                               |
+| `SetLargeTextUseCase`                | `SettingsUseCasesTest`                               | True/false scritti, errore scrittura                                                     |
+| `GetPermissionFavoritesUseCase`      | `SettingsUseCasesTest`                               | Set vuoto/popolato, errore lettura                                                       |
+| `SetPermissionFavoritesUseCase`      | `SettingsUseCasesTest`                               | Valore scritto vuoto/popolato, errore scrittura                                          |
+| `GetReduceMotionUseCase`             | `SettingsUseCasesTest`                               | True/false, errore lettura                                                               |
+| `SetReduceMotionUseCase`             | `SettingsUseCasesTest`                               | True/false scritti, errore scrittura                                                     |
+| `GetSuggestionsEnabledUseCase`       | `SettingsUseCasesTest`                               | True/false, errore lettura                                                               |
+| `SetSuggestionsEnabledUseCase`       | `SettingsUseCasesTest`                               | True/false scritti, errore scrittura                                                     |
+| `GetThemeUseCase`                    | `SettingsUseCasesTest`                               | Tutti i temi incluso SYSTEM, errore lettura                                              |
+| `SetThemeUseCase`                    | `SettingsUseCasesTest`                               | Ogni tema scritto incluso SYSTEM, errore scrittura                                       |
+| `GetVerboseLogUseCase`               | `SettingsUseCasesTest`                               | True/false, errore lettura                                                               |
+| `SetVerboseLogUseCase`               | `SettingsUseCasesTest`                               | True/false scritti, errore scrittura                                                     |
 
 ### Esecuzione mirata
 
