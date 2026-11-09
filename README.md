@@ -39,7 +39,7 @@
 | **Permissions**           | Installed app permissions overview with risk classification (Critical/High/Medium/Low), search and details                                                                                           |
 | **Shell/Tricks**          | Pre-configured ADB/shell commands (with root-required flag), optional confirmation, output and exit code                                                                                             |
 | **Log**                   | App operation log viewer with export                                                                                                                                                                 |
-| **Settings**              | Theme (light/dark/system), language (IT/EN), log verbosity, accessibility (high contrast, reduced animations, large text), library licenses, app version                                             |
+| **Settings**              | Theme (light/dark/system), language (system, IT/EN/DE/FR/ES), log verbosity, accessibility (high contrast, reduced animations, large text), library licenses, app version                          |
 
 ---
 
@@ -247,7 +247,7 @@ newCrackMyDroid/
 | **Background work**| WorkManager                         | 2.12.0         |
 | **Logging**        | Kermit                              | 2.0.4          |
 | **Testing**        | kotlin-test, MockK, coroutines-test | —              |
-| **Android**        | AGP                                 | 8.13.0         |
+| **Android**        | AGP                                 | 8.13.2         |
 | **Android**        | Core KTX / Activity Compose         | 1.13.1 / 1.8.2 |
 
 ---
@@ -258,14 +258,14 @@ newCrackMyDroid/
 
 - **JDK 17+**
 - **Android Studio** (Koala or later) or **IntelliJ IDEA** with the KMP plugin
-- **Android SDK** (API 34) with `platform-tools` in PATH
+- **Android SDK** (API 36) with `platform-tools` in PATH
 - **`adb`** in PATH (for the desktop app)
 
 ### Clone and first builds
 
 ```bash
-git clone https://github.com/<org>/CrackMyDroid.git
-cd newCrackMyDroid
+git clone https://github.com/misterAnt92TV/crackMyDroid.git
+cd crackMyDroid
 
 # Android
 ./gradlew :androidApp:installDebug
@@ -274,8 +274,7 @@ cd newCrackMyDroid
 ./gradlew :desktopApp:run
 
 # Tests
-./gradlew :shared:jvmCommonTest
-./gradlew :shared:desktopTest
+./gradlew :shared:desktopTest :shared:testDebugUnitTest
 ```
 
 ### Gradle Configuration
@@ -283,8 +282,8 @@ cd newCrackMyDroid
 Relevant properties in `gradle.properties`:
 
 ```properties
-android.compileSdk=34
-android.targetSdk=34
+android.compileSdk=36
+android.targetSdk=35
 android.minSdk=24
 org.gradle.parallel=true
 org.gradle.caching=true
@@ -296,7 +295,7 @@ kotlin.mpp.enableCInteropCommonization=true
 ## Quality Checks
 
 ```bash
-# Check local documentation links (README + docs)
+# Check local links and heading anchors in Markdown files
 ./scripts/check-doc-links.sh
 ```
 

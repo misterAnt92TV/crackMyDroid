@@ -6,6 +6,8 @@
 
 Kotlin Multiplatform (Android + Desktop + iOS) pour la sécurité mobile, le reverse engineering et le diagnostic de l'appareil — le tout dans une interface partagée construite avec Compose Multiplatform.
 
+La documentation technique (italien/anglais) est répertoriée dans l'[index de documentation](docs/README.md).
+
 ---
 
 ## Fonctionnalités principales
@@ -21,7 +23,7 @@ Kotlin Multiplatform (Android + Desktop + iOS) pour la sécurité mobile, le rev
 | **Permissions** | Aperçu des permissions des applications installées avec analyse des risques, recherche et détails |
 | **Shell/Astuces** | Commandes ADB/shell préconfigurées (avec indicateur root-required), confirmation optionnelle, sortie et code de retour |
 | **Journal** | Visualiseur de journaux applicatifs avec export |
-| **Paramètres** | Thème (clair/sombre/système), verbosité des journaux, accessibilité (contraste élevé, animations réduites, grand texte), licences des bibliothèques, version de l'application |
+| **Paramètres** | Thème (clair/sombre/système), langue (système, italien, anglais, allemand, français, espagnol), verbosité des journaux, accessibilité (contraste élevé, animations réduites, grand texte), licences des bibliothèques, version de l'application |
 
 ---
 

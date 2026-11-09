@@ -57,8 +57,8 @@ il catalogo; una pulizia degli script non deve cambiare il grafo risolto.
 ### Clone e verifica build
 
 ```bash
-git clone https://github.com/<org>/CrackMyDroid.git
-cd newCrackMyDroid
+git clone https://github.com/misterAnt92TV/crackMyDroid.git
+cd crackMyDroid
 
 # Verifica che Gradle funzioni
 ./gradlew tasks
@@ -112,8 +112,8 @@ cd newCrackMyDroid
 ### Test
 
 ```bash
-# Test JVM condivisi (commonMain + androidMain logic)
-./gradlew :shared:jvmCommonTest
+# Test condivisi sui target Desktop e Android unit
+./gradlew :shared:desktopTest :shared:testDebugUnitTest
 
 # Test Desktop
 ./gradlew :shared:desktopTest
@@ -121,9 +121,9 @@ cd newCrackMyDroid
 # Tutti i test
 ./gradlew :shared:allTests
 
-# Con report HTML
-./gradlew :shared:jvmCommonTest --info
-# Report: shared/build/reports/tests/jvmCommonTest/index.html
+# Esegui i test Desktop con log dettagliato
+./gradlew :shared:desktopTest --info
+# Report: shared/build/reports/tests/desktopTest/index.html
 ```
 
 ### Shared / KMP

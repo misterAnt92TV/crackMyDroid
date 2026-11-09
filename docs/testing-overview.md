@@ -19,48 +19,18 @@
 
 ```
 shared/src/
-├── commonTest/          # Dichiarato, attualmente vuoto
-├── iosTest/             # Dichiarato, attualmente vuoto
-│
-├── jvmCommonTest/       # 9 file — test condivisi JVM (ViewModel, UseCase, Model)
-│   └── kotlin/com/crackmydroid/shared/
-│       ├── domain/
-│       │   ├── usecase/
-│       │   │   └── UseCaseTests.kt
-│       │   └── model/
-│       │       └── DeviceScanSnapshotJsonTest.kt
-│       └── presentation/
-│           ├── PenTestingViewModelTest.kt
-│           ├── PermissionsViewModelTest.kt
-│           ├── ActivityListViewModelTest.kt
-│           ├── InstalledAppsViewModelTest.kt
-│           ├── LogViewModelTest.kt
-│           ├── TrickViewModelTest.kt
-│           └── components/
-│               └── SearchHistoryStoreTest.kt
-│
-└── desktopTest/         # 8 file — test layer Desktop/ADB
-    └── kotlin/com/crackmydroid/shared/
-        ├── data/
-        │   ├── adb/
-        │   │   ├── AdbParsersTest.kt
-        │   │   └── ProcessAdbBridgeTest.kt
-        │   ├── activity/
-        │   │   └── ActivityRepositoryDesktopTest.kt
-        │   ├── device/
-        │   │   └── DeviceSessionControllerDesktopTest.kt
-        │   ├── packages/
-        │   │   └── RemotePackageManagerDesktopTest.kt
-        │   ├── shell/
-        │   │   └── ShellCommandRepositoryDesktopTest.kt
-        │   └── snapshot/
-        │       └── RemoteDeviceSnapshotImporterTest.kt
-        └── domain/
-            └── model/
-                └── AppManifestSecurityTest.kt
+├── commonTest/          # 3 test file comuni
+├── jvmCommonTest/       # 38 test file JVM condivisi
+├── androidUnitTest/     # 1 test file specifico Android
+├── desktopTest/         # 9 test file specifici Desktop/ADB
+└── iosTest/             # source set dichiarato, senza test file
+
+androidApp/src/test/     # 2 test file del modulo Android
 ```
 
-**Totale:** 17 file di test · ~65 metodi `@Test`
+Inventario verificato: 51 file di test nel modulo `shared` e 2 in `androidApp`.
+`jvmCommonTest` è un source set, non un task Gradle; i test JVM condivisi vengono
+eseguiti tramite i task `desktopTest` e `testDebugUnitTest`.
 
 ---
 
@@ -131,7 +101,7 @@ elenca i soggetti e i comportamenti verificati.
 
 ## Pattern e convenzioni
 
-### Pattern ViewModel (tutti i 6 ViewModel test)
+### Pattern ViewModel (esempi)
 
 ```kotlin
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -180,7 +150,7 @@ tutte le coroutine in coda in modo deterministo, senza aspettare tempo reale.
 
 ---
 
-### Pattern Repository Desktop (tutti i 6 repository test)
+### Pattern Repository Desktop (esempi)
 
 ```kotlin
 class MyRepositoryDesktopTest {
@@ -249,6 +219,9 @@ Necessario perché `SearchHistoryStore` è un object singleton con stato persist
 
 ## Mappa di copertura
 
+Le tabelle riportano le suite documentate in dettaglio, non l'intero inventario dei test.
+Il conteggio complessivo e i source set sono riepilogati nella sezione iniziale.
+
 ### `jvmCommonTest`
 
 | File                            | Classe testata           | # Test | Aree coperte                                                               |
@@ -281,6 +254,7 @@ Necessario perché `SearchHistoryStore` è un object singleton con stato persist
 | `RemotePackageManagerDesktopTest.kt`    | `RemotePackageManagerDesktop`    | 1      | Caching ADB: ogni comando eseguito esattamente una volta per sessione            |
 | `DeviceSessionControllerDesktopTest.kt` | `DeviceSessionControllerDesktop` | 2      | Selezione device + invalidazione cache, rescan + clear selection                 |
 | `RemoteDeviceSnapshotImporterTest.kt`   | `RemoteDeviceSnapshotImporter`   | 2      | Import snapshot valido in cache, fallback su schema incompatibile                |
+| `ReportFileRepositoryDesktopTest.kt`    | `ReportFileRepositoryDesktop`    | 3      | PDF multipagina e accenti, salvataggio PDF, envelope JSON                         |
 
 ---
 
@@ -290,6 +264,6 @@ Vedi i file specifici per la documentazione completa test-per-test:
 
 | Documento                                                  | Contenuto                                                                                                                   |
 |------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------|
-| [`testing-viewmodels.md`](testing-viewmodels.md)           | Test di tutti i ViewModel (PenTesting, Permissions, ActivityList, InstalledApps, Log, Trick) con fixture, mock e assertions |
+| [`testing-viewmodels.md`](testing-viewmodels.md)           | Sei suite ViewModel selezionate (PenTesting, Permissions, ActivityList, InstalledApps, Log, Trick) con fixture, mock e assertions |
 | [`testing-usecases-models.md`](testing-usecases-models.md) | Test dei use case, modelli di dominio, serializzazione snapshot, SearchHistoryStore                                         |
 | [`testing-desktop-adb.md`](testing-desktop-adb.md)         | Test del layer Desktop/ADB: parser, bridge, repository, session controller, snapshot importer                               |

@@ -38,15 +38,16 @@ For a functional overview in **Italian and English**, start with the
 |------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------|
 | [`testing-overview.md`](testing-overview.md)               | **Indice test** — struttura suite, source set, dipendenze, comandi Gradle, pattern, mappa di copertura                    |
 | [`testing-feature-map.md`](testing-feature-map.md)         | **Feature → Test Map** — tracciabilità veloce tra funzionalità e test principali, con gap noti                            |
-| [`testing-viewmodels.md`](testing-viewmodels.md)           | Test ViewModel: PenTesting, Permissions, ActivityList, InstalledApps, Log, Trick — fixture, mock e assertions dettagliate |
+| [`testing-viewmodels.md`](testing-viewmodels.md)           | Dettagli di sei suite ViewModel selezionate; l'inventario completo è in `testing-overview.md` |
 | [`testing-usecases-models.md`](testing-usecases-models.md) | Test use case, serializzazione `DeviceScanSnapshot`, `SearchHistoryStore`                                                 |
-| [`testing-desktop-adb.md`](testing-desktop-adb.md)         | Test layer Desktop/ADB: parser, `ProcessAdbBridge`, manifest analyzer, repository, session controller, snapshot importer  |
+| [`testing-desktop-adb.md`](testing-desktop-adb.md)         | Test Desktop/ADB: parser, bridge, repository, session controller, snapshot importer e report PDF/JSON |
 
 ### Design
 
 | File                                             | Descrizione                                                                                              |
 |--------------------------------------------------|----------------------------------------------------------------------------------------------------------|
 | [`design/penpot/README.md`](design/penpot/README.md)   | Sorgente Penpot, pagine richieste e procedura di backup/ripristino                                      |
+| [`design/penpot/export/README.md`](design/penpot/export/README.md) | Bundle SVG di schermate e componenti importabili in Penpot, con manifest e istruzioni |
 | [`design/exports/README.md`](design/exports/README.md) | Setup del flusso Penpot-to-Compose, export versionati e policy per gli agenti                           |
 
 ---
@@ -71,6 +72,7 @@ For a functional overview in **Italian and English**, start with the
 ### Design
 
 - [Sorgente Penpot e backup](design/penpot/README.md)
+- [Bundle SVG importabile in Penpot](design/penpot/export/README.md)
 - [Handoff Penpot-to-Compose](design/exports/README.md)
 
 ### Architettura e sviluppo
@@ -90,8 +92,8 @@ For a functional overview in **Italian and English**, start with the
 ### Test
 
 - [Comandi Gradle test](testing-overview.md#comandi-gradle)
-- [Pattern ViewModel test](testing-overview.md#pattern-viewmodel-tutti-i-6-viewmodel-test)
-- [Pattern Repository Desktop](testing-overview.md#pattern-repository-desktop-tutti-i-6-repository-test)
+- [Pattern ViewModel test](testing-overview.md#pattern-viewmodel-esempi)
+- [Pattern Repository Desktop](testing-overview.md#pattern-repository-desktop-esempi)
 - [Mappa di copertura](testing-overview.md#mappa-di-copertura)
 - [PenTestingViewModelTest](testing-viewmodels.md#pentestingviewmodeltest)
 - [AdbParsersTest](testing-desktop-adb.md#adbparserstest)

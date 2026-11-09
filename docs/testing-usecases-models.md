@@ -9,7 +9,7 @@
 
 - [Copertura diretta degli UseCase](#copertura-diretta-degli-usecase)
 - [UseCaseTests](#usecasetests)
-- [DeviceScanSnapshotJsonTest](#devicescansnapshottjsontest)
+- [DeviceScanSnapshotJsonTest](#devicescansnapshotjsontest)
 - [SearchHistoryStoreTest](#searchhistorystoretest)
 
 ---

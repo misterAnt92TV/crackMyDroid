@@ -1,7 +1,8 @@
-# CrackMyDroid — Test ViewModel (`jvmCommonTest`)
+# CrackMyDroid — Esempi di test ViewModel (`jvmCommonTest`)
 
-> Test dei ViewModel condivisi. Tutti risiedono in `shared/src/jvmCommonTest/` e usano
-> `StandardTestDispatcher` + MockK.
+> Questa guida descrive nel dettaglio sei suite ViewModel selezionate, non l'intero inventario.
+> Tutte risiedono in `shared/src/jvmCommonTest/` e usano `StandardTestDispatcher` + MockK.
+> L'inventario corrente e i comandi Gradle sono in [`testing-overview.md`](testing-overview.md).
 
 ---
 

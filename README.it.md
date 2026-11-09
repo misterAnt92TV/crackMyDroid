@@ -41,14 +41,14 @@
 | **Permessi**              | Panoramica permessi app installate con classificazione del rischio (Critical/High/Medium/Low), ricerca e dettagli                                                                                             |
 | **Shell/Trick**           | Comandi ADB/shell preconfigurati (con flag root-required), conferma opzionale, output ed exit code                                                                                                            |
 | **Log**                   | Visualizzazione log applicativi con export                                                                                                                                                                    |
-| **Impostazioni**          | Tema (chiaro/scuro/sistema), lingua (IT/EN), verbosità log, accessibilità (alto contrasto, animazioni ridotte, testo grande), licenze librerie, versione app                                                  |
+| **Impostazioni**          | Tema (chiaro/scuro/sistema), lingua (sistema, IT/EN/DE/FR/ES), verbosità log, accessibilità (alto contrasto, animazioni ridotte, testo grande), licenze librerie, versione app                       |
 
 ---
 
 ## Schermate UI / UI Screens
 
-> Mockup ASCII fedeli alla UI Compose Multiplatform reale. Vedi [`docs/screens.md`](docs/screens.md)
-> per la documentazione visiva completa di tutte le schermate.
+> Mockup ASCII illustrativi della UI Compose Multiplatform. Vedi [`docs/screens.md`](docs/screens.md)
+> per la guida visiva completa e [`docs/README.md`](docs/README.md) per l'indice della documentazione tecnica.
 
 ### Home & Navigazione
 
@@ -213,7 +213,7 @@ MainActivity
 
 - Android **API 24+** (Android 7.0 Nougat)
 - JDK 17, Android SDK con `platform-tools`/`adb` nel PATH
-- `compileSdk=34`, `targetSdk=34`
+- `compileSdk=36`, `targetSdk=35`
 
 ### Build e installazione
 
@@ -381,7 +381,7 @@ newCrackMyDroid/
 | **Lavoro in background** | WorkManager                    | 2.12.0         |
 | **Logging**         | Kermit                              | 2.0.4          |
 | **Test**            | kotlin-test, MockK, coroutines-test | —              |
-| **Android**         | AGP                                 | 8.13.0         |
+| **Android**         | AGP                                 | 8.13.2         |
 | **Android**         | Core KTX / Activity Compose         | 1.13.1 / 1.8.2 |
 
 ---
@@ -392,14 +392,14 @@ newCrackMyDroid/
 
 - **JDK 17+**
 - **Android Studio** (Koala o superiore) oppure **IntelliJ IDEA** con plugin KMP
-- **Android SDK** (API 34) con `platform-tools` nel PATH
+- **Android SDK** (API 36) con `platform-tools` nel PATH
 - **`adb`** nel PATH (per la desktop app)
 
 ### Clone e prime build
 
 ```bash
-git clone https://github.com/<org>/CrackMyDroid.git
-cd newCrackMyDroid
+git clone https://github.com/misterAnt92TV/crackMyDroid.git
+cd crackMyDroid
 
 # Android
 ./gradlew :androidApp:installDebug
@@ -408,8 +408,7 @@ cd newCrackMyDroid
 ./gradlew :desktopApp:run
 
 # Test
-./gradlew :shared:jvmCommonTest
-./gradlew :shared:desktopTest
+./gradlew :shared:desktopTest :shared:testDebugUnitTest
 ```
 
 ### Configurazione Gradle
@@ -417,8 +416,8 @@ cd newCrackMyDroid
 Le proprietà rilevanti in `gradle.properties`:
 
 ```properties
-android.compileSdk=34
-android.targetSdk=34
+android.compileSdk=36
+android.targetSdk=35
 android.minSdk=24
 org.gradle.parallel=true
 org.gradle.caching=true
@@ -430,7 +429,7 @@ kotlin.mpp.enableCInteropCommonization=true
 ## Quality Checks
 
 ```bash
-# Verifica link locali nella documentazione (README + docs)
+# Verifica link e ancore locali nei file Markdown
 ./scripts/check-doc-links.sh
 ```
 
