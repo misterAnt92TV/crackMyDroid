@@ -48,7 +48,7 @@ actual fun platformModule(): Module = module {
     single<DeviceInfoRepository> { DeviceInfoRepositoryAndroid(androidContext(), get()) }
     single<ShellCommandRepository> { ShellCommandRepositoryAndroid() }
     single<SettingsRepository> { SettingsRepositoryAndroid(androidContext()) }
-    single<LogRepository> { LogRepositoryAndroid(androidContext()) }
+    single<LogRepository> { LogRepositoryAndroid() }
     single<PermissionsRepository> { PermissionsRepositoryAndroid(androidContext(), get()) }
     single<InstalledAppsRepository> { InstalledAppsRepositoryAndroid(androidContext(), get()) }
     single<ReportFileRepository> { ReportFileRepositoryAndroid() }

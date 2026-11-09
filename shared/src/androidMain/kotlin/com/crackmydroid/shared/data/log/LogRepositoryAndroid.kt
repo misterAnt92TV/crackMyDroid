@@ -1,15 +1,13 @@
 package com.crackmydroid.shared.data.log
 
-import android.content.Context
 import com.crackmydroid.shared.domain.repository.log.LogRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runInterruptible
 import kotlinx.coroutines.withContext
-import java.io.File
 
-class LogRepositoryAndroid(private val context: Context) : LogRepository {
+class LogRepositoryAndroid : LogRepository {
     override suspend fun fetchLog(): List<String> = withContext(Dispatchers.IO) {
         coroutineScope {
             val process =
@@ -29,11 +27,4 @@ class LogRepositoryAndroid(private val context: Context) : LogRepository {
         }
     }
 
-    override suspend fun export(logs: List<String>): Result<String> = withContext(Dispatchers.IO) {
-        runCatching {
-            val file = File(context.cacheDir, "crackmydroid-log.txt")
-            file.writeText(logs.joinToString("\n"))
-            file.absolutePath
-        }
-    }
 }

@@ -29,7 +29,7 @@ ViewModel non sono considerati copertura diretta.
 | `ExportApkUseCase` | `UseCaseTests`, `UseCaseDelegationTest` | Successo, fallimento ed eccezione |
 | `ListInstalledAppsUseCase` | `UseCaseDelegationTest` | Lista completa/vuota, errore |
 | `ShareApkUseCase` | `UseCaseDelegationTest` | Entrambi i valori bluetoothOnly, successo, fallimento ed eccezione |
-| `ExportLogsUseCase` | `UseCaseDelegationTest` | Lista vuota e duplicati, percorso, fallimento ed eccezione |
+| `ExportLogsUseCase` | `log/ExportLogsUseCaseTest`, `UseCaseDelegationTest` | Formati TXT/JSON/PDF, contenuto e nome file, percorso, fallimento ed eccezione |
 | `GetLogsUseCase` | `UseCaseDelegationTest` | Lista completa/vuota, ordine e duplicati, errore |
 | `RunPenTestChecksUseCase` | `pentest/RunPenTestChecksUseCaseTest` | Success/finding per ogni check, dati assenti, soglie library e fallback |
 | `AnalyzePermissionRisksUseCase` | `permissions/AnalyzePermissionRisksUseCaseTest` | Famiglie e pattern, normalizzazione, duplicati, score, conteggi, etichette e ordinamento |

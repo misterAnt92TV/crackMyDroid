@@ -126,7 +126,7 @@ Su Desktop, prima di questa navigazione, occorre selezionare un dispositivo.
 | APK e avvio activity | Operazioni native, soggette ai permessi | Estrazione tramite ADB, avvio remoto dove consentito | Non supportati |
 | Root e shell | Controlli locali; comandi limitati dai privilegi | Controlli/comandi sul device via ADB | Root dichiarato non supportato; elenco shell vuoto |
 | Play Integrity | Richiesta token; nessuna verifica server dei verdetti | Solo eventuale dato importato; indisponibile in ADB-only. Lo snapshot Android automatico lo marca come non eseguito | Non supportato |
-| Log | Log accessibili al processo | Snapshot oppure logcat via ADB | Vuoti; export log non supportato |
+| Log | Log accessibili al processo | Snapshot oppure logcat via ADB | Vuoti; l'export segue il formato report selezionato |
 | Report/condivisione | File e condivisione Android dove implementati | File locali; «condividi» rivela/apre il file o la cartella, non invia automaticamente né usa Bluetooth | Non equivale al supporto degli strumenti Android |
 
 Desktop richiede ADB funzionante e un dispositivo accessibile e autorizzato; uno stato offline
@@ -244,7 +244,7 @@ Desktop requires device selection before this shared navigation becomes availabl
 | APK and activity launch | Native operations subject to permissions | ADB extraction, permitted remote launch | Unsupported |
 | Root and shell | Local checks; privilege-limited commands | Checks/commands on the device over ADB | Root marked unsupported; empty command list |
 | Play Integrity | Token request; no server verification of verdicts | Only possibly imported data; unavailable in ADB-only mode. Automatic Android snapshots mark it as not executed | Unsupported |
-| Logs | Logs accessible to the process | Snapshot or ADB logcat | Empty; log export unsupported |
+| Logs | Logs accessible to the process | Snapshot or ADB logcat | Empty; export follows the selected report format |
 | Reports/sharing | Android files/sharing where implemented | Local files; “share” reveals/opens the file or folder, without automatic sending or Bluetooth | Does not imply support for Android inspection tools |
 
 Desktop requires working ADB and an accessible, authorized device; offline/unauthorized status

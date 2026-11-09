@@ -1,6 +1,8 @@
 package com.crackmydroid.shared.domain.usecase
 
 import com.crackmydroid.shared.domain.model.activity.ActivityEntry
+import com.crackmydroid.shared.domain.model.ExportDocument
+import com.crackmydroid.shared.domain.model.ExportFormat
 import com.crackmydroid.shared.domain.model.InstalledAppEntry
 import com.crackmydroid.shared.domain.model.DeviceInfo
 import com.crackmydroid.shared.domain.model.PlayIntegrityResult
@@ -16,6 +18,7 @@ import com.crackmydroid.shared.domain.repository.DeviceInfoRepository
 import com.crackmydroid.shared.domain.repository.PermissionsRepository
 import com.crackmydroid.shared.domain.repository.RootCheckRepository
 import com.crackmydroid.shared.domain.repository.log.LogRepository
+import com.crackmydroid.shared.domain.repository.ReportFileRepository
 import com.crackmydroid.shared.domain.usecase.activities.GetActivitiesUseCase
 import com.crackmydroid.shared.domain.usecase.activities.LaunchActivityUseCase
 import com.crackmydroid.shared.domain.usecase.info.GetDeviceInfoUseCase
@@ -24,6 +27,8 @@ import com.crackmydroid.shared.domain.usecase.installedapps.ListInstalledAppsUse
 import com.crackmydroid.shared.domain.usecase.installedapps.ShareApkUseCase
 import com.crackmydroid.shared.domain.usecase.log.ExportLogsUseCase
 import com.crackmydroid.shared.domain.usecase.log.GetLogsUseCase
+import com.crackmydroid.shared.domain.usecase.reports.ExportReportUseCase
+import com.crackmydroid.shared.domain.usecase.settings.GetExportFormatUseCase
 import com.crackmydroid.shared.domain.usecase.permissions.ListPermissionsUseCase
 import com.crackmydroid.shared.domain.usecase.root.CheckPlayIntegrityUseCase
 import com.crackmydroid.shared.domain.usecase.root.CheckRootUseCase
@@ -164,15 +169,18 @@ class UseCaseDelegationTest {
     @Test
     fun `APK and log exports forward inputs and convert thrown exceptions to failures`() = runTest {
         val apps = mockk<InstalledAppsRepository>()
-        val logs = mockk<LogRepository>()
+        val reportFiles = mockk<ReportFileRepository>()
+        val format = mockk<GetExportFormatUseCase>()
         val failure = IllegalStateException("Export failed")
         coEvery { apps.exportApk("pkg") } returns Result.failure(failure)
-        coEvery { logs.export(emptyList()) } returns Result.success("/logs.txt")
+        coEvery { format() } returns Result.success(ExportFormat.TXT)
+        coEvery { reportFiles.save(any<ExportDocument>()) } returns Result.success("/logs.txt")
+        val exportLogs = ExportLogsUseCase(ExportReportUseCase(reportFiles, format))
         assertSame(failure, ExportApkUseCase(apps)("pkg").exceptionOrNull())
-        assertEquals("/logs.txt", ExportLogsUseCase(logs)(emptyList()).getOrThrow())
+        assertEquals("/logs.txt", exportLogs(emptyList()).getOrThrow())
         val lines = listOf("line", "line")
-        coEvery { logs.export(lines) } returns Result.failure(failure)
-        assertSame(failure, ExportLogsUseCase(logs)(lines).exceptionOrNull())
+        coEvery { reportFiles.save(any<ExportDocument>()) } returns Result.failure(failure)
+        assertSame(failure, exportLogs(lines).exceptionOrNull())
         for (bluetooth in listOf(false, true)) {
             coEvery { apps.shareApk("pkg", bluetooth) } returns Result.failure(failure)
             assertSame(failure, ShareApkUseCase(apps)("pkg", bluetooth).exceptionOrNull())
@@ -182,10 +190,10 @@ class UseCaseDelegationTest {
         }
         coEvery { apps.exportApk("pkg") } throws failure
         coEvery { apps.shareApk("pkg", false) } throws failure
-        coEvery { logs.export(lines) } throws failure
+        coEvery { reportFiles.save(any<ExportDocument>()) } throws failure
         assertSame(failure, ExportApkUseCase(apps)("pkg").exceptionOrNull())
         assertSame(failure, ShareApkUseCase(apps)("pkg", false).exceptionOrNull())
-        assertSame(failure, ExportLogsUseCase(logs)(lines).exceptionOrNull())
+        assertSame(failure, exportLogs(lines).exceptionOrNull())
     }
 
     @Test

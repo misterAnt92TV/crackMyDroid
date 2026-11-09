@@ -184,6 +184,6 @@ fun presentationModule() = module {
     }
     factory { LogViewModel(get(), get(), get()) }
     factory { PermissionsViewModel(get(), get(), get(), get(), get(), get(), get()) }
-    factory { InstalledAppsViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
+    factory { InstalledAppsViewModel(get(), get(), get(), get(), get(), get(), get()) }
     factory { PenTestingViewModel(get(), get(), get(), get(), get(), get()) }
 }

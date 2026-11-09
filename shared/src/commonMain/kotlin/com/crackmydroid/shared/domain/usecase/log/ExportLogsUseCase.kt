@@ -1,12 +1,12 @@
 package com.crackmydroid.shared.domain.usecase.log
 
-import com.crackmydroid.shared.domain.repository.log.LogRepository
+import com.crackmydroid.shared.domain.usecase.reports.ExportReportUseCase
 import co.touchlab.kermit.Logger
 import com.crackmydroid.shared.AppLogger
 import com.crackmydroid.shared.domain.usecase.BaseUseCase
 
 class ExportLogsUseCase(
-    private val repository: LogRepository,
+    private val reportExporter: ExportReportUseCase,
     logger: Logger = AppLogger.logger
 ) : BaseUseCase(TAG, logger = logger) {
     private companion object {
@@ -14,5 +14,11 @@ class ExportLogsUseCase(
     }
 
     suspend operator fun invoke(logs: List<String>): Result<String> =
-        execute { repository.export(logs).getOrThrow() }
+        execute {
+            reportExporter.saveTextReport(
+                baseName = "crackmydroid-log",
+                reportType = "logs",
+                textContent = logs.joinToString("\n"),
+            ).getOrThrow()
+        }
 }

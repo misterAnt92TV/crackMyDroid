@@ -327,10 +327,12 @@ data class ShellCommandResult(
 
 ```kotlin
 interface LogRepository {
-    suspend fun fetchLog(): List<LogEntry>
-    suspend fun export(): ResultWrapper<String>   // path file esportato
+    suspend fun fetchLog(): List<String>
 }
 ```
+
+L'esportazione dei log è gestita da `ExportLogsUseCase` tramite `ExportReportUseCase`, quindi
+rispetta il formato documentale selezionato nelle impostazioni (`.txt`, `.json` o `.pdf`).
 
 ---
 

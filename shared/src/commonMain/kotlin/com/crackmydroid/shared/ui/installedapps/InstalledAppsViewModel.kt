@@ -7,7 +7,6 @@ import com.crackmydroid.shared.domain.usecase.installedapps.ExportApkUseCase
 import com.crackmydroid.shared.domain.usecase.installedapps.ListInstalledAppsUseCase
 import com.crackmydroid.shared.domain.usecase.installedapps.ShareApkUseCase
 import com.crackmydroid.shared.domain.usecase.reports.ExportReportUseCase
-import com.crackmydroid.shared.domain.usecase.settings.GetExportFormatUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetInstalledAppFavoritesUseCase
 import com.crackmydroid.shared.domain.usecase.settings.SetInstalledAppFavoritesUseCase
 import com.crackmydroid.shared.presentation.BaseViewModel
@@ -25,7 +24,6 @@ class InstalledAppsViewModel(
     private val listUseCase: ListInstalledAppsUseCase,
     private val exportUseCase: ExportApkUseCase,
     private val shareUseCase: ShareApkUseCase,
-    private val getExportFormat: GetExportFormatUseCase,
     private val reportExporter: ExportReportUseCase,
     private val getFavorites: GetInstalledAppFavoritesUseCase,
     private val setFavorites: SetInstalledAppFavoritesUseCase,

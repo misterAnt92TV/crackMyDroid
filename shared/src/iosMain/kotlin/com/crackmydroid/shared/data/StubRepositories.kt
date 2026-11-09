@@ -172,8 +172,6 @@ class SettingsRepositoryIos : SettingsRepository {
 
 class LogRepositoryIos : LogRepository {
     override suspend fun fetchLog(): List<String> = emptyList()
-    override suspend fun export(logs: List<String>): Result<String> =
-        Result.failure(UnsupportedOperationException("Non supportato su iOS"))
 }
 
 class PermissionsRepositoryIos : PermissionsRepository {
