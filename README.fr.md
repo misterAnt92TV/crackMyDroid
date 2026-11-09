@@ -6,6 +6,8 @@
 
 Kotlin Multiplatform (Android + Desktop + iOS) pour la sécurité mobile, le reverse engineering et le diagnostic de l'appareil — le tout dans une interface partagée construite avec Compose Multiplatform.
 
+La documentation technique (italien/anglais) est répertoriée dans l'[index de documentation](docs/README.md).
+
 ---
 
 ## Fonctionnalités principales
@@ -14,14 +16,14 @@ Kotlin Multiplatform (Android + Desktop + iOS) pour la sécurité mobile, le rev
 |---|---|
 | **Accueil** | Aperçu rapide, objectif de l'application et FAQ déroulantes |
 | **Infos appareil** | Matériel/logiciel, correctifs de sécurité, empreinte, radio, noyau, bootloader, batterie/réseau, indicateurs de débogage (ADB, options développeur, debuggable), statut root ; chaque ligne copiable, rapport exportable en TXT |
-| **Root / Play Integrity** | Vérification root avec RootBeer, contrôles Play Integrity avec nonce configurable et détail des tests |
+| **Root / Play Integrity** | Vérification root avec RootBeer et verdicts Play Integrity vérifiables par backend pour CrackMyDroid et l’appareil |
 | **PenTesting** | Liste de contrôles de sécurité avec statut (queued/ok/error), compteurs, détail des erreurs, export/partage du rapport |
 | **Activités** | Liste des activités par application avec recherche/historique, favoris, expansion par paquet, lancement direct et export |
 | **Applications installées (APK)** | Recherche, filtres, favoris, icônes des apps, export APK vers le stockage et partage direct |
 | **Permissions** | Aperçu des permissions des applications installées avec analyse des risques, recherche et détails |
 | **Shell/Astuces** | Commandes ADB/shell préconfigurées (avec indicateur root-required), confirmation optionnelle, sortie et code de retour |
 | **Journal** | Visualiseur de journaux applicatifs avec export |
-| **Paramètres** | Thème (clair/sombre/système), verbosité des journaux, accessibilité (contraste élevé, animations réduites, grand texte), licences des bibliothèques, version de l'application |
+| **Paramètres** | Thème (clair/sombre/système), langue (système, italien, anglais, allemand, français, espagnol), verbosité des journaux, accessibilité (contraste élevé, animations réduites, grand texte), licences des bibliothèques, version de l'application |
 
 ---
 

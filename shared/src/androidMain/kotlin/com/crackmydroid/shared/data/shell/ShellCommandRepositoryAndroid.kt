@@ -5,9 +5,12 @@ import com.crackmydroid.shared.AppLogger
 import com.crackmydroid.shared.domain.model.shell.ShellCommand
 import com.crackmydroid.shared.domain.model.shell.ShellCommandResult
 import com.crackmydroid.shared.domain.repository.ShellCommandRepository
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.runInterruptible
 import kotlinx.coroutines.withContext
-import java.io.BufferedReader
 import java.util.Locale
 
 class ShellCommandRepositoryAndroid : ShellCommandRepository {
@@ -279,18 +282,24 @@ class ShellCommandRepositoryAndroid : ShellCommandRepository {
             runCommand(command.command, command.requiresRoot)
         }
 
-    private fun runCommand(cmd: String, root: Boolean): ShellCommandResult {
-        return try {
+    private suspend fun runCommand(cmd: String, root: Boolean): ShellCommandResult = coroutineScope {
+        var process: Process? = null
+        try {
             val prefix = if (root) arrayOf("su", "-c", cmd) else arrayOf("sh", "-c", cmd)
-            val process = Runtime.getRuntime().exec(prefix)
-            val stdout = process.inputStream.bufferedReader().use(BufferedReader::readText)
-            val stderr = process.errorStream.bufferedReader().use(BufferedReader::readText)
-            val code = process.waitFor()
+            val startedProcess = Runtime.getRuntime().exec(prefix)
+            process = startedProcess
+            val stdout = async { startedProcess.inputStream.bufferedReader().use { it.readText() } }
+            val stderr = async { startedProcess.errorStream.bufferedReader().use { it.readText() } }
+            val code = runInterruptible { startedProcess.waitFor() }
             AppLogger.logger.i { "cmd=$cmd code=$code" }
-            ShellCommandResult(code == 0, stdout = stdout, stderr = stderr, code = code)
-        } catch (t: Throwable) {
+            ShellCommandResult(code == 0, stdout = stdout.await(), stderr = stderr.await(), code = code)
+        } catch (cancellation: CancellationException) {
+            throw cancellation
+        } catch (t: Exception) {
             AppLogger.logger.e(t) { "shell failed for $cmd" }
             ShellCommandResult(false, stdout = "", stderr = t.message ?: "errore", code = -1)
+        } finally {
+            process?.destroy()
         }
     }
 

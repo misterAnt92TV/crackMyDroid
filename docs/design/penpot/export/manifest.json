@@ -1,0 +1,520 @@
+{
+  "schemaVersion": 1,
+  "application": "CrackMyDroid",
+  "source": {
+    "screenshots": "docs/design/exports/screenshots/manifest.json",
+    "tokens": "docs/design/exports/design-tokens.json",
+    "componentRoot": "shared/src/commonMain/kotlin/com/crackmydroid/shared",
+    "capture": {
+      "platform": "Android emulator",
+      "avd": "Small_Phone_-_720x1280",
+      "serial": "emulator-5554",
+      "android": "Android 16 (API 36)",
+      "package": "com.crackmydroid.android",
+      "language": "English",
+      "dimensions": "720x1280",
+      "captureCommit": "3d6a1e3fb1b9a22eace039113d0d78c5f9463011",
+      "fixture": "No temporary fixture required; the clean emulator inventory was used.",
+      "notes": "Navigation and assertions used the accessibility UI driver. PNG capture used adb screencap only after the screen was stable."
+    }
+  },
+  "tokens": "design-tokens.json",
+  "screens": [
+    {
+      "name": "Home",
+      "state": "Recent operations populated",
+      "route": "Home bottom navigation",
+      "source": "docs/design/exports/screenshots/android/home.png",
+      "file": "screens/home.svg",
+      "format": "svg-with-embedded-png",
+      "width": 720,
+      "height": 1280,
+      "sha256": "918f2db50ddecccb5fb7157b4eb7ee9252f5cdfe805de2177d5a8b07aac9e48e",
+      "exportSha256": "ee198958280ae51504df7c7cc421af6145f2f515d374fac78c589535b781e1b4"
+    },
+    {
+      "name": "Device Info",
+      "state": "Default device summary",
+      "route": "Device info bottom navigation",
+      "source": "docs/design/exports/screenshots/android/device-info.png",
+      "file": "screens/device-info.svg",
+      "format": "svg-with-embedded-png",
+      "width": 720,
+      "height": 1280,
+      "sha256": "36d21617b926a081812eb14e943b82e14ffe2b43fbbf29e39ccd4eed92932d02",
+      "exportSha256": "8605d95900e731dfc1c9cbd59804bb1914477e8153b36f95b086a2e1902d2838"
+    },
+    {
+      "name": "Settings",
+      "state": "English selected",
+      "route": "Settings bottom navigation > Language > English",
+      "source": "docs/design/exports/screenshots/android/settings.png",
+      "file": "screens/settings.svg",
+      "format": "svg-with-embedded-png",
+      "width": 720,
+      "height": 1280,
+      "sha256": "057128ca5ca794d4ae0b888c52ca6badcf7039378006e67c75eef983ed091999",
+      "exportSha256": "1f10d8dfd5e45826f92cc457a835f22a5f75c04c7bbb6b9529f2257c66702802"
+    },
+    {
+      "name": "Installed Apps",
+      "state": "APK tip dialog",
+      "route": "Menu > APKs",
+      "source": "docs/design/exports/screenshots/android/installed-apps.png",
+      "file": "screens/installed-apps.svg",
+      "format": "svg-with-embedded-png",
+      "width": 720,
+      "height": 1280,
+      "sha256": "b28e2e7504357f64fef8afc3e4d935430b1ea0f4370e60f6599c01741939636b",
+      "exportSha256": "99748a9539f2bec28cf739f535f0d55db42878a34250646a3e49f29b6a629f95"
+    },
+    {
+      "name": "PenTesting",
+      "state": "Wizard step 1 of 4",
+      "route": "Menu > Pentest > Got it",
+      "source": "docs/design/exports/screenshots/android/pentesting.png",
+      "file": "screens/pentesting.svg",
+      "format": "svg-with-embedded-png",
+      "width": 720,
+      "height": 1280,
+      "sha256": "aee9eb874b909e893c5cd1840139ac88b4bce7ca9c5a99980314e8133749311b",
+      "exportSha256": "01e699e2993dc850afacae6937153966171a5560183925b037e8768c4173426a"
+    },
+    {
+      "name": "Permissions",
+      "state": "Inventory loaded",
+      "route": "Menu > Permissions > Got it",
+      "source": "docs/design/exports/screenshots/android/permissions.png",
+      "file": "screens/permissions.svg",
+      "format": "svg-with-embedded-png",
+      "width": 720,
+      "height": 1280,
+      "sha256": "0e601d0b4db1a56ff7b7aca8ab3ab9695fc3dbc33815fe7f52d62bc2729fc86b",
+      "exportSha256": "aad58a86ce6daeab21a93a58b31d7877501b0053437c54d47b51d75b458a4c1e"
+    },
+    {
+      "name": "Activities",
+      "state": "Inventory loaded",
+      "route": "Menu > Activity list > Got it",
+      "source": "docs/design/exports/screenshots/android/activities.png",
+      "file": "screens/activities.svg",
+      "format": "svg-with-embedded-png",
+      "width": 720,
+      "height": 1280,
+      "sha256": "8686376754af8f109b91c7dab6cf81595ba50d30d0eb79ce22bb9fb551cedf8f",
+      "exportSha256": "f883dee270c755106c88f86721d01b49d88373cc59c951beaeda53c096b5e890"
+    },
+    {
+      "name": "Root / Play Integrity",
+      "state": "Checks ready",
+      "route": "Menu > Root test > Got it",
+      "source": "docs/design/exports/screenshots/android/root-play-integrity.png",
+      "file": "screens/root-play-integrity.svg",
+      "format": "svg-with-embedded-png",
+      "width": 720,
+      "height": 1280,
+      "sha256": "6df5d321328b239eef5e78de9da72e6b9760da0482d0586877709f57698f4c44",
+      "exportSha256": "55db8c3fb6de5f13d07b3b492673dac056fbe27d63bd1c68dcb1bc3f86fd257b"
+    },
+    {
+      "name": "Shell / Trick",
+      "state": "Command cards ready",
+      "route": "Menu > Trick > Got it",
+      "source": "docs/design/exports/screenshots/android/shell-trick.png",
+      "file": "screens/shell-trick.svg",
+      "format": "svg-with-embedded-png",
+      "width": 720,
+      "height": 1280,
+      "sha256": "453ffc8134e9299f0f5e992bf5f4febc85a7c5250fe9cc13f54290c5b1314cc6",
+      "exportSha256": "2a5c7374de4b8dacdf7d87e776370640b096f522e23c11c18c475096719ecebf"
+    },
+    {
+      "name": "Log",
+      "state": "Filtered log view",
+      "route": "Menu > Log",
+      "source": "docs/design/exports/screenshots/android/log.png",
+      "file": "screens/log.svg",
+      "format": "svg-with-embedded-png",
+      "width": 720,
+      "height": 1280,
+      "sha256": "d1ddd34d30f69a2a5c5b0ad24e4a355541c82d924e5b64a109cb715542759680",
+      "exportSha256": "1edc16c90110302135b51c7ef101004df8347e33085cedf7c90324e9e289d7f7"
+    },
+    {
+      "name": "Help",
+      "state": "Feature map",
+      "route": "Menu > Help",
+      "source": "docs/design/exports/screenshots/android/help.png",
+      "file": "screens/help.svg",
+      "format": "svg-with-embedded-png",
+      "width": 720,
+      "height": 1280,
+      "sha256": "69f3f8b46ceb8541da04369984c1bcbf3f4dad8efbaf20414a636d9fdb23c2ab",
+      "exportSha256": "b412653a4eb6afb0b4d0d869bbede6431be7a41385f1ae4ed3f59a81e63e41fa"
+    },
+    {
+      "name": "PenTesting tip",
+      "state": "First-entry guidance",
+      "route": "Menu > Pentest",
+      "source": "docs/design/exports/screenshots/android/pentesting-tip.png",
+      "file": "screens/pentesting-tip.svg",
+      "format": "svg-with-embedded-png",
+      "width": 720,
+      "height": 1280,
+      "sha256": "5281b3cffefeda545d21e2c4416d2080a755893f84e5617527e04a2fd5085f3b",
+      "exportSha256": "751973e89d68e4b6983e76f04bdf2016f93e40285db061d3550c82113a00ee62"
+    },
+    {
+      "name": "Permissions tip",
+      "state": "First-entry guidance",
+      "route": "Menu > Permissions",
+      "source": "docs/design/exports/screenshots/android/permissions-tip.png",
+      "file": "screens/permissions-tip.svg",
+      "format": "svg-with-embedded-png",
+      "width": 720,
+      "height": 1280,
+      "sha256": "be253f1e433691242da1d2b3f63f4341569cbb397aac4a1de030361794b3d871",
+      "exportSha256": "a54543a0a803742d093cd1928a0d69b3a05a48ca77ee4e111c71f523ac96b5e8"
+    },
+    {
+      "name": "Activities tip",
+      "state": "First-entry guidance",
+      "route": "Menu > Activity list",
+      "source": "docs/design/exports/screenshots/android/activities-tip.png",
+      "file": "screens/activities-tip.svg",
+      "format": "svg-with-embedded-png",
+      "width": 720,
+      "height": 1280,
+      "sha256": "6c23f3467f694af1d7df650de4249c232bb30ce7858d7b99c9eab903beca42b2",
+      "exportSha256": "3f86b03ef1956afaf25d39d6f6ee895d94be8edf99dc50fa9597049dec030999"
+    },
+    {
+      "name": "Root / Play Integrity tip",
+      "state": "First-entry guidance",
+      "route": "Menu > Root test",
+      "source": "docs/design/exports/screenshots/android/root-play-integrity-tip.png",
+      "file": "screens/root-play-integrity-tip.svg",
+      "format": "svg-with-embedded-png",
+      "width": 720,
+      "height": 1280,
+      "sha256": "fa768c586a21315fe23dcd4731e3dcb9812c9f36b934f0bf99eabe44176defd2",
+      "exportSha256": "34baecca96873105253dd98e7d5a0334c8e033dff71d78c96189789e86b15583"
+    },
+    {
+      "name": "Shell / Trick tip",
+      "state": "First-entry guidance",
+      "route": "Menu > Trick",
+      "source": "docs/design/exports/screenshots/android/shell-trick-tip.png",
+      "file": "screens/shell-trick-tip.svg",
+      "format": "svg-with-embedded-png",
+      "width": 720,
+      "height": 1280,
+      "sha256": "5d36e069aa77e4c513790f727e0a503c85ea3738d1d917ba6feb94c40ecf59c1",
+      "exportSha256": "4d5f895f99ad462ecc914cd2809179bb8dcbbd3715620a4fe70a115179a1b65f"
+    },
+    {
+      "name": "Help dialog",
+      "state": "Log help dialog",
+      "route": "Log > Help",
+      "source": "docs/design/exports/screenshots/android/help-dialog.png",
+      "file": "screens/help-dialog.svg",
+      "format": "svg-with-embedded-png",
+      "width": 720,
+      "height": 1280,
+      "sha256": "93fa1023042c94a913f67b41cff5c3db306c546be24f0b1317e75fec17bc2fb6",
+      "exportSha256": "915c4d642af6dceeaada13773813a5a0cb1affc5512893f8694f86d7f3db97d2"
+    }
+  ],
+  "components": [
+    {
+      "name": "AppAccordion",
+      "source": "shared/src/commonMain/kotlin/com/crackmydroid/shared/presentation/components/AppAccordion.kt",
+      "format": "editable-svg",
+      "exports": [
+        {
+          "file": "components/appaccordion-light.svg",
+          "sha256": "bfb840e8ce2ab5800f07acdc38efab46d25c76fc758b6888c1979e8a1b1cbe76"
+        },
+        {
+          "file": "components/appaccordion-dark.svg",
+          "sha256": "a1f1364ec2d75621d41d4d35c4f8bc3072ac0e3e8f7d1b7bed3fb28b0c22c409"
+        }
+      ]
+    },
+    {
+      "name": "AppButton",
+      "source": "shared/src/commonMain/kotlin/com/crackmydroid/shared/presentation/components/AppButton.kt",
+      "format": "editable-svg",
+      "exports": [
+        {
+          "file": "components/appbutton-light.svg",
+          "sha256": "066edd53a7a2642da10e7e489240d8839f9c7e4d53c1159c32e8a1ab051b7a06"
+        },
+        {
+          "file": "components/appbutton-dark.svg",
+          "sha256": "1590bd0544b3297c9b446b29825f1752eb0c4d775ab86ba6bfcd32c884ee20b5"
+        }
+      ]
+    },
+    {
+      "name": "AppCard",
+      "source": "shared/src/commonMain/kotlin/com/crackmydroid/shared/presentation/components/card/AppCard.kt",
+      "format": "editable-svg",
+      "exports": [
+        {
+          "file": "components/appcard-light.svg",
+          "sha256": "e299774e074c5dcc6a173f90d12abe8f477d74407f76aa5afa62d26ee1ca59ac"
+        },
+        {
+          "file": "components/appcard-dark.svg",
+          "sha256": "ebfcbba3d5bc3049bc8e3f4ce6a9263879d3c232f56303cdf91b9c89e55a9a1b"
+        }
+      ]
+    },
+    {
+      "name": "AppDialog",
+      "source": "shared/src/commonMain/kotlin/com/crackmydroid/shared/presentation/components/AppDialog.kt",
+      "format": "editable-svg",
+      "exports": [
+        {
+          "file": "components/appdialog-light.svg",
+          "sha256": "8ecfea5e26956659441a662cd237e8d6afb0bce38ab91cf455094ac82d51f999"
+        },
+        {
+          "file": "components/appdialog-dark.svg",
+          "sha256": "f4ad3dcd36938debf457fe882732d75b62cc6d2b012b1a73577fcedc564e89d3"
+        }
+      ]
+    },
+    {
+      "name": "AppListItem",
+      "source": "shared/src/commonMain/kotlin/com/crackmydroid/shared/presentation/components/AppListItem.kt",
+      "format": "editable-svg",
+      "exports": [
+        {
+          "file": "components/applistitem-light.svg",
+          "sha256": "602e70ec403c4ea1ee92e2c35500c955ab441e204b379c80189d6152769f6118"
+        },
+        {
+          "file": "components/applistitem-dark.svg",
+          "sha256": "be316f4a40612be4656fad11c2bf1e749e37c426eee62ebcd94260032515d369"
+        }
+      ]
+    },
+    {
+      "name": "AppProgressIndicator",
+      "source": "shared/src/commonMain/kotlin/com/crackmydroid/shared/presentation/components/AppProgressIndicator.kt",
+      "format": "editable-svg",
+      "exports": [
+        {
+          "file": "components/appprogressindicator-light.svg",
+          "sha256": "dae263d2744410683dd306f8c1ef91343ab0e987164ed6aefd7c1ef7edb069fb"
+        },
+        {
+          "file": "components/appprogressindicator-dark.svg",
+          "sha256": "60ad24c979b0ea24062534f29f04e4aa128e261a9edd285db432371d67f965d9"
+        }
+      ]
+    },
+    {
+      "name": "AppText",
+      "source": "shared/src/commonMain/kotlin/com/crackmydroid/shared/presentation/components/text/AppText.kt",
+      "format": "editable-svg",
+      "exports": [
+        {
+          "file": "components/apptext-light.svg",
+          "sha256": "7d25e616e0bb1432889055a0fcc8ffd1312a0b625142e9f3fcf972cde5d036cf"
+        },
+        {
+          "file": "components/apptext-dark.svg",
+          "sha256": "391322e45c19dc2acb99a1e1c994a2e94cb4366696896bb0685a6118d84d50be"
+        }
+      ]
+    },
+    {
+      "name": "AppTextField",
+      "source": "shared/src/commonMain/kotlin/com/crackmydroid/shared/presentation/components/AppTextField.kt",
+      "format": "editable-svg",
+      "exports": [
+        {
+          "file": "components/apptextfield-light.svg",
+          "sha256": "f76cfc79c86198ecd8ada652f2ecaa482ef8f3a9ddc0a4154b60449c4318f3f1"
+        },
+        {
+          "file": "components/apptextfield-dark.svg",
+          "sha256": "fa494a173ec1b359c4ea469e2e314bd9b695b5951c89e462c10ce959249aef54"
+        }
+      ]
+    },
+    {
+      "name": "CardBlock",
+      "source": "shared/src/commonMain/kotlin/com/crackmydroid/shared/presentation/components/card/CardBlock.kt",
+      "format": "editable-svg",
+      "exports": [
+        {
+          "file": "components/cardblock-light.svg",
+          "sha256": "e0baafb15688b54978a4002f3601269bfb97ed3a28b003162475422173c0b7ff"
+        },
+        {
+          "file": "components/cardblock-dark.svg",
+          "sha256": "4118828a4615d6b48d0968ce32b5745a143a754c67e5531a99b42d4ba217fb8d"
+        }
+      ]
+    },
+    {
+      "name": "ErrorDialogComponent",
+      "source": "shared/src/commonMain/kotlin/com/crackmydroid/shared/presentation/components/ErrorDialogComponent.kt",
+      "format": "editable-svg",
+      "exports": [
+        {
+          "file": "components/errordialog-light.svg",
+          "sha256": "885b6349030ff1215bcad13e120c0889b0aef47cd526c4f426459d2342854484"
+        },
+        {
+          "file": "components/errordialog-dark.svg",
+          "sha256": "cae556754a05b4846806c86766ab1aa228d5c4b3afe31dd21ae8e660f8c35d7d"
+        }
+      ]
+    },
+    {
+      "name": "ExportDetailsCard",
+      "source": "shared/src/commonMain/kotlin/com/crackmydroid/shared/presentation/components/card/ExportDetailsCard.kt",
+      "format": "editable-svg",
+      "exports": [
+        {
+          "file": "components/exportdetailscard-light.svg",
+          "sha256": "a637a18db6bf006078d77a1b7442c5942b0ceabac94512a41e22a58fe59887f5"
+        },
+        {
+          "file": "components/exportdetailscard-dark.svg",
+          "sha256": "71ced4d7b30ea81dd72c13619defb2f7c61b3bfe99bb55ed0577284b80c3d6af"
+        }
+      ]
+    },
+    {
+      "name": "LastOperationItemComponent",
+      "source": "shared/src/commonMain/kotlin/com/crackmydroid/shared/ui/home/view/LastOperationItemComponent.kt",
+      "format": "editable-svg",
+      "exports": [
+        {
+          "file": "components/lastoperationitem-light.svg",
+          "sha256": "0ce07cbc7fbde4cf32418d9c79c18357ef3ba902e16f66d94a2bf34702511d8b"
+        },
+        {
+          "file": "components/lastoperationitem-dark.svg",
+          "sha256": "f57144ecd8d8f9aacbfa1e24d3c7acc4615a1b1c1fe11dc6c3e192301091711c"
+        }
+      ]
+    },
+    {
+      "name": "PackageIcon",
+      "source": "shared/src/commonMain/kotlin/com/crackmydroid/shared/presentation/components/AppIcon.kt",
+      "format": "editable-svg",
+      "exports": [
+        {
+          "file": "components/packageicon-light.svg",
+          "sha256": "c07766f1a394fdbc451376898cd6a92dcdeeddae527f13fd28245331dd2c3cfc"
+        },
+        {
+          "file": "components/packageicon-dark.svg",
+          "sha256": "a70d84067dfe75fddbb54b44161cf50d51428230ef6300cbef8f8bdfe1fc98b7"
+        }
+      ]
+    },
+    {
+      "name": "PenTestCheckItemComponent",
+      "source": "shared/src/commonMain/kotlin/com/crackmydroid/shared/presentation/components/pentest/PenTestAtomics.kt",
+      "format": "editable-svg",
+      "exports": [
+        {
+          "file": "components/pentestcheckitem-light.svg",
+          "sha256": "2e6bcb4c13dcead8e2bbf3c0626780aabf9a8fa74613010d2f035df9861f32c2"
+        },
+        {
+          "file": "components/pentestcheckitem-dark.svg",
+          "sha256": "e72ca77fb121a7b8425318540aa25d36c33c6f8916bbc3f353004bd0fdbac9d4"
+        }
+      ]
+    },
+    {
+      "name": "PenTestChecksListComponent",
+      "source": "shared/src/commonMain/kotlin/com/crackmydroid/shared/presentation/components/pentest/PenTestChecksList.kt",
+      "format": "editable-svg",
+      "exports": [
+        {
+          "file": "components/pentestcheckslist-light.svg",
+          "sha256": "da1e4edfb106407eca47d84e43628799bdfe3abbf3570cef116edd1ba327d076"
+        },
+        {
+          "file": "components/pentestcheckslist-dark.svg",
+          "sha256": "9b8695cf9f007113baa10ff550832e7f3001931ac42b79db539a7a12302582fb"
+        }
+      ]
+    },
+    {
+      "name": "PenTestProgressHeaderComponent",
+      "source": "shared/src/commonMain/kotlin/com/crackmydroid/shared/presentation/components/pentest/PenTestAtomics.kt",
+      "format": "editable-svg",
+      "exports": [
+        {
+          "file": "components/pentestprogressheader-light.svg",
+          "sha256": "f3447863f651b632d417eb69040197e9272234d4143024f45394e27999e920ba"
+        },
+        {
+          "file": "components/pentestprogressheader-dark.svg",
+          "sha256": "d0bc4f8b839a962dd6b1a87df1878d86119b3e91ba57c7528252110a3b942cc3"
+        }
+      ]
+    },
+    {
+      "name": "ScrollToTopButton",
+      "source": "shared/src/commonMain/kotlin/com/crackmydroid/shared/presentation/components/ScrollToTopButton.kt",
+      "format": "editable-svg",
+      "exports": [
+        {
+          "file": "components/scrolltotopbutton-light.svg",
+          "sha256": "d4c48912585db2c15c78063206565222c0e0be02888b1856a25875fd1c0dbb86"
+        },
+        {
+          "file": "components/scrolltotopbutton-dark.svg",
+          "sha256": "da107db12921d0a663e32e2d5085dd28a1e9b137e126822623a2d670998e654d"
+        }
+      ]
+    },
+    {
+      "name": "SearchFieldWithHistoryComponent",
+      "source": "shared/src/commonMain/kotlin/com/crackmydroid/shared/presentation/components/SearchFieldWithHistory.kt",
+      "format": "editable-svg",
+      "exports": [
+        {
+          "file": "components/searchfieldwithhistory-light.svg",
+          "sha256": "bd065182100368641195d659ebe3d802b47fae20da056b2f7cab67b52e2f3289"
+        },
+        {
+          "file": "components/searchfieldwithhistory-dark.svg",
+          "sha256": "299556d65e3dad8547cca238806a20c43662d760eeed402900d62e6ff9de6ca8"
+        }
+      ]
+    },
+    {
+      "name": "SectionHeader",
+      "source": "shared/src/commonMain/kotlin/com/crackmydroid/shared/presentation/components/SectionHeader.kt",
+      "format": "editable-svg",
+      "exports": [
+        {
+          "file": "components/sectionheader-light.svg",
+          "sha256": "1bb18cdee8a908aba1c7632e728548b2fddfe2ade310e19892b9740a34ffb038"
+        },
+        {
+          "file": "components/sectionheader-dark.svg",
+          "sha256": "64203d361c0e286c261c60b69dd25b2892deb880493fee0c1f50e471cd8ff653"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "Screen SVGs embed the original PNG capture as a data URI; their screenshot pixels are not individually editable.",
+    "Component SVGs use editable SVG shapes and text as visual references and do not include Compose runtime behavior.",
+    "Component exports include light and dark palettes. Screen captures reflect the source screenshot manifest's captured theme."
+  ]
+}

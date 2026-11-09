@@ -1,20 +1,10 @@
 package com.crackmydroid.shared.presentation
 
-import kotlinx.coroutines.CoroutineDispatcher
+import com.crackmydroid.shared.util.AppDispatchers
+import com.crackmydroid.shared.util.DefaultAppDispatchers
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
-
-interface AppDispatchers {
-    val main: CoroutineDispatcher
-    val default: CoroutineDispatcher
-}
-
-object DefaultAppDispatchers : AppDispatchers {
-    override val main: CoroutineDispatcher = Dispatchers.Main
-    override val default: CoroutineDispatcher = Dispatchers.Default
-}
 
 open class BaseViewModel(
     protected val dispatchers: AppDispatchers = DefaultAppDispatchers

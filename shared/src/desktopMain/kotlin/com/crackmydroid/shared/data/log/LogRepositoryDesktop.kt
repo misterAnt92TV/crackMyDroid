@@ -5,7 +5,6 @@ import com.crackmydroid.shared.data.DesktopScanCache
 import com.crackmydroid.shared.domain.repository.AdbBridge
 import com.crackmydroid.shared.domain.repository.DeviceSessionController
 import com.crackmydroid.shared.domain.repository.log.LogRepository
-import com.crackmydroid.shared.util.saveTextFile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -25,7 +24,4 @@ class LogRepositoryDesktop(
         }
     }
 
-    override suspend fun export(logs: List<String>): Result<String> = withContext(Dispatchers.IO) {
-        saveTextFile("crackmydroid-log.txt", logs.joinToString("\n"))
-    }
 }

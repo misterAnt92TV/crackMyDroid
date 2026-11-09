@@ -2,20 +2,22 @@ package com.crackmydroid.shared.data.adb
 
 import com.crackmydroid.shared.domain.model.ConnectedDevice
 import com.crackmydroid.shared.domain.repository.AdbBridge
+import com.crackmydroid.shared.util.runSuspendCatching
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.runInterruptible
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.concurrent.TimeUnit
 
 class ProcessAdbBridge : AdbBridge {
-    override suspend fun resolveBinary(configuredPath: String?): Result<String> = runCatching {
+    override suspend fun resolveBinary(configuredPath: String?): Result<String> = runSuspendCatching {
         resolveBinaryPath(configuredPath)
     }
 
     override suspend fun listDevices(configuredPath: String?): Result<List<ConnectedDevice>> =
-        runCatching {
+        runSuspendCatching {
             val adb = resolveBinaryPath(configuredPath)
             val output = runCommand(listOf(adb, "devices", "-l"))
             ensureSuccess(output, "Impossibile leggere i device ADB")
@@ -35,7 +37,7 @@ class ProcessAdbBridge : AdbBridge {
         configuredPath: String?,
         asRoot: Boolean,
         timeoutMs: Long
-    ): Result<String> = runCatching {
+    ): Result<String> = runSuspendCatching {
         val adb = resolveBinaryPath(configuredPath)
         val shellArgs = if (asRoot) {
             listOf("shell", "su", "-c", command)
@@ -52,7 +54,7 @@ class ProcessAdbBridge : AdbBridge {
         remotePath: String,
         localPath: String,
         configuredPath: String?
-    ): Result<String> = runCatching {
+    ): Result<String> = runSuspendCatching {
         val adb = resolveBinaryPath(configuredPath)
         File(localPath).parentFile?.mkdirs()
         val output = runCommand(listOf(adb, "-s", serial, "pull", remotePath, localPath))
@@ -64,7 +66,7 @@ class ProcessAdbBridge : AdbBridge {
         serial: String,
         configuredPath: String?,
         lines: Int
-    ): Result<List<String>> = runCatching {
+    ): Result<List<String>> = runSuspendCatching {
         val adb = resolveBinaryPath(configuredPath)
         val output = runCommand(
             listOf(
@@ -110,17 +112,21 @@ class ProcessAdbBridge : AdbBridge {
         withContext(Dispatchers.IO) {
             coroutineScope {
                 val process = ProcessBuilder(args).start()
-                val stdout = async { process.inputStream.bufferedReader().use { it.readText() } }
-                val stderr = async { process.errorStream.bufferedReader().use { it.readText() } }
-                if (!process.waitFor(timeoutMs, TimeUnit.MILLISECONDS)) {
-                    process.destroyForcibly()
-                    error("Timeout eseguendo: ${args.joinToString(" ")}")
+                try {
+                    val stdout = async { process.inputStream.bufferedReader().use { it.readText() } }
+                    val stderr = async { process.errorStream.bufferedReader().use { it.readText() } }
+                    if (!runInterruptible { process.waitFor(timeoutMs, TimeUnit.MILLISECONDS) }) {
+                        process.destroyForcibly()
+                        error("Timeout eseguendo: ${args.joinToString(" ")}")
+                    }
+                    CommandOutput(
+                        exitCode = process.exitValue(),
+                        stdout = stdout.await().trim(),
+                        stderr = stderr.await().trim()
+                    )
+                } finally {
+                    if (process.isAlive) process.destroyForcibly()
                 }
-                CommandOutput(
-                    exitCode = process.exitValue(),
-                    stdout = stdout.await().trim(),
-                    stderr = stderr.await().trim()
-                )
             }
         }
 

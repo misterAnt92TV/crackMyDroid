@@ -1,6 +1,9 @@
 package com.crackmydroid.shared.di
 
+import co.touchlab.kermit.Logger
+import com.crackmydroid.shared.AppLogger
 import com.crackmydroid.shared.domain.usecase.root.CheckPlayIntegrityUseCase
+import com.crackmydroid.shared.domain.usecase.root.VerifyPlayIntegrityTokenUseCase
 import com.crackmydroid.shared.domain.usecase.root.CheckRootUseCase
 import com.crackmydroid.shared.domain.usecase.trick.ExecuteShellCommandUseCase
 import com.crackmydroid.shared.domain.usecase.installedapps.ExportApkUseCase
@@ -9,6 +12,7 @@ import com.crackmydroid.shared.domain.usecase.activities.GetActivitiesUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetActivityFavoritesUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetActivityPackageFavoritesUseCase
 import com.crackmydroid.shared.domain.usecase.info.GetDeviceInfoUseCase
+import com.crackmydroid.shared.domain.usecase.info.BuildDeviceInfoReportUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetExportFormatUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetFeatureHintsEnabledUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetHighContrastUseCase
@@ -45,10 +49,13 @@ import com.crackmydroid.shared.domain.usecase.reports.ExportReportUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetLanguageUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetLargeTextUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetPermissionFavoritesUseCase
-import com.crackmydroid.shared.presentation.AppDispatchers
-import com.crackmydroid.shared.presentation.DefaultAppDispatchers
+import com.crackmydroid.shared.util.AppDispatchers
+import com.crackmydroid.shared.util.DefaultAppDispatchers
 import com.crackmydroid.shared.ui.activities.ActivityListViewModel
 import com.crackmydroid.shared.ui.info.InfoViewModel
+import com.crackmydroid.shared.ui.AppPresentationDependencies
+import com.crackmydroid.shared.ui.appshell.AppShellViewModel
+import com.crackmydroid.shared.ui.home.HomeViewModel
 import com.crackmydroid.shared.ui.installedapps.InstalledAppsViewModel
 import com.crackmydroid.shared.ui.logs.LogViewModel
 import com.crackmydroid.shared.ui.pentest.PenTestingViewModel
@@ -69,58 +76,97 @@ fun initKoin(appDeclaration: KoinAppDeclaration = {}) = startKoin {
 }
 
 fun commonModule() = module {
-    factory { GetLanguageUseCase(get()) }
-    factory { SetLanguageUseCase(get()) }
-    factory { GetActivityFavoritesUseCase(get()) }
-    factory { SetActivityFavoritesUseCase(get()) }
-    factory { GetActivityPackageFavoritesUseCase(get()) }
-    factory { SetActivityPackageFavoritesUseCase(get()) }
-    factory { GetInstalledAppFavoritesUseCase(get()) }
-    factory { SetInstalledAppFavoritesUseCase(get()) }
-    factory { GetPermissionFavoritesUseCase(get()) }
-    factory { SetPermissionFavoritesUseCase(get()) }
-    factory { GetActivitiesUseCase(get()) }
-    factory { LaunchActivityUseCase(get()) }
-    factory { CheckRootUseCase(get()) }
-    factory { CheckPlayIntegrityUseCase(get()) }
-    factory { GetDeviceInfoUseCase(get()) }
-    factory { ListShellCommandsUseCase(get()) }
-    factory { ExecuteShellCommandUseCase(get()) }
-    factory { GetThemeUseCase(get()) }
-    factory { SetThemeUseCase(get()) }
-    factory { GetVerboseLogUseCase(get()) }
-    factory { SetVerboseLogUseCase(get()) }
-    factory { GetExportFormatUseCase(get()) }
-    factory { SetExportFormatUseCase(get()) }
-    factory { GetHighContrastUseCase(get()) }
-    factory { SetHighContrastUseCase(get()) }
-    factory { GetReduceMotionUseCase(get()) }
-    factory { SetReduceMotionUseCase(get()) }
-    factory { GetLargeTextUseCase(get()) }
-    factory { SetLargeTextUseCase(get()) }
-    factory { GetSuggestionsEnabledUseCase(get()) }
-    factory { SetSuggestionsEnabledUseCase(get()) }
-    factory { GetFeatureHintsEnabledUseCase(get()) }
-    factory { SetFeatureHintsEnabledUseCase(get()) }
-    factory { GetLogsUseCase(get()) }
-    factory { ExportLogsUseCase(get()) }
-    factory { GetIntroSeenUseCase(get()) }
-    factory { SetIntroSeenUseCase(get()) }
-    factory { ListPermissionsUseCase(get()) }
-    factory { AnalyzePermissionRisksUseCase() }
-    factory { BuildPermissionsReportUseCase(get()) }
-    factory { RunPenTestChecksUseCase(get()) }
-    factory { ExportReportUseCase(get()) }
-    factory { ListInstalledAppsUseCase(get()) }
-    factory { ExportApkUseCase(get()) }
-    factory { ShareApkUseCase(get()) }
+    single<Logger> { AppLogger.logger }
+    single<AppDispatchers> { DefaultAppDispatchers }
+    factory { GetLanguageUseCase(get(), logger = get()) }
+    factory { SetLanguageUseCase(get(), logger = get()) }
+    factory { GetActivityFavoritesUseCase(get(), logger = get()) }
+    factory { SetActivityFavoritesUseCase(get(), logger = get()) }
+    factory { GetActivityPackageFavoritesUseCase(get(), logger = get()) }
+    factory { SetActivityPackageFavoritesUseCase(get(), logger = get()) }
+    factory { GetInstalledAppFavoritesUseCase(get(), logger = get()) }
+    factory { SetInstalledAppFavoritesUseCase(get(), logger = get()) }
+    factory { GetPermissionFavoritesUseCase(get(), logger = get()) }
+    factory { SetPermissionFavoritesUseCase(get(), logger = get()) }
+    factory { GetActivitiesUseCase(get(), logger = get()) }
+    factory { LaunchActivityUseCase(get(), logger = get()) }
+    factory { CheckRootUseCase(get(), logger = get()) }
+    factory { CheckPlayIntegrityUseCase(get(), logger = get()) }
+    factory { VerifyPlayIntegrityTokenUseCase(get(), logger = get()) }
+    factory { GetDeviceInfoUseCase(get(), logger = get()) }
+    factory { BuildDeviceInfoReportUseCase(dispatchers = get(), logger = get()) }
+    factory { ListShellCommandsUseCase(get(), logger = get()) }
+    factory { ExecuteShellCommandUseCase(get(), logger = get()) }
+    factory { GetThemeUseCase(get(), logger = get()) }
+    factory { SetThemeUseCase(get(), logger = get()) }
+    factory { GetVerboseLogUseCase(get(), logger = get()) }
+    factory { SetVerboseLogUseCase(get(), logger = get()) }
+    factory { GetExportFormatUseCase(get(), logger = get()) }
+    factory { SetExportFormatUseCase(get(), logger = get()) }
+    factory { GetHighContrastUseCase(get(), logger = get()) }
+    factory { SetHighContrastUseCase(get(), logger = get()) }
+    factory { GetReduceMotionUseCase(get(), logger = get()) }
+    factory { SetReduceMotionUseCase(get(), logger = get()) }
+    factory { GetLargeTextUseCase(get(), logger = get()) }
+    factory { SetLargeTextUseCase(get(), logger = get()) }
+    factory { GetSuggestionsEnabledUseCase(get(), logger = get()) }
+    factory { SetSuggestionsEnabledUseCase(get(), logger = get()) }
+    factory { GetFeatureHintsEnabledUseCase(get(), logger = get()) }
+    factory { SetFeatureHintsEnabledUseCase(get(), logger = get()) }
+    factory { GetLogsUseCase(get(), logger = get()) }
+    factory { ExportLogsUseCase(get(), logger = get()) }
+    factory { GetIntroSeenUseCase(get(), logger = get()) }
+    factory { SetIntroSeenUseCase(get(), logger = get()) }
+    factory { ListPermissionsUseCase(get(), logger = get()) }
+    factory { AnalyzePermissionRisksUseCase(dispatchers = get(), logger = get()) }
+    factory { BuildPermissionsReportUseCase(get(), dispatchers = get(), logger = get()) }
+    factory { RunPenTestChecksUseCase(get(), dispatchers = get(), logger = get()) }
+    factory { ExportReportUseCase(get(), get(), logger = get()) }
+    factory { ListInstalledAppsUseCase(get(), logger = get()) }
+    factory { ExportApkUseCase(get(), logger = get()) }
+    factory { ShareApkUseCase(get(), logger = get()) }
 }
 
 fun presentationModule() = module {
-    single<AppDispatchers> { DefaultAppDispatchers }
     factory { ActivityListViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get()) }
+    factory { HomeViewModel(get()) }
+    factory {
+        val activity = get<ActivityListViewModel>()
+        val info = get<InfoViewModel>()
+        val trick = get<TrickViewModel>()
+        val settings = get<SettingsViewModel>()
+        val logs = get<LogViewModel>()
+        val permissions = get<PermissionsViewModel>()
+        val installedApps = get<InstalledAppsViewModel>()
+        val penTesting = get<PenTestingViewModel>()
+        AppPresentationDependencies(
+            shell = AppShellViewModel(
+                getIntroSeen = get(),
+                setIntroSeen = get(),
+                activity = activity,
+                info = info,
+                trick = trick,
+                settings = settings,
+                logs = logs,
+                permissions = permissions,
+                installedApps = installedApps,
+                penTesting = penTesting,
+                getVerbose = get()
+            ),
+            activity = activity,
+            home = get(),
+            root = get(),
+            info = info,
+            trick = trick,
+            settings = settings,
+            logs = logs,
+            permissions = permissions,
+            installedApps = installedApps,
+            penTesting = penTesting
+        )
+    }
     factory { RootViewModel(get(), get(), get()) }
-    factory { InfoViewModel(get(), get(), get()) }
+    factory { InfoViewModel(get(), get(), get(), get()) }
     factory { TrickViewModel(get(), get()) }
     factory {
         SettingsViewModel(
@@ -137,7 +183,7 @@ fun presentationModule() = module {
         )
     }
     factory { LogViewModel(get(), get(), get()) }
-    factory { PermissionsViewModel(get(), get(), get(), get(), get(), get()) }
-    factory { InstalledAppsViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
+    factory { PermissionsViewModel(get(), get(), get(), get(), get(), get(), get()) }
+    factory { InstalledAppsViewModel(get(), get(), get(), get(), get(), get(), get()) }
     factory { PenTestingViewModel(get(), get(), get(), get(), get(), get()) }
 }

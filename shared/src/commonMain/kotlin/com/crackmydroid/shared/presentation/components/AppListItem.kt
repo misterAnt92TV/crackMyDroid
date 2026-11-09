@@ -31,7 +31,10 @@ fun AppListItem(
     leading: @Composable (() -> Unit)? = null,
     trailing: @Composable (() -> Unit)? = null,
     modifier: Modifier = Modifier,
-    onClick: (() -> Unit)? = null
+    onClick: (() -> Unit)? = null,
+    titleMaxLines: Int? = null,
+    subtitleMaxLines: Int? = null,
+    textOverflow: TextOverflow = TextOverflow.Ellipsis
 ) {
     val prefs = LocalAccessibilityPrefs.current
     val rowModifier = modifier
@@ -55,16 +58,16 @@ fun AppListItem(
             AppText(
                 title,
                 style = MaterialTheme.typography.titleMedium,
-                maxLines = if (prefs.largeText) 3 else 1,
-                overflow = TextOverflow.Ellipsis
+                maxLines = titleMaxLines ?: if (prefs.largeText) 3 else 1,
+                overflow = textOverflow
             )
             subtitle?.let {
                 AppText(
                     it,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = if (prefs.largeText) 3 else 1,
-                    overflow = TextOverflow.Ellipsis
+                    maxLines = subtitleMaxLines ?: if (prefs.largeText) 3 else 1,
+                    overflow = textOverflow
                 )
             }
             if (meta != null && prefs.largeText) {
@@ -97,6 +100,9 @@ private fun AppListItemPreview() = ComponentPreviewContainer {
         title = "Configurazione di sicurezza con un titolo particolarmente lungo",
         subtitle = "Descrizione del risultato disponibile per il dispositivo selezionato",
         meta = "Aggiornato ora",
+        titleMaxLines = 3,
+        subtitleMaxLines = 4,
+        textOverflow = TextOverflow.Clip,
         leading = { Icon(Icons.Filled.Info, contentDescription = null) },
         trailing = { Icon(Icons.Filled.MoreVert, contentDescription = null) },
         onClick = {}

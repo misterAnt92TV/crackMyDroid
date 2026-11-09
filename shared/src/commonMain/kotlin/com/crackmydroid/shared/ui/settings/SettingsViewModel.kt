@@ -1,5 +1,6 @@
 package com.crackmydroid.shared.ui.settings
 
+import com.crackmydroid.shared.AppLogger
 import com.crackmydroid.shared.domain.model.app.AppLanguage
 import com.crackmydroid.shared.domain.model.app.AppTheme
 import com.crackmydroid.shared.domain.model.ExportFormat
@@ -24,6 +25,7 @@ import com.crackmydroid.shared.domain.usecase.settings.SetSuggestionsEnabledUseC
 import com.crackmydroid.shared.domain.usecase.settings.SetThemeUseCase
 import com.crackmydroid.shared.domain.usecase.settings.SetVerboseLogUseCase
 import com.crackmydroid.shared.presentation.BaseViewModel
+import com.crackmydroid.shared.util.runSuspendCatching
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -55,84 +57,86 @@ class SettingsViewModel(
     val state: StateFlow<SettingsState> = _state
     private var savingFormat = false
 
-    fun load() {
-        scope.launch {
-            _state.update { it.copy(loading = true, error = null) }
-            runCatching {
-                LoadedSettings(
-                    language = getLanguage(),
-                    theme = getTheme(),
-                    verbose = getVerbose(),
-                    format = getExportFormat(),
-                    highContrast = getHighContrast(),
-                    reduceMotion = getReduceMotion(),
-                    largeText = getLargeText(),
-                    suggestionsEnabled = getSuggestionsEnabled(),
-                    featureHintsEnabled = getFeatureHintsEnabled(),
-                    introSeen = getIntroSeen()
+    fun load() = scope.launch {
+        _state.update { it.copy(loading = true, error = null) }
+        val language = getLanguage().onSuccess { value ->
+            _state.update { it.copy(language = value) }
+        }
+        val verbose = getVerbose().onSuccess(AppLogger::setVerbose)
+        runSuspendCatching {
+            LoadedSettings(
+                language = language.getOrThrow(),
+                theme = getTheme().getOrThrow(),
+                verbose = verbose.getOrThrow(),
+                format = getExportFormat().getOrThrow(),
+                highContrast = getHighContrast().getOrThrow(),
+                reduceMotion = getReduceMotion().getOrThrow(),
+                largeText = getLargeText().getOrThrow(),
+                suggestionsEnabled = getSuggestionsEnabled().getOrThrow(),
+                featureHintsEnabled = getFeatureHintsEnabled().getOrThrow(),
+                introSeen = getIntroSeen().getOrThrow()
+            )
+        }.onSuccess { loaded ->
+            _state.update {
+                it.copy(
+                    theme = loaded.theme,
+                    language = loaded.language,
+                    verbose = loaded.verbose,
+                    exportFormat = loaded.format,
+                    highContrast = loaded.highContrast,
+                    reduceMotion = loaded.reduceMotion,
+                    largeText = loaded.largeText,
+                    suggestionsEnabled = loaded.suggestionsEnabled,
+                    featureHintsEnabled = loaded.featureHintsEnabled,
+                    showIntroOnLaunch = !loaded.introSeen,
+                    loading = false
                 )
-            }.onSuccess { loaded ->
-                _state.update {
-                    it.copy(
-                        theme = loaded.theme,
-                        language = loaded.language,
-                        verbose = loaded.verbose,
-                        exportFormat = loaded.format,
-                        highContrast = loaded.highContrast,
-                        reduceMotion = loaded.reduceMotion,
-                        largeText = loaded.largeText,
-                        suggestionsEnabled = loaded.suggestionsEnabled,
-                        featureHintsEnabled = loaded.featureHintsEnabled,
-                        showIntroOnLaunch = !loaded.introSeen,
-                        loading = false
-                    )
-                }
-            }.onFailure { err ->
-                _state.update { it.copy(error = err.message, loading = false) }
             }
+        }.onFailure { err ->
+            _state.update { it.copy(error = err.message, loading = false) }
         }
     }
 
     fun selectTheme(theme: AppTheme) {
-        scope.launch {
-            setTheme(theme)
-            _state.update { it.copy(theme = theme) }
+        persistSetting(persist = { setTheme(theme) }) {
+            _state.update { it.copy(theme = theme, error = null) }
         }
     }
 
     fun selectLanguage(language: AppLanguage) {
-        scope.launch {
-            runCatching { setLanguage(language) }
-                .onSuccess { _state.update { it.copy(language = language, error = null) } }
-                .onFailure { err -> _state.update { it.copy(error = err.message) } }
+        persistSetting(persist = { setLanguage(language) }) {
+            _state.update { it.copy(language = language, error = null) }
         }
     }
 
     fun toggleVerbose(enabled: Boolean) {
-        scope.launch {
-            setVerbose(enabled)
-            _state.update { it.copy(verbose = enabled) }
+        persistSetting(persist = { setVerbose(enabled) }) {
+            AppLogger.setVerbose(enabled)
+            _state.update { it.copy(verbose = enabled, error = null) }
         }
     }
 
     fun setHighContrast(enabled: Boolean) {
-        scope.launch {
+        persistSetting(persist = {
             setHighContrast.invoke(enabled)
-            _state.update { it.copy(highContrast = enabled) }
+        }) {
+            _state.update { it.copy(highContrast = enabled, error = null) }
         }
     }
 
     fun setReduceMotion(enabled: Boolean) {
-        scope.launch {
+        persistSetting(persist = {
             setReduceMotion.invoke(enabled)
-            _state.update { it.copy(reduceMotion = enabled) }
+        }) {
+            _state.update { it.copy(reduceMotion = enabled, error = null) }
         }
     }
 
     fun setLargeText(enabled: Boolean) {
-        scope.launch {
+        persistSetting(persist = {
             setLargeText.invoke(enabled)
-            _state.update { it.copy(largeText = enabled) }
+        }) {
+            _state.update { it.copy(largeText = enabled, error = null) }
         }
     }
 
@@ -141,24 +145,28 @@ class SettingsViewModel(
     }
 
     fun setSuggestionsEnabled(enabled: Boolean) {
-        scope.launch {
-            setSuggestionsEnabled.invoke(enabled)
-            _state.update { it.copy(suggestionsEnabled = enabled) }
-            com.crackmydroid.shared.presentation.components.SearchHistoryStore.setEnabled(enabled)
+        persistSetting(persist = {
+            setSuggestionsEnabled.invoke(enabled).onSuccess {
+                com.crackmydroid.shared.presentation.components.SearchHistoryStore.setEnabled(enabled)
+            }
+        }) {
+            _state.update { it.copy(suggestionsEnabled = enabled, error = null) }
         }
     }
 
     fun setFeatureHintsEnabled(enabled: Boolean) {
-        scope.launch {
+        persistSetting(persist = {
             setFeatureHintsEnabled.invoke(enabled)
-            _state.update { it.copy(featureHintsEnabled = enabled) }
+        }) {
+            _state.update { it.copy(featureHintsEnabled = enabled, error = null) }
         }
     }
 
     fun setShowIntroOnLaunch(enabled: Boolean) {
-        scope.launch {
+        persistSetting(persist = {
             setIntroSeen(!enabled)
-            _state.update { it.copy(showIntroOnLaunch = enabled) }
+        }) {
+            _state.update { it.copy(showIntroOnLaunch = enabled, error = null) }
         }
     }
 
@@ -171,10 +179,24 @@ class SettingsViewModel(
         if (savingFormat) return
         savingFormat = true
         scope.launch {
-            runCatching { setExportFormat.invoke(format) }
-                .onSuccess { _state.update { it.copy(exportFormat = format, error = null) } }
-                .onFailure { err -> _state.update { it.copy(error = err.message) } }
-            savingFormat = false
+            try {
+                setExportFormat.invoke(format)
+                    .onSuccess { _state.update { it.copy(exportFormat = format, error = null) } }
+                    .onFailure { err -> _state.update { it.copy(error = err.message) } }
+            } finally {
+                savingFormat = false
+            }
+        }
+    }
+
+    private fun persistSetting(persist: suspend () -> Result<Unit>, updateState: () -> Unit) {
+        scope.launch {
+            runSuspendCatching {
+                persist().getOrThrow()
+                updateState()
+            }.onFailure { error ->
+                _state.update { it.copy(error = error.message ?: "Impossibile salvare l'impostazione") }
+            }
         }
     }
 }

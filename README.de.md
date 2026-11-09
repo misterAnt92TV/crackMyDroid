@@ -6,6 +6,8 @@
 
 Kotlin Multiplatform (Android + Desktop + iOS) für mobile Sicherheit, Reverse Engineering und Gerätediagnose — alles in einer gemeinsamen UI, die mit Compose Multiplatform entwickelt wurde.
 
+Die technische Dokumentation (Italienisch/Englisch) finden Sie im [Dokumentationsindex](docs/README.md).
+
 ---
 
 ## Hauptfunktionen
@@ -14,14 +16,14 @@ Kotlin Multiplatform (Android + Desktop + iOS) für mobile Sicherheit, Reverse E
 |---|---|
 | **Home** | Kurzübersicht, App-Zweck und erweiterbare FAQ |
 | **Geräteinformationen** | Hardware/Software, Sicherheits-Patches, Fingerprint, Radio, Kernel, Bootloader, Akku/Netzwerk, Debug-Flags (ADB, Entwickleroptionen, debuggable), Root-Status; jede Zeile kopierbar, Report als TXT exportierbar |
-| **Root / Play Integrity** | Root-Prüfung mit RootBeer, Play Integrity-Checks mit konfigurierbarem Nonce und Testdetails |
+| **Root / Play Integrity** | Root-Prüfung mit RootBeer und backendverifizierbaren Play-Integrity-Verdikten für CrackMyDroid und das Gerät |
 | **PenTesting** | Sicherheitsprüfliste mit Status (queued/ok/error), Zähler, Fehlerdetails, Report-Export/-Teilen |
 | **Activities** | Aktivitätenliste pro App mit Suche/Verlauf, Favoriten, Paketerweiterung, direktem Start und Export |
 | **Installierte Apps (APK)** | Suche, Filter, Favoriten, App-Icons, APK-Export in den Speicher und direktes Teilen |
 | **Berechtigungen** | Übersicht der App-Berechtigungen mit Risikoanalyse, Suche und Details |
 | **Shell/Tricks** | Vorkonfigurierte ADB/Shell-Befehle (mit Root-required-Flag), optionale Bestätigung, Ausgabe und Exit-Code |
 | **Log** | Anwendungslog-Viewer mit Export |
-| **Einstellungen** | Thema (Hell/Dunkel/System), Log-Ausführlichkeit, Barrierefreiheit (hoher Kontrast, reduzierte Animationen, großer Text), Bibliothekslizenzen, App-Version |
+| **Einstellungen** | Thema (Hell/Dunkel/System), Sprache (System, Italienisch, Englisch, Deutsch, Französisch, Spanisch), Log-Ausführlichkeit, Barrierefreiheit (hoher Kontrast, reduzierte Animationen, großer Text), Bibliothekslizenzen, App-Version |
 
 ---
 

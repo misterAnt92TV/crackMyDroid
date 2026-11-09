@@ -7,15 +7,16 @@ import androidx.compose.runtime.Composable
 import com.crackmydroid.shared.i18n.LocalStrings
 import com.crackmydroid.shared.presentation.preview.AppComponentPreviews
 import com.crackmydroid.shared.presentation.preview.ComponentPreviewContainer
+import com.crackmydroid.shared.presentation.components.text.AppText
 
 @Composable
 fun ErrorDialogComponent(message: String, onDismiss: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
         confirmButton = {
-            Button(onClick = onDismiss) { Text(LocalStrings.current.confirm) }
+            Button(onClick = onDismiss) { AppText(LocalStrings.current.confirm) }
         },
-        text = { Text(message) }
+        text = { AppText(message) }
     )
 }
 

@@ -25,7 +25,7 @@ fun AppTextField(
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
-        label = { Text(label) },
+        label = { AppText(label) },
         enabled = enabled,
         singleLine = singleLine,
         isError = error != null,

@@ -49,7 +49,7 @@ class RemoteDeviceSnapshotImporter(
             )
         }
 
-        if (snapshot.schemaVersion != DeviceScanSnapshot.SCHEMA_VERSION) {
+        if (snapshot.schemaVersion !in DeviceScanSnapshot.MIN_SUPPORTED_SCHEMA_VERSION..DeviceScanSnapshot.SCHEMA_VERSION) {
             return SnapshotImportOutcome(
                 usedSnapshot = false,
                 message = "Snapshot incompatibile: schema ${snapshot.schemaVersion}"

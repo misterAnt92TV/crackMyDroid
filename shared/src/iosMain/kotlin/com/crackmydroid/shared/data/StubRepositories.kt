@@ -17,6 +17,7 @@ import com.crackmydroid.shared.domain.repository.ActivityRepository
 import com.crackmydroid.shared.domain.repository.CacheMaintenance
 import com.crackmydroid.shared.domain.repository.DeviceInfoRepository
 import com.crackmydroid.shared.domain.repository.InstalledAppsRepository
+import com.crackmydroid.shared.domain.repository.IntegrityVerificationRepository
 import com.crackmydroid.shared.domain.repository.log.LogRepository
 import com.crackmydroid.shared.domain.repository.PermissionsRepository
 import com.crackmydroid.shared.domain.repository.RootCheckRepository
@@ -45,6 +46,13 @@ class RootCheckRepositoryIos : RootCheckRepository {
         com.crackmydroid.shared.domain.model.PlayIntegrityResult(
             basicIntegrity = null,
             deviceIntegrity = null,
+            details = "Play Integrity non supportato su iOS"
+        )
+}
+
+class IntegrityVerificationRepositoryIos : IntegrityVerificationRepository {
+    override suspend fun verify(integrityToken: String, requestBinding: String) =
+        com.crackmydroid.shared.domain.model.PlayIntegrityResult(
             details = "Play Integrity non supportato su iOS"
         )
 }
@@ -164,8 +172,6 @@ class SettingsRepositoryIos : SettingsRepository {
 
 class LogRepositoryIos : LogRepository {
     override suspend fun fetchLog(): List<String> = emptyList()
-    override suspend fun export(logs: List<String>): Result<String> =
-        Result.failure(UnsupportedOperationException("Non supportato su iOS"))
 }
 
 class PermissionsRepositoryIos : PermissionsRepository {

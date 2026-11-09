@@ -2,9 +2,9 @@ package com.crackmydroid.shared.ui.logs
 
 import com.crackmydroid.shared.domain.usecase.log.ExportLogsUseCase
 import com.crackmydroid.shared.domain.usecase.log.GetLogsUseCase
-import com.crackmydroid.shared.presentation.AppDispatchers
+import com.crackmydroid.shared.util.AppDispatchers
 import com.crackmydroid.shared.presentation.BaseViewModel
-import com.crackmydroid.shared.presentation.DefaultAppDispatchers
+import com.crackmydroid.shared.util.DefaultAppDispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -24,7 +24,7 @@ class LogViewModel(
     fun refresh() {
         scope.launch {
             _state.update { it.copy(loading = true, error = null, message = null) }
-            runCatching { getLogs() }
+            getLogs()
                 .onSuccess { list ->
                     val trimmed = if (list.size > MAX_LINES) list.takeLast(MAX_LINES) else list
                     recomputeAsync(
@@ -55,8 +55,8 @@ class LogViewModel(
     fun export() {
         scope.launch {
             val current = _state.value.visibleLogs
-            runCatching { exportLogs(current) }
-                .onSuccess { res -> _state.update { it.copy(message = res.getOrNull()) } }
+            exportLogs(current)
+                .onSuccess { path -> _state.update { it.copy(message = path) } }
                 .onFailure { err -> _state.update { it.copy(error = err.message) } }
         }
     }

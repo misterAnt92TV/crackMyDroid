@@ -1,8 +1,10 @@
 package com.crackmydroid.shared.presentation.operations
 
+import com.crackmydroid.shared.AppLogger
 import com.crackmydroid.shared.domain.model.operation.OperationEntry
 import com.crackmydroid.shared.domain.model.operation.OperationEvent
 import com.crackmydroid.shared.domain.repository.log.OperationLogRepository
+import com.crackmydroid.shared.util.runSuspendCatching
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -40,11 +42,14 @@ class DefaultOperationLogRepository(
 
     init {
         scope.launch {
-            runCatching { persistence.load() }
+            runSuspendCatching { persistence.load() }
                 .onSuccess { loaded ->
                     _entries.update { current ->
                         if (current.isEmpty()) normalizeLoadedEntries(loaded) else current
                     }
+                }
+                .onFailure { error ->
+                    AppLogger.logger.e(error) { "Failed to load operation history" }
                 }
         }
     }
@@ -110,7 +115,10 @@ class DefaultOperationLogRepository(
     private fun persist() {
         scope.launch {
             persistenceMutex.withLock {
-                runCatching { persistence.save(_entries.value) }
+                runSuspendCatching { persistence.save(_entries.value) }
+                    .onFailure { error ->
+                        AppLogger.logger.e(error) { "Failed to persist operation history" }
+                    }
             }
         }
     }

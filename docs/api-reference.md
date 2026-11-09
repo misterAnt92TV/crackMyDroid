@@ -18,6 +18,19 @@
 
 ## Domain Models
 
+### `InstalledAppEntry` provenance
+
+The installed-app inventory includes an `InstallSourceInfo` value. `GOOGLE_PLAY` means the OS
+reported `com.android.vending` as installer; it is not a signature check, Play license, or malware
+assessment. Android provides richer values on API 30+, while Desktop ADB and older Android may
+return `UNAVAILABLE`.
+
+### `PlayIntegrityResult`
+
+The integrity result applies only to CrackMyDroid and the device requesting its token. A decoded
+backend verdict can contain `appRecognitionVerdict`, `appLicensingVerdict`, device-recognition
+labels and an optional Play Protect verdict. See [the backend contract](play-integrity-backend-contract.md).
+
 ### `AppEntry`
 
 Rappresenta un'app installata sul device.
@@ -314,10 +327,12 @@ data class ShellCommandResult(
 
 ```kotlin
 interface LogRepository {
-    suspend fun fetchLog(): List<LogEntry>
-    suspend fun export(): ResultWrapper<String>   // path file esportato
+    suspend fun fetchLog(): List<String>
 }
 ```
+
+L'esportazione dei log è gestita da `ExportLogsUseCase` tramite `ExportReportUseCase`, quindi
+rispetta il formato documentale selezionato nelle impostazioni (`.txt`, `.json` o `.pdf`).
 
 ---
 
@@ -347,49 +362,139 @@ interface SettingsRepository {
 
 ## Use Cases
 
+All one-shot use-case operations are `suspend` and return Kotlin `Result<T>`,
+including analysis and report generation. Setters return `Result<Unit>`.
+Each class extends `BaseUseCase` and delegates its execution boundary to
+`execute`: ordinary exceptions become failures, while `CancellationException`
+is rethrown, including cancellation returned inside a repository `Result`.
+Fatal `Error` instances are not converted to failures.
+
+The base has no scope or job of its own. Repository operations retain the caller
+context and repository-owned I/O dispatching; CPU analysis/report use cases
+accept `AppDispatchers` and use `default`. Dispatchers live in `shared.util`.
+Use cases accept a Kermit `Logger` for injectable diagnostics.
+
+The signatures below omit constructors and method bodies.
+
 ### Permissions
 
 ```kotlin
-class ListPermissionsUseCase(private val repo: PermissionsRepository) {
-    suspend operator fun invoke(packageName: String): AppPermissionEntry
+class ListPermissionsUseCase {
+    suspend operator fun invoke(): Result<List<AppPermissionEntry>>
 }
 
 class AnalyzePermissionRisksUseCase {
-    operator fun invoke(entry: AppPermissionEntry): PermissionRiskReport
+    suspend operator fun invoke(app: AppPermissionEntry): Result<PermissionRiskReport?>
+    fun sortReports(reports: List<PermissionRiskReport>): List<PermissionRiskReport>
 }
 
 class BuildPermissionsReportUseCase {
-    operator fun invoke(report: PermissionRiskReport): String   // testo esportabile
+    suspend operator fun invoke(
+        apps: List<AppPermissionEntry>,
+        riskReports: List<PermissionRiskReport>,
+        text: UseCaseReportText
+    ): Result<String>
+    suspend fun single(
+        app: AppPermissionEntry,
+        riskReport: PermissionRiskReport?,
+        text: UseCaseReportText
+    ): Result<String>
+    fun singleFileName(packageName: String): String
 }
 ```
+
+`Result.success(null)` from risk analysis means no findings, not failure.
+Formatting helpers remain synchronous; execute sorting on the CPU dispatcher
+when processing scan batches. Permission report preparation is asynchronous in
+the ViewModel, with loading/content/error state; superseded requests are cancelled.
+
+`PermissionRiskFinding` carries `key`, `kind: PermissionFindingKind`, `level` and
+`isPattern`, not translated title/reason strings. `PenTestCheckResult` similarly
+carries a typed `PenTestMessage` with numeric/technical parameters. Findings are
+rendered by the pure `UseCaseTexts` catalog in Italian, English, German, Spanish
+or French (unsupported languages fall back to English). Permission names and
+technical terms remain unchanged.
+
+`UseCaseReportText` is a domain contract implemented by that catalog, explicitly
+supplied to report builders. UI and reports share finding and severity rendering;
+no preference or Compose lookup happens in the domain. ViewModels retain semantic
+results and remap them when language changes, including saved in-memory PenTest
+snapshots, without repeating repository calls or scans. Preview requests in the
+old language are cancelled; each export/share captures its resources at invocation.
 
 ### Activities
 
 ```kotlin
-class GetActivitiesUseCase(private val repo: ActivityRepository) {
-    suspend operator fun invoke(packageName: String): List<ActivityEntry>
+class GetActivitiesUseCase {
+    suspend operator fun invoke(): Result<List<ActivityEntry>>
 }
 ```
 
 ### InstalledApps
 
 ```kotlin
-class ListInstalledAppsUseCase(private val repo: InstalledAppsRepository) {
-    suspend operator fun invoke(): List<AppEntry>
+class ListInstalledAppsUseCase {
+    suspend operator fun invoke(): Result<List<InstalledAppEntry>>
 }
 
-class ExportApkUseCase(private val repo: InstalledAppsRepository) {
-    suspend operator fun invoke(packageName: String): ResultWrapper<String>
+class ExportApkUseCase {
+    suspend operator fun invoke(packageName: String): Result<String>
 }
 ```
 
 ### Root
 
 ```kotlin
-class CheckRootUseCase(private val repo: RootCheckRepository) {
-    suspend operator fun invoke(): RootStatus
+class CheckRootUseCase {
+    suspend operator fun invoke(mode: RootCheckMode = RootCheckMode.PASSIVE): Result<RootStatus>
 }
 ```
+
+Negative root/Integrity verdicts and shell outcomes retain their domain-model
+semantics; they are not automatically converted into exceptions.
+
+### Reports and settings
+
+```kotlin
+class BuildDeviceInfoReportUseCase {
+    suspend operator fun invoke(
+        info: DeviceInfo,
+        root: RootStatus?,
+        text: UseCaseReportText
+    ): Result<String>
+}
+
+class ExportReportUseCase {
+    suspend fun save(fileName: String, content: String): Result<String>
+    suspend fun share(fileName: String, content: String): Result<String>
+}
+
+class GetThemeUseCase {
+    suspend operator fun invoke(): Result<AppTheme>
+}
+
+class SetThemeUseCase {
+    suspend operator fun invoke(theme: AppTheme): Result<Unit>
+}
+```
+
+Use `onSuccess`/`onFailure` directly for single operations. For composed
+operations, unwrap each result with `getOrThrow()` inside a cancellation-safe
+boundary; never ignore a failed setter or return nested `Result`.
+
+### Diagnostics and future streams
+
+`BaseUseCase` logs use-case name, operation, outcome and monotonic duration.
+Debug events (start/success/cancellation) follow the persisted **Verbose logs**
+preference, initialized before shell-triggered feature loads. Failures are
+error-level events regardless of that preference. Only exception category is
+logged: no raw message/cause, throwable, arguments, results, tokens, shell
+commands or device/report data. Original exceptions remain available in `Result`.
+Changing verbosity does not change unrelated Kermit/HTTP log levels.
+
+There are currently no Flow use cases. Future observation operations should
+use `Flow<Result<T>>`, not `Result<Flow<T>>`: upstream failures belong to the
+stream boundary, and cancellation must propagate. Do not catch collector failures.
 
 ---
 

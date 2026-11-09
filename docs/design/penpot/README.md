@@ -1,5 +1,9 @@
 # CrackMyDroid Penpot source
 
+For an upload-ready bundle of screen and component SVGs, see
+[`export/README.md`](export/README.md). It can be imported without connecting to
+the hosted Penpot file.
+
 `CrackMyDroid.penpot` is the importable backup of the local Penpot file. Commit it
 after each accepted design revision together with the generated files in
 `../exports/`.

@@ -2,24 +2,41 @@ package com.crackmydroid.shared.domain.usecase.permissions
 
 import com.crackmydroid.shared.domain.model.app.AppPermissionEntry
 import com.crackmydroid.shared.domain.model.PermissionRiskFinding
+import com.crackmydroid.shared.domain.model.PermissionFindingKind
 import com.crackmydroid.shared.domain.model.PermissionRiskLevel
 import com.crackmydroid.shared.domain.model.PermissionRiskReport
+import co.touchlab.kermit.Logger
+import com.crackmydroid.shared.AppLogger
+import com.crackmydroid.shared.domain.usecase.BaseUseCase
+import com.crackmydroid.shared.util.AppDispatchers
+import com.crackmydroid.shared.util.DefaultAppDispatchers
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 
-class AnalyzePermissionRisksUseCase {
+class AnalyzePermissionRisksUseCase(
+    dispatchers: AppDispatchers = DefaultAppDispatchers,
+    logger: Logger = AppLogger.logger
+) : BaseUseCase(TAG, dispatcher = dispatchers.default, logger = logger) {
     private companion object {
+        private const val TAG = "AnalyzePermissionRisksUseCase"
         private const val PATTERN_OVERLAY_ACCESSIBILITY = "pattern_overlay_accessibility"
         private const val PATTERN_INSTALL_QUERY = "pattern_install_query"
         private const val PATTERN_BOOT_SMS = "pattern_boot_sms"
         private const val PATTERN_BACKGROUND_CAPTURE = "pattern_background_capture"
     }
 
-    operator fun invoke(app: AppPermissionEntry): PermissionRiskReport? {
-        if (app.permissions.isEmpty()) return null
-        val permissions = app.permissions.map { it.trim() }.filter { it.isNotBlank() }.distinct()
-        if (permissions.isEmpty()) return null
+    suspend operator fun invoke(app: AppPermissionEntry): Result<PermissionRiskReport?> = execute {
+        if (app.permissions.isEmpty()) return@execute null
+        val context = currentCoroutineContext()
+        val permissions = app.permissions.map {
+            context.ensureActive()
+            it.trim()
+        }.filter { it.isNotBlank() }.distinct()
+        if (permissions.isEmpty()) return@execute null
 
         val findingsByKey = linkedMapOf<String, PermissionRiskFinding>()
         permissions.forEach { permission ->
+            context.ensureActive()
             detectPermissionRisk(permission)?.let { finding ->
                 registerFinding(findingsByKey, finding)
             }
@@ -32,9 +49,8 @@ class AnalyzePermissionRisksUseCase {
                 findingsByKey,
                 PermissionRiskFinding(
                     key = PATTERN_OVERLAY_ACCESSIBILITY,
-                    title = "Pattern sospetto: overlay + accessibility",
+                    kind = PermissionFindingKind.OVERLAY_ACCESSIBILITY_PATTERN,
                     level = PermissionRiskLevel.Critical,
-                    reason = "La combinazione puo sovrapporre UI e intercettare interazioni utente.",
                     isPattern = true
                 )
             )
@@ -47,9 +63,8 @@ class AnalyzePermissionRisksUseCase {
                 findingsByKey,
                 PermissionRiskFinding(
                     key = PATTERN_INSTALL_QUERY,
-                    title = "Pattern sospetto: installazione + inventario app",
+                    kind = PermissionFindingKind.INSTALL_QUERY_PATTERN,
                     level = PermissionRiskLevel.High,
-                    reason = "Puo scaricare/gestire APK e mappare le app presenti nel dispositivo.",
                     isPattern = true
                 )
             )
@@ -65,9 +80,8 @@ class AnalyzePermissionRisksUseCase {
                 findingsByKey,
                 PermissionRiskFinding(
                     key = PATTERN_BOOT_SMS,
-                    title = "Pattern sospetto: persistenza + SMS",
+                    kind = PermissionFindingKind.BOOT_SMS_PATTERN,
                     level = PermissionRiskLevel.Critical,
-                    reason = "Può riattivarsi al boot e interagire con canali SMS sensibili.",
                     isPattern = true
                 )
             )
@@ -80,27 +94,29 @@ class AnalyzePermissionRisksUseCase {
                 findingsByKey,
                 PermissionRiskFinding(
                     key = PATTERN_BACKGROUND_CAPTURE,
-                    title = "Pattern sospetto: background location + acquisizione",
+                    kind = PermissionFindingKind.BACKGROUND_LOCATION_CAPTURE_PATTERN,
                     level = PermissionRiskLevel.High,
-                    reason = "Accesso continuo alla posizione unito a sensori audio/video.",
                     isPattern = true
                 )
             )
         }
 
         val findings = findingsByKey.values.sortedWith(
-            compareByDescending<PermissionRiskFinding> { riskWeight(it.level) }
+            compareByDescending<PermissionRiskFinding> {
+                context.ensureActive()
+                riskWeight(it.level)
+            }
                 .thenByDescending { it.isPattern }
-                .thenBy { it.title }
+                .thenBy { findingSortKey(it) }
         )
-        if (findings.isEmpty()) return null
+        if (findings.isEmpty()) return@execute null
 
         val criticalCount = findings.count { it.level == PermissionRiskLevel.Critical }
         val highCount = findings.count { it.level == PermissionRiskLevel.High }
         val mediumCount = findings.count { it.level == PermissionRiskLevel.Medium }
         val score = findings.sumOf { riskWeight(it.level) }
 
-        return PermissionRiskReport(
+        PermissionRiskReport(
             appLabel = app.appLabel,
             packageName = app.packageName,
             findings = findings,
@@ -118,98 +134,85 @@ class AnalyzePermissionRisksUseCase {
                 .thenBy { it.appLabel.lowercase() }
         )
 
-    fun riskLabel(level: PermissionRiskLevel): String = when (level) {
-        PermissionRiskLevel.Critical -> "CRITICO"
-        PermissionRiskLevel.High -> "ALTO"
-        PermissionRiskLevel.Medium -> "MEDIO"
-    }
-
     private fun detectPermissionRisk(permission: String): PermissionRiskFinding? {
         val key = permission.uppercase()
         return when {
             "BIND_ACCESSIBILITY_SERVICE" in key -> PermissionRiskFinding(
                 key = permission,
-                title = permission,
+                kind = PermissionFindingKind.ACCESSIBILITY_SERVICE,
                 level = PermissionRiskLevel.Critical,
-                reason = "Può leggere contenuti a schermo e simulare interazioni utente."
             )
 
             "SYSTEM_ALERT_WINDOW" in key -> PermissionRiskFinding(
                 key = permission,
-                title = permission,
+                kind = PermissionFindingKind.OVERLAY_ACCESS,
                 level = PermissionRiskLevel.Critical,
-                reason = "Consente overlay sopra altre app (rischio phishing/tapjacking)."
             )
 
             "SEND_SMS" in key || "READ_SMS" in key || "RECEIVE_SMS" in key ||
                     "RECEIVE_MMS" in key || "RECEIVE_WAP_PUSH" in key -> PermissionRiskFinding(
                 key = permission,
-                title = permission,
+                kind = PermissionFindingKind.SMS_MMS_ACCESS,
                 level = PermissionRiskLevel.Critical,
-                reason = "Accesso a canali SMS/MMS con possibile esfiltrazione o frode."
             )
 
             "REQUEST_INSTALL_PACKAGES" in key -> PermissionRiskFinding(
                 key = permission,
-                title = permission,
+                kind = PermissionFindingKind.APK_INSTALLATION,
                 level = PermissionRiskLevel.High,
-                reason = "Può richiedere installazioni di APK fuori dal Play Store."
             )
 
             "MANAGE_EXTERNAL_STORAGE" in key -> PermissionRiskFinding(
                 key = permission,
-                title = permission,
+                kind = PermissionFindingKind.BROAD_STORAGE_ACCESS,
                 level = PermissionRiskLevel.High,
-                reason = "Accesso esteso allo storage del dispositivo."
             )
 
             "QUERY_ALL_PACKAGES" in key -> PermissionRiskFinding(
                 key = permission,
-                title = permission,
+                kind = PermissionFindingKind.INSTALLED_APP_INVENTORY,
                 level = PermissionRiskLevel.High,
-                reason = "Permette inventario completo delle app installate."
             )
 
             "READ_CALL_LOG" in key || "WRITE_CALL_LOG" in key || "PROCESS_OUTGOING_CALLS" in key ||
                     "READ_CONTACTS" in key || "WRITE_CONTACTS" in key ||
                     "READ_PHONE_STATE" in key || "CALL_PHONE" in key || "ANSWER_PHONE_CALLS" in key -> PermissionRiskFinding(
                 key = permission,
-                title = permission,
+                kind = PermissionFindingKind.PHONE_AND_CONTACTS_ACCESS,
                 level = PermissionRiskLevel.High,
-                reason = "Accesso a dati telefonici o rubriche sensibili."
             )
 
             "ACCESS_BACKGROUND_LOCATION" in key || "ACCESS_FINE_LOCATION" in key -> PermissionRiskFinding(
                 key = permission,
-                title = permission,
+                kind = PermissionFindingKind.LOCATION_ACCESS,
                 level = PermissionRiskLevel.High,
-                reason = "Tracciamento posizione preciso, anche in background."
             )
 
             "RECORD_AUDIO" in key || "CAMERA" in key -> PermissionRiskFinding(
                 key = permission,
-                title = permission,
+                kind = PermissionFindingKind.MICROPHONE_CAMERA_ACCESS,
                 level = PermissionRiskLevel.High,
-                reason = "Accesso a microfono/camera con possibile acquisizione sensibile."
             )
 
             "READ_EXTERNAL_STORAGE" in key || "WRITE_EXTERNAL_STORAGE" in key ||
                     "READ_MEDIA_" in key || "READ_CALENDAR" in key || "WRITE_CALENDAR" in key ||
                     "BODY_SENSORS" in key || "USE_BIOMETRIC" in key || "USE_FINGERPRINT" in key -> PermissionRiskFinding(
                 key = permission,
-                title = permission,
+                kind = PermissionFindingKind.SENSITIVE_DATA_ACCESS,
                 level = PermissionRiskLevel.Medium,
-                reason = "Permesso sensibile da verificare nel contesto funzionale dell'app."
             )
 
             else -> null
         }
     }
 
-    private fun containsPermission(permissions: List<String>, token: String): Boolean =
-        permissions.any { it.uppercase().contains(token) }
+    private suspend fun containsPermission(permissions: List<String>, token: String): Boolean =
+        permissions.any {
+            currentCoroutineContext().ensureActive()
+            it.uppercase().contains(token)
+        }
 
-    private fun containsAnyPermission(permissions: List<String>, tokens: List<String>): Boolean =
+    private suspend fun containsAnyPermission(permissions: List<String>, tokens: List<String>): Boolean =
         tokens.any { token -> containsPermission(permissions, token) }
 
     private fun registerFinding(
@@ -226,5 +229,13 @@ class AnalyzePermissionRisksUseCase {
         PermissionRiskLevel.Critical -> 5
         PermissionRiskLevel.High -> 3
         PermissionRiskLevel.Medium -> 1
+    }
+
+    private fun findingSortKey(finding: PermissionRiskFinding): String = when (finding.kind) {
+        PermissionFindingKind.BACKGROUND_LOCATION_CAPTURE_PATTERN -> "00"
+        PermissionFindingKind.INSTALL_QUERY_PATTERN -> "01"
+        PermissionFindingKind.BOOT_SMS_PATTERN -> "02"
+        PermissionFindingKind.OVERLAY_ACCESSIBILITY_PATTERN -> "03"
+        else -> finding.key
     }
 }

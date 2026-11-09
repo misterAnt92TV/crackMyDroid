@@ -13,15 +13,52 @@
 |----------------|----------------------------|--------------------------------------|
 | JDK            | 17                         | Testate con Temurin/Eclipse Adoptium |
 | Android Studio | Koala (2024.1) o superiore | oppure IntelliJ IDEA con plugin KMP  |
-| Android SDK    | API 34                     | `compileSdk=34`, `targetSdk=34`      |
+| Android SDK    | API 36                     | `compileSdk=36`, `targetSdk=35`      |
 | `adb`          | qualsiasi                  | Solo per la desktop app              |
 | Xcode          | 15+                        | Solo per build iOS                   |
+
+Ktor resta allineato alla versione 3.5.0, che usa OkHttp 5.3.2 ed è compatibile con
+`compileSdk=36`. Ktor 3.6.0 introduce OkHttp Android 5.5.0, che richiede API 37:
+prima di aggiornare Ktor, ricontrollare i requisiti SDK delle dipendenze transitive.
+
+### Configurazione Gradle condivisa / Shared Gradle Configuration
+
+`gradle/libs.versions.toml` centralizza coordinate e versioni richieste di
+librerie e plugin, inclusi plugin ktlint e relativa CLI, con versioni distinte.
+Le impostazioni di build non sono versioni di dipendenze: SDK e JVM sono
+proprieta comuni in `gradle.properties`, lette direttamente dai moduli.
+
+| Proprieta | Valore | Utilizzo |
+|-----------|--------|----------|
+| `android.compileSdk` | `36` | shared e androidApp |
+| `android.minSdk` | `24` | shared e androidApp |
+| `android.targetSdk` | `35` | androidApp |
+| `build.jvmVersion` | `17` | toolchain shared/desktopApp e target Java/Kotlin Android |
+
+Non duplicare questi valori nei `.kts` o nel catalogo. Proprieta mancanti o
+non numeriche devono produrre un errore di configurazione, non un valore
+di fallback. Per una prova locale possono essere sovrascritte con `-P`,
+ma cambiarle nella build distribuita richiede una verifica di compatibilita.
+Identificativi app, versionCode/versionName e opzioni packaging restano
+nel modulo che li possiede.
+
+`kotlin("test")` resta l'helper del plugin Kotlin per allineare la libreria di
+test; `compose.desktop.currentOs` sceglie gli artefatti nativi del sistema
+operativo. Non sostituirli con coordinate/versioni fisse nel catalogo.
+Le dipendenze comuni dei test sono dichiarate in `commonTest` e
+`jvmCommonTest`, senza ripeterle nei source set che le ereditano.
+La gerarchia KMP iOS/JVM resta esplicita.
+
+Le versioni del catalogo sono **richieste**, non vincoli forzati sulle
+dipendenze transitive: il grafo puo risolvere una versione diversa.
+Verificare con `dependencies` o `dependencyInsight` prima di modificare
+il catalogo; una pulizia degli script non deve cambiare il grafo risolto.
 
 ### Clone e verifica build
 
 ```bash
-git clone https://github.com/<org>/CrackMyDroid.git
-cd newCrackMyDroid
+git clone https://github.com/misterAnt92TV/crackMyDroid.git
+cd crackMyDroid
 
 # Verifica che Gradle funzioni
 ./gradlew tasks
@@ -75,8 +112,8 @@ cd newCrackMyDroid
 ### Test
 
 ```bash
-# Test JVM condivisi (commonMain + androidMain logic)
-./gradlew :shared:jvmCommonTest
+# Test condivisi sui target Desktop e Android unit
+./gradlew :shared:desktopTest :shared:testDebugUnitTest
 
 # Test Desktop
 ./gradlew :shared:desktopTest
@@ -84,9 +121,9 @@ cd newCrackMyDroid
 # Tutti i test
 ./gradlew :shared:allTests
 
-# Con report HTML
-./gradlew :shared:jvmCommonTest --info
-# Report: shared/build/reports/tests/jvmCommonTest/index.html
+# Esegui i test Desktop con log dettagliato
+./gradlew :shared:desktopTest --info
+# Report: shared/build/reports/tests/desktopTest/index.html
 ```
 
 ### Shared / KMP
@@ -98,6 +135,56 @@ cd newCrackMyDroid
 # Controlla metadati KMP
 ./gradlew :shared:commonizeHmpp
 ```
+
+### Qualita Kotlin / Kotlin Code Quality
+
+ktlint e integrato in Gradle: non richiede una CLI installata sul computer.
+Il plugin e il motore sono fissati nel version catalog. La `.editorconfig`
+definisce lo stile Android Studio, trailing comma e naming Compose:
+le funzioni annotate `@Composable` possono mantenere PascalCase.
+Il controllo copre sorgenti Kotlin, test, source set KMP e script `.kts`;
+directory `build` e `generated` sono escluse.
+
+```bash
+# Controllo incrementale: fallisce su violazioni non presenti nella baseline
+./gradlew ktlintCheck
+
+# Report completo del debito, senza baseline (puo terminare con exit code 1)
+./gradlew ktlintCheck -PktlintFullReport=true --continue
+
+# Controllo rigoroso di un file modificato, senza baseline
+./gradlew ktlintFilesCheck \
+  -PktlintFiles=shared/src/commonMain/kotlin/com/crackmydroid/shared/ui/permissions/PermissionsViewModel.kt
+
+# Formattazione limitata ai file indicati, non all'intero progetto
+./gradlew ktlintFilesFormat \
+  -PktlintFiles=shared/src/commonMain/kotlin/com/crackmydroid/shared/ui/permissions/PermissionsViewModel.kt
+
+# Analisi Android: separata dalle convenzioni stilistiche Kotlin
+./gradlew :shared:lintDebug :androidApp:lintDebug
+```
+
+`ktlintFiles` accetta path relativi alla root del repository, separati da virgole.
+I task dedicati `ktlintFilesCheck`/`ktlintFilesFormat` usano la CLI fissata tramite
+Gradle, senza baseline o risultati incrementali di altri file. I task generali
+del plugin non supportano questo selettore.
+I report Checkstyle/SARIF sono in `<modulo>/build/reports/ktlint/`.
+Android Lint produce HTML/XML in `<modulo>/build/reports/`.
+ktlint verifica stile, non prestazioni o correttezza funzionale; Android Lint
+non sostituisce test e compilazione Desktop/iOS.
+
+I file `ktlint-baseline.xml` versionati registrano esclusivamente debito
+preesistente fuori dal perimetro del refactor. Non rigenerarli automaticamente
+per far passare un check: i file modificati devono passare il controllo
+rigoroso senza baseline, rimuovendo le loro eventuali voci legacy.
+`ktlintGenerateBaseline` e riservato a un aggiornamento esplicito e revisionato
+del debito. `ktlintFormat` ignora la baseline e formatta anche codice legacy:
+non usarlo indiscriminatamente, preferire `ktlintFilesFormat`.
+
+I warning Android residui relativi a `HardwareIds` sono intenzionali nel
+repository diagnostico del dispositivo. Le raccomandazioni di upgrade
+dipendenze/targetSdk e di icone monocromatiche richiedono interventi separati;
+non vengono soppressi globalmente.
 
 ---
 
@@ -117,6 +204,21 @@ shared/src/
 - `kotlin-test` — assertions
 - `MockK` `1.13.13` — mocking coroutine-friendly
 - `kotlinx-coroutines-test` — `TestScope`, `runTest`, `advanceUntilIdle`
+
+### Ownership delle scansioni
+
+Nei ViewModel Permessi e PenTest una nuova esecuzione, un refresh o un reset
+invalida e cancella l'operazione precedente. Solo la generazione corrente
+puo pubblicare risultati, errori o azzerare il progresso nel `finally`.
+La cancellazione non diventa un errore utente, e risposte tardive non popolano
+le cache dopo un refresh. Le anteprime mantengono la propria ownership.
+
+La presentazione riusa finding tradotti, indici e riepiloghi quando i relativi
+input restano invariati; un cambio lingua rimappa i messaggi semantici senza
+una nuova scansione. Il ritmo delle scansioni, score e ordinamento rimangono
+invariati. I test con dispatcher virtuale coprono riavvii, risposte fuori ordine,
+cancellazione non cooperativa e riuso delle strutture derivate: non attestano
+un guadagno temporale o una riduzione del jank senza profiling.
 
 ### Esempio test ViewModel
 

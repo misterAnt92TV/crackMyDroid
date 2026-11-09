@@ -8,5 +8,7 @@ data class InfoState(
     val root: RootStatus? = null,
     val loading: Boolean = false,
     val error: String? = null,
-    val lastExportPath: String? = null
+    val lastExportPath: String? = null,
+    val reportContent: String? = null,
+    val reportLoading: Boolean = false
 )

@@ -45,6 +45,7 @@ async function connect(url) {
     capabilities: {},
     clientInfo: { name: "crackmydroid-penpot-export", version: "1.0.0" }
   }));
+  if (!initialized.payload) throw new Error(`MCP initialization at ${url} returned an empty response.`);
   if (initialized.payload.error) throw new Error(`MCP initialization error: ${initialized.payload.error.message}`);
   if (!initialized.sessionId) throw new Error("MCP server did not return Mcp-Session-Id.");
   await post(url, initialized.sessionId, JSON.stringify({ jsonrpc: "2.0", method: "notifications/initialized" }));
@@ -59,12 +60,15 @@ async function listTools(url, sessionId) {
 
 async function callTool(url, sessionId, name, argumentsValue) {
   const response = await post(url, sessionId, requestBody(3, "tools/call", { name, arguments: argumentsValue }));
+  if (!response.payload) throw new Error(`${name} returned an empty response from ${url}.`);
   if (response.payload.error) throw new Error(`${name} failed: ${response.payload.error.message}`);
-  if (response.payload.result?.isError) {
-    const detail = response.payload.result.content?.map((entry) => entry.text ?? entry.type).join("; ");
-    throw new Error(`${name} reported an error: ${detail}`);
+  const result = response.payload.result;
+  const detail = result?.content?.map((entry) => entry.text ?? entry.type).join("; ") ?? "";
+  if (!result || result.isError || /Tool execution failed|No Penpot plugin instances are currently connected/i.test(detail)) {
+    const suffix = detail || "no tool result returned";
+    throw new Error(`${name} reported an error at ${url}: ${suffix}. Open CrackMyDroid, reload the localhost manifest, and click Connect to MCP server.`);
   }
-  return response.payload.result;
+  return result;
 }
 
 function parseShapes(argumentsList) {
@@ -154,6 +158,9 @@ async function importImage(url, argumentList) {
   if (!filePath || !path.isAbsolute(filePath)) {
     throw new Error("import-image requires an absolute PNG/JPEG/GIF/WEBP path.");
   }
+  await stat(filePath).catch(() => {
+    throw new Error(`Image file does not exist or is not readable: ${filePath}`);
+  });
   const sessionId = await connect(url);
   const tools = await listTools(url, sessionId);
   if (!tools.some((tool) => tool.name === "import_image")) {

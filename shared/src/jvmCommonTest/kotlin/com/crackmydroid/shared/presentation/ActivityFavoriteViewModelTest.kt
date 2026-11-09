@@ -56,8 +56,8 @@ class ActivityFavoriteViewModelTest {
         val launchActivity = mockk<LaunchActivityUseCase>()
         val getExportFormat = mockk<GetExportFormatUseCase>()
         val settings = mockk<SettingsRepository>()
-        coEvery { getActivities() } returns listOf(entry)
-        coEvery { getExportFormat() } returns ExportFormat.TXT
+        coEvery { getActivities() } returns Result.success(listOf(entry))
+        coEvery { getExportFormat() } returns Result.success(ExportFormat.TXT)
         coEvery { settings.getActivityFavorites() } returns setOf(entry.favoriteKey())
         coEvery { settings.getActivityPackageFavorites() } returns emptySet()
         coJustRun { settings.setActivityFavorites(any()) }

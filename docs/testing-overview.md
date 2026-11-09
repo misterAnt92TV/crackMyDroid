@@ -19,48 +19,18 @@
 
 ```
 shared/src/
-├── commonTest/          # Dichiarato, attualmente vuoto
-├── iosTest/             # Dichiarato, attualmente vuoto
-│
-├── jvmCommonTest/       # 9 file — test condivisi JVM (ViewModel, UseCase, Model)
-│   └── kotlin/com/crackmydroid/shared/
-│       ├── domain/
-│       │   ├── usecase/
-│       │   │   └── UseCaseTests.kt
-│       │   └── model/
-│       │       └── DeviceScanSnapshotJsonTest.kt
-│       └── presentation/
-│           ├── PenTestingViewModelTest.kt
-│           ├── PermissionsViewModelTest.kt
-│           ├── ActivityListViewModelTest.kt
-│           ├── InstalledAppsViewModelTest.kt
-│           ├── LogViewModelTest.kt
-│           ├── TrickViewModelTest.kt
-│           └── components/
-│               └── SearchHistoryStoreTest.kt
-│
-└── desktopTest/         # 8 file — test layer Desktop/ADB
-    └── kotlin/com/crackmydroid/shared/
-        ├── data/
-        │   ├── adb/
-        │   │   ├── AdbParsersTest.kt
-        │   │   └── ProcessAdbBridgeTest.kt
-        │   ├── activity/
-        │   │   └── ActivityRepositoryDesktopTest.kt
-        │   ├── device/
-        │   │   └── DeviceSessionControllerDesktopTest.kt
-        │   ├── packages/
-        │   │   └── RemotePackageManagerDesktopTest.kt
-        │   ├── shell/
-        │   │   └── ShellCommandRepositoryDesktopTest.kt
-        │   └── snapshot/
-        │       └── RemoteDeviceSnapshotImporterTest.kt
-        └── domain/
-            └── model/
-                └── AppManifestSecurityTest.kt
+├── commonTest/          # 3 test file comuni
+├── jvmCommonTest/       # 38 test file JVM condivisi
+├── androidUnitTest/     # 1 test file specifico Android
+├── desktopTest/         # 9 test file specifici Desktop/ADB
+└── iosTest/             # source set dichiarato, senza test file
+
+androidApp/src/test/     # 2 test file del modulo Android
 ```
 
-**Totale:** 17 file di test · ~65 metodi `@Test`
+Inventario verificato: 51 file di test nel modulo `shared` e 2 in `androidApp`.
+`jvmCommonTest` è un source set, non un task Gradle; i test JVM condivisi vengono
+eseguiti tramite i task `desktopTest` e `testDebugUnitTest`.
 
 ---
 
@@ -96,8 +66,8 @@ commonTest
 ## Comandi Gradle
 
 ```bash
-# Esegui tutti i test JVM condivisi (jvmCommonTest → include androidUnitTest + desktopTest)
-./gradlew :shared:jvmCommonTest
+# Esegui i test JVM condivisi sui target Desktop e Android unit
+./gradlew :shared:desktopTest :shared:testDebugUnitTest
 
 # Solo desktop test
 ./gradlew :shared:desktopTest
@@ -109,24 +79,29 @@ commonTest
 ./gradlew :shared:allTests
 
 # Con report HTML dettagliato
-./gradlew :shared:jvmCommonTest --info
-# Report: shared/build/reports/tests/jvmCommonTest/index.html
-
 ./gradlew :shared:desktopTest --info
 # Report: shared/build/reports/tests/desktopTest/index.html
 
+./gradlew :shared:testDebugUnitTest --info
+# Report: shared/build/reports/tests/testDebugUnitTest/index.html
+
 # Esegui un singolo test per classe
-./gradlew :shared:jvmCommonTest --tests "*.PenTestingViewModelTest"
+./gradlew :shared:desktopTest --tests "*.PenTestingViewModelTest"
 
 # Esegui un singolo metodo
 ./gradlew :shared:desktopTest --tests "*.AppManifestSecurityTest.analyzesDebuggableAppAsCritical"
 ```
 
+`jvmCommonTest` è un source set, non un task Gradle. Per eseguire solo i test diretti dei
+45 UseCase, aggiungere `--tests 'com.crackmydroid.shared.domain.usecase.*'` a uno dei due task JVM.
+La [matrice UseCase → Test](testing-usecases-models.md#copertura-diretta-degli-usecase)
+elenca i soggetti e i comportamenti verificati.
+
 ---
 
 ## Pattern e convenzioni
 
-### Pattern ViewModel (tutti i 6 ViewModel test)
+### Pattern ViewModel (esempi)
 
 ```kotlin
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -175,7 +150,7 @@ tutte le coroutine in coda in modo deterministo, senza aspettare tempo reale.
 
 ---
 
-### Pattern Repository Desktop (tutti i 6 repository test)
+### Pattern Repository Desktop (esempi)
 
 ```kotlin
 class MyRepositoryDesktopTest {
@@ -244,11 +219,20 @@ Necessario perché `SearchHistoryStore` è un object singleton con stato persist
 
 ## Mappa di copertura
 
+Le tabelle riportano le suite documentate in dettaglio, non l'intero inventario dei test.
+Il conteggio complessivo e i source set sono riepilogati nella sezione iniziale.
+
 ### `jvmCommonTest`
 
 | File                            | Classe testata           | # Test | Aree coperte                                                               |
 |---------------------------------|--------------------------|--------|----------------------------------------------------------------------------|
-| `UseCaseTests.kt`               | 5 use case               | 5      | Delegazione a repository, valori di ritorno, `coVerify`                    |
+| `UseCaseTests.kt`               | Deleghe e report         | 6      | Delegazione a repository, valori di ritorno, ordine save/share |
+| `UseCaseDelegationTest.kt`      | 13 UseCase deleganti      | 11     | Risultati, default, parametri, liste vuote, fallimenti ed eccezioni |
+| `SettingsUseCasesTest.kt`       | 28 UseCase settings       | 7      | Tutti i valori, effetti di ogni setter, errori lettura/scrittura |
+| `pentest/RunPenTestChecksUseCaseTest.kt` | `RunPenTestChecksUseCase` | 12 | Check success/finding, dati assenti, soglie e fallback |
+| `permissions/AnalyzePermissionRisksUseCaseTest.kt` | `AnalyzePermissionRisksUseCase` | 8 | Famiglie, pattern, score, normalizzazione, etichette e ordinamento |
+| `permissions/BuildPermissionsReportUseCaseTest.kt` | `BuildPermissionsReportUseCase` | 5 | Report vuoti/singoli/aggregati, totali, ordinamento, filename |
+| `reports/ExportReportUseCaseTest.kt` | `ExportReportUseCase` | 5 | Save/share, ordine, Result.failure ed eccezioni |
 | `PenTestingViewModelTest.kt`    | `PenTestingViewModel`    | 2      | Manifest check con intent exposure, deduplicazione chiamate permessi       |
 | `PermissionsViewModelTest.kt`   | `PermissionsViewModel`   | 2      | Frequency tracking query, filtro "solo a rischio" post-scan                |
 | `ActivityListViewModelTest.kt`  | `ActivityListViewModel`  | 5      | Load, filtro, top-query, guided launch, report aggregation                 |
@@ -270,6 +254,7 @@ Necessario perché `SearchHistoryStore` è un object singleton con stato persist
 | `RemotePackageManagerDesktopTest.kt`    | `RemotePackageManagerDesktop`    | 1      | Caching ADB: ogni comando eseguito esattamente una volta per sessione            |
 | `DeviceSessionControllerDesktopTest.kt` | `DeviceSessionControllerDesktop` | 2      | Selezione device + invalidazione cache, rescan + clear selection                 |
 | `RemoteDeviceSnapshotImporterTest.kt`   | `RemoteDeviceSnapshotImporter`   | 2      | Import snapshot valido in cache, fallback su schema incompatibile                |
+| `ReportFileRepositoryDesktopTest.kt`    | `ReportFileRepositoryDesktop`    | 3      | PDF multipagina e accenti, salvataggio PDF, envelope JSON                         |
 
 ---
 
@@ -279,6 +264,6 @@ Vedi i file specifici per la documentazione completa test-per-test:
 
 | Documento                                                  | Contenuto                                                                                                                   |
 |------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------|
-| [`testing-viewmodels.md`](testing-viewmodels.md)           | Test di tutti i ViewModel (PenTesting, Permissions, ActivityList, InstalledApps, Log, Trick) con fixture, mock e assertions |
+| [`testing-viewmodels.md`](testing-viewmodels.md)           | Sei suite ViewModel selezionate (PenTesting, Permissions, ActivityList, InstalledApps, Log, Trick) con fixture, mock e assertions |
 | [`testing-usecases-models.md`](testing-usecases-models.md) | Test dei use case, modelli di dominio, serializzazione snapshot, SearchHistoryStore                                         |
 | [`testing-desktop-adb.md`](testing-desktop-adb.md)         | Test del layer Desktop/ADB: parser, bridge, repository, session controller, snapshot importer                               |

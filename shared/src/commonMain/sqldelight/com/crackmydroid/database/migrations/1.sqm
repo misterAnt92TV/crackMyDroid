@@ -1,0 +1,6 @@
+ALTER TABLE installed_apps_cache ADD COLUMN installSourceClassification TEXT NOT NULL DEFAULT 'UNAVAILABLE';
+ALTER TABLE installed_apps_cache ADD COLUMN installingPackageName TEXT;
+ALTER TABLE installed_apps_cache ADD COLUMN initiatingPackageName TEXT;
+ALTER TABLE installed_apps_cache ADD COLUMN originatingPackageName TEXT;
+ALTER TABLE installed_apps_cache ADD COLUMN installSourceObservedAtEpochMs INTEGER;
+ALTER TABLE installed_apps_cache ADD COLUMN installSourceUnavailableReason TEXT;

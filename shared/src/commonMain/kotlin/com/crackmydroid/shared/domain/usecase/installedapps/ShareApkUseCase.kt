@@ -1,8 +1,18 @@
 package com.crackmydroid.shared.domain.usecase.installedapps
 
 import com.crackmydroid.shared.domain.repository.InstalledAppsRepository
+import co.touchlab.kermit.Logger
+import com.crackmydroid.shared.AppLogger
+import com.crackmydroid.shared.domain.usecase.BaseUseCase
 
-class ShareApkUseCase(private val repository: InstalledAppsRepository) {
+class ShareApkUseCase(
+    private val repository: InstalledAppsRepository,
+    logger: Logger = AppLogger.logger
+) : BaseUseCase(TAG, logger = logger) {
+    private companion object {
+        private const val TAG = "ShareApkUseCase"
+    }
+
     suspend operator fun invoke(packageName: String, bluetoothOnly: Boolean): Result<Unit> =
-        repository.shareApk(packageName, bluetoothOnly)
+        execute { repository.shareApk(packageName, bluetoothOnly).getOrThrow() }
 }

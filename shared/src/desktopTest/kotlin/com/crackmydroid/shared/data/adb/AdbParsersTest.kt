@@ -3,6 +3,7 @@ package com.crackmydroid.shared.data.adb
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import com.crackmydroid.shared.domain.model.InstallSourceClassification
 
 class AdbParsersTest {
     @Test
@@ -36,6 +37,24 @@ class AdbParsersTest {
         assertEquals(2, apps.size)
         assertEquals("com.example.demo", apps[1].packageName)
         assertTrue(paths.first().endsWith("Calculator.apk"))
+    }
+
+    @Test
+    fun parsesReportedGooglePlayInstaller() {
+        val apps = AdbParsers.parseInstalledApps(
+            "package:/data/app/demo/base.apk=com.example.demo installer=com.android.vending"
+        )
+
+        assertEquals(InstallSourceClassification.GOOGLE_PLAY, apps.single().installSource.classification)
+        assertEquals("com.android.vending", apps.single().installSource.installingPackageName)
+    }
+
+    @Test
+    fun missingInstallerIsExplicitlyUnavailable() {
+        val apps = AdbParsers.parseInstalledApps("package:/data/app/demo/base.apk=com.example.demo")
+
+        assertEquals(InstallSourceClassification.UNAVAILABLE, apps.single().installSource.classification)
+        assertTrue(apps.single().installSource.unavailableReason != null)
     }
 
     @Test

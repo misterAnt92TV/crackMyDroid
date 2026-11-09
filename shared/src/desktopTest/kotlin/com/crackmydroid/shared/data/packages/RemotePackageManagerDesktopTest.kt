@@ -16,7 +16,7 @@ class RemotePackageManagerDesktopTest {
     fun cachesPackageQueriesPerSession() = runTest {
         val bridge = FakePackageAdbBridge(
             outputs = mapOf(
-                "pm list packages -f" to """
+                "pm list packages -f -i" to """
                     package:/system/app/Calculator/Calculator.apk=com.android.calculator2
                     package:/data/app/~~hash==/base.apk=com.example.demo
                 """.trimIndent(),
@@ -40,7 +40,7 @@ class RemotePackageManagerDesktopTest {
         assertEquals(firstList, secondList)
         assertEquals(firstDump, secondDump)
         assertEquals(firstPaths, secondPaths)
-        assertEquals(1, bridge.commands.count { it == "pm list packages -f" })
+        assertEquals(1, bridge.commands.count { it == "pm list packages -f -i" })
         assertEquals(1, bridge.commands.count { it == "dumpsys package com.example.demo" })
         assertEquals(1, bridge.commands.count { it == "pm path com.example.demo" })
     }

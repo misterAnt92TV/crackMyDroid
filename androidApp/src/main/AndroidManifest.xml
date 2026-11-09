@@ -24,6 +24,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.CrackMyDroid">
+        <!-- Public endpoint only. Google credentials belong exclusively to the backend runtime. -->
+        <meta-data
+            android:name="com.crackmydroid.INTEGRITY_VERIFICATION_ENDPOINT"
+            android:value="${integrityVerificationEndpoint}" />
         <activity
             android:name=".MainActivity"
             android:exported="true"

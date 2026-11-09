@@ -31,7 +31,7 @@ class UseCaseTests {
 
         val result = uc()
 
-        assertEquals(1, result.size)
+        assertEquals(1, result.getOrThrow().size)
         coVerify { repo.getActivities() }
     }
 
@@ -43,7 +43,7 @@ class UseCaseTests {
 
         val result = uc()
 
-        assertTrue(result.isRooted)
+        assertTrue(result.getOrThrow().isRooted)
         coVerify { repo.checkRoot() }
     }
 
@@ -55,7 +55,7 @@ class UseCaseTests {
 
         val result = uc()
 
-        assertEquals(1, result.size)
+        assertEquals(1, result.getOrThrow().size)
         coVerify { repo.listInstalled() }
     }
 

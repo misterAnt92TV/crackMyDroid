@@ -41,7 +41,7 @@ class TrickViewModelTest {
         val listUseCase = mockk<ListShellCommandsUseCase>()
         val execUseCase = mockk<ExecuteShellCommandUseCase>()
         val cmd = ShellCommand("Elenco pacchetti", "pm list packages", requiresRoot = false)
-        coEvery { listUseCase() } returns listOf(cmd)
+        coEvery { listUseCase() } returns Result.success(listOf(cmd))
         val vm = TrickViewModel(listUseCase, execUseCase)
 
         vm.load()
@@ -60,14 +60,14 @@ class TrickViewModelTest {
         val top = ShellCommand("Mostra top process", "top -n 1", requiresRoot = false)
         coEvery { execUseCase(packages) } coAnswers {
             delay(120)
-            ShellCommandResult(success = true, stdout = "package:com.test", stderr = "", code = 0)
+            Result.success(ShellCommandResult(success = true, stdout = "package:com.test", stderr = "", code = 0))
         }
-        coEvery { execUseCase(top) } returns ShellCommandResult(
+        coEvery { execUseCase(top) } returns Result.success(ShellCommandResult(
             success = true,
             stdout = "ok",
             stderr = "",
             code = 0
-        )
+        ))
         val vm = TrickViewModel(listUseCase, execUseCase)
 
         vm.execute(packages)
@@ -92,7 +92,7 @@ class TrickViewModelTest {
         val listUseCase = mockk<ListShellCommandsUseCase>()
         val execUseCase = mockk<ExecuteShellCommandUseCase>()
         val command = ShellCommand("Root check", "id", requiresRoot = true)
-        coEvery { execUseCase(command) } throws IllegalStateException("su unavailable")
+        coEvery { execUseCase(command) } returns Result.failure(IllegalStateException("su unavailable"))
         val vm = TrickViewModel(listUseCase, execUseCase)
 
         vm.execute(command)
