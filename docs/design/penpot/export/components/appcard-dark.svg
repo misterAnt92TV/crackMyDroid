@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="280" viewBox="0 0 720 280" role="img" data-source="shared/src/commonMain/kotlin/com/crackmydroid/shared/presentation/components/card/AppCard.kt">
+<title>AppCard · dark theme</title>
+<desc>Editable SVG visual reference for AppCard, based on shared/src/commonMain/kotlin/com/crackmydroid/shared/presentation/components/card/AppCard.kt.</desc>
+<rect x="0" y="0" width="720" height="280" fill="#101418" rx="0"/>
+<rect x="24" y="24" width="672" height="232" fill="#101418" rx="22" stroke="#3F4652" stroke-width="1"/>
+<rect x="48" y="54" width="624" height="172" fill="#101418" rx="18" stroke="#3F4652" stroke-width="1"/>
+<text x="76" y="96" fill="#E3E8F0" font-family="Inter, Roboto, sans-serif" font-size="21" font-weight="600">Analysis result</text>
+<text x="76" y="132" fill="#C0C7D2" font-family="Inter, Roboto, sans-serif" font-size="16" font-weight="400">Tap the card to view the details.</text>
+<rect x="76" y="164" width="126" height="36" fill="#174EA6" rx="12"/>
+<text x="96" y="188" fill="#A8C7FA" font-family="Inter, Roboto, sans-serif" font-size="14" font-weight="600">View details</text>
+</svg>

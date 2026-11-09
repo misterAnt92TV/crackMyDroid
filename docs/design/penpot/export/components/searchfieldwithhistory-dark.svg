@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="280" viewBox="0 0 720 280" role="img" data-source="shared/src/commonMain/kotlin/com/crackmydroid/shared/presentation/components/SearchFieldWithHistory.kt">
+<title>SearchFieldWithHistoryComponent · dark theme</title>
+<desc>Editable SVG visual reference for SearchFieldWithHistoryComponent, based on shared/src/commonMain/kotlin/com/crackmydroid/shared/presentation/components/SearchFieldWithHistory.kt.</desc>
+<rect x="0" y="0" width="720" height="280" fill="#101418" rx="0"/>
+<rect x="24" y="24" width="672" height="232" fill="#101418" rx="22" stroke="#3F4652" stroke-width="1"/>
+<rect x="52" y="48" width="616" height="68" fill="#3F4652" rx="16"/>
+<text x="76" y="73" fill="#C0C7D2" font-family="Inter, Roboto, sans-serif" font-size="12" font-weight="400">Search permissions</text>
+<text x="76" y="99" fill="#E3E8F0" font-family="Inter, Roboto, sans-serif" font-size="16" font-weight="400">camera</text>
+<text x="630" y="92" fill="#C0C7D2" font-family="Inter, Roboto, sans-serif" font-size="20" font-weight="400">×</text>
+<rect x="54" y="137" width="162" height="42" fill="#174EA6" rx="20"/>
+<circle cx="76" cy="158" r="8" fill="#A8C7FA"/>
+<text x="93" y="164" fill="#E3E8F0" font-family="Inter, Roboto, sans-serif" font-size="14" font-weight="400">camera</text>
+<rect x="230" y="137" width="178" height="42" fill="#3F4652" rx="20"/>
+<circle cx="252" cy="158" r="8" fill="#A8C7FA"/>
+<text x="269" y="164" fill="#E3E8F0" font-family="Inter, Roboto, sans-serif" font-size="14" font-weight="400">location</text>
+<text x="56" y="211" fill="#C0C7D2" font-family="Inter, Roboto, sans-serif" font-size="13" font-weight="400">Search history suggestions</text>
+</svg>
