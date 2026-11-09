@@ -12,6 +12,7 @@ import com.crackmydroid.shared.domain.model.root.RootCheckOutcome
 import com.crackmydroid.shared.domain.repository.AdbBridge
 import com.crackmydroid.shared.domain.repository.DeviceSessionController
 import com.crackmydroid.shared.domain.repository.RootCheckRepository
+import com.crackmydroid.shared.util.runSuspendCatching
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.util.Calendar
@@ -40,7 +41,7 @@ class RootCheckRepositoryDesktop(
         }
         val whichSu = shell("which su")
         val suExec = if (mode == RootCheckMode.PRIVILEGE_ACCESS) {
-            runCatching { shell("id", asRoot = true, timeoutMs = 5_000L) }.getOrDefault("")
+            runSuspendCatching { shell("id", asRoot = true, timeoutMs = 5_000L) }.getOrDefault("")
         } else ""
         val magiskTraces = listOf(
             "/sbin/.magisk",
@@ -53,10 +54,10 @@ class RootCheckRepositoryDesktop(
         }
         val dangerousProps = props["ro.debuggable"] == "1" || props["ro.secure"] == "0"
         val testKeys = props["ro.build.tags"]?.contains("test-keys") == true
-        val rwSystem = runCatching {
+        val rwSystem = runSuspendCatching {
             shell("mount | grep ' /system ' | grep rw")
         }.getOrNull()?.isNotBlank() == true
-        val selinux = runCatching { shell("getenforce") }.getOrDefault("unknown")
+        val selinux = runSuspendCatching { shell("getenforce") }.getOrDefault("unknown")
         val adbEnabled = shell("settings get global adb_enabled").trim() == "1"
         val developerOptions =
             shell("settings get global development_settings_enabled").trim() == "1"
@@ -66,11 +67,11 @@ class RootCheckRepositoryDesktop(
         val outdatedPatch = patchYear == null || patchYear <= currentYear - 2
         checks += RootCheck(RootCheckId.SU_BINARY, if (suBinaryFound || whichSu.isNotBlank()) RootCheckOutcome.DETECTED else RootCheckOutcome.NOT_DETECTED)
         checks += RootCheck(RootCheckId.MAGISK_TRACES, if (magiskFound) RootCheckOutcome.DETECTED else RootCheckOutcome.NOT_DETECTED)
-        val busyBox = runCatching { shell("command -v busybox") }.getOrDefault("")
-        val busyBoxList = runCatching { shell("busybox --list") }.getOrDefault("")
+        val busyBox = runSuspendCatching { shell("command -v busybox") }.getOrDefault("")
+        val busyBoxList = runSuspendCatching { shell("busybox --list") }.getOrDefault("")
         checks += RootCheck(RootCheckId.BUSYBOX, if (busyBox.isNotBlank()) RootCheckOutcome.DETECTED else RootCheckOutcome.NOT_DETECTED, busyBoxList.lines().count { it.isNotBlank() }.toString())
-        val sudo = runCatching { shell("command -v sudo") }.getOrDefault("")
-        val sudoProbe = if (sudo.isNotBlank()) runCatching { shell("sudo -n id") }.getOrDefault("") else ""
+        val sudo = runSuspendCatching { shell("command -v sudo") }.getOrDefault("")
+        val sudoProbe = if (sudo.isNotBlank()) runSuspendCatching { shell("sudo -n id") }.getOrDefault("") else ""
         checks += RootCheck(
             RootCheckId.SUDO,
             when {
@@ -80,7 +81,7 @@ class RootCheckRepositoryDesktop(
             },
             listOf(sudo, sudoProbe).filter { it.isNotBlank() }.joinToString(" ")
         )
-        val managerPackages = runCatching { shell("pm list packages | grep -E 'magisk|supersu|superuser|kernelsu'") }.getOrDefault("")
+        val managerPackages = runSuspendCatching { shell("pm list packages | grep -E 'magisk|supersu|superuser|kernelsu'") }.getOrDefault("")
         checks += RootCheck(RootCheckId.ROOT_MANAGER, if (managerPackages.isNotBlank()) RootCheckOutcome.DETECTED else RootCheckOutcome.NOT_DETECTED, managerPackages)
         val suOutcome = if (mode == RootCheckMode.PRIVILEGE_ACCESS) {
             when {

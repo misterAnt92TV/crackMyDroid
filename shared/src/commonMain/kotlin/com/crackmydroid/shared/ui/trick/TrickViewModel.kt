@@ -18,8 +18,9 @@ class TrickViewModel(
 
     fun load() {
         scope.launch {
-            val list = listUseCase()
-            _state.update { it.copy(commands = list) }
+            listUseCase()
+                .onSuccess { list -> _state.update { it.copy(commands = list) } }
+                .onFailure { error -> _state.update { it.copy(error = error.message) } }
         }
     }
 
@@ -40,12 +41,20 @@ class TrickViewModel(
             )
         }
         scope.launch {
-            runCatching { execUseCase(command) }
+            execUseCase(command)
                 .onSuccess { res ->
                     _state.update {
                         it.copy(
                             lastResult = res,
+                            resultToDisplay = res,
                             lastCommandTitle = command.title,
+                            stdoutLines = res.stdout.lines().map(String::trim).filter(String::isNotEmpty),
+                            stderrLines = res.stderr.lines().map(String::trim).filter(String::isNotEmpty),
+                            packageLines = res.stdout.lines().map(String::trim)
+                                .filter { line -> line.startsWith("package:") }
+                                .map { line -> line.removePrefix("package:").trim() },
+                            stdoutIsPackageList = res.stdout.lines().map(String::trim)
+                                .filter(String::isNotEmpty).all { line -> line.startsWith("package:") },
                             running = false,
                             runningCommand = null
                         )
@@ -63,6 +72,20 @@ class TrickViewModel(
                 }
         }
     }
+
+    fun requestExecution(command: ShellCommand) {
+        if (command.confirmation != null) _state.update { it.copy(pendingCommand = command) }
+        else execute(command)
+    }
+
+    fun confirmPendingExecution() {
+        val command = _state.value.pendingCommand ?: return
+        _state.update { it.copy(pendingCommand = null) }
+        execute(command)
+    }
+
+    fun dismissPendingCommand() = _state.update { it.copy(pendingCommand = null) }
+    fun dismissResult() = _state.update { it.copy(resultToDisplay = null) }
 
     fun notifyBusyInteraction(requestedCommand: ShellCommand) {
         val active = _state.value.runningCommand?.title ?: "un altro comando"

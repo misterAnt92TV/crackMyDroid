@@ -6,6 +6,8 @@
 
 Kotlin Multiplatform (Android + Desktop + iOS) para seguridad móvil, ingeniería inversa y diagnóstico del dispositivo — todo en una única interfaz compartida construida con Compose Multiplatform.
 
+La documentación técnica (italiano/inglés) está en el [índice de documentación](docs/README.md).
+
 ---
 
 ## Funcionalidades principales
@@ -14,14 +16,14 @@ Kotlin Multiplatform (Android + Desktop + iOS) para seguridad móvil, ingenierí
 |---|---|
 | **Inicio** | Resumen rápido, propósito de la app y preguntas frecuentes expandibles |
 | **Info del dispositivo** | Hardware/software, parches de seguridad, huella digital, radio, kernel, bootloader, batería/red, indicadores de depuración (ADB, opciones de desarrollador, debuggable), estado root; cada fila copiable, informe exportable en TXT |
-| **Root / Play Integrity** | Verificación root con RootBeer, comprobaciones Play Integrity con nonce configurable y detalle de pruebas |
+| **Root / Play Integrity** | Verificación root con RootBeer y veredictos Play Integrity verificables por backend para CrackMyDroid y el dispositivo |
 | **PenTesting** | Lista de comprobaciones de seguridad con estado (queued/ok/error), contadores, detalle de errores, exportar/compartir informe |
 | **Actividades** | Lista de actividades por app con búsqueda/historial, favoritos, expansión por paquete, lanzamiento directo y exportación |
 | **Apps instaladas (APK)** | Búsqueda, filtros, favoritos, iconos de app, exportar APK al almacenamiento y compartir directamente |
 | **Permisos** | Resumen de permisos de apps instaladas con análisis de riesgo, búsqueda y detalles |
 | **Shell/Trucos** | Comandos ADB/shell preconfigurados (con indicador root-required), confirmación opcional, salida y código de retorno |
 | **Registro** | Visor de registros de la aplicación con exportación |
-| **Ajustes** | Tema (claro/oscuro/sistema), verbosidad de registros, accesibilidad (alto contraste, animaciones reducidas, texto grande), licencias de bibliotecas, versión de la app |
+| **Ajustes** | Tema (claro/oscuro/sistema), idioma (sistema, italiano, inglés, alemán, francés, español), verbosidad de registros, accesibilidad (alto contraste, animaciones reducidas, texto grande), licencias de bibliotecas, versión de la app |
 
 ---
 

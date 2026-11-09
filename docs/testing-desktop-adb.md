@@ -1,7 +1,7 @@
 # CrackMyDroid — Test Desktop e Layer ADB (`desktopTest`)
 
 > Test del layer Desktop: parser ADB, bridge di processo, repository via ADB, session controller,
-> snapshot importer e analisi manifest.
+> snapshot importer, analisi manifest e generazione/salvataggio dei report.
 
 ---
 
@@ -16,6 +16,7 @@
 - [RemotePackageManagerDesktopTest](#remotepackagemanagerdesktoptest)
 - [DeviceSessionControllerDesktopTest](#devicesessioncontrollerdesktoptest)
 - [RemoteDeviceSnapshotImporterTest](#remotedevicesnapshotimportertest)
+- [ReportFileRepositoryDesktopTest](#reportfilerepositorydesktoptest)
 
 ---
 
@@ -693,3 +694,12 @@ assertFalse(outcome.usedSnapshot)
 assertTrue(outcome.message.contains("schema"))
 assertNull(cache.deviceInfo)   // cache non toccata
 ```
+
+---
+
+## ReportFileRepositoryDesktopTest
+
+**File:** `shared/src/desktopTest/kotlin/com/crackmydroid/shared/data/reports/ReportFileRepositoryDesktopTest.kt`
+
+La suite verifica la scrittura di PDF paginati e validi, la conservazione dei caratteri accentati
+nei report e l'involucro JSON e l'estensione corretti per i report JSON.

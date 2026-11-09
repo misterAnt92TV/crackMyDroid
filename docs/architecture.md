@@ -66,17 +66,21 @@
 
 ### Version Catalog (`gradle/libs.versions.toml`)
 
-Le versioni di tutte le dipendenze sono centralizzate nel version catalog. Le principali:
+Coordinate e versioni richieste di librerie/plugin sono centralizzate nel
+version catalog, inclusa ktlint CLI. Il catalogo e la fonte di riferimento:
+non duplicare qui le versioni, che possono cambiare indipendentemente
+dalla documentazione. La risoluzione Gradle puo selezionare versioni
+transitive diverse da quelle richieste.
 
-| Libreria              | Versione |
-|-----------------------|----------|
-| Kotlin                | `2.3.21` |
-| Compose Multiplatform | `1.10.3` |
-| AGP                   | `8.13.0` |
-| Koin                  | `3.5.6`  |
-| SQLDelight            | `2.0.1`  |
-| Coroutines            | `1.8.1`  |
-| kotlinx.serialization | `1.6.3`  |
+SDK Android e JVM non sono dipendenze: i moduli leggono le proprieta comuni
+`android.compileSdk`, `android.minSdk`, `android.targetSdk` e
+`build.jvmVersion` da `gradle.properties`. Identificativi e opzioni specifiche
+dell'app restano negli script dei moduli.
+
+Gli helper `kotlin("test")` e `compose.desktop.currentOs` mantengono
+rispettivamente l'allineamento Kotlin e la selezione degli artefatti nativi
+per l'OS. La gerarchia KMP esplicita resta invariata; le dipendenze test
+condivise sono ereditate da `commonTest` e `jvmCommonTest`.
 
 ---
 
@@ -124,6 +128,7 @@ domain/
 │   ├── ResultWrapper.kt          // Success/Failure wrapper
 │   └── AppLanguage.kt
 └── usecase/
+    ├── BaseUseCase.kt            // Result, cancellation, safe diagnostics; no scope
     ├── permissions/              // List, AnalyzeRisk, BuildReport
     ├── activities/               // Get, Analyze
     ├── installedapps/            // List, Export, ShareApk
@@ -133,6 +138,20 @@ domain/
     ├── settings/                 // Get/Set theme, language, prefs
     └── trick/                    // ListCommands, Execute
 ```
+
+**Use-case execution:** main operations are `suspend Result<T>`, including CPU
+analysis and report generation; setters use `Result<Unit>`. `BaseUseCase.execute`
+preserves caller cancellation and converts ordinary exceptions, not fatal errors,
+to failures. CPU work runs on injectable `AppDispatchers.default` (`shared.util`);
+repository operations keep repository-owned I/O dispatching. Pure formatting
+helpers remain synchronous. ViewModels prepare report content outside state
+updates and expose asynchronous permission-report preparation through state.
+
+**Diagnostics:** Kermit events contain use-case/operation names, outcome and
+monotonic duration, never payloads or raw exception messages/causes. Debug follows
+the persisted Verbose logs preference; failures remain error-level and cancellation
+is debug-only. The shell initializes the policy before triggering feature loads.
+There are no Flow use cases today; future stream operations use `Flow<Result<T>>`.
 
 ### Data Layer
 

@@ -8,6 +8,12 @@ data class TrickState(
     val lastResult: ShellCommandResult? = null,
     val lastCommandTitle: String? = null,
     val runningCommand: ShellCommand? = null,
+    val pendingCommand: ShellCommand? = null,
+    val resultToDisplay: ShellCommandResult? = null,
+    val stdoutLines: List<String> = emptyList(),
+    val stderrLines: List<String> = emptyList(),
+    val packageLines: List<String> = emptyList(),
+    val stdoutIsPackageList: Boolean = false,
     val running: Boolean = false,
     val interactionHint: String? = null,
     val error: String? = null

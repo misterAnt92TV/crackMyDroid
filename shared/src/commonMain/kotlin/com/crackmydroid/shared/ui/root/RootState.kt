@@ -8,5 +8,6 @@ data class RootState(
     val playIntegrity: PlayIntegrityResult? = null,
     val loading: Boolean = false,
     val error: String? = null,
-    val reportPath: String? = null
+    val reportPath: String? = null,
+    val playIntegrityNonce: String = "sample-nonce"
 )

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="280" viewBox="0 0 720 280" role="img" data-source="shared/src/commonMain/kotlin/com/crackmydroid/shared/presentation/components/AppButton.kt">
+<title>AppButton · dark theme</title>
+<desc>Editable SVG visual reference for AppButton, based on shared/src/commonMain/kotlin/com/crackmydroid/shared/presentation/components/AppButton.kt.</desc>
+<rect x="0" y="0" width="720" height="280" fill="#101418" rx="0"/>
+<rect x="24" y="24" width="672" height="232" fill="#101418" rx="22" stroke="#3F4652" stroke-width="1"/>
+<rect x="54" y="51" width="612" height="54" fill="#A8C7FA" rx="18"/>
+<text x="253" y="85" fill="#053062" font-family="Inter, Roboto, sans-serif" font-size="18" font-weight="600">Analyze device</text>
+<rect x="54" y="123" width="292" height="48" fill="#101418" rx="18" stroke="#A8C7FA" stroke-width="2"/>
+<text x="142" y="154" fill="#A8C7FA" font-family="Inter, Roboto, sans-serif" font-size="16" font-weight="600">Details</text>
+<rect x="362" y="123" width="304" height="48" fill="#174EA6" rx="18"/>
+<text x="464" y="154" fill="#E3E8F0" font-family="Inter, Roboto, sans-serif" font-size="16" font-weight="600">Export report</text>
+<rect x="54" y="188" width="612" height="42" fill="#3F4652" rx="16"/>
+<text x="274" y="215" fill="#C0C7D2" font-family="Inter, Roboto, sans-serif" font-size="15" font-weight="500">Disabled action</text>
+</svg>

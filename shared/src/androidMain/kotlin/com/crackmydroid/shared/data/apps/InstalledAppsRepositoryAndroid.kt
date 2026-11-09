@@ -12,6 +12,8 @@ import com.crackmydroid.shared.domain.model.app.AppComponentType
 import com.crackmydroid.shared.domain.model.app.AppManifestSecurity
 import com.crackmydroid.shared.domain.model.app.ExposedComponentInfo
 import com.crackmydroid.shared.domain.model.InstalledAppEntry
+import com.crackmydroid.shared.domain.model.InstallSourceClassification
+import com.crackmydroid.shared.domain.model.InstallSourceInfo
 import com.crackmydroid.shared.domain.model.app.ManifestSecurityAnalyzer
 import com.crackmydroid.shared.domain.model.app.ManifestSecurityReport
 import com.crackmydroid.shared.domain.repository.InstalledAppsRepository
@@ -36,7 +38,17 @@ class InstalledAppsRepositoryAndroid(
                 allowBackup = it.allowBackup == 1L,
                 testOnly = it.testOnly == 1L,
                 targetSdkVersion = it.targetSdkVersion?.toInt(),
-                minSdkVersion = it.minSdkVersion?.toInt()
+                minSdkVersion = it.minSdkVersion?.toInt(),
+                installSource = InstallSourceInfo(
+                    classification = runCatching {
+                        InstallSourceClassification.valueOf(it.installSourceClassification)
+                    }.getOrDefault(InstallSourceClassification.UNAVAILABLE),
+                    installingPackageName = it.installingPackageName,
+                    initiatingPackageName = it.initiatingPackageName,
+                    originatingPackageName = it.originatingPackageName,
+                    observedAtEpochMs = it.installSourceObservedAtEpochMs,
+                    unavailableReason = it.installSourceUnavailableReason
+                )
             )
         }
         if (cached.isNotEmpty()) return@withContext cached
@@ -58,7 +70,8 @@ class InstalledAppsRepositoryAndroid(
                 allowBackup = allowBackup,
                 testOnly = testOnly,
                 targetSdkVersion = pkg.applicationInfo?.targetSdkVersion,
-                minSdkVersion = pkg.applicationInfo?.minSdkVersion
+                minSdkVersion = pkg.applicationInfo?.minSdkVersion,
+                installSource = readInstallSource(pkg.packageName)
             )
         }.sortedBy { it.appLabel.lowercase() }
 
@@ -73,7 +86,13 @@ class InstalledAppsRepositoryAndroid(
                     allowBackup = if (entry.allowBackup) 1L else 0L,
                     testOnly = if (entry.testOnly) 1L else 0L,
                     targetSdkVersion = entry.targetSdkVersion?.toLong(),
-                    minSdkVersion = entry.minSdkVersion?.toLong()
+                    minSdkVersion = entry.minSdkVersion?.toLong(),
+                    installSourceClassification = entry.installSource.classification.name,
+                    installingPackageName = entry.installSource.installingPackageName,
+                    initiatingPackageName = entry.installSource.initiatingPackageName,
+                    originatingPackageName = entry.installSource.originatingPackageName,
+                    installSourceObservedAtEpochMs = entry.installSource.observedAtEpochMs,
+                    installSourceUnavailableReason = entry.installSource.unavailableReason
                 )
             }
         }
@@ -86,6 +105,42 @@ class InstalledAppsRepositoryAndroid(
             val all = listInstalled()
             PaginationHelper.paginate(all, offset, limit)
         }
+
+    private fun readInstallSource(packageName: String): InstallSourceInfo {
+        val packageManager = context.packageManager
+        val source = runCatching {
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+                val info = packageManager.getInstallSourceInfo(packageName)
+                InstallSourceInfo(
+                    classification = classifyInstaller(info.installingPackageName),
+                    installingPackageName = info.installingPackageName,
+                    initiatingPackageName = info.initiatingPackageName,
+                    originatingPackageName = info.originatingPackageName,
+                    observedAtEpochMs = System.currentTimeMillis()
+                )
+            } else {
+                @Suppress("DEPRECATION")
+                val installer = packageManager.getInstallerPackageName(packageName)
+                InstallSourceInfo(
+                    classification = classifyInstaller(installer),
+                    installingPackageName = installer,
+                    observedAtEpochMs = System.currentTimeMillis()
+                )
+            }
+        }
+        return source.getOrElse { error ->
+            InstallSourceInfo(
+                classification = InstallSourceClassification.UNAVAILABLE,
+                unavailableReason = error.message ?: "Install source unavailable"
+            )
+        }
+    }
+
+    private fun classifyInstaller(installerPackageName: String?): InstallSourceClassification = when {
+        installerPackageName == "com.android.vending" -> InstallSourceClassification.GOOGLE_PLAY
+        installerPackageName.isNullOrBlank() -> InstallSourceClassification.UNKNOWN
+        else -> InstallSourceClassification.OTHER
+    }
 
     override suspend fun analyzeManifestSecurity(): List<ManifestSecurityReport> =
         withContext(Dispatchers.IO) {

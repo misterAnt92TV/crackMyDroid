@@ -39,6 +39,7 @@ import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertSame
 
 class SettingsUseCasesTest {
     @Test
@@ -59,20 +60,20 @@ class SettingsUseCasesTest {
         coEvery { repository.getInstalledAppFavorites() } returns setOf("installed")
         coEvery { repository.getPermissionFavorites() } returns setOf("permission")
 
-        assertEquals(AppLanguage.ITALIAN, GetLanguageUseCase(repository)())
-        assertEquals(AppTheme.DARK, GetThemeUseCase(repository)())
-        assertEquals(true, GetVerboseLogUseCase(repository)())
-        assertEquals(true, GetIntroSeenUseCase(repository)())
-        assertEquals(ExportFormat.JSON, GetExportFormatUseCase(repository)())
-        assertEquals(true, GetHighContrastUseCase(repository)())
-        assertEquals(true, GetReduceMotionUseCase(repository)())
-        assertEquals(true, GetLargeTextUseCase(repository)())
-        assertEquals(false, GetSuggestionsEnabledUseCase(repository)())
-        assertEquals(false, GetFeatureHintsEnabledUseCase(repository)())
-        assertEquals(setOf("activity"), GetActivityFavoritesUseCase(repository)())
-        assertEquals(setOf("package"), GetActivityPackageFavoritesUseCase(repository)())
-        assertEquals(setOf("installed"), GetInstalledAppFavoritesUseCase(repository)())
-        assertEquals(setOf("permission"), GetPermissionFavoritesUseCase(repository)())
+        assertEquals(AppLanguage.ITALIAN, GetLanguageUseCase(repository)().getOrThrow())
+        assertEquals(AppTheme.DARK, GetThemeUseCase(repository)().getOrThrow())
+        assertEquals(true, GetVerboseLogUseCase(repository)().getOrThrow())
+        assertEquals(true, GetIntroSeenUseCase(repository)().getOrThrow())
+        assertEquals(ExportFormat.JSON, GetExportFormatUseCase(repository)().getOrThrow())
+        assertEquals(true, GetHighContrastUseCase(repository)().getOrThrow())
+        assertEquals(true, GetReduceMotionUseCase(repository)().getOrThrow())
+        assertEquals(true, GetLargeTextUseCase(repository)().getOrThrow())
+        assertEquals(false, GetSuggestionsEnabledUseCase(repository)().getOrThrow())
+        assertEquals(false, GetFeatureHintsEnabledUseCase(repository)().getOrThrow())
+        assertEquals(setOf("activity"), GetActivityFavoritesUseCase(repository)().getOrThrow())
+        assertEquals(setOf("package"), GetActivityPackageFavoritesUseCase(repository)().getOrThrow())
+        assertEquals(setOf("installed"), GetInstalledAppFavoritesUseCase(repository)().getOrThrow())
+        assertEquals(setOf("permission"), GetPermissionFavoritesUseCase(repository)().getOrThrow())
 
         coVerify(exactly = 1) { repository.getLanguage() }
         coVerify(exactly = 1) { repository.getActivityPackageFavorites() }
@@ -115,7 +116,184 @@ class SettingsUseCasesTest {
         coVerify { repository.setLanguage(AppLanguage.GERMAN) }
         coVerify { repository.setLanguage(AppLanguage.SYSTEM) }
         coVerify { repository.setTheme(AppTheme.LIGHT) }
+        coVerify { repository.setVerboseLog(true) }
+        coVerify { repository.setIntroSeen(false) }
         coVerify { repository.setExportFormat(ExportFormat.JSON) }
+        coVerify { repository.setHighContrast(true) }
+        coVerify { repository.setReduceMotion(true) }
+        coVerify { repository.setLargeText(true) }
+        coVerify { repository.setSuggestionsEnabled(false) }
+        coVerify { repository.setFeatureHintsEnabled(false) }
+        coVerify { repository.setActivityFavorites(setOf("activity")) }
+        coVerify { repository.setActivityPackageFavorites(setOf("package")) }
+        coVerify { repository.setInstalledAppFavorites(setOf("installed")) }
         coVerify { repository.setPermissionFavorites(setOf("permission")) }
+    }
+
+    @Test
+    fun `boolean settings preserve both enabled and disabled values`() = runTest {
+        val repository = mockk<SettingsRepository>()
+        for (value in listOf(false, true)) {
+            coEvery { repository.isVerboseLog() } returns value
+            coEvery { repository.isIntroSeen() } returns value
+            coEvery { repository.isHighContrast() } returns value
+            coEvery { repository.isReduceMotion() } returns value
+            coEvery { repository.isLargeText() } returns value
+            coEvery { repository.isSuggestionsEnabled() } returns value
+            coEvery { repository.isFeatureHintsEnabled() } returns value
+            coJustRun { repository.setVerboseLog(value) }
+            coJustRun { repository.setIntroSeen(value) }
+            coJustRun { repository.setHighContrast(value) }
+            coJustRun { repository.setReduceMotion(value) }
+            coJustRun { repository.setLargeText(value) }
+            coJustRun { repository.setSuggestionsEnabled(value) }
+            coJustRun { repository.setFeatureHintsEnabled(value) }
+
+            assertEquals(value, GetVerboseLogUseCase(repository)().getOrThrow())
+            assertEquals(value, GetIntroSeenUseCase(repository)().getOrThrow())
+            assertEquals(value, GetHighContrastUseCase(repository)().getOrThrow())
+            assertEquals(value, GetReduceMotionUseCase(repository)().getOrThrow())
+            assertEquals(value, GetLargeTextUseCase(repository)().getOrThrow())
+            assertEquals(value, GetSuggestionsEnabledUseCase(repository)().getOrThrow())
+            assertEquals(value, GetFeatureHintsEnabledUseCase(repository)().getOrThrow())
+            SetVerboseLogUseCase(repository)(value)
+            SetIntroSeenUseCase(repository)(value)
+            SetHighContrastUseCase(repository)(value)
+            SetReduceMotionUseCase(repository)(value)
+            SetLargeTextUseCase(repository)(value)
+            SetSuggestionsEnabledUseCase(repository)(value)
+            SetFeatureHintsEnabledUseCase(repository)(value)
+
+            coVerify(exactly = 1) { repository.setVerboseLog(value) }
+            coVerify(exactly = 1) { repository.setIntroSeen(value) }
+            coVerify(exactly = 1) { repository.setHighContrast(value) }
+            coVerify(exactly = 1) { repository.setReduceMotion(value) }
+            coVerify(exactly = 1) { repository.setLargeText(value) }
+            coVerify(exactly = 1) { repository.setSuggestionsEnabled(value) }
+            coVerify(exactly = 1) { repository.setFeatureHintsEnabled(value) }
+        }
+    }
+
+    @Test
+    fun `enum settings preserve every supported value`() = runTest {
+        val repository = mockk<SettingsRepository>()
+        for (value in AppLanguage.entries) {
+            coEvery { repository.getLanguage() } returns value
+            coJustRun { repository.setLanguage(value) }
+            assertEquals(value, GetLanguageUseCase(repository)().getOrThrow())
+            SetLanguageUseCase(repository)(value)
+            coVerify(exactly = 1) { repository.setLanguage(value) }
+        }
+        for (value in AppTheme.entries) {
+            coEvery { repository.getTheme() } returns value
+            coJustRun { repository.setTheme(value) }
+            assertEquals(value, GetThemeUseCase(repository)().getOrThrow())
+            SetThemeUseCase(repository)(value)
+            coVerify(exactly = 1) { repository.setTheme(value) }
+        }
+        for (value in ExportFormat.entries) {
+            coEvery { repository.getExportFormat() } returns value
+            coJustRun { repository.setExportFormat(value) }
+            assertEquals(value, GetExportFormatUseCase(repository)().getOrThrow())
+            SetExportFormatUseCase(repository)(value)
+            coVerify(exactly = 1) { repository.setExportFormat(value) }
+        }
+    }
+
+    @Test
+    fun `favorite settings preserve empty and populated sets`() = runTest {
+        val repository = mockk<SettingsRepository>()
+        for (value in listOf(emptySet(), setOf("first", "second"))) {
+            coEvery { repository.getActivityFavorites() } returns value
+            coEvery { repository.getActivityPackageFavorites() } returns value
+            coEvery { repository.getInstalledAppFavorites() } returns value
+            coEvery { repository.getPermissionFavorites() } returns value
+            coJustRun { repository.setActivityFavorites(value) }
+            coJustRun { repository.setActivityPackageFavorites(value) }
+            coJustRun { repository.setInstalledAppFavorites(value) }
+            coJustRun { repository.setPermissionFavorites(value) }
+
+            assertEquals(value, GetActivityFavoritesUseCase(repository)().getOrThrow())
+            assertEquals(value, GetActivityPackageFavoritesUseCase(repository)().getOrThrow())
+            assertEquals(value, GetInstalledAppFavoritesUseCase(repository)().getOrThrow())
+            assertEquals(value, GetPermissionFavoritesUseCase(repository)().getOrThrow())
+            SetActivityFavoritesUseCase(repository)(value)
+            SetActivityPackageFavoritesUseCase(repository)(value)
+            SetInstalledAppFavoritesUseCase(repository)(value)
+            SetPermissionFavoritesUseCase(repository)(value)
+
+            coVerify(exactly = 1) { repository.setActivityFavorites(value) }
+            coVerify(exactly = 1) { repository.setActivityPackageFavorites(value) }
+            coVerify(exactly = 1) { repository.setInstalledAppFavorites(value) }
+            coVerify(exactly = 1) { repository.setPermissionFavorites(value) }
+        }
+    }
+
+    @Test
+    fun `all getters propagate repository read failures`() = runTest {
+        val repository = mockk<SettingsRepository>()
+        val failure = IllegalStateException("Read failed")
+        coEvery { repository.getLanguage() } throws failure
+        coEvery { repository.getTheme() } throws failure
+        coEvery { repository.getExportFormat() } throws failure
+        coEvery { repository.isVerboseLog() } throws failure
+        coEvery { repository.isIntroSeen() } throws failure
+        coEvery { repository.isHighContrast() } throws failure
+        coEvery { repository.isReduceMotion() } throws failure
+        coEvery { repository.isLargeText() } throws failure
+        coEvery { repository.isSuggestionsEnabled() } throws failure
+        coEvery { repository.isFeatureHintsEnabled() } throws failure
+        coEvery { repository.getActivityFavorites() } throws failure
+        coEvery { repository.getActivityPackageFavorites() } throws failure
+        coEvery { repository.getInstalledAppFavorites() } throws failure
+        coEvery { repository.getPermissionFavorites() } throws failure
+        assertSame(failure, GetLanguageUseCase(repository)().exceptionOrNull())
+        assertSame(failure, GetThemeUseCase(repository)().exceptionOrNull())
+        assertSame(failure, GetExportFormatUseCase(repository)().exceptionOrNull())
+        assertSame(failure, GetVerboseLogUseCase(repository)().exceptionOrNull())
+        assertSame(failure, GetIntroSeenUseCase(repository)().exceptionOrNull())
+        assertSame(failure, GetHighContrastUseCase(repository)().exceptionOrNull())
+        assertSame(failure, GetReduceMotionUseCase(repository)().exceptionOrNull())
+        assertSame(failure, GetLargeTextUseCase(repository)().exceptionOrNull())
+        assertSame(failure, GetSuggestionsEnabledUseCase(repository)().exceptionOrNull())
+        assertSame(failure, GetFeatureHintsEnabledUseCase(repository)().exceptionOrNull())
+        assertSame(failure, GetActivityFavoritesUseCase(repository)().exceptionOrNull())
+        assertSame(failure, GetActivityPackageFavoritesUseCase(repository)().exceptionOrNull())
+        assertSame(failure, GetInstalledAppFavoritesUseCase(repository)().exceptionOrNull())
+        assertSame(failure, GetPermissionFavoritesUseCase(repository)().exceptionOrNull())
+    }
+
+    @Test
+    fun `all setters propagate repository write failures`() = runTest {
+        val repository = mockk<SettingsRepository>()
+        val failure = IllegalStateException("Write failed")
+        coEvery { repository.setLanguage(any()) } throws failure
+        coEvery { repository.setTheme(any()) } throws failure
+        coEvery { repository.setExportFormat(any()) } throws failure
+        coEvery { repository.setVerboseLog(any()) } throws failure
+        coEvery { repository.setIntroSeen(any()) } throws failure
+        coEvery { repository.setHighContrast(any()) } throws failure
+        coEvery { repository.setReduceMotion(any()) } throws failure
+        coEvery { repository.setLargeText(any()) } throws failure
+        coEvery { repository.setSuggestionsEnabled(any()) } throws failure
+        coEvery { repository.setFeatureHintsEnabled(any()) } throws failure
+        coEvery { repository.setActivityFavorites(any()) } throws failure
+        coEvery { repository.setActivityPackageFavorites(any()) } throws failure
+        coEvery { repository.setInstalledAppFavorites(any()) } throws failure
+        coEvery { repository.setPermissionFavorites(any()) } throws failure
+        assertSame(failure, SetLanguageUseCase(repository)(AppLanguage.SYSTEM).exceptionOrNull())
+        assertSame(failure, SetThemeUseCase(repository)(AppTheme.SYSTEM).exceptionOrNull())
+        assertSame(failure, SetExportFormatUseCase(repository)(ExportFormat.TXT).exceptionOrNull())
+        assertSame(failure, SetVerboseLogUseCase(repository)(false).exceptionOrNull())
+        assertSame(failure, SetIntroSeenUseCase(repository)(false).exceptionOrNull())
+        assertSame(failure, SetHighContrastUseCase(repository)(false).exceptionOrNull())
+        assertSame(failure, SetReduceMotionUseCase(repository)(false).exceptionOrNull())
+        assertSame(failure, SetLargeTextUseCase(repository)(false).exceptionOrNull())
+        assertSame(failure, SetSuggestionsEnabledUseCase(repository)(false).exceptionOrNull())
+        assertSame(failure, SetFeatureHintsEnabledUseCase(repository)(false).exceptionOrNull())
+        assertSame(failure, SetActivityFavoritesUseCase(repository)(emptySet()).exceptionOrNull())
+        assertSame(failure, SetActivityPackageFavoritesUseCase(repository)(emptySet()).exceptionOrNull())
+        assertSame(failure, SetInstalledAppFavoritesUseCase(repository)(emptySet()).exceptionOrNull())
+        assertSame(failure, SetPermissionFavoritesUseCase(repository)(emptySet()).exceptionOrNull())
     }
 }

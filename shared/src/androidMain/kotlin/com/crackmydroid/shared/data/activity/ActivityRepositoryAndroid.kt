@@ -4,28 +4,25 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.net.Uri
+import androidx.core.net.toUri
 import com.crackmydroid.database.CacheDatabase
 import com.crackmydroid.shared.data.cache.CachingRepositoryDecorator
 import com.crackmydroid.shared.data.cache.PaginationHelper
-import com.crackmydroid.shared.domain.model.activity.ActivityEntry
-import com.crackmydroid.shared.domain.model.app.AppComponent
 import com.crackmydroid.shared.domain.model.ComponentType
+import com.crackmydroid.shared.domain.model.activity.ActivityEntry
 import com.crackmydroid.shared.domain.model.activity.classifyAndroidActivityLaunchability
+import com.crackmydroid.shared.domain.model.app.AppComponent
 import com.crackmydroid.shared.domain.repository.ActivityRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-class ActivityRepositoryAndroid(
-    private val context: Context,
-    private val db: CacheDatabase
-) : ActivityRepository {
+class ActivityRepositoryAndroid(private val context: Context, private val db: CacheDatabase) : ActivityRepository {
     private val cachingDecorator = CachingRepositoryDecorator()
     override suspend fun getActivities(): List<ActivityEntry> = withContext(Dispatchers.IO) {
         val cached = db.cacheDatabaseQueries.selectAllActivities().executeAsList().map {
             val launchability = classifyAndroidActivityLaunchability(
                 exported = it.exported == 1L,
-                permission = it.permission
+                permission = it.permission,
             )
             ActivityEntry(
                 label = it.label,
@@ -35,7 +32,7 @@ class ActivityRepositoryAndroid(
                 launchableViaShell = launchability.launchableViaShell,
                 launchabilityReason = launchability.launchabilityReason,
                 exported = it.exported == 1L,
-                permission = it.permission
+                permission = it.permission,
             )
         }
         if (cached.isNotEmpty()) return@withContext cached
@@ -52,7 +49,7 @@ class ActivityRepositoryAndroid(
             activities.map { activityInfo ->
                 val launchability = classifyAndroidActivityLaunchability(
                     exported = activityInfo.exported,
-                    permission = activityInfo.permission
+                    permission = activityInfo.permission,
                 )
                 val label = activityInfo.loadLabel(pm).toString()
                     .ifBlank { activityInfo.name.substringAfterLast('.') }
@@ -64,7 +61,7 @@ class ActivityRepositoryAndroid(
                     launchableViaShell = launchability.launchableViaShell,
                     launchabilityReason = launchability.launchabilityReason,
                     exported = activityInfo.exported,
-                    permission = activityInfo.permission
+                    permission = activityInfo.permission,
                 )
             }
         }.sortedBy { it.label.lowercase() }
@@ -78,7 +75,7 @@ class ActivityRepositoryAndroid(
                     activityName = it.activityName,
                     label = it.label,
                     exported = if (it.exported) 1L else 0L,
-                    permission = it.permission
+                    permission = it.permission,
                 )
             }
         }
@@ -95,8 +92,8 @@ class ActivityRepositoryAndroid(
         val pm = context.packageManager
         val packages = pm.getInstalledPackages(
             PackageManager.GET_SERVICES or
-                    PackageManager.GET_RECEIVERS or
-                    PackageManager.GET_PROVIDERS
+                PackageManager.GET_RECEIVERS or
+                PackageManager.GET_PROVIDERS,
         )
 
         packages.flatMap { pkgInfo ->
@@ -115,7 +112,7 @@ class ActivityRepositoryAndroid(
                     name = service.name,
                     type = ComponentType.SERVICE,
                     exported = service.exported,
-                    permission = service.permission
+                    permission = service.permission,
                 )
             }
 
@@ -127,7 +124,7 @@ class ActivityRepositoryAndroid(
                     name = receiver.name,
                     type = ComponentType.RECEIVER,
                     exported = receiver.exported,
-                    permission = receiver.permission
+                    permission = receiver.permission,
                 )
             }
 
@@ -139,7 +136,7 @@ class ActivityRepositoryAndroid(
                     name = provider.name,
                     type = ComponentType.PROVIDER,
                     exported = provider.exported,
-                    permission = provider.readPermission ?: provider.writePermission
+                    permission = provider.readPermission ?: provider.writePermission,
                 )
             }
 
@@ -147,23 +144,22 @@ class ActivityRepositoryAndroid(
         }.sortedBy { it.label.lowercase() }
     }
 
-    override suspend fun getComponentsCached(): List<AppComponent> =
-        withContext(Dispatchers.IO) {
-            cachingDecorator.getCachedOrCompute(
-                cacheGetter = { cachingDecorator.getComponentsCache() },
-                cacheSetter = { cachingDecorator.cacheComponents(it) },
-                timeGetter = { 0L },
-                timeSetter = { }
-            ) {
-                getComponents()
-            }
+    override suspend fun getComponentsCached(): List<AppComponent> = withContext(Dispatchers.IO) {
+        cachingDecorator.getCachedOrCompute(
+            cacheGetter = { cachingDecorator.getComponentsCache() },
+            cacheSetter = { cachingDecorator.cacheComponents(it) },
+            timeGetter = { 0L },
+            timeSetter = { },
+        ) {
+            getComponents()
         }
+    }
 
     override suspend fun launch(
         entry: ActivityEntry,
         action: String?,
         dataUri: String?,
-        mimeType: String?
+        mimeType: String?,
     ): Result<Unit> = withContext(Dispatchers.Main) {
         runCatching {
             val intent = Intent().apply {
@@ -176,10 +172,10 @@ class ActivityRepositoryAndroid(
                 }
                 when {
                     !dataUri.isNullOrBlank() && !mimeType.isNullOrBlank() ->
-                        setDataAndType(Uri.parse(dataUri), mimeType)
+                        setDataAndType(dataUri.toUri(), mimeType)
 
                     !dataUri.isNullOrBlank() ->
-                        data = Uri.parse(dataUri)
+                        data = dataUri.toUri()
 
                     !mimeType.isNullOrBlank() ->
                         type = mimeType

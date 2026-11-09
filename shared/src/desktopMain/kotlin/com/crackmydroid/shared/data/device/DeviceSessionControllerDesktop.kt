@@ -6,6 +6,7 @@ import com.crackmydroid.shared.domain.model.ConnectedDevice
 import com.crackmydroid.shared.domain.model.DeviceSessionSource
 import com.crackmydroid.shared.domain.repository.AdbBridge
 import com.crackmydroid.shared.domain.repository.DeviceSessionController
+import com.crackmydroid.shared.util.runSuspendCatching
 import com.crackmydroid.shared.domain.model.DeviceSessionState
 import com.crackmydroid.shared.domain.repository.SettingsRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -69,7 +70,7 @@ class DeviceSessionControllerDesktop(
     ): Result<Unit> {
         val adbPath = adbPathOverride?.trim().orEmpty().ifBlank { _state.value.adbPath }
         val configured = !adbPathOverride.isNullOrBlank()
-        return runCatching {
+        return runSuspendCatching {
             if (configured) {
                 settingsRepository.setAdbPath(adbPath)
             }
@@ -103,7 +104,7 @@ class DeviceSessionControllerDesktop(
         }
     }
 
-    override suspend fun rescanSelectedDevice(): Result<Unit> = runCatching {
+    override suspend fun rescanSelectedDevice(): Result<Unit> = runSuspendCatching {
         val device = requireNotNull(_state.value.selectedDevice) { "Nessun device selezionato" }
         clearCaches()
         val snapshotOutcome = snapshotImporter?.import(device, _state.value.adbPath)

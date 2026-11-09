@@ -45,10 +45,29 @@ Comprende:
 Il flusso è UDF/MVI:
 
 ```text
-User interaction → Action/Event → ViewModel → State/StateFlow → Compose UI
+User interaction → UI event/callback → ViewModel action → UseCase → Repository/data source → result → immutable StateFlow → Compose UI
 ```
 
+Ogni nuova sezione applicativa concretizza il flusso con un `FeatureEvent` tipizzato, un singolo
+`ViewModel.onEvent(event)`, uno `StateFlow<FeatureUiState>` immutabile e, quando necessario, un
+`SharedFlow<FeatureEffect>` per effetti one-shot. La screen collega questi contratti; il content
+renderizza soltanto `FeatureUiState` e inoltra gli eventi.
+
 I ViewModel usano `BaseViewModel` per possedere uno scope cancellabile. Il lavoro asincrono deve essere lanciato nello scope del ViewModel, con dispatcher forniti tramite `AppDispatchers`, e deve pubblicare stati coerenti per loading, successo ed errore.
+
+La UI non contiene logica applicativa: Screen e composable ricevono `UiState` immutabile e callback,
+renderizzano il contenuto e inoltrano gli eventi. Non possono accedere a UseCase, repository, database,
+SDK, API native, Koin o coroutine applicative, né eseguire filtering, sorting, mapping, validazione,
+gestione errori o navigazione condizionale. Sono ammessi solo calcoli locali strettamente visuali,
+come layout, animazioni, dimensioni, colori, accessibilità e stato transitorio di un controllo.
+
+Le liste con righe o card strutturate attraversano un confine esplicito di presentazione:
+`FeatureState → XxxUiStateMapper → XxxUiState → XxxContent`. I mapper puri ricevono la localizzazione
+attiva e producono item immutabili specifici della feature; le screen non passano modelli di dominio ai
+componenti di lista. Le azioni degli item usano identificatori stabili, risolti dal ViewModel.
+
+Le regole di dominio e le trasformazioni funzionali appartengono ai UseCase; il ViewModel gestisce
+solo orchestrazione della presentazione, eventi, coroutine e mapping verso `UiState`.
 
 ### 3.2 Domain
 
@@ -60,6 +79,56 @@ Si trova in `com.crackmydroid.shared.domain` e contiene la logica indipendente d
 - analizzatori e regole di classificazione.
 
 Un UseCase coordina una singola intenzione applicativa. Può validare input, chiamare uno o più repository, trasformare i dati e restituire un risultato di dominio. Non deve conoscere Compose, Koin, Activity, Context o API ADB.
+
+Le operazioni one-shot sono `suspend` e restituiscono `Result<T>` (anche analisi e
+report); le scritture restituiscono `Result<Unit>`. Tutti gli use case estendono
+`BaseUseCase`, che centralizza conversione delle eccezioni ordinarie e diagnostica,
+senza possedere scope o job. `CancellationException` viene sempre propagata,
+anche se contenuta in un risultato del repository; gli `Error` fatali non vengono
+catturati. Un esito di dominio negativo o l'assenza legittima di finding non sono
+automaticamente errori tecnici.
+
+Ogni use case dichiara `private const val TAG = "NomeClasse"` nel proprio
+`private companion object` e passa `TAG` a `BaseUseCase`, mantenendo stabile
+l'identificativo diagnostico senza stringhe letterali nel costruttore della base.
+
+Gli use case CPU usano `AppDispatchers.default` iniettabile, con controlli
+cooperativi di cancellazione. Gli altri mantengono il contesto del chiamante e il
+dispatching I/O dei repository. `AppDispatchers` risiede in `shared.util`, non
+nel layer Presentation. I ViewModel consumano i risultati e preparano report
+fuori da `StateFlow.update`; le anteprime asincrone espongono stato osservabile.
+
+La base usa Kermit per eventi con nome use case/operazione, esito e durata
+monotona: debug solo con Log verbosi, error per fallimenti. La preferenza viene
+letta prima dei caricamenti della shell e aggiornata solo dopo persistenza
+riuscita. I nuovi eventi non contengono input/output, messaggi grezzi, cause o
+throwable; la cancellazione non viene registrata come errore. La policy non
+modifica i livelli degli altri logger.
+
+Non esistono attualmente use case Flow. Per futuri stream il contratto previsto
+e `Flow<Result<T>>`, con errori upstream gestiti nello stream e cancellazione
+propagata, senza intercettare gli errori del collector.
+
+### Localizzazione dei risultati e dei report
+
+L'analisi permessi produce `PermissionFindingKind` e parametri tecnici;
+i controlli PenTest producono messaggi `PenTestMessage` tipizzati. Questi
+risultati non memorizzano frasi nella lingua della scansione. Il catalogo puro
+`UseCaseTexts` li rende in italiano, inglese, tedesco, spagnolo e francese, con
+fallback inglese, condividendo descrizioni e severita tra UI e report.
+
+I builder di report ricevono esplicitamente `UseCaseReportText`, contratto
+definito nel dominio: non leggono preferenze, `LocalStrings` o locale globale.
+La shell carica la lingua prima delle feature e coordina i mapper dei ViewModel.
+Cambiare lingua rimappa i risultati e gli snapshot PenTest in memoria senza
+rifare scansioni; il report dispositivo viene rigenerato dai dati caricati.
+Le preview obsolete vengono cancellate e ogni export/share cattura la lingua
+all'inizio dell'operazione. I file gia esportati non vengono riscritti.
+
+TAG, permessi, package, URI, nomi file e termini tecnici (APK, ADB, shell,
+intent/deeplink, overlay, accessibility, score, finding) rimangono invariati.
+I messaggi raw dei repository/dispositivo e i testi dell'analizzatore activity
+preesistente non fanno parte di questa localizzazione.
 
 ### 3.3 Data
 
@@ -85,6 +154,7 @@ Le responsabilità trasversali includono:
 - SQLDelight per il database locale;
 - kotlinx.serialization per snapshot e report JSON;
 - coroutines per concorrenza e cancellazione strutturata;
+- Ktor Client per tutte le chiamate REST, con engine confinati nel source set di piattaforma;
 - ADB e process bridge esclusivamente nel percorso Desktop/ADB.
 
 ## 4. Flusso applicativo
@@ -123,11 +193,17 @@ Il wrapper SwiftUI ospita la UI condivisa. Le integrazioni iOS restano negli ada
 
 `shared/src/commonMain/kotlin/com/crackmydroid/shared/di/Koin.kt` compone:
 
-- `commonModule()` per gli UseCase comuni;
-- `presentationModule()` per dispatcher e ViewModel;
+- `commonModule()` per UseCase, logger e dispatcher condivisi;
+- `presentationModule()` per ViewModel;
 - `platformModule()` come `expect`, con implementazioni nei source set di piattaforma.
 
 Le dipendenze devono essere costruite nel composition root e passate esplicitamente ai componenti. Un ViewModel non deve creare repository o avviare Koin autonomamente.
+
+Ogni risoluzione di `AppPresentationDependencies` crea un grafo di presentazione indipendente.
+La factory risolve una sola volta i ViewModel delle schermate e passa le stesse istanze ad
+`AppShellViewModel`: i caricamenti della shell aggiornano quindi lo stato osservato dalla UI.
+Non risolvere nuovamente questi ViewModel per costruire la shell e non convertirli in singleton
+globali: contenitori distinti devono mantenere stato indipendente.
 
 ## 6. Persistenza, cache e snapshot
 
@@ -136,6 +212,30 @@ Le dipendenze devono essere costruite nel composition root e passate esplicitame
 - Gli eventi di aggiornamento/rimozione pacchetto devono invalidare le cache interessate.
 - Gli snapshot sono serializzati con un contratto stabile e importati tramite un componente dedicato.
 - ADB è una boundary esterna: timeout, processo fallito, output non valido e device non disponibile devono essere trasformati in risultati o errori gestibili.
+
+### CacheDatabase: migrazioni e indici
+
+I driver Android e iOS devono ricevere `CacheDatabaseSchema`, non direttamente lo schema
+generato. L'adattatore conserva le migrazioni SQLDelight e ripara nel passaggio v3 i DB
+legacy che condividono la versione 1/2 ma non le colonne manifest/activity. `2.sqm`
+versiona questo passaggio con un UPDATE senza righe; il callback `AfterVersion(2)`
+controlla `PRAGMA table_info` e aggiunge solo le colonne mancanti. Non modificare
+`1.sqm` già applicato e non aggirare gli errori cancellando il database.
+
+Solo la cache app/activity a cui vengono aggiunte colonne viene invalidata, nella
+transazione di upgrade del driver: i default dei nuovi flag non rappresentano una
+scansione effettiva. I DB già completi mantengono le righe. Le SELECT di queste tabelle
+elencano esplicitamente le colonne, perché l'ordine fisico dopo ALTER TABLE può differire
+da una nuova installazione. `clearDeviceInfo` elimina sia i campi key/value sia
+l'eventuale chiave JSON legacy.
+
+Le quattro cache sono indipendenti, senza foreign key: `packageName` è un collegamento
+logico, non richiede un ordine di popolamento. Le PK `(packageName, activityName)` e
+`(packageName, permission)` coprono già le ricerche per package; le altre PK sono
+`installed_apps_cache(packageName)` e `device_info_cache(key)`. Non aggiungere indici
+ridondanti sul package o sui flag: le query attuali leggono tutte le app e filtrano in
+memoria. La paginazione SQL, la rappresentazione delle app senza permessi e la
+normalizzazione delle cache richiedono un intervento separato, non nuovi indici isolati.
 
 ## 7. Regole di dipendenza
 

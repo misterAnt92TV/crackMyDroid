@@ -13,6 +13,7 @@ UI_URL="${PENPOT_UI_URL:-https://design.penpot.app}"
 BACKEND_URL="${PENPOT_BACKEND_URL:-}"
 MCP_URL="${PENPOT_MCP_URL:-http://localhost:4401/mcp}"
 PLUGIN_URL="${PENPOT_MCP_PLUGIN_URL:-http://localhost:4400/manifest.json}"
+WS_PORT="${PENPOT_MCP_WEBSOCKET_PORT:-4402}"
 CURL=(curl --fail --silent --show-error)
 
 require_local_url() {
@@ -54,10 +55,23 @@ else
 fi
 
 echo "Checking Penpot MCP plugin manifest: $PLUGIN_URL"
-"${CURL[@]}" "$PLUGIN_URL" >/dev/null
+if ! "${CURL[@]}" "$PLUGIN_URL" >/dev/null; then
+  echo "Plugin manifest unavailable at $PLUGIN_URL. Start the bridge once with scripts/penpot/start_penpot_mcp.sh." >&2
+  exit 1
+fi
 echo "OK plugin manifest reachable"
 
+echo "Checking Penpot MCP WebSocket listener: localhost:$WS_PORT"
+if ! command -v lsof >/dev/null 2>&1 || ! lsof -nP -iTCP:"$WS_PORT" -sTCP:LISTEN 2>/dev/null | grep -q .; then
+  echo "WebSocket listener unavailable on localhost:$WS_PORT. Start or reuse the complete bridge; do not start a duplicate." >&2
+  exit 1
+fi
+echo "OK WebSocket listener reachable"
+
 echo "Checking Penpot MCP: $MCP_URL"
-node "$REPO_ROOT/scripts/penpot/mcp_client.mjs" check "$MCP_URL"
+if ! node "$REPO_ROOT/scripts/penpot/mcp_client.mjs" check "$MCP_URL"; then
+  echo "MCP endpoint is reachable but the plugin/file session is not ready. Open CrackMyDroid, load the localhost manifest, and click Connect to MCP server." >&2
+  exit 1
+fi
 
 echo "Done"

@@ -3,6 +3,7 @@ package com.crackmydroid.shared.i18n
 import com.crackmydroid.shared.domain.model.app.AppLanguage
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 
 class LanguageResolverTest {
@@ -107,6 +108,57 @@ class LanguageResolverTest {
                 "Demo App · com.example.demo",
                 strings.permissionsExpandedAppLabel.format("Demo App", "com.example.demo")
             )
+        }
+    }
+
+    @Test
+    fun componentPenTestLabels_andSearchHistoryAction_areLocalized() {
+        val checkIds = listOf(
+            "lib_scan",
+            "manifest_flags",
+            "file_scout",
+            "network_monitor",
+            "permission_risk"
+        )
+        val italian = stringsFor("it")
+        val italianLabels = checkIds.map { italian.pentestChecks.getValue(it).first }
+
+        listOf("it", "en", "de", "es", "fr").forEach { languageCode ->
+            val strings = stringsFor(languageCode)
+            checkIds.forEachIndexed { index, checkId ->
+                val label = strings.pentestChecks[checkId]?.first.orEmpty()
+                assertTrue(label.isNotBlank(), "$languageCode/$checkId")
+                if (languageCode != "it") {
+                    assertNotEquals(italianLabels[index], label, "$languageCode/$checkId still uses Italian")
+                }
+            }
+            assertTrue(strings.clearSearchHistoryContentDescription.isNotBlank(), languageCode)
+            if (languageCode != "it") {
+                assertNotEquals(
+                    italian.clearSearchHistoryContentDescription,
+                    strings.clearSearchHistoryContentDescription,
+                    "$languageCode/clearSearchHistoryContentDescription still uses Italian"
+                )
+            }
+        }
+    }
+
+    @Test
+    fun activityUiStrings_areLocalizedForEverySupportedLanguage() {
+        listOf("it", "en", "de", "es", "fr").forEach { languageCode ->
+            val ui = stringsFor(languageCode).activityUi
+            listOf(
+                ui.searchToolsSubtitle, ui.suggestionsCleared, ui.exportSuccess, ui.frequentSearch,
+                ui.resultsSummary, ui.noResults, ui.noActivities, ui.searchHint,
+                ui.resetFilter, ui.refresh, ui.activityCount, ui.guidedLauncherTitle,
+                ui.reportTitle, ui.totals, ui.riskSummary, ui.recommendations,
+                ui.highlights, ui.exportHtml, ui.closeReport, ui.exportedTitle,
+                ui.exportedSummary, ui.appDetail, ui.packageDetail, ui.activitiesDetail,
+                ui.maximumRiskDetail, ui.riskLow, ui.riskMedium, ui.riskHigh, ui.riskCritical
+            ).forEach { value -> assertTrue(value.isNotBlank(), "$languageCode has blank Activity UI text") }
+            assertTrue(ui.resultsSummary.contains("%d"), languageCode)
+            assertTrue(ui.riskSummary.contains("%s"), languageCode)
+            assertTrue(ui.noResults.contains("%s"), languageCode)
         }
     }
 }

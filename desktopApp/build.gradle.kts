@@ -4,9 +4,11 @@ plugins {
     alias(libs.plugins.compose.mpp)
 }
 
+val jvmVersion = providers.gradleProperty("build.jvmVersion").map(String::toInt)
+
 kotlin {
     jvm("desktop")
-    jvmToolchain(17)
+    jvmToolchain(jvmVersion.get())
 
     sourceSets {
         val desktopMain by getting {

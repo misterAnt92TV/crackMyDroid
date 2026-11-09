@@ -57,7 +57,17 @@ class DeviceScanSnapshotJsonTest {
                 )
             ),
             installedApps = SnapshotSection.ready(
-                listOf(InstalledAppEntry("Demo", "pkg.demo", "/data/app/pkg.demo/base.apk"))
+                listOf(
+                    InstalledAppEntry(
+                        "Demo",
+                        "pkg.demo",
+                        "/data/app/pkg.demo/base.apk",
+                        installSource = InstallSourceInfo(
+                            classification = InstallSourceClassification.GOOGLE_PLAY,
+                            installingPackageName = "com.android.vending"
+                        )
+                    )
+                )
             ),
             permissions = SnapshotSection.failed("Permessi non disponibili"),
             activities = SnapshotSection.ready(
@@ -76,6 +86,10 @@ class DeviceScanSnapshotJsonTest {
         assertEquals(SnapshotSectionState.SKIPPED, decoded.playIntegrity.state)
         assertEquals("I/Test: ok", decoded.logs.data?.first())
         assertEquals(RootCheckOutcome.NOT_DETECTED, decoded.rootStatus.data?.checks?.single()?.outcome)
+        assertEquals(
+            InstallSourceClassification.GOOGLE_PLAY,
+            decoded.installedApps.data?.single()?.installSource?.classification
+        )
     }
 
     @Test

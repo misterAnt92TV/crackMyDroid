@@ -1,7 +1,17 @@
 package com.crackmydroid.shared.domain.usecase.settings
 
 import com.crackmydroid.shared.domain.repository.SettingsRepository
+import co.touchlab.kermit.Logger
+import com.crackmydroid.shared.AppLogger
+import com.crackmydroid.shared.domain.usecase.BaseUseCase
 
-class GetActivityFavoritesUseCase(private val repository: SettingsRepository) {
-    suspend operator fun invoke(): Set<String> = repository.getActivityFavorites()
+class GetActivityFavoritesUseCase(
+    private val repository: SettingsRepository,
+    logger: Logger = AppLogger.logger
+) : BaseUseCase(TAG, logger = logger) {
+    private companion object {
+        private const val TAG = "GetActivityFavoritesUseCase"
+    }
+
+    suspend operator fun invoke(): Result<Set<String>> = execute { repository.getActivityFavorites() }
 }

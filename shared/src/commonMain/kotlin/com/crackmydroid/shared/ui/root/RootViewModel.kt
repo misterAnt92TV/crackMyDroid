@@ -1,9 +1,9 @@
 package com.crackmydroid.shared.ui.root
 
-import com.crackmydroid.shared.domain.usecase.root.CheckRootUseCase
 import com.crackmydroid.shared.domain.model.root.RootCheckMode
 import com.crackmydroid.shared.domain.usecase.reports.ExportReportUseCase
 import com.crackmydroid.shared.domain.usecase.root.CheckPlayIntegrityUseCase
+import com.crackmydroid.shared.domain.usecase.root.CheckRootUseCase
 import com.crackmydroid.shared.i18n.Strings
 import com.crackmydroid.shared.presentation.BaseViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,7 +14,7 @@ import kotlinx.coroutines.launch
 class RootViewModel(
     private val checkRoot: CheckRootUseCase,
     private val checkPlayIntegrity: CheckPlayIntegrityUseCase,
-    private val reportExporter: ExportReportUseCase
+    private val reportExporter: ExportReportUseCase,
 ) : BaseViewModel() {
     private val _state = MutableStateFlow(RootState())
     val state: StateFlow<RootState> = _state
@@ -23,7 +23,9 @@ class RootViewModel(
         appendLine(strings.navRoot)
         appendLine("-----------")
         _state.value.status?.let { status ->
-            appendLine("${strings.verifyRoot}: ${if (status.isRooted) strings.rootDetected else strings.rootNotDetected}")
+            appendLine(
+                "${strings.verifyRoot}: ${if (status.isRooted) strings.rootDetected else strings.rootNotDetected}",
+            )
             appendLine("Dettagli root: ${status.details}")
         } ?: appendLine("${strings.verifyRoot}: ${strings.notAvailable}")
         _state.value.playIntegrity?.let { pi ->
@@ -46,28 +48,33 @@ class RootViewModel(
     private fun verify(mode: RootCheckMode) {
         scope.launch {
             _state.update { it.copy(loading = true, error = null) }
-            runCatching { checkRoot(mode) }
+            checkRoot(mode)
                 .onSuccess { status -> _state.update { it.copy(status = status, loading = false) } }
                 .onFailure { err ->
                     _state.update {
                         it.copy(
                             error = err.message,
-                            loading = false
+                            loading = false,
                         )
                     }
                 }
         }
     }
 
-    fun verifyPlayIntegrity(nonce: String = "sample-nonce") {
+    fun updatePlayIntegrityNonce(value: String) {
+        _state.update { it.copy(playIntegrityNonce = value) }
+    }
+
+    fun verifyPlayIntegrity() {
+        val nonce = _state.value.playIntegrityNonce.ifBlank { "sample-nonce" }
         scope.launch {
             _state.update { it.copy(loading = true, error = null) }
-            runCatching { checkPlayIntegrity(nonce) }
+            checkPlayIntegrity(nonce)
                 .onSuccess { res ->
                     _state.update {
                         it.copy(
                             playIntegrity = res,
-                            loading = false
+                            loading = false,
                         )
                     }
                 }
@@ -75,7 +82,7 @@ class RootViewModel(
                     _state.update {
                         it.copy(
                             error = err.message,
-                            loading = false
+                            loading = false,
                         )
                     }
                 }
@@ -85,7 +92,7 @@ class RootViewModel(
     fun shareReport(strings: Strings) {
         val content = buildReportContent(strings)
         scope.launch {
-            reportExporter.share("root_test_report", content)
+            reportExporter.shareTextReport("root_test_report", "root_test", content)
                 .onSuccess { path -> _state.update { it.copy(reportPath = path, error = null) } }
                 .onFailure { error -> _state.update { it.copy(error = error.message ?: "Errore") } }
         }

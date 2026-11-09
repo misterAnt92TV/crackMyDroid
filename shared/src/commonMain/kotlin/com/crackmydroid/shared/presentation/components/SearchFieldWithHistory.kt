@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -40,6 +41,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 import com.crackmydroid.shared.i18n.LocalStrings
+import com.crackmydroid.shared.presentation.components.text.AppText
 import com.crackmydroid.shared.presentation.preview.AppComponentPreviews
 import com.crackmydroid.shared.presentation.preview.ComponentPreviewContainer
 
@@ -52,7 +54,7 @@ fun SearchFieldWithHistoryComponent(
     label: String,
     historyKey: String,
     modifier: Modifier = Modifier,
-    shape: androidx.compose.ui.graphics.Shape = TextFieldDefaults.shape,
+    shape: androidx.compose.ui.graphics.Shape = RoundedCornerShape(14.dp),
     showClearAction: Boolean = false,
     onCleared: (() -> Unit)? = null
 ) {
@@ -103,7 +105,7 @@ fun SearchFieldWithHistoryComponent(
                 .onFocusChanged { state ->
                     hasFocus = state.isFocused
                 },
-            label = { Text(label) },
+            label = { AppText(label) },
             shape = shape,
             singleLine = true,
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
@@ -170,7 +172,7 @@ fun SearchFieldWithHistoryComponent(
                                 },
                                 onLongClickLabel = strings.removeSearchHistoryContentDescription.format(suggestion)
                             ),
-                            label = { Text(suggestion) },
+                            label = { AppText(suggestion) },
                             leadingIcon = {
                                 Icon(
                                     imageVector = Icons.Filled.History,
@@ -183,8 +185,8 @@ fun SearchFieldWithHistoryComponent(
                     }
                 }
                 if (showClearAction) {
-                    Text(
-                        text = "Svuota suggerimenti",
+                    AppText(
+                        text = strings.clearSearchHistoryContentDescription,
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier
@@ -216,19 +218,20 @@ fun SearchFieldWithHistoryComponent(
 @AppComponentPreviews
 @Composable
 private fun SearchFieldWithHistoryComponentPreview() = ComponentPreviewContainer {
+    val strings = LocalStrings.current
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         SearchFieldWithHistoryComponent(
             value = "",
             onValueChange = {},
             onSubmit = {},
-            label = "Cerca applicazioni",
+            label = strings.permissionsSearch,
             historyKey = "component-preview-empty"
         )
         SearchFieldWithHistoryComponent(
             value = "crack",
             onValueChange = {},
             onSubmit = {},
-            label = "Cerca applicazioni",
+            label = strings.permissionsSearch,
             historyKey = "component-preview-filled",
             showClearAction = true,
             onCleared = {}

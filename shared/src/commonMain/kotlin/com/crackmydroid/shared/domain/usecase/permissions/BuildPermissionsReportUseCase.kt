@@ -1,105 +1,162 @@
 package com.crackmydroid.shared.domain.usecase.permissions
 
 import com.crackmydroid.shared.domain.model.app.AppPermissionEntry
+import com.crackmydroid.shared.domain.model.PermissionRiskLevel
 import com.crackmydroid.shared.domain.model.PermissionRiskReport
+import com.crackmydroid.shared.domain.model.ReportLabel
+import com.crackmydroid.shared.domain.model.UseCaseReportText
+import co.touchlab.kermit.Logger
+import com.crackmydroid.shared.AppLogger
+import com.crackmydroid.shared.domain.usecase.BaseUseCase
+import com.crackmydroid.shared.util.AppDispatchers
+import com.crackmydroid.shared.util.DefaultAppDispatchers
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 
 class BuildPermissionsReportUseCase(
-    private val analyzePermissionRisks: AnalyzePermissionRisksUseCase
-) {
-    operator fun invoke(
+    private val analyzePermissionRisks: AnalyzePermissionRisksUseCase,
+    dispatchers: AppDispatchers = DefaultAppDispatchers,
+    logger: Logger = AppLogger.logger
+) : BaseUseCase(TAG, dispatcher = dispatchers.default, logger = logger) {
+    private companion object {
+        private const val TAG = "BuildPermissionsReportUseCase"
+    }
+
+    suspend operator fun invoke(
         apps: List<AppPermissionEntry>,
-        riskReports: List<PermissionRiskReport>
-    ): String = buildString {
-        val riskByPackage = riskReports.associateBy { it.packageName }
-        val criticalTotal = riskReports.sumOf { it.criticalCount }
-        val highTotal = riskReports.sumOf { it.highCount }
-        val mediumTotal = riskReports.sumOf { it.mediumCount }
-        val sortedApps = apps.sortedWith(
-            compareByDescending<AppPermissionEntry> { riskByPackage[it.packageName]?.score ?: 0 }
+        riskReports: List<PermissionRiskReport>,
+        text: UseCaseReportText
+    ): Result<String> = execute { buildString {
+        val context = currentCoroutineContext()
+        val riskByPackage = riskReports.associateBy {
+            context.ensureActive()
+            it.packageName
+        }
+        val criticalTotal = riskReports.sumOf { context.ensureActive(); it.criticalCount }
+        val highTotal = riskReports.sumOf { context.ensureActive(); it.highCount }
+        val mediumTotal = riskReports.sumOf { context.ensureActive(); it.mediumCount }
+        val sortedApps = apps.map { context.ensureActive(); it }.sortedWith(
+            compareByDescending<AppPermissionEntry> {
+                context.ensureActive()
+                riskByPackage[it.packageName]?.score ?: 0
+            }
                 .thenBy { it.appLabel.lowercase() }
         )
 
-        appendLine("REPORT PERMESSI APP INSTALLATE")
+        appendLine(text.label(ReportLabel.PERMISSIONS_REPORT_TITLE))
         appendLine("==============================================")
-        appendLine("Totale app analizzate: ${apps.size}")
-        appendLine("Totale permessi trovati: ${apps.sumOf { it.permissions.size }}")
-        appendLine("App con rischi rilevati: ${riskReports.size}")
-        appendLine("Rischi -> Critici: $criticalTotal | Alti: $highTotal | Medi: $mediumTotal")
-        appendLine("Legenda severita: CRITICO > ALTO > MEDIO")
-        appendLine("Nota: il report evidenzia indicatori di rischio, non conferme definitive di malware.")
+        appendLine(
+            text.permissionOverview(
+                appCount = apps.size,
+                permissionCount = apps.sumOf { context.ensureActive(); it.permissions.size },
+                appsWithRisksCount = riskReports.size
+            )
+        )
+        appendLine(text.permissionRiskCounts(criticalTotal, highTotal, mediumTotal))
+        appendLine(
+            "${text.label(ReportLabel.SEVERITY_LEGEND)}: " +
+                    "${text.riskLevel(PermissionRiskLevel.Critical)} > " +
+                    "${text.riskLevel(PermissionRiskLevel.High)} > " +
+                    text.riskLevel(PermissionRiskLevel.Medium)
+        )
+        appendLine(text.label(ReportLabel.CAUTION_NOTE))
         appendLine()
 
         if (apps.isEmpty()) {
-            appendLine("Nessun dato disponibile.")
+            appendLine(text.noDataAvailable())
             return@buildString
         }
 
         sortedApps.forEachIndexed { index, app ->
+            context.ensureActive()
             appendLine("--------------------------------------------------")
-            appendLine("${index + 1}) ${app.appLabel}")
-            appendLine("Package: ${app.packageName}")
-            appendLine("Permessi dichiarati: ${app.permissions.size}")
+            appendLine(text.permissionAppHeading(index + 1, app.appLabel))
+            appendLine("${text.label(ReportLabel.PACKAGE)}: ${app.packageName}")
+            appendLine(text.declaredPermissionCount(app.permissions.size))
             val risk = riskByPackage[app.packageName]
             if (risk == null) {
-                appendLine("Analisi rischio: nessun comportamento sensibile rilevato.")
+                appendLine("${text.label(ReportLabel.RISK_ANALYSIS)}: ${text.noSensitiveBehavior()}")
             } else {
                 appendLine(
-                    "Analisi rischio: score ${risk.score} • ${risk.findings.size} finding " +
-                            "(Critici ${risk.criticalCount}, Alti ${risk.highCount}, Medi ${risk.mediumCount})"
+                    "${text.label(ReportLabel.RISK_ANALYSIS)}: ${
+                        text.permissionRiskOverview(
+                            score = risk.score,
+                            findingCount = risk.findings.size,
+                            criticalCount = risk.criticalCount,
+                            highCount = risk.highCount,
+                            mediumCount = risk.mediumCount
+                        )
+                    }"
                 )
-                appendLine("Dettaglio finding:")
+                appendLine(text.label(ReportLabel.FINDING_DETAILS) + ":")
                 risk.findings.forEach { finding ->
-                    appendLine("- [${analyzePermissionRisks.riskLabel(finding.level)}] ${finding.title}")
-                    appendLine("  ${finding.reason}")
+                    context.ensureActive()
+                    appendLine("- [${text.riskLevel(finding.level)}] ${text.permissionTitle(finding)}")
+                    appendLine("  ${text.permissionReason(finding)}")
                 }
             }
-            appendLine("Permessi:")
+            appendLine("${text.label(ReportLabel.PERMISSIONS)}:")
             if (app.permissions.isEmpty()) {
-                appendLine("- Nessun permesso dichiarato")
+                appendLine("- ${text.noDeclaredPermissions()}")
             } else {
-                app.permissions.sorted().forEach { perm ->
+                app.permissions.map { context.ensureActive(); it }.sorted().forEach { perm ->
+                    context.ensureActive()
                     appendLine("- $perm")
                 }
             }
             appendLine()
         }
-    }
+    } }
 
-    fun single(
+    suspend fun single(
         app: AppPermissionEntry,
-        riskReport: PermissionRiskReport?
-    ): String = buildString {
-        appendLine("REPORT PERMESSI APP")
+        riskReport: PermissionRiskReport?,
+        text: UseCaseReportText
+    ): Result<String> = execute("single") { buildString {
+        val context = currentCoroutineContext()
+        appendLine(text.label(ReportLabel.SINGLE_PERMISSIONS_REPORT_TITLE))
         appendLine("==============================================")
-        appendLine("App: ${app.appLabel}")
-        appendLine("Package: ${app.packageName}")
-        appendLine("Totale permessi: ${app.permissions.size}")
-        appendLine("Legenda severita: CRITICO > ALTO > MEDIO")
+        appendLine("${text.label(ReportLabel.APP)}: ${app.appLabel}")
+        appendLine("${text.label(ReportLabel.PACKAGE)}: ${app.packageName}")
+        appendLine(text.declaredPermissionCount(app.permissions.size))
+        appendLine(
+            "${text.label(ReportLabel.SEVERITY_LEGEND)}: " +
+                    "${text.riskLevel(PermissionRiskLevel.Critical)} > " +
+                    "${text.riskLevel(PermissionRiskLevel.High)} > " +
+                    text.riskLevel(PermissionRiskLevel.Medium)
+        )
         appendLine()
-        appendLine("ANALISI RISCHIO")
+        appendLine(text.label(ReportLabel.RISK_ANALYSIS).uppercase())
         appendLine("----------------------------------------------")
         if (riskReport == null) {
-            appendLine("Nessun permesso pericoloso/malevolo rilevato con le regole correnti.")
+            appendLine(text.noRiskyPermissions())
         } else {
-            appendLine("Score rischio: ${riskReport.score}")
+            appendLine("${text.label(ReportLabel.SCORE)}: ${riskReport.score}")
             appendLine(
-                "Finding: ${riskReport.findings.size} " +
-                        "(Critici ${riskReport.criticalCount}, Alti ${riskReport.highCount}, Medi ${riskReport.mediumCount})"
+                text.permissionRiskOverview(
+                    score = riskReport.score,
+                    findingCount = riskReport.findings.size,
+                    criticalCount = riskReport.criticalCount,
+                    highCount = riskReport.highCount,
+                    mediumCount = riskReport.mediumCount
+                )
             )
             riskReport.findings.forEachIndexed { index, finding ->
-                appendLine("${index + 1}. [${analyzePermissionRisks.riskLabel(finding.level)}] ${finding.title}")
-                appendLine("   ${finding.reason}")
+                context.ensureActive()
+                appendLine(text.permissionFindingHeading(index + 1, finding))
+                appendLine("   ${text.permissionReason(finding)}")
             }
         }
         appendLine()
-        appendLine("ELENCO PERMESSI")
+        appendLine(text.label(ReportLabel.PERMISSIONS).uppercase())
         appendLine("----------------------------------------------")
         if (app.permissions.isEmpty()) {
-            appendLine("Nessun permesso dichiarato.")
+            appendLine(text.noDeclaredPermissions())
         } else {
-            app.permissions.sorted().forEachIndexed { index, permission ->
+            app.permissions.map { context.ensureActive(); it }.sorted().forEachIndexed { index, permission ->
+                context.ensureActive()
                 appendLine("${index + 1}. $permission")
-            }
+            } }
         }
     }
 

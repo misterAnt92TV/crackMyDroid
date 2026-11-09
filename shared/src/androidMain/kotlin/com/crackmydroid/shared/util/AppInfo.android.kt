@@ -29,7 +29,7 @@ actual fun appRequestedPermissions(): List<String> {
         runCatching {
             val pkgInfo = context.packageManager.getPackageInfo(
                 context.packageName,
-                PackageManager.GET_PERMISSIONS
+                PackageManager.GET_PERMISSIONS,
             )
             pkgInfo.requestedPermissions?.toList() ?: emptyList()
         }.getOrDefault(emptyList())
@@ -43,8 +43,8 @@ actual fun appSdkInfo(): SdkInfo? {
         runCatching {
             val appInfo = context.applicationInfo
             SdkInfo(
-                minSdk = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) appInfo.minSdkVersion else null,
-                targetSdk = appInfo.targetSdkVersion
+                minSdk = appInfo.minSdkVersion,
+                targetSdk = appInfo.targetSdkVersion,
             )
         }.getOrNull()
     }

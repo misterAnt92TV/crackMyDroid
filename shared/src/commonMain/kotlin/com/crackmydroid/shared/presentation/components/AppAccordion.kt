@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
@@ -47,81 +48,104 @@ fun AppAccordion(
     accessibilityLabel: String? = null,
     leading: @Composable (() -> Unit)? = null,
     actions: @Composable RowScope.() -> Unit = {},
+    titleMaxLines: Int? = null,
+    subtitleMaxLines: Int? = null,
+    textOverflow: TextOverflow = TextOverflow.Ellipsis,
+    headerVerticalPadding: androidx.compose.ui.unit.Dp = 2.dp,
+    headerMinHeight: androidx.compose.ui.unit.Dp = 0.dp,
+    actionsBelowHeader: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val prefs = LocalAccessibilityPrefs.current
     val reduceMotion = LocalAccessibilityPrefs.current.reduceMotion
     val strings = LocalStrings.current
     AppCard(modifier = modifier) {
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable(role = Role.Button, onClick = onToggle)
-                .semantics {
-                    contentDescription = accessibilityLabel ?: title.orEmpty()
-                    stateDescription = if (expanded) {
-                        strings.expandedStateDescription
-                    } else {
-                        strings.collapsedStateDescription
+                .heightIn(min = headerMinHeight)
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable(role = Role.Button, onClick = onToggle)
+                    .semantics {
+                        contentDescription = accessibilityLabel ?: title.orEmpty()
+                        stateDescription = if (expanded) {
+                            strings.expandedStateDescription
+                        } else {
+                            strings.collapsedStateDescription
+                        }
+                    }
+                    .padding(vertical = headerVerticalPadding),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                verticalAlignment = if (prefs.largeText) Alignment.Top else Alignment.CenterVertically
+            ) {
+                leading?.let {
+                    Box(modifier = Modifier.size(44.dp), contentAlignment = Alignment.Center) { it() }
+                }
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(2.dp)
+                ) {
+                    title?.let {
+                        AppText(
+                            it,
+                            style = MaterialTheme.typography.titleMedium,
+                            maxLines = titleMaxLines ?: if (prefs.largeText) 3 else 1,
+                            overflow = textOverflow
+                        )
+                    }
+                    subtitle?.let {
+                        AppText(
+                            it,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = subtitleMaxLines ?: if (prefs.largeText) 3 else 1,
+                            overflow = textOverflow
+                        )
+                    }
+                    if (actionsBelowHeader) meta?.let {
+                        AppText(
+                            it,
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.primary,
+                            maxLines = 2,
+                            overflow = textOverflow
+                        )
                     }
                 }
-                .padding(vertical = 2.dp),
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
-            verticalAlignment = if (prefs.largeText) Alignment.Top else Alignment.CenterVertically
-        ) {
-            leading?.let {
-                Box(modifier = Modifier.size(44.dp), contentAlignment = Alignment.Center) { it() }
-            }
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(2.dp)
-            ) {
-                title?.let {
-                    AppText(
-                        it,
-                        style = MaterialTheme.typography.titleMedium,
-                        maxLines = if (prefs.largeText) 3 else 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-                subtitle?.let {
-                    AppText(
-                        it,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = if (prefs.largeText) 3 else 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-                if (meta != null && prefs.largeText) {
+                if (!actionsBelowHeader && meta != null) {
                     AppText(
                         meta,
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.primary,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis
+                        maxLines = if (prefs.largeText || actionsBelowHeader) 2 else 1,
+                        overflow = textOverflow
                     )
                 }
-            }
-            if (meta != null && !prefs.largeText) {
-                AppText(
-                    meta,
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.primary,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                verticalAlignment = if (prefs.largeText) Alignment.Top else Alignment.CenterVertically
-            ) {
-                actions()
+                if (!actionsBelowHeader) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        verticalAlignment = if (prefs.largeText) Alignment.Top else Alignment.CenterVertically
+                    ) {
+                        actions()
+                    }
+                }
                 Icon(
                     imageVector = if (expanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.primary
                 )
+            }
+            if (actionsBelowHeader) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
+                    horizontalArrangement = Arrangement.End,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    actions()
+                }
             }
         }
 
@@ -149,19 +173,33 @@ fun AppAccordion(
 private fun AppAccordionPreview() = ComponentPreviewContainer {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         AppAccordion(
-            title = "Controlli di sicurezza",
-            subtitle = "Verifica configurazioni e permessi",
+            title = "com.example.security.long.application.label",
+            subtitle = "com.example.security.long.application.package.name",
             meta = "3 risultati",
             expanded = false,
             onToggle = {},
+            titleMaxLines = 3,
+            subtitleMaxLines = 3,
+            textOverflow = TextOverflow.Clip,
+            headerVerticalPadding = 10.dp,
+            headerMinHeight = 88.dp,
+            actionsBelowHeader = true,
+            actions = { AppText("⋮") },
             leading = { Icon(Icons.Filled.Info, contentDescription = null) }
         ) { AppText("Contenuto non visibile") }}
         AppAccordion(
-            title = "Controlli di sicurezza",
-            subtitle = "Verifica configurazioni e permessi",
+            title = "com.example.security.long.application.label",
+            subtitle = "com.example.security.long.application.package.name",
             meta = "3 risultati",
             expanded = true,
             onToggle = {},
+            titleMaxLines = 3,
+            subtitleMaxLines = 3,
+            textOverflow = TextOverflow.Clip,
+            headerVerticalPadding = 10.dp,
+            headerMinHeight = 88.dp,
+            actionsBelowHeader = true,
+            actions = { AppText("⋮") },
             leading = { Icon(Icons.Filled.Info, contentDescription = null) }
         ) { AppText("Il dispositivo non espone backup, debug o permessi inattesi.") }
 

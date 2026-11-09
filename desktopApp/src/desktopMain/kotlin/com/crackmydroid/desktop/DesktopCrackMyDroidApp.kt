@@ -57,6 +57,7 @@ import com.crackmydroid.shared.presentation.components.card.AppCard
 import com.crackmydroid.shared.presentation.components.text.AppText
 import com.crackmydroid.shared.presentation.theme.CrackMyDroidTheme
 import com.crackmydroid.shared.ui.CrackMyDroidApp
+import com.crackmydroid.shared.ui.AppPresentationDependencies
 import kotlinx.coroutines.launch
 import org.koin.mp.KoinPlatform
 import java.time.Instant
@@ -72,6 +73,9 @@ fun DesktopCrackMyDroidApp() {
         KoinPlatform.getKoin().get<GetLanguageUseCase>()
     }
     val getTheme = remember { KoinPlatform.getKoin().get<GetThemeUseCase>() }
+    val presentationDependencies = remember {
+        KoinPlatform.getKoin().get<AppPresentationDependencies>()
+    }
     val state by sessionController.state.collectAsState()
     val scope = rememberCoroutineScope()
     var adbPath by remember { mutableStateOf(state.adbPath) }
@@ -86,8 +90,10 @@ fun DesktopCrackMyDroidApp() {
     }
 
     LaunchedEffect(Unit) {
-        strings = stringsFor(resolveLanguageCode(getLanguage(), platformLanguage()))
-        appTheme = getTheme()
+        getLanguage().onSuccess { language ->
+            strings = stringsFor(resolveLanguageCode(language, platformLanguage()))
+        }
+        getTheme().onSuccess { appTheme = it }
         if (state.availableDevices.isEmpty()) {
             sessionController.refreshDevices(null)
         }
@@ -147,6 +153,7 @@ fun DesktopCrackMyDroidApp() {
                     )
                     key(state.sessionVersion) {
                         CrackMyDroidApp(
+                            dependencies = presentationDependencies,
                             onLanguageChanged = { language ->
                                 strings = stringsFor(resolveLanguageCode(language, platformLanguage()))
                             }
@@ -204,12 +211,12 @@ private fun DevicePickerContent(
                 .padding(horizontal = 48.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text(
+            AppText(
                 text = strings.desktopAdbPickerTitle,
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold
             )
-            Text(
+            AppText(
                 text = strings.desktopAdbPickerDescription,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -222,7 +229,7 @@ private fun DevicePickerContent(
                     singleLine = true
                 )
             } else {
-                Text(
+                AppText(
                     text = strings.desktopAdbPathConfigured,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -253,7 +260,7 @@ private fun DevicePickerContent(
                 }
             }
             error?.let {
-                Text(
+                AppText(
                     text = it,
                     color = MaterialTheme.colorScheme.error,
                     style = MaterialTheme.typography.bodySmall
@@ -269,7 +276,7 @@ private fun DevicePickerContent(
                             .padding(24.dp),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(
+                        AppText(
                             text = strings.desktopNoDevices,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -293,16 +300,16 @@ private fun DevicePickerContent(
                                         .padding(16.dp),
                                     verticalArrangement = Arrangement.spacedBy(4.dp)
                                 ) {
-                                    Text(
+                                    AppText(
                                         text = device.model ?: device.serial,
                                         style = MaterialTheme.typography.titleMedium,
                                         fontWeight = FontWeight.SemiBold
                                     )
-                                    Text(
+                                    AppText(
                                         text = "${strings.desktopSerialLabel}: ${device.serial}",
                                         style = MaterialTheme.typography.bodySmall
                                     )
-                                    Text(
+                                    AppText(
                                         text = "${strings.desktopStateLabel}: ${device.state}",
                                         style = MaterialTheme.typography.bodySmall,
                                         color = if (selectable) {
@@ -311,7 +318,7 @@ private fun DevicePickerContent(
                                             MaterialTheme.colorScheme.error
                                         }
                                     )
-                                    Text(
+                                    AppText(
                                         text = listOfNotNull(
                                             device.product?.let { "${strings.desktopProductLabel}: $it" },
                                             device.device?.let { "${strings.desktopDeviceLabel}: $it" },
@@ -321,7 +328,7 @@ private fun DevicePickerContent(
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                     if (!selectable) {
-                                        Text(
+                                        AppText(
                                             text = when (device.state) {
                                                 "offline" -> strings.desktopDeviceOffline
                                                 "unauthorized" -> strings.desktopDeviceUnauthorized
@@ -370,23 +377,23 @@ private fun DesktopToolbarComponent(
                     contentDescription = null
                 )
                 Column(modifier = Modifier.weight(1f)) {
-                    Text(
+                    AppText(
                         text = device.model ?: device.serial,
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold
                     )
-                    Text(
+                    AppText(
                         text = "${device.serial} • ${device.state}",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    Text(
+                    AppText(
                         text = buildSourceLabel(strings, dataSource, snapshotMetadata),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.primary
                     )
                     snapshotStatus?.let {
-                        Text(
+                        AppText(
                             text = it,
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant

@@ -1,0 +1,3 @@
+-- Legacy databases share a version despite different manifest/activity columns.
+-- CacheDatabaseSchema repairs these conditionally in the AfterVersion(2) callback.
+UPDATE device_info_cache SET value = value WHERE 0;
