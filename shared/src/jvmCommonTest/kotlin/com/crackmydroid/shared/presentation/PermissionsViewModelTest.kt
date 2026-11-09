@@ -1,5 +1,7 @@
 package com.crackmydroid.shared.presentation
 
+import com.crackmydroid.shared.domain.model.ExportDocument
+import com.crackmydroid.shared.domain.model.ExportFormat
 import com.crackmydroid.shared.domain.model.UseCaseReportText
 import com.crackmydroid.shared.domain.model.app.AppPermissionEntry
 import com.crackmydroid.shared.domain.repository.ReportFileRepository
@@ -7,6 +9,7 @@ import com.crackmydroid.shared.domain.usecase.permissions.AnalyzePermissionRisks
 import com.crackmydroid.shared.domain.usecase.permissions.BuildPermissionsReportUseCase
 import com.crackmydroid.shared.domain.usecase.permissions.ListPermissionsUseCase
 import com.crackmydroid.shared.domain.usecase.reports.ExportReportUseCase
+import com.crackmydroid.shared.domain.usecase.settings.GetExportFormatUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetPermissionFavoritesUseCase
 import com.crackmydroid.shared.domain.usecase.settings.SetPermissionFavoritesUseCase
 import com.crackmydroid.shared.i18n.UseCaseTexts
@@ -15,6 +18,7 @@ import io.mockk.coEvery
 import io.mockk.coJustRun
 import io.mockk.coVerify
 import io.mockk.mockk
+import io.mockk.slot
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -55,6 +59,28 @@ class PermissionsViewModelTest {
     @AfterTest
     fun tearDown() {
         Dispatchers.resetMain()
+    }
+
+    @Test
+    fun exportUsesTheSelectedPdfExtension() = runTest(dispatcher) {
+        val builder = mockk<BuildPermissionsReportUseCase>()
+        val files = mockk<ReportFileRepository>()
+        val format = mockk<GetExportFormatUseCase>()
+        val saved = slot<ExportDocument>()
+        coEvery { builder(emptyList(), emptyList(), any()) } returns Result.success("permissions report")
+        coEvery { format() } returns Result.success(ExportFormat.PDF)
+        coEvery { files.save(capture(saved)) } returns Result.success("/tmp/permissions_report.pdf")
+        val vm = previewViewModel(builder, ExportReportUseCase(files, format))
+
+        vm.export()
+        advanceUntilIdle()
+
+        assertEquals("/tmp/permissions_report.pdf", vm.state.value.lastExportPath)
+        assertEquals("permissions_report.pdf", saved.captured.fileName)
+        assertEquals("permissions", saved.captured.reportType)
+        assertEquals("permissions report", saved.captured.textContent)
+        coVerify(exactly = 1) { files.save(any<ExportDocument>()) }
+        vm.onCleared()
     }
 
     @Test
@@ -159,11 +185,13 @@ class PermissionsViewModelTest {
     fun previewIsAsynchronousAndSharingReusesTheGeneratedContent() = runTest(dispatcher) {
         val builder = mockk<BuildPermissionsReportUseCase>()
         val files = mockk<ReportFileRepository>()
+        val format = mockk<GetExportFormatUseCase>()
+        val shared = slot<ExportDocument>()
         coEvery { builder.single(any(), any(), any()) } returns Result.success("generated content")
-        coEvery { files.save(any(), any()) } returns Result.success("/tmp/report")
-        coEvery { files.share("/tmp/report") } returns Result.success(Unit)
+        coEvery { format() } returns Result.success(ExportFormat.PDF)
+        coEvery { files.share(capture(shared)) } returns Result.success("/tmp/report.pdf")
         io.mockk.every { builder.singleFileName("pkg.first") } returns "first.txt"
-        val vm = previewViewModel(builder, ExportReportUseCase(files))
+        val vm = previewViewModel(builder, ExportReportUseCase(files, format))
         vm.refresh()
         advanceUntilIdle()
 
@@ -177,7 +205,10 @@ class PermissionsViewModelTest {
         vm.shareSingle("pkg.first", vm.state.value.reportPreviewContent)
         advanceUntilIdle()
         coVerify(exactly = 1) { builder.single(any(), any(), any()) }
-        coVerify { files.save("first.txt", "generated content") }
+        assertEquals("first.pdf", shared.captured.fileName)
+        assertEquals("permissions", shared.captured.reportType)
+        assertEquals("generated content", shared.captured.textContent)
+        coVerify(exactly = 1) { files.share(any<ExportDocument>()) }
         vm.onCleared()
     }
 
@@ -307,6 +338,8 @@ class PermissionsViewModelTest {
     fun languageSwitchCancelsObsoletePreviewAndSharesNewLanguageContent() = runTest(dispatcher) {
         val builder = mockk<BuildPermissionsReportUseCase>()
         val files = mockk<ReportFileRepository>()
+        val format = mockk<GetExportFormatUseCase>()
+        val shared = slot<ExportDocument>()
         var cancelled = false
         coEvery { builder.single(any(), any(), any()) } coAnswers {
             val reportText = thirdArg<UseCaseReportText>()
@@ -319,10 +352,10 @@ class PermissionsViewModelTest {
             }
             Result.success(reportText.noDataAvailable())
         }
+        coEvery { format() } returns Result.success(ExportFormat.PDF)
         io.mockk.every { builder.singleFileName("pkg.first") } returns "first.txt"
-        coEvery { files.save(any(), any()) } returns Result.success("/tmp/report")
-        coEvery { files.share("/tmp/report") } returns Result.success(Unit)
-        val vm = previewViewModel(builder, ExportReportUseCase(files))
+        coEvery { files.share(capture(shared)) } returns Result.success("/tmp/report.pdf")
+        val vm = previewViewModel(builder, ExportReportUseCase(files, format))
         vm.refresh()
         advanceUntilIdle()
         vm.requestReportPreview("pkg.first")
@@ -335,7 +368,9 @@ class PermissionsViewModelTest {
         assertEquals(UseCaseTexts("fr").noDataAvailable(), content)
         vm.shareSingle("pkg.first", content)
         advanceUntilIdle()
-        coVerify { files.save("first.txt", UseCaseTexts("fr").noDataAvailable()) }
+        assertEquals("first.pdf", shared.captured.fileName)
+        assertEquals(UseCaseTexts("fr").noDataAvailable(), shared.captured.textContent)
+        coVerify { files.share(any<ExportDocument>()) }
         vm.onCleared()
     }
 

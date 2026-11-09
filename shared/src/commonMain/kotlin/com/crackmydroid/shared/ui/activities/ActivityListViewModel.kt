@@ -1,21 +1,22 @@
 package com.crackmydroid.shared.ui.activities
 
+import com.crackmydroid.shared.domain.model.ExportFormat
 import com.crackmydroid.shared.domain.model.activity.ActivityEntry
-import com.crackmydroid.shared.domain.model.operation.OperationEvent
-import com.crackmydroid.shared.domain.model.operation.OperationEventKey
 import com.crackmydroid.shared.domain.model.activity.ActivityIntentRiskAnalyzer
 import com.crackmydroid.shared.domain.model.activity.ActivityIntentRiskLevel
 import com.crackmydroid.shared.domain.model.activity.ActivityIntentRiskReport
 import com.crackmydroid.shared.domain.model.activity.favoriteKey
+import com.crackmydroid.shared.domain.model.operation.OperationEvent
+import com.crackmydroid.shared.domain.model.operation.OperationEventKey
 import com.crackmydroid.shared.domain.repository.log.OperationLogRepository
 import com.crackmydroid.shared.domain.usecase.activities.GetActivitiesUseCase
+import com.crackmydroid.shared.domain.usecase.activities.LaunchActivityUseCase
+import com.crackmydroid.shared.domain.usecase.reports.ExportReportUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetActivityFavoritesUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetActivityPackageFavoritesUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetExportFormatUseCase
-import com.crackmydroid.shared.domain.usecase.activities.LaunchActivityUseCase
 import com.crackmydroid.shared.domain.usecase.settings.SetActivityFavoritesUseCase
 import com.crackmydroid.shared.domain.usecase.settings.SetActivityPackageFavoritesUseCase
-import com.crackmydroid.shared.domain.usecase.reports.ExportReportUseCase
 import com.crackmydroid.shared.i18n.Strings
 import com.crackmydroid.shared.i18n.stringsFor
 import com.crackmydroid.shared.presentation.BaseViewModel
@@ -29,6 +30,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.encodeToJsonElement
 
 class ActivityListViewModel(
     private val getActivities: GetActivitiesUseCase,
@@ -39,7 +42,7 @@ class ActivityListViewModel(
     private val getPackageFavorites: GetActivityPackageFavoritesUseCase,
     private val setPackageFavorites: SetActivityPackageFavoritesUseCase,
     private val reportExporter: ExportReportUseCase,
-    private val operationLogs: OperationLogRepository = NoOpOperationLogRepository
+    private val operationLogs: OperationLogRepository = NoOpOperationLogRepository,
 ) : BaseViewModel() {
     private val json = Json { prettyPrint = true }
     private val _state = MutableStateFlow(ActivityListState())
@@ -64,7 +67,7 @@ class ActivityListViewModel(
                     recomputeAsync(_state.value.copy(activities = list, loading = false))
                     operationLogs.record(
                         OperationEvent(OperationEventKey.ACTIVITY_LOAD, listOf(list.size.toString())),
-                        success = true
+                        success = true,
                     )
                 }
                 .onFailure { err ->
@@ -72,7 +75,7 @@ class ActivityListViewModel(
                     operationLogs.record(
                         OperationEvent(OperationEventKey.ACTIVITY_LOAD),
                         success = false,
-                        details = err.message
+                        details = err.message,
                     )
                 }
         }
@@ -112,12 +115,7 @@ class ActivityListViewModel(
         launchWithIntent(entry, action, dataUri, mimeType)
     }
 
-    fun launchWithIntent(
-        entry: ActivityEntry,
-        action: String?,
-        dataUri: String?,
-        mimeType: String?
-    ) {
+    fun launchWithIntent(entry: ActivityEntry, action: String?, dataUri: String?, mimeType: String?) {
         launchInternal(entry, action, dataUri, mimeType)
     }
 
@@ -125,7 +123,7 @@ class ActivityListViewModel(
         entry: ActivityEntry,
         action: String? = null,
         dataUri: String? = null,
-        mimeType: String? = null
+        mimeType: String? = null,
     ) {
         val risk = ActivityIntentRiskAnalyzer.analyze(entry)
         val normalizedAction = action?.trim().orEmpty().ifBlank { null }
@@ -139,7 +137,7 @@ class ActivityListViewModel(
             operationLogs.record(
                 "Lancio ${entry.activityName}",
                 success = false,
-                details = "$msg • rischio ${ActivityIntentRiskAnalyzer.formatLevel(risk.level)}"
+                details = "$msg • rischio ${ActivityIntentRiskAnalyzer.formatLevel(risk.level)}",
             )
             return
         }
@@ -151,13 +149,13 @@ class ActivityListViewModel(
                 operationLogs.record(
                     "Lancio ${entry.activityName}",
                     success = false,
-                    details = "$msg • rischio ${ActivityIntentRiskAnalyzer.formatLevel(risk.level)}"
+                    details = "$msg • rischio ${ActivityIntentRiskAnalyzer.formatLevel(risk.level)}",
                 )
             }.onSuccess {
                 operationLogs.record(
                     "Lancio ${entry.activityName}",
                     success = true,
-                    details = "Rischio ${ActivityIntentRiskAnalyzer.formatLevel(risk.level)} • ${risk.summary}"
+                    details = "Rischio ${ActivityIntentRiskAnalyzer.formatLevel(risk.level)} • ${risk.summary}",
                 )
             }
         }
@@ -192,9 +190,13 @@ class ActivityListViewModel(
 
     fun toggleExpanded(packageName: String) {
         val expanded = _state.value.expandedPackages.toMutableSet()
-        if (expanded.contains(packageName)) expanded.remove(packageName) else expanded.add(
-            packageName
-        )
+        if (expanded.contains(packageName)) {
+            expanded.remove(packageName)
+        } else {
+            expanded.add(
+                packageName,
+            )
+        }
         _state.update { it.copy(expandedPackages = expanded) }
     }
 
@@ -202,7 +204,12 @@ class ActivityListViewModel(
         scope.launch {
             runSuspendCatching {
                 val content = buildExportContent(_state.value.activities)
-                reportExporter.save("activities${extensionForCurrentFormat()}", content).getOrThrow()
+                reportExporter.save(
+                    baseName = "activities",
+                    reportType = "activities",
+                    textContent = content,
+                    data = exportData(_state.value.activities),
+                ).getOrThrow()
             }
                 .onSuccess { path ->
                     operationLogs.record("Export attività", success = true, details = path)
@@ -211,7 +218,7 @@ class ActivityListViewModel(
                     operationLogs.record(
                         "Export attività",
                         success = false,
-                        details = error.message
+                        details = error.message,
                     )
                 }
         }
@@ -224,29 +231,32 @@ class ActivityListViewModel(
             operationLogs.record(
                 "Export attività $packageName",
                 success = false,
-                details = "Nessuna activity"
+                details = "Nessuna activity",
             )
             return
         }
         scope.launch {
             runSuspendCatching {
                 val content = buildExportContent(acts)
-                val fileName =
-                    "activities_${packageName.replace('.', '_')}" + extensionForCurrentFormat()
-                reportExporter.share(fileName, content).getOrThrow()
+                reportExporter.share(
+                    baseName = "activities_${packageName.replace('.', '_')}",
+                    reportType = "activities",
+                    textContent = content,
+                    data = exportData(acts),
+                ).getOrThrow()
             }
                 .onSuccess { path ->
                     operationLogs.record(
                         "Export attività $packageName",
                         success = true,
-                        details = path
+                        details = path,
                     )
                 }.onFailure { error ->
                     _state.update { it.copy(error = error.message) }
                     operationLogs.record(
                         "Export attività $packageName",
                         success = false,
-                        details = error.message
+                        details = error.message,
                     )
                 }
         }
@@ -315,7 +325,7 @@ class ActivityListViewModel(
         val highlights = riskReports.sortedWith(
             compareByDescending<ActivityIntentRiskReport> { favorites.contains(it.entry.favoriteKey()) }
                 .thenByDescending { it.score }
-                .thenBy { it.entry.activityName.lowercase() }
+                .thenBy { it.entry.activityName.lowercase() },
         ).take(10)
 
         return ActivityAppReport(
@@ -332,7 +342,7 @@ class ActivityListViewModel(
             highestRiskLevel = highestRiskLevel,
             recommendations = recommendations,
             findings = findings,
-            highlights = highlights
+            highlights = highlights,
         )
     }
 
@@ -352,46 +362,45 @@ class ActivityListViewModel(
                 operationLogs.record(
                     "Report activity $packageName",
                     success = false,
-                    details = error.message
+                    details = error.message,
                 )
             }
     }
 
-    private suspend fun buildExportContent(list: List<ActivityEntry>): String {
-        val format = getExportFormat().getOrThrow()
-        return if (format == com.crackmydroid.shared.domain.model.ExportFormat.JSON) {
-            val payload = list.map { entry -> entry.toExportPayload() }
-            json.encodeToString(payload)
-        } else {
-            buildString {
-                list.forEach { act ->
-                    val risk = ActivityIntentRiskAnalyzer.analyze(act)
-                    appendLine("${act.label} (${act.packageName})")
-                    appendLine("Activity: ${act.activityName}")
-                    appendLine("Launch mode: ${risk.launchMode}")
-                    appendLine("Rischio: ${ActivityIntentRiskAnalyzer.formatLevel(risk.level)}")
-                    act.launchIntentAction?.takeIf { it.isNotBlank() }
-                        ?.let { appendLine("Action: $it") }
-                    act.launchIntentData?.takeIf { it.isNotBlank() }
-                        ?.let { appendLine("Data: $it") }
-                    act.launchIntentMimeType?.takeIf { it.isNotBlank() }
-                        ?.let { appendLine("MIME: $it") }
-                    act.launchContextHint?.takeIf { it.isNotBlank() }
-                        ?.let { appendLine("Hint: $it") }
-                    act.launchabilityReason?.takeIf { it.isNotBlank() }
-                        ?.let { appendLine("Motivo: $it") }
-                    if (risk.findings.isNotEmpty()) {
-                        appendLine("Finding:")
-                        risk.findings.forEach { finding ->
-                            appendLine("- ${ActivityIntentRiskAnalyzer.formatLevel(finding.level)} • ${finding.title}: ${finding.detail}")
-                        }
-                    }
-                    appendLine("Raccomandazione: ${risk.recommendation}")
-                    appendLine()
+    private suspend fun buildExportContent(list: List<ActivityEntry>): String = buildString {
+        list.forEach { act ->
+            val risk = ActivityIntentRiskAnalyzer.analyze(act)
+            appendLine("${act.label} (${act.packageName})")
+            appendLine("Activity: ${act.activityName}")
+            appendLine("Launch mode: ${risk.launchMode}")
+            appendLine("Rischio: ${ActivityIntentRiskAnalyzer.formatLevel(risk.level)}")
+            act.launchIntentAction?.takeIf { it.isNotBlank() }
+                ?.let { appendLine("Action: $it") }
+            act.launchIntentData?.takeIf { it.isNotBlank() }
+                ?.let { appendLine("Data: $it") }
+            act.launchIntentMimeType?.takeIf { it.isNotBlank() }
+                ?.let { appendLine("MIME: $it") }
+            act.launchContextHint?.takeIf { it.isNotBlank() }
+                ?.let { appendLine("Hint: $it") }
+            act.launchabilityReason?.takeIf { it.isNotBlank() }
+                ?.let { appendLine("Motivo: $it") }
+            if (risk.findings.isNotEmpty()) {
+                appendLine("Finding:")
+                risk.findings.forEach { finding ->
+                    appendLine(
+                        "- ${ActivityIntentRiskAnalyzer.formatLevel(
+                            finding.level,
+                        )} • ${finding.title}: ${finding.detail}",
+                    )
                 }
             }
+            appendLine("Raccomandazione: ${risk.recommendation}")
+            appendLine()
         }
     }
+
+    private fun exportData(list: List<ActivityEntry>): JsonElement =
+        json.encodeToJsonElement(list.map { entry -> entry.toExportPayload() })
 
     private fun recompute(state: ActivityListState): ActivityListState {
         val filtered = if (state.filter.isBlank()) {
@@ -399,32 +408,36 @@ class ActivityListViewModel(
         } else {
             state.activities.filter {
                 it.label.contains(state.filter, ignoreCase = true) ||
-                        it.appLabel.contains(state.filter, ignoreCase = true) ||
-                        it.activityName.contains(state.filter, ignoreCase = true) ||
-                        it.packageName.contains(state.filter, ignoreCase = true)
+                    it.appLabel.contains(state.filter, ignoreCase = true) ||
+                    it.activityName.contains(state.filter, ignoreCase = true) ||
+                    it.packageName.contains(state.filter, ignoreCase = true)
             }
         }
         val sorted = filtered.sortedWith(
             compareBy<ActivityEntry> {
                 if (state.favoritePackages.contains(it.packageName) ||
                     state.favorites.contains(it.favoriteKey())
-                ) 0 else 1
+                ) {
+                    0
+                } else {
+                    1
+                }
             }
                 .thenBy { it.packageName }
-                .thenBy { it.activityName }
+                .thenBy { it.activityName },
         )
         val grouped = sorted.groupBy { it.packageName }
             .map { (pkg, acts) ->
                 ActivityGroup(
                     packageName = pkg,
                     label = acts.firstOrNull()?.appLabel,
-                    activities = acts
+                    activities = acts,
                 )
             }
             .sortedBy { it.packageName }
         return state.copy(
             groups = grouped,
-            favoriteQueries = state.favorites.sorted()
+            favoriteQueries = state.favorites.sorted(),
         )
     }
 
@@ -436,9 +449,6 @@ class ActivityListViewModel(
             _state.value = newState
         }
     }
-
-    private suspend fun extensionForCurrentFormat(): String =
-        if (getExportFormat().getOrThrow() == com.crackmydroid.shared.domain.model.ExportFormat.JSON) ".json" else ".txt"
 
     private fun normalizeQuery(value: String): String = value
         .trim()
@@ -455,30 +465,48 @@ class ActivityListViewModel(
         appendLine("  <style>")
         appendLine("    :root { color-scheme: light; }")
         appendLine("    * { box-sizing: border-box; }")
-        appendLine("    body { margin: 0; font-family: \"Segoe UI\", sans-serif; background: #f3f6fb; color: #162033; }")
+        appendLine(
+            "    body { margin: 0; font-family: \"Segoe UI\", sans-serif; background: #f3f6fb; color: #162033; }",
+        )
         appendLine("    .wrap { max-width: 1180px; margin: 0 auto; padding: 32px 20px 40px; }")
-        appendLine("    .hero { background: linear-gradient(135deg, #0f2747, #1a5fb4); color: #fff; padding: 28px; border-radius: 24px; box-shadow: 0 18px 42px rgba(15, 39, 71, 0.22); }")
-        appendLine("    .eyebrow { text-transform: uppercase; letter-spacing: 0.12em; font-size: 12px; opacity: 0.78; }")
+        appendLine(
+            "    .hero { background: linear-gradient(135deg, #0f2747, #1a5fb4); color: #fff; padding: 28px; border-radius: 24px; box-shadow: 0 18px 42px rgba(15, 39, 71, 0.22); }",
+        )
+        appendLine(
+            "    .eyebrow { text-transform: uppercase; letter-spacing: 0.12em; font-size: 12px; opacity: 0.78; }",
+        )
         appendLine("    h1 { margin: 10px 0 6px; font-size: 32px; }")
         appendLine("    .hero p { margin: 6px 0; font-size: 15px; opacity: 0.92; }")
-        appendLine("    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; margin: 22px 0; }")
-        appendLine("    .stat { background: #fff; border-radius: 18px; padding: 18px; box-shadow: 0 12px 26px rgba(22, 32, 51, 0.08); }")
+        appendLine(
+            "    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; margin: 22px 0; }",
+        )
+        appendLine(
+            "    .stat { background: #fff; border-radius: 18px; padding: 18px; box-shadow: 0 12px 26px rgba(22, 32, 51, 0.08); }",
+        )
         appendLine("    .stat strong { display: block; font-size: 30px; color: #0f2747; }")
         appendLine("    .stat span { color: #5b667a; font-size: 13px; }")
         appendLine("    .grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 18px; }")
-        appendLine("    .card { background: #fff; border-radius: 22px; padding: 22px; box-shadow: 0 12px 30px rgba(22, 32, 51, 0.08); }")
+        appendLine(
+            "    .card { background: #fff; border-radius: 22px; padding: 22px; box-shadow: 0 12px 30px rgba(22, 32, 51, 0.08); }",
+        )
         appendLine("    .card h2 { margin: 0 0 14px; font-size: 20px; color: #0f2747; }")
         appendLine("    ul { margin: 0; padding-left: 20px; }")
         appendLine("    li { margin: 8px 0; line-height: 1.45; }")
         appendLine("    table { width: 100%; border-collapse: collapse; font-size: 14px; }")
-        appendLine("    th, td { text-align: left; padding: 12px 10px; border-bottom: 1px solid #e4e8f0; vertical-align: top; }")
+        appendLine(
+            "    th, td { text-align: left; padding: 12px 10px; border-bottom: 1px solid #e4e8f0; vertical-align: top; }",
+        )
         appendLine("    th { color: #536078; font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; }")
-        appendLine("    .tag { display: inline-block; padding: 5px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; }")
+        appendLine(
+            "    .tag { display: inline-block; padding: 5px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; }",
+        )
         appendLine("    .tag-shell { background: #e8f7ee; color: #1f7a3e; }")
         appendLine("    .tag-guided { background: #fff1d8; color: #9a5b00; }")
         appendLine("    .tag-dump { background: #fde5e7; color: #a1283d; }")
         appendLine("    .muted { color: #637089; }")
-        appendLine("    code { font-family: \"SFMono-Regular\", monospace; font-size: 12px; background: #f4f7fb; padding: 2px 6px; border-radius: 6px; }")
+        appendLine(
+            "    code { font-family: \"SFMono-Regular\", monospace; font-size: 12px; background: #f4f7fb; padding: 2px 6px; border-radius: 6px; }",
+        )
         appendLine("  </style>")
         appendLine("</head>")
         appendLine("<body>")
@@ -490,11 +518,19 @@ class ActivityListViewModel(
         appendLine("      <p>Report generato dalla sezione Activity con dettaglio intent e indicazioni PenTest.</p>")
         appendLine("    </section>")
         appendLine("    <section class=\"stats\">")
-        appendLine("      <div class=\"stat\"><strong>${report.totalActivities}</strong><span>Activity totali</span></div>")
-        appendLine("      <div class=\"stat\"><strong>${report.shellLaunchableCount}</strong><span>Avviabili via shell</span></div>")
-        appendLine("      <div class=\"stat\"><strong>${report.guidedLaunchCount}</strong><span>Guided launch</span></div>")
+        appendLine(
+            "      <div class=\"stat\"><strong>${report.totalActivities}</strong><span>Activity totali</span></div>",
+        )
+        appendLine(
+            "      <div class=\"stat\"><strong>${report.shellLaunchableCount}</strong><span>Avviabili via shell</span></div>",
+        )
+        appendLine(
+            "      <div class=\"stat\"><strong>${report.guidedLaunchCount}</strong><span>Guided launch</span></div>",
+        )
         appendLine("      <div class=\"stat\"><strong>${report.dumpOnlyCount}</strong><span>Solo dump</span></div>")
-        appendLine("      <div class=\"stat\"><strong>${report.riskyActivitiesCount}</strong><span>Con rischio intent</span></div>")
+        appendLine(
+            "      <div class=\"stat\"><strong>${report.riskyActivitiesCount}</strong><span>Con rischio intent</span></div>",
+        )
         appendLine("    </section>")
         appendLine("    <div class=\"grid\">")
         appendLine("      <section class=\"card\">")
@@ -510,9 +546,9 @@ class ActivityListViewModel(
         appendLine(
             "        <p>Severita massima rilevata: <strong>${
                 ActivityIntentRiskAnalyzer.formatLevel(
-                    report.highestRiskLevel
+                    report.highestRiskLevel,
                 )
-            }</strong></p>"
+            }</strong></p>",
         )
         if (report.recommendations.isNotEmpty()) {
             appendLine("        <ul>")
@@ -521,13 +557,17 @@ class ActivityListViewModel(
             }
             appendLine("        </ul>")
         } else {
-            appendLine("        <p class=\"muted\">Nessuna raccomandazione aggiuntiva oltre ai test di reachability.</p>")
+            appendLine(
+                "        <p class=\"muted\">Nessuna raccomandazione aggiuntiva oltre ai test di reachability.</p>",
+            )
         }
         appendLine("      </section>")
         appendLine("      <section class=\"card\">")
         appendLine("        <h2>Activity in evidenza</h2>")
         appendLine("        <table>")
-        appendLine("          <thead><tr><th>Label</th><th>Component</th><th>Launch</th><th>Rischio</th><th>Hint</th></tr></thead>")
+        appendLine(
+            "          <thead><tr><th>Label</th><th>Component</th><th>Launch</th><th>Rischio</th><th>Hint</th></tr></thead>",
+        )
         appendLine("          <tbody>")
         report.highlights.forEach { activity ->
             appendLine("            <tr>")
@@ -538,7 +578,7 @@ class ActivityListViewModel(
             appendLine(
                 "              <td class=\"muted\">${
                     activity.reportHint().htmlEscape()
-                }</td>"
+                }</td>",
             )
             appendLine("            </tr>")
         }
@@ -548,7 +588,9 @@ class ActivityListViewModel(
         appendLine("      <section class=\"card\">")
         appendLine("        <h2>Inventario completo</h2>")
         appendLine("        <table>")
-        appendLine("          <thead><tr><th>#</th><th>Label</th><th>Activity</th><th>Modalita</th><th>Rischio</th><th>Dettagli</th></tr></thead>")
+        appendLine(
+            "          <thead><tr><th>#</th><th>Label</th><th>Activity</th><th>Modalita</th><th>Rischio</th><th>Dettagli</th></tr></thead>",
+        )
         appendLine("          <tbody>")
         _state.value.activities
             .filter { it.packageName == report.packageName }
@@ -564,7 +606,7 @@ class ActivityListViewModel(
                 appendLine(
                     "              <td class=\"muted\">${
                         activity.reportHint().htmlEscape()
-                    }</td>"
+                    }</td>",
                 )
                 appendLine("            </tr>")
             }
@@ -577,21 +619,19 @@ class ActivityListViewModel(
         appendLine("</html>")
     }
 
-    private fun ActivityEntry.hasGuidedLaunchMetadata(): Boolean =
-        !launchContextHint.isNullOrBlank() ||
-                !launchIntentAction.isNullOrBlank() ||
-                !launchIntentData.isNullOrBlank() ||
-                !launchIntentMimeType.isNullOrBlank()
+    private fun ActivityEntry.hasGuidedLaunchMetadata(): Boolean = !launchContextHint.isNullOrBlank() ||
+        !launchIntentAction.isNullOrBlank() ||
+        !launchIntentData.isNullOrBlank() ||
+        !launchIntentMimeType.isNullOrBlank()
 
-    private fun ActivityEntry.reportHint(): String =
-        launchabilityReason
-            ?: launchContextHint
-            ?: buildList {
-                launchIntentAction?.takeIf { it.isNotBlank() }?.let { add("action=$it") }
-                launchIntentData?.takeIf { it.isNotBlank() }?.let { add("data=$it") }
-                launchIntentMimeType?.takeIf { it.isNotBlank() }?.let { add("mime=$it") }
-            }.joinToString(" • ")
-                .ifBlank { "Nessun dettaglio aggiuntivo" }
+    private fun ActivityEntry.reportHint(): String = launchabilityReason
+        ?: launchContextHint
+        ?: buildList {
+            launchIntentAction?.takeIf { it.isNotBlank() }?.let { add("action=$it") }
+            launchIntentData?.takeIf { it.isNotBlank() }?.let { add("data=$it") }
+            launchIntentMimeType?.takeIf { it.isNotBlank() }?.let { add("mime=$it") }
+        }.joinToString(" • ")
+            .ifBlank { "Nessun dettaglio aggiuntivo" }
 
     private fun ActivityEntry.launchModeBadge(): String = when {
         !launchableViaShell && hasGuidedLaunchMetadata() -> "<span class=\"tag tag-guided\">Guided launch</span>"
@@ -641,9 +681,9 @@ class ActivityListViewModel(
                 ActivityRiskFindingPayload(
                     level = ActivityIntentRiskAnalyzer.formatLevel(finding.level),
                     title = finding.title,
-                    detail = finding.detail
+                    detail = finding.detail,
                 )
-            }
+            },
         )
     }
 
@@ -657,7 +697,7 @@ class ActivityListViewModel(
                     '"' -> "&quot;"
                     '\'' -> "&#39;"
                     else -> char.toString()
-                }
+                },
             )
         }
     }
@@ -678,13 +718,9 @@ class ActivityListViewModel(
         val riskLevel: String,
         val riskScore: Int,
         val recommendation: String,
-        val findings: List<ActivityRiskFindingPayload>
+        val findings: List<ActivityRiskFindingPayload>,
     )
 
     @Serializable
-    private data class ActivityRiskFindingPayload(
-        val level: String,
-        val title: String,
-        val detail: String
-    )
+    private data class ActivityRiskFindingPayload(val level: String, val title: String, val detail: String)
 }

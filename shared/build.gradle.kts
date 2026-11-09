@@ -79,6 +79,7 @@ kotlin {
             dependencies {
                 implementation(libs.coroutines.swing)
                 implementation(libs.ktor.client.cio)
+                implementation(libs.pdfbox)
             }
         }
         val desktopTest by getting {

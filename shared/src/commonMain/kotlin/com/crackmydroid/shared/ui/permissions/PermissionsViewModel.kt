@@ -164,7 +164,7 @@ class PermissionsViewModel(
                     currentState.riskReports,
                     reportText,
                 ).getOrThrow()
-                reportExporter.save("permissions_report.txt", content).getOrThrow()
+                reportExporter.saveTextReport("permissions_report", "permissions", content).getOrThrow()
             }
                 .onSuccess { path ->
                     _state.update {
@@ -207,7 +207,11 @@ class PermissionsViewModel(
                 val content =
                     contentOverride ?: app?.let { buildPermissionsReport.single(it, risk, reportText).getOrThrow() }
                         ?: noData
-                reportExporter.share(buildPermissionsReport.singleFileName(packageName), content).getOrThrow()
+                reportExporter.shareTextReport(
+                    buildPermissionsReport.singleFileName(packageName).removeSuffix(".txt"),
+                    "permissions",
+                    content,
+                ).getOrThrow()
             }
                 .onSuccess { path ->
                     _state.update {

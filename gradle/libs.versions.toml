@@ -22,6 +22,7 @@ material = "1.14.0"
 work = "2.12.0"
 leakcanary = "2.14"
 ktor = "3.5.0"
+pdfbox = "3.0.8"
 ktlintPlugin = "14.2.0"
 ktlint = "1.8.0"
 
@@ -78,3 +79,4 @@ ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "kto
 ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor" }
 ktor-client-darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "ktor" }
 ktor-client-mock = { module = "io.ktor:ktor-client-mock", version.ref = "ktor" }
+pdfbox = { module = "org.apache.pdfbox:pdfbox", version.ref = "pdfbox" }

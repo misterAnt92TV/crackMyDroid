@@ -1,11 +1,11 @@
 package com.crackmydroid.shared.ui.info
 
 import com.crackmydroid.shared.domain.usecase.info.BuildDeviceInfoReportUseCase
-import com.crackmydroid.shared.domain.usecase.root.CheckRootUseCase
 import com.crackmydroid.shared.domain.usecase.info.GetDeviceInfoUseCase
 import com.crackmydroid.shared.domain.usecase.reports.ExportReportUseCase
-import com.crackmydroid.shared.i18n.UseCaseTexts
+import com.crackmydroid.shared.domain.usecase.root.CheckRootUseCase
 import com.crackmydroid.shared.i18n.UseCasePresentationTexts
+import com.crackmydroid.shared.i18n.UseCaseTexts
 import com.crackmydroid.shared.presentation.BaseViewModel
 import com.crackmydroid.shared.util.runSuspendCatching
 import kotlinx.coroutines.Job
@@ -18,7 +18,7 @@ class InfoViewModel(
     private val getInfo: GetDeviceInfoUseCase,
     private val checkRoot: CheckRootUseCase,
     private val reportExporter: ExportReportUseCase,
-    private val buildReport: BuildDeviceInfoReportUseCase
+    private val buildReport: BuildDeviceInfoReportUseCase,
 ) : BaseViewModel() {
     private val _state = MutableStateFlow(InfoState())
     val state: StateFlow<InfoState> = _state
@@ -63,7 +63,7 @@ class InfoViewModel(
                 _state.update {
                     it.copy(
                         error = error.message ?: UseCasePresentationTexts(reportText.languageCode).reportFailed,
-                        reportLoading = false
+                        reportLoading = false,
                     )
                 }
             }
@@ -77,7 +77,7 @@ class InfoViewModel(
         scope.launch {
             runSuspendCatching {
                 val content = buildReport(info, root, reportText).getOrThrow()
-                reportExporter.save("device_info", content).getOrThrow()
+                reportExporter.saveTextReport("device_info", "device_info", content).getOrThrow()
             }.onSuccess { path ->
                 _state.update { it.copy(lastExportPath = path, error = null) }
             }.onFailure { error -> _state.update { it.copy(error = error.message) } }
@@ -91,7 +91,7 @@ class InfoViewModel(
         scope.launch {
             runSuspendCatching {
                 val content = contentOverride ?: buildReport(info, root, reportText).getOrThrow()
-                reportExporter.share("device_info", content).getOrThrow()
+                reportExporter.shareTextReport("device_info", "device_info", content).getOrThrow()
             }.onSuccess { path ->
                 _state.update { it.copy(lastExportPath = path, error = null) }
             }.onFailure { error -> _state.update { it.copy(error = error.message) } }

@@ -121,7 +121,7 @@ fun commonModule() = module {
     factory { AnalyzePermissionRisksUseCase(dispatchers = get(), logger = get()) }
     factory { BuildPermissionsReportUseCase(get(), dispatchers = get(), logger = get()) }
     factory { RunPenTestChecksUseCase(get(), dispatchers = get(), logger = get()) }
-    factory { ExportReportUseCase(get(), logger = get()) }
+    factory { ExportReportUseCase(get(), get(), logger = get()) }
     factory { ListInstalledAppsUseCase(get(), logger = get()) }
     factory { ExportApkUseCase(get(), logger = get()) }
     factory { ShareApkUseCase(get(), logger = get()) }

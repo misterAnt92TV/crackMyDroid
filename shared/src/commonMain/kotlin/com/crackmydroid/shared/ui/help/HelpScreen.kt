@@ -1,6 +1,7 @@
 package com.crackmydroid.shared.ui.help
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -10,11 +11,16 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -23,11 +29,13 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.crackmydroid.shared.i18n.LocalStrings
 import com.crackmydroid.shared.i18n.Strings
+import com.crackmydroid.shared.presentation.components.ScrollToTopButton
 import com.crackmydroid.shared.presentation.components.SectionHeader
 import com.crackmydroid.shared.presentation.components.card.AppCard
 import com.crackmydroid.shared.presentation.components.text.AppText
 import com.crackmydroid.shared.presentation.navigation.Screen
 import com.crackmydroid.shared.ui.screens.screenContentPadding
+import kotlinx.coroutines.launch
 
 @Composable
 fun HelpScreen(
@@ -52,44 +60,56 @@ internal fun HelpContent(
     onNavigate: (Screen) -> Unit
 ) {
     val strings = LocalStrings.current
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = screenContentPadding(padding),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        item {
-            SectionHeader(
-                title = strings.navHelp,
-                help = strings.helpOverview,
-                onHelp = onHelp,
-                onMenu = onMenu
-            )
+    val listState = rememberLazyListState()
+    val scope = rememberCoroutineScope()
+    val showScrollTop by remember {
+        derivedStateOf { listState.firstVisibleItemIndex > 1 || listState.firstVisibleItemScrollOffset > 240 }
+    }
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        LazyColumn(
+            state = listState,
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = screenContentPadding(padding),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            item {
+                SectionHeader(
+                    title = strings.navHelp,
+                    help = strings.helpOverview,
+                    onHelp = onHelp,
+                    onMenu = onMenu
+                )
+            }
+            item {
+                AppText(
+                    text = strings.helpOverview,
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(horizontal = 4.dp, vertical = 4.dp)
+                )
+            }
+            items(helpScreens) { screen ->
+                HelpNavigationItem(
+                    title = screen.title(strings),
+                    summary = sectionSummary(strings, screen),
+                    icon = screen.icon,
+                    onClick = { onNavigate(screen) }
+                )
+            }
         }
-        item {
-            AppText(
-                text = strings.helpOverview,
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(horizontal = 4.dp, vertical = 4.dp)
-            )
-        }
-        items(helpScreens) { screen ->
-            HelpNavigationItem(
-                title = screen.title(strings),
-                summary = sectionSummary(strings, screen),
-                icon = screen.icon,
-                onClick = { onNavigate(screen) }
-            )
-        }
+
+        ScrollToTopButton(
+            visible = showScrollTop,
+            onClick = { scope.launch { listState.animateScrollToItem(0) } },
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(12.dp)
+        )
     }
 }
 
 @Composable
-private fun HelpNavigationItem(
-    title: String,
-    summary: String,
-    icon: ImageVector,
-    onClick: () -> Unit
-) {
+private fun HelpNavigationItem(title: String, summary: String, icon: ImageVector, onClick: () -> Unit) {
     AppCard(
         modifier = Modifier
             .fillMaxWidth()

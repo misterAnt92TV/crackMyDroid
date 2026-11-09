@@ -243,6 +243,10 @@ internal fun SettingsContent(
                     label = strings.settingsExportJson,
                     selected = state.exportFormat == ExportFormat.JSON
                 ) { actions.onSetExportFormat(ExportFormat.JSON) }
+                ExportFormatRow(
+                    label = strings.settingsExportPdf,
+                    selected = state.exportFormat == ExportFormat.PDF
+                ) { actions.onSetExportFormat(ExportFormat.PDF) }
                 AppText(
                     strings.settingsExportDescription,
                     style = MaterialTheme.typography.bodySmall,
