@@ -18,9 +18,15 @@ class InfoViewModel(
     private val reportExporter: ExportReportUseCase,
     private val buildReport: BuildDeviceInfoReportUseCase,
     dispatchers: AppDispatchers,
-) : LocalizedBaseViewModel(dispatchers) {
+) : LocalizedBaseViewModel<InfoEvent>(dispatchers) {
     private val _state = MutableStateFlow(InfoState())
     val state: StateFlow<InfoState> = _state
+
+    override fun onEvent(event: InfoEvent) = when (event) {
+        is InfoEvent.Load -> load()
+        is InfoEvent.Export -> export()
+        is InfoEvent.Share -> share()
+    }
 
     override fun onLanguageChanged() {
         refreshReport()

@@ -1,9 +1,13 @@
 package com.crackmydroid.architecture.presentation
 
 import com.crackmydroid.architecture.coroutines.AppDispatchers
+import com.crackmydroid.architecture.presentation.model.UiEvent
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.test.assertEquals
+import kotlin.test.assertNotEquals
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -16,8 +20,26 @@ import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withContext
 
-@OptIn(ExperimentalCoroutinesApi::class)
+@OptIn(ExperimentalCoroutinesApi::class, ExperimentalUuidApi::class)
 class BaseViewModelTest {
+    @Test
+    fun eventIdIsStableAndUniqueForNewInstances() {
+        val first = TestEvent()
+        val second = TestEvent()
+
+        assertEquals(first.id, first.id)
+        assertNotEquals(first.id, second.id)
+    }
+
+    @Test
+    fun handleEventDelegatesToOnEvent() {
+        val viewModel = TestViewModel(testDispatchers(StandardTestDispatcher()))
+        val event = TestEvent()
+
+        viewModel.handleEvent(event)
+
+        assertEquals(event, viewModel.handledEvent)
+    }
     @Test
     fun onClearedCancelsChildCoroutines() = runTest {
         val viewModel = TestViewModel(testDispatchers(StandardTestDispatcher(testScheduler)))
@@ -61,7 +83,13 @@ class BaseViewModelTest {
         override val default = dispatcher
     }
 
-    private class TestViewModel(dispatchers: AppDispatchers) : BaseViewModel(dispatchers) {
+    private class TestViewModel(dispatchers: AppDispatchers) : BaseViewModel<TestEvent>(dispatchers) {
+        var handledEvent: TestEvent? = null
+
+        override fun onEvent(event: TestEvent) {
+            handledEvent = event
+        }
+
         fun launch(block: suspend () -> Unit): Job = scope.launch { block() }
         fun latest(key: String, block: suspend () -> Unit): Job = launchLatest(key) { block() }
         fun nonCooperativeLatest(key: String, gate: CompletableDeferred<Unit>, publish: () -> Unit): Job =
@@ -71,4 +99,6 @@ class BaseViewModelTest {
                 publish()
             }
     }
+
+    private class TestEvent : UiEvent()
 }

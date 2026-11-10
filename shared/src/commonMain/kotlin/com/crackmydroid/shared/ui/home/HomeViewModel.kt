@@ -10,13 +10,18 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 
 class HomeViewModel(private val operationLogs: OperationLogRepository, dispatchers: AppDispatchers) :
-    LocalizedBaseViewModel(dispatchers) {
+    LocalizedBaseViewModel<HomeEvent>(dispatchers) {
     private companion object {
         const val MAX_RECENT_OPERATIONS = 5
     }
 
     private val _state = MutableStateFlow(HomeState())
     val state: StateFlow<HomeState> = _state
+
+    override fun onEvent(event: HomeEvent) = when (event) {
+        is HomeEvent.HideFromRecent -> hideFromRecent(event.operationId)
+        is HomeEvent.Remove -> remove(event.operationId)
+    }
 
     init {
         launchTask {

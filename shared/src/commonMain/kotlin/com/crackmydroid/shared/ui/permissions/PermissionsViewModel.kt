@@ -14,6 +14,8 @@ import com.crackmydroid.shared.util.runSuspendCatching
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
@@ -26,7 +28,7 @@ class PermissionsViewModel(
     private val getFavorites: GetPermissionFavoritesUseCase,
     private val setFavorites: SetPermissionFavoritesUseCase,
     dispatchers: AppDispatchers,
-) : LocalizedBaseViewModel(dispatchers) {
+) : LocalizedBaseViewModel<PermissionsEvent>(dispatchers) {
     private companion object {
         const val REFRESH_KEY = "permissions-refresh"
         const val RISK_SCAN_KEY = "permissions-risk-scan"
@@ -35,8 +37,25 @@ class PermissionsViewModel(
 
     private val _state = MutableStateFlow(PermissionsState())
     val state: StateFlow<PermissionsState> = _state
+    private val _effects = MutableSharedFlow<PermissionsEffect>()
+    val effects: SharedFlow<PermissionsEffect> = _effects
     private val queryCount = mutableMapOf<String, Int>()
     private val multiSpaceRegex = Regex("\\s+")
+
+    override fun onEvent(event: PermissionsEvent) = when (event) {
+        is PermissionsEvent.Refresh -> refresh()
+        is PermissionsEvent.FilterChanged -> setFilter(event.value, event.trackUsage)
+        is PermissionsEvent.RiskFilterChanged -> setShowOnlyRisky(event.enabled)
+        is PermissionsEvent.RiskFilterToggled -> toggleShowOnlyRisky()
+        is PermissionsEvent.ErrorDismissed -> clearError()
+        is PermissionsEvent.ExportRequested -> export()
+        is PermissionsEvent.FavoriteToggled -> toggleFavorite(event.packageName)
+        is PermissionsEvent.ReportShared -> sharePreview(event.packageName)
+        is PermissionsEvent.ReportPreviewRequested -> requestReportPreview(event.packageName)
+        is PermissionsEvent.ReportPreviewDismissed -> dismissReportPreview()
+        is PermissionsEvent.AutoRiskScanStarted -> startAutoRiskScan()
+        is PermissionsEvent.AutoRiskScanCancelled -> cancelAutoRiskScan()
+    }
     override fun onLanguageChanged() {
         val previewPackage = _state.value.reportPreviewPackage
         dismissReportPreview()
@@ -206,6 +225,15 @@ class PermissionsViewModel(
                 }
                 .onFailure { error -> _state.update { it.copy(error = error.message) } }
         }
+    }
+
+    private fun sharePreview(packageName: String) {
+        val content = _state.value.reportPreviewContent
+        if (content != null) {
+            launchTask { _effects.emit(PermissionsEffect.CopyToClipboard(content)) }
+        }
+        shareSingle(packageName, content)
+        dismissReportPreview()
     }
 
     fun requestReportPreview(packageName: String) {

@@ -86,6 +86,8 @@ import com.crackmydroid.shared.presentation.preview.AppScreenPreviews
 import com.crackmydroid.shared.ui.permissions.PermissionFindingUi
 import com.crackmydroid.shared.ui.permissions.PermissionsState
 import com.crackmydroid.shared.ui.permissions.PermissionsViewModel
+import com.crackmydroid.shared.ui.permissions.PermissionsEvent
+import com.crackmydroid.shared.ui.permissions.PermissionsEffect
 import com.crackmydroid.shared.ui.screens.screenContentPadding
 import kotlinx.coroutines.launch
 
@@ -103,15 +105,18 @@ fun PermissionsScreen(
     @Suppress("DEPRECATION")
     val clipboard = LocalClipboardManager.current
     DisposableEffect(viewModel) {
-        onDispose { viewModel.dismissReportPreview() }
+        onDispose { viewModel.handleEvent(PermissionsEvent.ReportPreviewDismissed()) }
+    }
+    LaunchedEffect(viewModel) {
+        viewModel.effects.collect { effect ->
+            if (effect is PermissionsEffect.CopyToClipboard) clipboard.setText(AnnotatedString(effect.content))
+        }
     }
     LaunchedEffect(state.reportPreviewPackage, state.reportPreviewContent) {
         val packageName = state.reportPreviewPackage
         val content = state.reportPreviewContent
         if (packageName != null && content != null) {
-            clipboard.setText(AnnotatedString(content))
-            viewModel.shareSingle(packageName, content)
-            viewModel.dismissReportPreview()
+            viewModel.handleEvent(PermissionsEvent.ReportShared(packageName))
         }
     }
     PermissionsScreenContent(
@@ -121,15 +126,15 @@ fun PermissionsScreen(
         onHelp = onHelp,
         onBack = onBack,
         onMenu = onMenu,
-        onRefresh = viewModel::refresh,
-        onStartAutoRiskScan = viewModel::startAutoRiskScan,
-        onCancelAutoRiskScan = viewModel::cancelAutoRiskScan,
-        onFilterChange = viewModel::setFilter,
-        onToggleShowOnlyRisky = viewModel::toggleShowOnlyRisky,
-        onSetShowOnlyRisky = viewModel::setShowOnlyRisky,
-        onRequestReportPreview = viewModel::requestReportPreview,
-        onToggleFavorite = viewModel::toggleFavorite,
-        onClearError = viewModel::clearError,
+        onRefresh = { viewModel.handleEvent(PermissionsEvent.Refresh()) },
+        onStartAutoRiskScan = { viewModel.handleEvent(PermissionsEvent.AutoRiskScanStarted()) },
+        onCancelAutoRiskScan = { viewModel.handleEvent(PermissionsEvent.AutoRiskScanCancelled()) },
+        onFilterChange = { value, trackUsage -> viewModel.handleEvent(PermissionsEvent.FilterChanged(value, trackUsage)) },
+        onToggleShowOnlyRisky = { viewModel.handleEvent(PermissionsEvent.RiskFilterToggled()) },
+        onSetShowOnlyRisky = { viewModel.handleEvent(PermissionsEvent.RiskFilterChanged(it)) },
+        onRequestReportPreview = { viewModel.handleEvent(PermissionsEvent.ReportPreviewRequested(it)) },
+        onToggleFavorite = { viewModel.handleEvent(PermissionsEvent.FavoriteToggled(it)) },
+        onClearError = { viewModel.handleEvent(PermissionsEvent.ErrorDismissed()) },
     )
 }
 

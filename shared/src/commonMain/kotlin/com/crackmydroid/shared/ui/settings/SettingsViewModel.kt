@@ -54,9 +54,27 @@ class SettingsViewModel(
     private val getLanguage: GetLanguageUseCase,
     private val setLanguage: SetLanguageUseCase,
     dispatchers: AppDispatchers,
-) : LocalizedBaseViewModel(dispatchers) {
+) : LocalizedBaseViewModel<SettingsEvent>(dispatchers) {
     private val _state = MutableStateFlow(SettingsState())
     val state: StateFlow<SettingsState> = _state
+
+    override fun onEvent(event: SettingsEvent) {
+        when (event) {
+        is SettingsEvent.Load -> load()
+        is SettingsEvent.ThemeSelected -> selectTheme(event.theme)
+        is SettingsEvent.LanguageSelected -> selectLanguage(event.language)
+        is SettingsEvent.VerboseLoggingChanged -> toggleVerbose(event.enabled)
+        is SettingsEvent.HighContrastChanged -> setHighContrast(event.enabled)
+        is SettingsEvent.ReduceMotionChanged -> setReduceMotion(event.enabled)
+        is SettingsEvent.LargeTextChanged -> setLargeText(event.enabled)
+        is SettingsEvent.ErrorDismissed -> clearError()
+        is SettingsEvent.SuggestionsEnabledChanged -> setSuggestionsEnabled(event.enabled)
+        is SettingsEvent.FeatureHintsEnabledChanged -> setFeatureHintsEnabled(event.enabled)
+        is SettingsEvent.IntroOnLaunchChanged -> setShowIntroOnLaunch(event.enabled)
+        is SettingsEvent.SuggestionsCleared -> clearSuggestions()
+        is SettingsEvent.ExportFormatSelected -> setExportFormat(event.format)
+        }
+    }
     private var savingFormat = false
 
     fun load() = launchLatest("settings-load") {

@@ -1,6 +1,7 @@
 package com.crackmydroid.architecture.presentation
 
 import com.crackmydroid.architecture.coroutines.AppDispatchers
+import com.crackmydroid.architecture.presentation.model.UiEvent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
@@ -10,11 +11,16 @@ import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
 
-open class BaseViewModel(protected val dispatchers: AppDispatchers) {
+abstract class BaseViewModel<E : UiEvent>(protected val dispatchers: AppDispatchers) {
     private val job = SupervisorJob()
     protected val scope = CoroutineScope(job + dispatchers.main)
     private val latestJobs = mutableMapOf<String, Job>()
     private val latestVersions = mutableMapOf<String, Long>()
+
+    /** The only public input boundary for a ViewModel. */
+    fun handleEvent(event: E) = onEvent(event)
+
+    protected abstract fun onEvent(event: E)
 
     protected fun launchTask(block: suspend CoroutineScope.() -> Unit): Job = scope.launch(block = block)
 

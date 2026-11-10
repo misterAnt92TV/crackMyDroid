@@ -55,8 +55,9 @@ Il flusso è UDF/MVI:
 User interaction → UI event/callback → ViewModel action → UseCase → Repository/data source → result → immutable StateFlow → Compose UI
 ```
 
-Ogni nuova sezione applicativa concretizza il flusso con un `FeatureEvent` tipizzato, un singolo
-`ViewModel.onEvent(event)`, uno `StateFlow<FeatureUiState>` immutabile e, quando necessario, un
+Ogni nuova sezione applicativa concretizza il flusso con un `FeatureEvent : UiEvent()` tipizzato,
+un singolo ingresso `ViewModel.handleEvent(event)` che delega all'hook protetto `onEvent`, uno
+`StateFlow<FeatureUiState>` immutabile e, quando necessario, un
 `SharedFlow<FeatureEffect>` per effetti one-shot. La screen collega questi contratti; il content
 renderizza soltanto `FeatureUiState` e inoltra gli eventi.
 

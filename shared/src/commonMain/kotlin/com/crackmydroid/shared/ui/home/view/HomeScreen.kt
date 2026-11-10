@@ -41,6 +41,7 @@ import com.crackmydroid.shared.presentation.components.card.AppCard
 import com.crackmydroid.shared.presentation.components.text.AppText
 import com.crackmydroid.shared.ui.home.HomeUiState
 import com.crackmydroid.shared.ui.home.HomeViewModel
+import com.crackmydroid.shared.ui.home.HomeEvent
 import com.crackmydroid.shared.ui.home.model.HomeUiStateMapper
 import com.crackmydroid.shared.ui.screens.screenContentPadding
 import kotlinx.coroutines.launch
@@ -65,8 +66,8 @@ fun HomeScreen(
         headerHelp = headerHelp,
         onHelp = onHelp,
         onMenu = onMenu,
-        onHideRecent = viewModel::hideFromRecent,
-        onRemove = viewModel::remove,
+        onHideRecent = { viewModel.handleEvent(HomeEvent.HideFromRecent(it)) },
+        onRemove = { viewModel.handleEvent(HomeEvent.Remove(it)) },
     )
 }
 

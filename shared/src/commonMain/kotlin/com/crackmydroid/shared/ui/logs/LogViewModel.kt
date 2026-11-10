@@ -13,9 +13,18 @@ class LogViewModel(
     private val getLogs: GetLogsUseCase,
     private val exportLogs: ExportLogsUseCase,
     dispatchers: AppDispatchers,
-) : LocalizedBaseViewModel(dispatchers) {
+) : LocalizedBaseViewModel<LogEvent>(dispatchers) {
     private val _state = MutableStateFlow(LogState())
     val state: StateFlow<LogState> = _state
+
+    override fun onEvent(event: LogEvent) = when (event) {
+        is LogEvent.Refresh -> refresh()
+        is LogEvent.FilterChanged -> setFilter(event.value)
+        is LogEvent.Export -> export()
+        is LogEvent.ErrorDismissed -> clearError()
+        is LogEvent.LevelToggled -> toggleLevel(event.level)
+        is LogEvent.ColorByLevelChanged -> setColorByLevel(event.enabled)
+    }
 
     fun refresh() {
         launchLatest("logs-refresh") {

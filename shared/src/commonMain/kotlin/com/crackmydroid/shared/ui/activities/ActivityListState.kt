@@ -16,6 +16,8 @@ data class ActivityListState(
     val groups: List<ActivityGroup> = emptyList(),
     val favoriteQueries: List<String> = emptyList(),
     val guidedLaunch: GuidedLaunchState? = null,
+    val selectedReport: ActivityAppReport? = null,
+    val reportExportPath: String? = null,
 )
 
 data class GuidedLaunchState(val entry: ActivityEntry)

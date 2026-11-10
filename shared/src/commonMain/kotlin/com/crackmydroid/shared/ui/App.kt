@@ -74,6 +74,7 @@ import com.crackmydroid.shared.presentation.navigation.bottomScreens
 import com.crackmydroid.shared.presentation.navigation.drawerScreens
 import com.crackmydroid.shared.presentation.theme.CrackMyDroidTheme
 import com.crackmydroid.shared.ui.activities.view.ActivityListScreen
+import com.crackmydroid.shared.ui.appshell.AppShellEvent
 import com.crackmydroid.shared.ui.help.HelpScreen
 import com.crackmydroid.shared.ui.home.view.HomeScreen
 import com.crackmydroid.shared.ui.info.view.InfoScreen
@@ -123,11 +124,11 @@ fun CrackMyDroidApp(
         largeText = settingsState.value.largeText,
     )
 
-    LaunchedEffect(Unit) { shellVm.initialize() }
+    LaunchedEffect(Unit) { shellVm.handleEvent(AppShellEvent.Initialize()) }
 
     LaunchedEffect(settingsState.value.featureHintsEnabled) {
         if (!settingsState.value.featureHintsEnabled) {
-            shellVm.dismissHint()
+            shellVm.handleEvent(AppShellEvent.HintDismissed())
         }
     }
 
@@ -151,7 +152,7 @@ fun CrackMyDroidApp(
         ) {
             val navigateFromDrawer: (Screen) -> Unit = { target ->
                 scope.launch { drawerState.close() }
-                shellVm.navigate(target, settingsState.value.featureHintsEnabled)
+                shellVm.handleEvent(AppShellEvent.ScreenSelected(target, settingsState.value.featureHintsEnabled))
             }
             Box(modifier = Modifier.fillMaxSize()) {
                 ModalNavigationDrawer(
@@ -232,7 +233,7 @@ fun CrackMyDroidApp(
                                 bottomScreens.forEach { screen ->
                                     NavigationBarItem(
                                         selected = shellState.selectedScreen == screen,
-                                        onClick = { shellVm.navigate(screen, false) },
+                                        onClick = { shellVm.handleEvent(AppShellEvent.ScreenSelected(screen, false)) },
                                         icon = {
                                             Icon(
                                                 screen.icon,
@@ -256,7 +257,7 @@ fun CrackMyDroidApp(
                         val focusManager = LocalFocusManager.current
                         val adjustedPadding = padding
                         val openDrawer: () -> Unit = { scope.launch { drawerState.open() } }
-                        val backToHome: () -> Unit = { shellVm.navigate(Screen.Home, false) }
+                        val backToHome: () -> Unit = { shellVm.handleEvent(AppShellEvent.ScreenSelected(Screen.Home, false)) }
                         Column(
                             modifier = Modifier
                                 .fillMaxSize()
@@ -377,7 +378,7 @@ fun CrackMyDroidApp(
                                         padding = adjustedPadding,
                                         onHelp = shellVm::showHelp,
                                         onMenu = openDrawer,
-                                        onNavigate = { target -> shellVm.navigate(target, false) },
+                                        onNavigate = { target -> shellVm.handleEvent(AppShellEvent.ScreenSelected(target, false)) },
                                     )
                                 }
                             }
@@ -431,10 +432,7 @@ fun CrackMyDroidApp(
                     confirmButton = {
                         androidx.compose.material3.Button(
                             onClick = {
-                                shellVm.confirmHint(
-                                    disableHints = disableHintsForever,
-                                    target = target,
-                                )
+                                shellVm.handleEvent(AppShellEvent.HintConfirmed(disableHintsForever, target))
                             },
                         ) {
                             AppText(strings.sectionHintConfirm)
@@ -443,7 +441,7 @@ fun CrackMyDroidApp(
                     dismissButton = {
                         TextButton(
                             onClick = {
-                                shellVm.dismissHint()
+                                shellVm.handleEvent(AppShellEvent.HintDismissed())
                             },
                         ) {
                             AppText(strings.close)

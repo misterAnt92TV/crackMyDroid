@@ -20,7 +20,8 @@ abstract class BaseUseCase(
         fun debug(outcome: String) {
             if (verbose()) {
                 logger.d {
-                    "useCase=$name operation=$operation outcome=$outcome durationMs=${started.elapsedNow().inWholeMilliseconds}"
+                    "useCase=$name operation=$operation outcome=$outcome " +
+                        "durationMs=${started.elapsedNow().inWholeMilliseconds}"
                 }
             }
         }
@@ -37,7 +38,8 @@ abstract class BaseUseCase(
             } catch (failure: Exception) {
                 currentCoroutineContext().ensureActive()
                 logger.e {
-                    "useCase=$name operation=$operation outcome=failed durationMs=${started.elapsedNow().inWholeMilliseconds} category=${failure::class.simpleName ?: "Exception"}"
+                    "useCase=$name operation=$operation outcome=failed " +
+                        "durationMs=${started.elapsedNow().inWholeMilliseconds} category=${failure::class.simpleName ?: "Exception"}"
                 }
                 return Result.failure(failure)
             }

@@ -63,6 +63,7 @@ import com.crackmydroid.shared.presentation.preview.AppScreenPreviews
 import com.crackmydroid.shared.ui.screens.screenContentPadding
 import com.crackmydroid.shared.ui.trick.TrickState
 import com.crackmydroid.shared.ui.trick.TrickViewModel
+import com.crackmydroid.shared.ui.trick.TrickEvent
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -85,16 +86,16 @@ fun TrickScreen(
         onMenu = onMenu,
         onCommandTap = { command ->
             when {
-                state.running -> viewModel.notifyBusyInteraction(command)
-                !command.supported -> viewModel.notifyUnsupportedCommand(command)
-                else -> viewModel.requestExecution(command)
+                state.running -> viewModel.handleEvent(TrickEvent.BusyInteractionNotified(command))
+                !command.supported -> viewModel.handleEvent(TrickEvent.UnsupportedCommandNotified(command))
+                else -> viewModel.handleEvent(TrickEvent.ExecutionRequested(command))
             }
         },
-        onClearInteractionHint = viewModel::clearInteractionHint,
-        onConfirmPending = viewModel::confirmPendingExecution,
-        onDismissPending = viewModel::dismissPendingCommand,
-        onDismissResult = viewModel::dismissResult,
-        onClearError = viewModel::clearError,
+        onClearInteractionHint = { viewModel.handleEvent(TrickEvent.InteractionHintDismissed()) },
+        onConfirmPending = { viewModel.handleEvent(TrickEvent.ExecutionConfirmed()) },
+        onDismissPending = { viewModel.handleEvent(TrickEvent.PendingCommandDismissed()) },
+        onDismissResult = { viewModel.handleEvent(TrickEvent.ResultDismissed()) },
+        onClearError = { viewModel.handleEvent(TrickEvent.ErrorDismissed()) },
     )
 }
 

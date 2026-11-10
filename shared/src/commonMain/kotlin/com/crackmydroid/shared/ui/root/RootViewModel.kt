@@ -15,9 +15,18 @@ class RootViewModel(
     private val checkPlayIntegrity: CheckPlayIntegrityUseCase,
     private val reportExporter: ExportReportUseCase,
     dispatchers: AppDispatchers,
-) : LocalizedBaseViewModel(dispatchers) {
+) : LocalizedBaseViewModel<RootEvent>(dispatchers) {
     private val _state = MutableStateFlow(RootState())
     val state: StateFlow<RootState> = _state
+
+    override fun onEvent(event: RootEvent) = when (event) {
+        is RootEvent.Verify -> verify()
+        is RootEvent.VerifyRootAccess -> verifyRootAccess()
+        is RootEvent.PlayIntegrityNonceChanged -> updatePlayIntegrityNonce(event.value)
+        is RootEvent.VerifyPlayIntegrity -> verifyPlayIntegrity()
+        is RootEvent.ShareReport -> shareReport()
+        is RootEvent.ErrorDismissed -> clearError()
+    }
 
     private fun buildReportContent(): String = buildString {
         appendLine(strings.navRoot)

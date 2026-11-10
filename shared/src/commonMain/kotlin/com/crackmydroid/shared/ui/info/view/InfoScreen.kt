@@ -61,6 +61,7 @@ import com.crackmydroid.shared.presentation.preview.AppPreviewEnvironment
 import com.crackmydroid.shared.presentation.preview.AppScreenPreviews
 import com.crackmydroid.shared.ui.info.InfoState
 import com.crackmydroid.shared.ui.info.InfoViewModel
+import com.crackmydroid.shared.ui.info.InfoEvent
 import kotlinx.coroutines.launch
 
 private fun buildInfoContent(info: DeviceInfo, root: RootStatus?, strings: Strings): String = buildString {
@@ -132,7 +133,7 @@ fun InfoScreen(
         headerHelp = headerHelp,
         onHelp = onHelp,
         onMenu = onMenu,
-        onShare = viewModel::share,
+        onShare = { viewModel.handleEvent(InfoEvent.Share()) },
     )
 }
 

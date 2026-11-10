@@ -32,6 +32,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -67,6 +68,8 @@ import com.crackmydroid.shared.presentation.preview.AppScreenPreviews
 import com.crackmydroid.shared.ui.activities.ActivityAppReport
 import com.crackmydroid.shared.ui.activities.ActivityGroup
 import com.crackmydroid.shared.ui.activities.ActivityListState
+import com.crackmydroid.shared.ui.activities.ActivityListEvent
+import com.crackmydroid.shared.ui.activities.ActivityListEffect
 import com.crackmydroid.shared.ui.activities.ActivityListViewModel
 import com.crackmydroid.shared.ui.screens.screenContentPadding
 import kotlinx.coroutines.launch
@@ -81,22 +84,30 @@ fun ActivityListScreen(
     onMenu: () -> Unit = {},
 ) {
     val state by viewModel.state.collectAsState()
+    @Suppress("DEPRECATION")
+    val clipboard = LocalClipboardManager.current
+    LaunchedEffect(viewModel) {
+        viewModel.effects.collect { effect ->
+            if (effect is ActivityListEffect.CopyToClipboard) clipboard.setText(AnnotatedString(effect.content))
+        }
+    }
     val callbacks = remember(viewModel) {
         ActivityListCallbacks(
-            onRefresh = viewModel::refresh,
-            onSetFilter = viewModel::setFilter,
-            onBuildReport = viewModel::buildReport,
-            onExportVisualReport = viewModel::exportVisualReport,
-            onClearError = viewModel::clearError,
-            onToggleExpanded = viewModel::toggleExpanded,
-            onGroupContent = viewModel::groupContent,
-            onExportGroup = viewModel::exportGroup,
-            onToggleFavoritePackage = viewModel::toggleFavoritePackage,
-            onLaunch = viewModel::launch,
-            onOpenGuidedLaunch = viewModel::openGuidedLaunch,
-            onToggleFavorite = viewModel::toggleFavorite,
-            onLaunchGuided = viewModel::launchGuided,
-            onDismissGuidedLaunch = viewModel::dismissGuidedLaunch,
+            onRefresh = { viewModel.handleEvent(ActivityListEvent.Refresh()) },
+            onSetFilter = { value, trackUsage -> viewModel.handleEvent(ActivityListEvent.FilterChanged(value, trackUsage)) },
+            onReportRequested = { viewModel.handleEvent(ActivityListEvent.ReportRequested(it)) },
+            onReportDismissed = { viewModel.handleEvent(ActivityListEvent.ReportDismissed()) },
+            onExportVisualReport = { viewModel.handleEvent(ActivityListEvent.VisualReportExportRequested(it)) },
+            onClearError = { viewModel.handleEvent(ActivityListEvent.ErrorDismissed()) },
+            onToggleExpanded = { viewModel.handleEvent(ActivityListEvent.GroupExpansionToggled(it)) },
+            onGroupClipboardCopy = { viewModel.handleEvent(ActivityListEvent.GroupClipboardCopyRequested(it)) },
+            onExportGroup = { viewModel.handleEvent(ActivityListEvent.GroupExportRequested(it)) },
+            onToggleFavoritePackage = { viewModel.handleEvent(ActivityListEvent.PackageFavoriteToggled(it)) },
+            onLaunch = { viewModel.handleEvent(ActivityListEvent.ActivityLaunched(it)) },
+            onOpenGuidedLaunch = { viewModel.handleEvent(ActivityListEvent.GuidedLaunchOpened(it)) },
+            onToggleFavorite = { viewModel.handleEvent(ActivityListEvent.FavoriteToggled(it)) },
+            onLaunchGuided = { action, dataUri, mimeType -> viewModel.handleEvent(ActivityListEvent.GuidedLaunchConfirmed(action, dataUri, mimeType)) },
+            onDismissGuidedLaunch = { viewModel.handleEvent(ActivityListEvent.GuidedLaunchDismissed()) },
         )
     }
 
@@ -114,11 +125,12 @@ fun ActivityListScreen(
 private data class ActivityListCallbacks(
     val onRefresh: () -> Unit,
     val onSetFilter: (String, Boolean) -> Unit,
-    val onBuildReport: (String) -> ActivityAppReport?,
-    val onExportVisualReport: suspend (String) -> Result<String>,
+    val onReportRequested: (String) -> Unit,
+    val onReportDismissed: () -> Unit,
+    val onExportVisualReport: (String) -> Unit,
     val onClearError: () -> Unit,
     val onToggleExpanded: (String) -> Unit,
-    val onGroupContent: suspend (String) -> String?,
+    val onGroupClipboardCopy: (String) -> Unit,
     val onExportGroup: (String) -> Unit,
     val onToggleFavoritePackage: (String) -> Unit,
     val onLaunch: (ActivityEntry) -> Unit,
@@ -140,16 +152,12 @@ private fun ActivityListContent(
 ) {
     val strings = LocalStrings.current
 
-    @Suppress("DEPRECATION")
-    val clipboard = LocalClipboardManager.current
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val groups = state.groups
     val favoriteQueries = state.favoriteQueries
     val listState = rememberLazyListState()
     var searchToolsExpanded by remember { mutableStateOf(true) }
-    var selectedReportPackage by remember { mutableStateOf<String?>(null) }
-    var lastReportPath by remember { mutableStateOf<String?>(null) }
     val showScrollTop by remember {
         derivedStateOf { listState.firstVisibleItemIndex > 1 || listState.firstVisibleItemScrollOffset > 240 }
     }
@@ -249,36 +257,14 @@ private fun ActivityListContent(
                 }
             }
 
-            selectedReportPackage?.let { packageName ->
-                item(key = "activity-report-$packageName") {
-                    callbacks.onBuildReport(packageName)?.let { report ->
-                        ActivityReportCard(
-                            report = report,
-                            lastExportPath = lastReportPath,
-                            onDismiss = {
-                                selectedReportPackage = null
-                                lastReportPath = null
-                            },
-                            onExport = {
-                                scope.launch {
-                                    callbacks.onExportVisualReport(report.packageName)
-                                        .onSuccess { path ->
-                                            lastReportPath = path
-                                            snackbarHostState.showSnackbar(
-                                                strings.activityUi.exportSuccess.format(
-                                                    report.appLabel,
-                                                ),
-                                            )
-                                        }
-                                        .onFailure { err ->
-                                            snackbarHostState.showSnackbar(
-                                                err.message ?: strings.activityUi.exportFailed,
-                                            )
-                                        }
-                                }
-                            },
-                        )
-                    }
+            state.selectedReport?.let { report ->
+                item(key = "activity-report-${report.packageName}") {
+                    ActivityReportCard(
+                        report = report,
+                        lastExportPath = state.reportExportPath,
+                        onDismiss = callbacks.onReportDismissed,
+                        onExport = { callbacks.onExportVisualReport(report.packageName) },
+                    )
                 }
             }
 
@@ -362,15 +348,17 @@ private fun ActivityListContent(
                     actions = {
                         IconButton(
                             onClick = {
-                                selectedReportPackage =
-                                    if (selectedReportPackage == group.packageName) null else group.packageName
-                                lastReportPath = null
+                                if (state.selectedReport?.packageName == group.packageName) {
+                                    callbacks.onReportDismissed()
+                                } else {
+                                    callbacks.onReportRequested(group.packageName)
+                                }
                             },
                         ) {
                             Icon(
                                 imageVector = Icons.Filled.Description,
                                 contentDescription = strings.reportActivitiesContentDescription,
-                                tint = if (selectedReportPackage == group.packageName) {
+                                tint = if (state.selectedReport?.packageName == group.packageName) {
                                     MaterialTheme.colorScheme.primary
                                 } else {
                                     MaterialTheme.colorScheme.onSurfaceVariant
@@ -379,11 +367,7 @@ private fun ActivityListContent(
                         }
                         IconButton(
                             onClick = {
-                                scope.launch {
-                                    callbacks.onGroupContent(group.packageName)?.let { content ->
-                                        clipboard.setText(AnnotatedString(content))
-                                    }
-                                }
+                                callbacks.onGroupClipboardCopy(group.packageName)
                                 callbacks.onExportGroup(group.packageName)
                             },
                         ) {
@@ -763,11 +747,12 @@ private fun ActivityListScreenPreview() {
     val callbacks = ActivityListCallbacks(
         onRefresh = {},
         onSetFilter = { _, _ -> },
-        onBuildReport = { null },
-        onExportVisualReport = { Result.failure(UnsupportedOperationException("Preview action")) },
+        onReportRequested = {},
+        onReportDismissed = {},
+        onExportVisualReport = {},
         onClearError = {},
         onToggleExpanded = {},
-        onGroupContent = { null },
+        onGroupClipboardCopy = {},
         onExportGroup = {},
         onToggleFavoritePackage = {},
         onLaunch = {},

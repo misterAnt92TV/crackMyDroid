@@ -28,11 +28,22 @@ class InstalledAppsViewModel(
     private val setFavorites: SetInstalledAppFavoritesUseCase,
     private val operationLogs: OperationLogRepository = NoOpOperationLogRepository,
     dispatchers: AppDispatchers,
-) : LocalizedBaseViewModel(dispatchers) {
+) : LocalizedBaseViewModel<InstalledAppsEvent>(dispatchers) {
     private val _state = MutableStateFlow(InstalledAppsState())
     val state: StateFlow<InstalledAppsState> = _state
     private val queryCount = mutableMapOf<String, Int>()
     private val multiSpaceRegex = Regex("\\s+")
+
+    override fun onEvent(event: InstalledAppsEvent) = when (event) {
+        is InstalledAppsEvent.Refresh -> refresh()
+        is InstalledAppsEvent.FilterChanged -> setFilter(event.value, event.trackUsage)
+        is InstalledAppsEvent.ApkExportRequested -> export(event.packageName)
+        is InstalledAppsEvent.AllExportRequested -> exportAll(event.baseName)
+        is InstalledAppsEvent.AllShareRequested -> shareAll(event.baseName)
+        is InstalledAppsEvent.ApkShareRequested -> share(event.packageName, event.bluetoothOnly)
+        is InstalledAppsEvent.ErrorDismissed -> clearError()
+        is InstalledAppsEvent.FavoriteToggled -> toggleFavorite(event.packageName)
+    }
 
     fun refresh() {
         launchLatest("installed-apps-refresh") {

@@ -13,9 +13,21 @@ class TrickViewModel(
     private val listUseCase: ListShellCommandsUseCase,
     private val execUseCase: ExecuteShellCommandUseCase,
     dispatchers: AppDispatchers,
-) : LocalizedBaseViewModel(dispatchers) {
+) : LocalizedBaseViewModel<TrickEvent>(dispatchers) {
     private val _state = MutableStateFlow(TrickState())
     val state: StateFlow<TrickState> = _state
+
+    override fun onEvent(event: TrickEvent) = when (event) {
+        is TrickEvent.Load -> load()
+        is TrickEvent.ExecutionRequested -> requestExecution(event.command)
+        is TrickEvent.ExecutionConfirmed -> confirmPendingExecution()
+        is TrickEvent.PendingCommandDismissed -> dismissPendingCommand()
+        is TrickEvent.ResultDismissed -> dismissResult()
+        is TrickEvent.BusyInteractionNotified -> notifyBusyInteraction(event.command)
+        is TrickEvent.UnsupportedCommandNotified -> notifyUnsupportedCommand(event.command)
+        is TrickEvent.InteractionHintDismissed -> clearInteractionHint()
+        is TrickEvent.ErrorDismissed -> clearError()
+    }
 
     fun load() {
         launchLatest("trick-load") {

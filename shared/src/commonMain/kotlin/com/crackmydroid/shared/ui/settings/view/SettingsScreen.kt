@@ -53,6 +53,7 @@ import com.crackmydroid.shared.presentation.components.card.CardBlock
 import com.crackmydroid.shared.presentation.components.text.AppText
 import com.crackmydroid.shared.ui.settings.SettingsState
 import com.crackmydroid.shared.ui.settings.SettingsViewModel
+import com.crackmydroid.shared.ui.settings.SettingsEvent
 import com.crackmydroid.shared.ui.settings.model.SettingsActions
 import com.crackmydroid.shared.ui.settings.model.SettingsAppInfo
 import com.crackmydroid.shared.util.appPackageName
@@ -84,21 +85,21 @@ fun SettingsScreen(
             requestedPermissions = appRequestedPermissions(),
         ),
         actions = SettingsActions(
-            onSelectTheme = viewModel::selectTheme,
-            onSelectLanguage = viewModel::selectLanguage,
-            onSetSuggestionsEnabled = viewModel::setSuggestionsEnabled,
-            onClearSuggestions = viewModel::clearSuggestions,
-            onSetFeatureHintsEnabled = viewModel::setFeatureHintsEnabled,
-            onSetShowIntroOnLaunch = viewModel::setShowIntroOnLaunch,
-            onToggleVerbose = viewModel::toggleVerbose,
-            onSetExportFormat = viewModel::setExportFormat,
-            onSetHighContrast = viewModel::setHighContrast,
-            onSetReduceMotion = viewModel::setReduceMotion,
-            onSetLargeText = viewModel::setLargeText,
+            onSelectTheme = { viewModel.handleEvent(SettingsEvent.ThemeSelected(it)) },
+            onSelectLanguage = { viewModel.handleEvent(SettingsEvent.LanguageSelected(it)) },
+            onSetSuggestionsEnabled = { viewModel.handleEvent(SettingsEvent.SuggestionsEnabledChanged(it)) },
+            onClearSuggestions = { viewModel.handleEvent(SettingsEvent.SuggestionsCleared()) },
+            onSetFeatureHintsEnabled = { viewModel.handleEvent(SettingsEvent.FeatureHintsEnabledChanged(it)) },
+            onSetShowIntroOnLaunch = { viewModel.handleEvent(SettingsEvent.IntroOnLaunchChanged(it)) },
+            onToggleVerbose = { viewModel.handleEvent(SettingsEvent.VerboseLoggingChanged(it)) },
+            onSetExportFormat = { viewModel.handleEvent(SettingsEvent.ExportFormatSelected(it)) },
+            onSetHighContrast = { viewModel.handleEvent(SettingsEvent.HighContrastChanged(it)) },
+            onSetReduceMotion = { viewModel.handleEvent(SettingsEvent.ReduceMotionChanged(it)) },
+            onSetLargeText = { viewModel.handleEvent(SettingsEvent.LargeTextChanged(it)) },
             onOpenUri = uriHandler::openUri,
             onHelp = onHelp,
             onMenu = onMenu,
-            onClearError = viewModel::clearError,
+            onClearError = { viewModel.handleEvent(SettingsEvent.ErrorDismissed()) },
         ),
     )
 }

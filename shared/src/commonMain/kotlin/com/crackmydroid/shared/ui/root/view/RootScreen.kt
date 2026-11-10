@@ -65,6 +65,7 @@ import com.crackmydroid.shared.presentation.preview.AppPreviewEnvironment
 import com.crackmydroid.shared.presentation.preview.AppScreenPreviews
 import com.crackmydroid.shared.ui.root.RootState
 import com.crackmydroid.shared.ui.root.RootViewModel
+import com.crackmydroid.shared.ui.root.RootEvent
 import kotlinx.coroutines.launch
 
 @Composable
@@ -85,13 +86,13 @@ fun RootScreen(
         onHelp = onHelp,
         onBack = onBack,
         onMenu = onMenu,
-        onVerify = viewModel::verify,
-        onVerifyRootAccess = viewModel::verifyRootAccess,
-        onPlayIntegrityNonceChange = viewModel::updatePlayIntegrityNonce,
-        onVerifyPlayIntegrity = viewModel::verifyPlayIntegrity,
-        onShareReport = viewModel::shareReport,
-        onClearError = viewModel::clearError,
-        onLoad = viewModel::verify,
+        onVerify = { viewModel.handleEvent(RootEvent.Verify()) },
+        onVerifyRootAccess = { viewModel.handleEvent(RootEvent.VerifyRootAccess()) },
+        onPlayIntegrityNonceChange = { viewModel.handleEvent(RootEvent.PlayIntegrityNonceChanged(it)) },
+        onVerifyPlayIntegrity = { viewModel.handleEvent(RootEvent.VerifyPlayIntegrity()) },
+        onShareReport = { viewModel.handleEvent(RootEvent.ShareReport()) },
+        onClearError = { viewModel.handleEvent(RootEvent.ErrorDismissed()) },
+        onLoad = { viewModel.handleEvent(RootEvent.Verify()) },
     )
 }
 

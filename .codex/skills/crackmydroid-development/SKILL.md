@@ -135,20 +135,22 @@ ui/<feature>/
     └── <Feature>Component.kt
 ```
 
-- For a new feature, the ViewModel exposes `StateFlow<FeatureUiState>` and one public event entry point:
-  `fun onEvent(event: FeatureEvent)`. Do not expose a growing set of application commands directly
-  to the screen.
-- `FeatureEvent` is a feature-specific sealed interface with typed events and minimal stable
+- For a new feature, the ViewModel extends `BaseViewModel<FeatureEvent>`, exposes
+  `StateFlow<FeatureUiState>`, and receives all UI input only through its inherited public
+  `handleEvent(event: FeatureEvent)`. Implement the protected exhaustive `onEvent` hook; do not
+  expose a growing set of application commands directly to the screen.
+- `FeatureEvent` is a feature-specific sealed class extending `UiEvent`, with typed events and minimal stable
   identifiers,
-  for example `Refresh`, `FilterChanged`, `ItemSelected`, `FavoriteToggled`, `ExportRequested` and
-  `RetryRequested`. Do not use stringly typed event names or untyped maps.
+  for example `class Refresh : FeatureEvent()`, `class FilterChanged(...) : FeatureEvent()` and
+  `class ExportRequested : FeatureEvent()`. Never use `object`: every dispatched event must receive
+  its own `UiEvent.id`. Do not use stringly typed event names or untyped maps.
 - `FeatureUiState` is immutable and UI-ready. It owns loading, empty, error and visible item state;
   domain objects must not be exposed directly through complex UI lists.
 - Persistent rendering data belongs in `StateFlow`; transient snackbar, navigation, share and export
   notifications belong in an optional `SharedFlow<FeatureEffect>`. Effects must not be represented
   by
   one-time booleans in `FeatureUiState`.
-- A new `FeatureScreen` collects state and wires `viewModel::onEvent`; `FeatureContent` receives only the
+- A new `FeatureScreen` collects state and wires `viewModel::handleEvent`; `FeatureContent` receives only the
   immutable UI state, visual dependencies and event callback. It must not call ViewModel methods
   directly.
 - The ViewModel handles the event `when`, launches cancellable work, invokes UseCases and maps
@@ -170,7 +172,7 @@ Use the following ownership rules when deciding where new logic belongs:
 - **Screen/Composable**: declarative rendering and event forwarding only; never application logic.
 
 Forbidden flow: `Screen → Repository` or `Screen → UseCase`.
-Required flow: `Screen(uiState, onEvent) → ViewModel.onEvent → UseCase → Repository`.
+Required flow: `Screen(uiState, handleEvent) → ViewModel.handleEvent → protected ViewModel.onEvent → UseCase → Repository`.
 
 When reviewing a feature, reject logic in the UI even if it is small or convenient. Move it to the
 UseCase when it is a domain/application rule; move it to the ViewModel only when it is presentation

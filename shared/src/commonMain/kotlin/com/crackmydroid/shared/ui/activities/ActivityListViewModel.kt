@@ -23,6 +23,8 @@ import com.crackmydroid.shared.presentation.operations.NoOpOperationLogRepositor
 import com.crackmydroid.shared.ui.activities.view.uiLabel
 import com.crackmydroid.shared.util.runSuspendCatching
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.serialization.Serializable
@@ -41,12 +43,36 @@ class ActivityListViewModel(
     private val reportExporter: ExportReportUseCase,
     private val operationLogs: OperationLogRepository = NoOpOperationLogRepository,
     dispatchers: AppDispatchers,
-) : LocalizedBaseViewModel(dispatchers) {
+) : LocalizedBaseViewModel<ActivityListEvent>(dispatchers) {
     private val json = Json { prettyPrint = true }
     private val _state = MutableStateFlow(ActivityListState())
     val state: StateFlow<ActivityListState> = _state
+    private val _effects = MutableSharedFlow<ActivityListEffect>()
+    val effects: SharedFlow<ActivityListEffect> = _effects
     private val queryCount = mutableMapOf<String, Int>()
     private val multiSpaceRegex = Regex("\\s+")
+
+    override fun onEvent(event: ActivityListEvent) {
+        when (event) {
+        is ActivityListEvent.Refresh -> refresh()
+        is ActivityListEvent.FilterChanged -> setFilter(event.value, event.trackUsage)
+        is ActivityListEvent.ActivityLaunched -> launch(event.entry)
+        is ActivityListEvent.GuidedLaunchOpened -> openGuidedLaunch(event.entry)
+        is ActivityListEvent.GuidedLaunchDismissed -> dismissGuidedLaunch()
+        is ActivityListEvent.GuidedLaunchConfirmed -> launchGuided(event.action, event.dataUri, event.mimeType)
+        is ActivityListEvent.ActivityLaunchedWithIntent -> launchWithIntent(event.entry, event.action, event.dataUri, event.mimeType)
+        is ActivityListEvent.ErrorDismissed -> clearError()
+        is ActivityListEvent.FavoriteToggled -> toggleFavorite(event.entry)
+        is ActivityListEvent.PackageFavoriteToggled -> toggleFavoritePackage(event.packageName)
+        is ActivityListEvent.GroupExpansionToggled -> toggleExpanded(event.packageName)
+        is ActivityListEvent.AllExportRequested -> exportAll()
+        is ActivityListEvent.GroupExportRequested -> exportGroup(event.packageName)
+        is ActivityListEvent.GroupClipboardCopyRequested -> copyGroupContent(event.packageName)
+        is ActivityListEvent.ReportRequested -> showReport(event.packageName)
+        is ActivityListEvent.ReportDismissed -> dismissReport()
+        is ActivityListEvent.VisualReportExportRequested -> exportVisualReportAsync(event.packageName)
+        }
+    }
 
     fun refresh() {
         launchLatest("activities-refresh") {
@@ -268,6 +294,12 @@ class ActivityListViewModel(
         return buildExportContent(acts)
     }
 
+    private fun copyGroupContent(packageName: String) {
+        launchTask {
+            groupContent(packageName)?.let { _effects.emit(ActivityListEffect.CopyToClipboard(it)) }
+        }
+    }
+
     fun buildReport(packageName: String): ActivityAppReport? {
         val activities = _state.value.activities.filter { it.packageName == packageName }
         if (activities.isEmpty()) return null
@@ -344,6 +376,22 @@ class ActivityListViewModel(
             findings = findings,
             highlights = highlights,
         )
+    }
+
+    private fun showReport(packageName: String) {
+        _state.update { it.copy(selectedReport = buildReport(packageName), reportExportPath = null) }
+    }
+
+    private fun dismissReport() {
+        _state.update { it.copy(selectedReport = null, reportExportPath = null) }
+    }
+
+    private fun exportVisualReportAsync(packageName: String) {
+        launchTask {
+            exportVisualReport(packageName).onSuccess { path ->
+                _state.update { it.copy(reportExportPath = path, error = null) }
+            }.onFailure { error -> _state.update { it.copy(error = error.message ?: presentationTexts.reportFailed) } }
+        }
     }
 
     suspend fun exportVisualReport(packageName: String): Result<String> {

@@ -2,12 +2,13 @@ package com.crackmydroid.shared.presentation
 
 import com.crackmydroid.architecture.coroutines.AppDispatchers
 import com.crackmydroid.architecture.presentation.BaseViewModel
+import com.crackmydroid.architecture.presentation.model.UiEvent
 import com.crackmydroid.shared.i18n.Strings
 import com.crackmydroid.shared.i18n.UseCasePresentationTexts
 import com.crackmydroid.shared.i18n.UseCaseTexts
 import com.crackmydroid.shared.i18n.stringsFor
 
-open class LocalizedBaseViewModel(dispatchers: AppDispatchers) : BaseViewModel(dispatchers) {
+abstract class LocalizedBaseViewModel<E : UiEvent>(dispatchers: AppDispatchers) : BaseViewModel<E>(dispatchers) {
     private var activeLanguageCode = "en"
 
     /** Cataloghi localizzati da usare per ogni copy dinamico prodotto dal ViewModel. */

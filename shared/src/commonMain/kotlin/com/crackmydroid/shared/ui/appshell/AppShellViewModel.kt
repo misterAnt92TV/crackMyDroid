@@ -41,10 +41,20 @@ class AppShellViewModel(
     private val penTesting: PenTestingViewModel,
     private val getVerbose: GetVerboseLogUseCase,
     dispatchers: AppDispatchers,
-) : LocalizedBaseViewModel(dispatchers) {
+) : LocalizedBaseViewModel<AppShellEvent>(dispatchers) {
     private val _state = MutableStateFlow(AppShellState())
     val state: StateFlow<AppShellState> = _state
     private var initializing = false
+
+    override fun onEvent(event: AppShellEvent) = when (event) {
+        is AppShellEvent.Initialize -> initialize()
+        is AppShellEvent.ScreenSelected -> navigate(event.screen, event.hintsEnabled)
+        is AppShellEvent.HintConfirmed -> confirmHint(event.disableHints, event.target)
+        is AppShellEvent.HintDismissed -> dismissHint()
+        is AppShellEvent.HelpDismissed -> dismissHelp()
+        is AppShellEvent.HelpRequested -> showHelp(event.message)
+        is AppShellEvent.IntroDismissed -> dismissIntro()
+    }
 
     fun initialize() {
         if (_state.value.initialized || initializing) return

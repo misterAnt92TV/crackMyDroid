@@ -59,9 +59,11 @@ The development skill defines the architecture, coroutine, localization, and mig
 This reference only records the feature shape and UI ownership rules.
 
 - State is immutable and exposes only what the screen needs through `StateFlow<FeatureUiState>`.
-- For new features, define a feature-specific sealed `FeatureEvent` and expose one
-  `ViewModel.onEvent(event)` entry point. Existing features may retain their public API during a
-  bounded change unless UDF migration is explicitly requested.
+- For new features, define a feature-specific sealed `FeatureEvent : UiEvent()` and extend
+  `BaseViewModel<FeatureEvent>`. Screens may call only the inherited `ViewModel.handleEvent(event)`;
+  the ViewModel implements its protected exhaustive `onEvent(event)` hook. Do not add public command
+  methods for screens. Existing features may retain their public API during a bounded change unless
+  UDF migration is explicitly requested.
 - Event names describe the user action and carry typed minimal data: `Refresh`, `AppSelected`,
   `FilterChanged`, `RetryRequested` or `ExportRequested`.
 - ViewModel event handling launches cancellable work, calls UseCases and translates outcomes into

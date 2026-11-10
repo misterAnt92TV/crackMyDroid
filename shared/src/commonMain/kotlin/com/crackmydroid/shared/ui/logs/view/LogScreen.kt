@@ -61,6 +61,7 @@ import com.crackmydroid.shared.presentation.preview.AppPreviewEnvironment
 import com.crackmydroid.shared.presentation.preview.AppScreenPreviews
 import com.crackmydroid.shared.ui.logs.LogState
 import com.crackmydroid.shared.ui.logs.LogViewModel
+import com.crackmydroid.shared.ui.logs.LogEvent
 import kotlinx.coroutines.launch
 
 @Composable
@@ -80,12 +81,12 @@ fun LogScreen(
         onHelp = onHelp,
         onBack = onBack,
         onMenu = onMenu,
-        onFilterChange = viewModel::setFilter,
-        onLevelToggle = viewModel::toggleLevel,
-        onRefresh = viewModel::refresh,
-        onExport = viewModel::export,
-        onColorByLevelChange = viewModel::setColorByLevel,
-        onClearError = viewModel::clearError,
+        onFilterChange = { viewModel.handleEvent(LogEvent.FilterChanged(it)) },
+        onLevelToggle = { viewModel.handleEvent(LogEvent.LevelToggled(it)) },
+        onRefresh = { viewModel.handleEvent(LogEvent.Refresh()) },
+        onExport = { viewModel.handleEvent(LogEvent.Export()) },
+        onColorByLevelChange = { viewModel.handleEvent(LogEvent.ColorByLevelChanged(it)) },
+        onClearError = { viewModel.handleEvent(LogEvent.ErrorDismissed()) },
     )
 }
 
