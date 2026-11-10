@@ -10,12 +10,17 @@ metadata:
 Use this skill when the user asks to add, repair, or improve unit tests in this repository. The
 output must protect a real behavior of the application, not merely increase the test count.
 
+This skill owns test files and test-only dependencies. It does not change production contracts or
+architecture; if production code must change for compilation or correctness, stop at the smallest
+diagnosis and apply the development skill for that change.
+
 ## Scope and discovery
 
 1. Identify the requested production target and its Gradle module. Read the production class, its
    public collaborators, and any existing test before editing.
-2. Inspect the target source-set path and choose the narrowest applicable test source set
-   using [references/platform-matrix.md](references/platform-matrix.md).
+2. Inspect the target source-set path and choose the narrowest applicable test source set using
+   [the platform matrix](../crackmydroid-development/references/platform-matrix.md), which is the
+   single source of truth for source sets, frameworks, and Gradle tasks.
 3. Derive cases from observable behavior: returned values, emitted state, thrown errors,
    persisted/exported data, commands sent to collaborators, and meaningful calls to dependencies.
 4. Keep production code unchanged. Only add or update test files and, when required for compilation,
@@ -30,8 +35,7 @@ suite for unrelated code.
 - `shared/src/commonMain` → `shared/src/commonTest`: use only Kotlin Multiplatform-compatible test
   APIs and real domain values. Do not import JVM-only MockK or JUnit.
 - Shared ViewModels, UseCases, and JVM-compatible collaborators → `shared/src/jvmCommonTest`: use
-  MockK for external collaborators and JUnit 4 when the selected task provides it. Follow the
-  existing coroutine-test patterns.
+  MockK and `kotlin.test` with coroutine-test, following the existing project patterns.
 - Desktop/ADB/process/filesystem implementations → `shared/src/desktopTest`: isolate process and
   filesystem boundaries with fakes or MockK where supported; never require a real ADB device or
   host-specific state.
@@ -82,8 +86,8 @@ they are correct, but derive coverage from production code rather than copying e
 
 ## Validation
 
-Run the narrowest applicable Gradle task from the matrix, then widen validation only when shared
-code or dependencies require it. At minimum:
+Run the narrowest applicable Gradle task from the platform matrix, then widen validation only when
+shared code or dependencies require it. At minimum:
 
 - compile and execute the changed test source set;
 - run the relevant test class or method first when iterating;

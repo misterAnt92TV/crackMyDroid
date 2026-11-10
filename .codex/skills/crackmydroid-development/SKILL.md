@@ -16,6 +16,17 @@ and [docs/clean-code-structure.md](../../../docs/clean-code-structure.md) before
 architectural boundary. For source-set, feature layout, preview, and validation details, read the
 relevant reference below.
 
+## Instruction precedence and scope
+
+- Apply user instructions first, then a task-specific skill, then this general development skill,
+  then its references and repository conventions.
+- The architecture specification defines layer boundaries; `references/platform-matrix.md` is the
+  source of truth for source sets, test frameworks, and Gradle validation.
+- Requirements marked **must** are gates; **should** describes the preferred convention; review
+  checks are performed before completion but do not expand the requested scope.
+- The canonical UDF contract is required for new features and explicit UDF refactors. For a bounded
+  change in an existing feature, preserve its public API unless migration is part of the request.
+
 ## Discovery and platform routing
 
 1. Inspect the requested feature, adjacent implementation, Gradle dependencies, and existing tests
@@ -69,6 +80,10 @@ file organization.
   use `launchTask` for independent work and `launchLatest(key)` for replaceable refresh, preview,
   scan, or recomputation flows. Check `LatestTask.isCurrent()`/`ensureCurrent()` before publishing
   results; do not duplicate request counters when the base primitive provides the same guard.
+  Every ViewModel must receive `AppDispatchers` as a required constructor dependency from Koin and
+  import its type at the top of the file; do not use fully qualified project types in declarations
+  or expressions when a normal import is possible. Keep imports explicit and grouped with the other
+  dependencies, and do not fall back to `DefaultAppDispatchers` inside a ViewModel.
 - `BaseUseCase` never owns a scope or job. It may switch CPU work to `AppDispatchers.default`,
   propagates `CancellationException`, and leaves I/O dispatching to repositories and adapters.
 - Define repository contracts in `domain/repository`; inject implementations through Koin
@@ -120,7 +135,7 @@ ui/<feature>/
     └── <Feature>Component.kt
 ```
 
-- The ViewModel exposes `StateFlow<FeatureUiState>` and one public event entry point:
+- For a new feature, the ViewModel exposes `StateFlow<FeatureUiState>` and one public event entry point:
   `fun onEvent(event: FeatureEvent)`. Do not expose a growing set of application commands directly
   to the screen.
 - `FeatureEvent` is a feature-specific sealed interface with typed events and minimal stable
@@ -133,7 +148,7 @@ ui/<feature>/
   notifications belong in an optional `SharedFlow<FeatureEffect>`. Effects must not be represented
   by
   one-time booleans in `FeatureUiState`.
-- `FeatureScreen` collects state and wires `viewModel::onEvent`; `FeatureContent` receives only the
+- A new `FeatureScreen` collects state and wires `viewModel::onEvent`; `FeatureContent` receives only the
   immutable UI state, visual dependencies and event callback. It must not call ViewModel methods
   directly.
 - The ViewModel handles the event `when`, launches cancellable work, invokes UseCases and maps

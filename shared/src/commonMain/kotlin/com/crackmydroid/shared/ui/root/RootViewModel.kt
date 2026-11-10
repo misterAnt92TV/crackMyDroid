@@ -5,6 +5,7 @@ import com.crackmydroid.shared.domain.usecase.reports.ExportReportUseCase
 import com.crackmydroid.shared.domain.usecase.root.CheckPlayIntegrityUseCase
 import com.crackmydroid.shared.domain.usecase.root.CheckRootUseCase
 import com.crackmydroid.shared.presentation.BaseViewModel
+import com.crackmydroid.shared.util.AppDispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -13,7 +14,7 @@ class RootViewModel(
     private val checkRoot: CheckRootUseCase,
     private val checkPlayIntegrity: CheckPlayIntegrityUseCase,
     private val reportExporter: ExportReportUseCase,
-    dispatchers: com.crackmydroid.shared.util.AppDispatchers,
+    dispatchers: AppDispatchers,
 ) : BaseViewModel(dispatchers) {
     private val _state = MutableStateFlow(RootState())
     val state: StateFlow<RootState> = _state

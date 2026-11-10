@@ -11,6 +11,7 @@ import com.crackmydroid.shared.domain.usecase.settings.SetInstalledAppFavoritesU
 import com.crackmydroid.shared.presentation.BaseViewModel
 import com.crackmydroid.shared.presentation.operations.NoOpOperationLogRepository
 import com.crackmydroid.shared.util.runSuspendCatching
+import com.crackmydroid.shared.util.AppDispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -26,7 +27,7 @@ class InstalledAppsViewModel(
     private val getFavorites: GetInstalledAppFavoritesUseCase,
     private val setFavorites: SetInstalledAppFavoritesUseCase,
     private val operationLogs: OperationLogRepository = NoOpOperationLogRepository,
-    dispatchers: com.crackmydroid.shared.util.AppDispatchers,
+    dispatchers: AppDispatchers,
 ) : BaseViewModel(dispatchers) {
     private val _state = MutableStateFlow(InstalledAppsState())
     val state: StateFlow<InstalledAppsState> = _state

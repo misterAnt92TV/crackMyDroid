@@ -3,6 +3,7 @@ package com.crackmydroid.shared.ui.home
 import com.crackmydroid.shared.domain.model.operation.OperationEntry
 import com.crackmydroid.shared.domain.repository.log.OperationLogRepository
 import com.crackmydroid.shared.presentation.BaseViewModel
+import com.crackmydroid.shared.util.AppDispatchers
 import com.crackmydroid.shared.ui.home.model.HomeState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -10,7 +11,7 @@ import kotlinx.coroutines.flow.update
 
 class HomeViewModel(
     private val operationLogs: OperationLogRepository,
-    dispatchers: com.crackmydroid.shared.util.AppDispatchers,
+    dispatchers: AppDispatchers,
 ) : BaseViewModel(dispatchers) {
     private companion object {
         const val MAX_RECENT_OPERATIONS = 5

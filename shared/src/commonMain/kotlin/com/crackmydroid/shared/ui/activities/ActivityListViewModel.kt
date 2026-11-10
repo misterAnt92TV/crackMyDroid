@@ -21,6 +21,7 @@ import com.crackmydroid.shared.presentation.BaseViewModel
 import com.crackmydroid.shared.presentation.operations.NoOpOperationLogRepository
 import com.crackmydroid.shared.ui.activities.view.uiLabel
 import com.crackmydroid.shared.util.runSuspendCatching
+import com.crackmydroid.shared.util.AppDispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -39,7 +40,7 @@ class ActivityListViewModel(
     private val setPackageFavorites: SetActivityPackageFavoritesUseCase,
     private val reportExporter: ExportReportUseCase,
     private val operationLogs: OperationLogRepository = NoOpOperationLogRepository,
-    dispatchers: com.crackmydroid.shared.util.AppDispatchers,
+    dispatchers: AppDispatchers,
 ) : BaseViewModel(dispatchers) {
     private val json = Json { prettyPrint = true }
     private val _state = MutableStateFlow(ActivityListState())

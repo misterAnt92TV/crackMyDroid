@@ -8,6 +8,7 @@ import com.crackmydroid.shared.i18n.platformLanguage
 import com.crackmydroid.shared.i18n.resolveLanguageCode
 import com.crackmydroid.shared.presentation.BaseViewModel
 import com.crackmydroid.shared.presentation.navigation.Screen
+import com.crackmydroid.shared.util.AppDispatchers
 import com.crackmydroid.shared.ui.activities.ActivityListViewModel
 import com.crackmydroid.shared.ui.home.HomeViewModel
 import com.crackmydroid.shared.ui.info.InfoViewModel
@@ -39,7 +40,7 @@ class AppShellViewModel(
     private val installedApps: InstalledAppsViewModel,
     private val penTesting: PenTestingViewModel,
     private val getVerbose: GetVerboseLogUseCase,
-    dispatchers: com.crackmydroid.shared.util.AppDispatchers,
+    dispatchers: AppDispatchers,
 ) : BaseViewModel(dispatchers) {
     private val _state = MutableStateFlow(AppShellState())
     val state: StateFlow<AppShellState> = _state

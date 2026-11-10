@@ -1,29 +1,13 @@
-# CrackMyDroid platform matrix
+# Test source-set routing
 
-This repository is Kotlin Multiplatform. Select the test source set from the production source set
-and dependency boundary, not from the IDE module name alone.
+Use the shared source-of-truth matrix in
+[the development skill](../../crackmydroid-development/references/platform-matrix.md). This
+reference exists only to route a test task back to that matrix; it intentionally contains no second
+table of frameworks or Gradle commands.
 
-| Production target                       | Test source set              | Libraries and style                                                                                                                       | Validation                                                                 |
-|-----------------------------------------|------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------|
-| `shared/src/commonMain`                 | `shared/src/commonTest`      | `kotlin.test`, `kotlinx-coroutines-test`; real values and platform-neutral fakes                                                          | `./gradlew :shared:allTests` or the narrow common-compatible task          |
-| Shared JVM-compatible ViewModel/UseCase | `shared/src/jvmCommonTest`   | MockK is available; use JUnit 4 when available through the consuming JVM test task; existing tests commonly use `kotlin.test` annotations | `./gradlew :shared:jvmCommonTest`                                          |
-| `shared/src/desktopMain`                | `shared/src/desktopTest`     | `kotlin.test`, coroutine-test; MockK only if the desktop test classpath provides it; prefer fakes for process/filesystem state            | `./gradlew :shared:desktopTest`                                            |
-| `shared/src/androidMain`                | `shared/src/androidUnitTest` | MockK, JUnit 4, coroutine-test; avoid device/framework dependencies in unit tests                                                         | `./gradlew :shared:testDebugUnitTest`                                      |
-| `androidApp/src/main`                   | `androidApp/src/test`        | MockK where useful and JUnit 4 (`org.junit.Test`, `org.junit.Assert`)                                                                     | `./gradlew :androidApp:testDebugUnitTest`                                  |
-| `shared/src/iosMain`                    | `shared/src/iosTest`         | Kotlin/Native-compatible `kotlin.test`; no JVM-only MockK or JUnit                                                                        | Use the repository's available iOS test task; do not substitute a JVM task |
-
-## Current dependency facts
-
-`shared/build.gradle.kts` currently provides:
-
-- `commonTest`: `kotlin("test")` and coroutine-test;
-- `jvmCommonTest`: MockK and coroutine-test;
-- `androidUnitTest`: MockK, JUnit 4, and coroutine-test;
-- `desktopTest`: Kotlin test and coroutine-test, inheriting the JVM-common test source set;
-- `iosTest`: common test dependencies only.
-
-`androidApp/build.gradle.kts` provides JUnit 4 for Android app unit tests. Check the actual Gradle
-file before adding any dependency; do not duplicate an existing alias or version.
+For test-specific design guidance, use this skill's `SKILL.md`: tests must remain behavior-focused,
+use the framework available in the selected source set, and must not silently expand into production
+changes.
 
 ## Pattern selection
 
@@ -52,15 +36,5 @@ Use real representative input. Cover valid input, empty/malformed input, and the
 boundary that the parser/analyzer is responsible for. Avoid mocks unless an external boundary is
 genuinely involved.
 
-## Existing project commands
-
-```bash
-./gradlew :shared:jvmCommonTest
-./gradlew :shared:desktopTest
-./gradlew :shared:testDebugUnitTest
-./gradlew :androidApp:testDebugUnitTest
-./gradlew :shared:allTests
-```
-
-When a task name differs by build variant or is unavailable, inspect Gradle tasks and use the
-closest task for the selected source set; report the exact command used.
+When a task name differs by build variant or is unavailable, inspect the shared matrix and Gradle
+tasks, then use the closest task for the selected source set and report the exact command used.

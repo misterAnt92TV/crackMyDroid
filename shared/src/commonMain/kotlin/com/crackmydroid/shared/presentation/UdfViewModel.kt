@@ -1,5 +1,7 @@
 package com.crackmydroid.shared.presentation
 
+import com.crackmydroid.shared.util.AppDispatchers
+
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -17,7 +19,7 @@ interface UiViewState
  * Usa MVI (Model-View-Intent) pattern con structured concurrency
  */
 abstract class UdfViewModel<Event : UiEvent, State : UiViewState>(
-    dispatchers: com.crackmydroid.shared.util.AppDispatchers,
+    dispatchers: AppDispatchers,
 ) : BaseViewModel(dispatchers) {
     abstract val state: Flow<State>
 

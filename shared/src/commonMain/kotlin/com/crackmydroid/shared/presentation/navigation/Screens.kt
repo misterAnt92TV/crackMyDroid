@@ -1,5 +1,7 @@
 package com.crackmydroid.shared.presentation.navigation
 
+import com.crackmydroid.shared.i18n.Strings
+
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.HelpOutline
 import androidx.compose.material.icons.automirrored.rounded.List
@@ -15,7 +17,7 @@ import androidx.compose.material.icons.rounded.VerifiedUser
 import androidx.compose.ui.graphics.vector.ImageVector
 
 sealed class Screen(
-    val title: (com.crackmydroid.shared.i18n.Strings) -> String,
+    val title: (Strings) -> String,
     val icon: ImageVector,
 ) {
     object Home : Screen({ it.navHome }, Icons.Rounded.Home)

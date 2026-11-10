@@ -4,6 +4,7 @@ import com.crackmydroid.shared.domain.model.shell.ShellCommand
 import com.crackmydroid.shared.domain.usecase.trick.ExecuteShellCommandUseCase
 import com.crackmydroid.shared.domain.usecase.trick.ListShellCommandsUseCase
 import com.crackmydroid.shared.presentation.BaseViewModel
+import com.crackmydroid.shared.util.AppDispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -11,7 +12,7 @@ import kotlinx.coroutines.flow.update
 class TrickViewModel(
     private val listUseCase: ListShellCommandsUseCase,
     private val execUseCase: ExecuteShellCommandUseCase,
-    dispatchers: com.crackmydroid.shared.util.AppDispatchers,
+    dispatchers: AppDispatchers,
 ) : BaseViewModel(dispatchers) {
     private val _state = MutableStateFlow(TrickState())
     val state: StateFlow<TrickState> = _state

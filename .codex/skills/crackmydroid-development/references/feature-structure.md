@@ -55,9 +55,13 @@ introduce a mapper.
 
 ## ViewModel, UDF and UI
 
+The development skill defines the architecture, coroutine, localization, and migration policy.
+This reference only records the feature shape and UI ownership rules.
+
 - State is immutable and exposes only what the screen needs through `StateFlow<FeatureUiState>`.
-- Define a feature-specific sealed `FeatureEvent` and expose one `ViewModel.onEvent(event)` entry
-  point.
+- For new features, define a feature-specific sealed `FeatureEvent` and expose one
+  `ViewModel.onEvent(event)` entry point. Existing features may retain their public API during a
+  bounded change unless UDF migration is explicitly requested.
 - Event names describe the user action and carry typed minimal data: `Refresh`, `AppSelected`,
   `FilterChanged`, `RetryRequested` or `ExportRequested`.
 - ViewModel event handling launches cancellable work, calls UseCases and translates outcomes into
@@ -98,28 +102,7 @@ Use a second preview state for user-visible empty or error conditions. If a 7-in
 affects the layout, add a named `@Preview` with `widthDp = 600` and `heightDp = 960`, in both light
 and night mode when the visual design changes with theme.
 
-## File size and readability gate
+## Readability and completion
 
-At 200 lines, check whether the file already has multiple responsibilities. At 250 lines, split by
-responsibility unless the code is a single coherent algorithm or declarative screen that would
-become harder to follow when fragmented.
-
-Names should expose intent. Comments document decisions that are not obvious from names and control
-flow, especially security decisions, cache invalidation, concurrency sequencing, platform
-workarounds, and external-format assumptions.
-
-## Feature completion gate
-
-Before considering a feature complete, verify that:
-
-- the UseCase, ViewModel, mapper, repository, or adapter behavior changed by the feature has a
-  corresponding focused test;
-- success and at least one meaningful error, empty, or boundary case are covered where the behavior
-  supports them;
-- asynchronous state transitions use deterministic coroutine testing;
-- every new business rule has a UseCase test and every event/state transition has a ViewModel test;
-- UI tests cover rendering and interaction only, with no domain logic in screens;
-- a review search found no repository/UseCase access, `viewModelScope`, `launch`, `async`,
-  application `collect`, direct API calls, or domain transformations in UI directories;
-- test files are placed in the source set matching the production platform;
-- the relevant Gradle test task has executed successfully.
+Use the development skill's readability and completion gates. For test source-set selection and
+test-case requirements, use `crackmydroid-unit-tests` and the shared platform matrix.

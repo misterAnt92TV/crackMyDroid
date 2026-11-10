@@ -8,6 +8,14 @@ description: "Use CrackMyDroid designs in Penpot hosted through the local MCP pl
 Use this skill for any Penpot task in CrackMyDroid: inspecting a hosted file, exporting/importing
 assets, creating or revising Penpot designs, or using the Penpot MCP bridge.
 
+## Scope and precedence
+
+This skill owns Penpot connection, design inspection, design mutation, and exports. For source-code
+or Compose implementation changes, also apply `crackmydroid-development`; that skill owns Kotlin,
+architecture, previews, and tests. For Penpot design/export decisions, this skill is more specific
+and takes precedence over generic UI implementation guidance. Do not use Penpot instructions to
+authorize unrelated code or repository changes.
+
 ## Hosted UI and local bridge
 
 - Use the hosted Penpot UI and the local bridge below as defaults:

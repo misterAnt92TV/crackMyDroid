@@ -25,7 +25,9 @@ import com.crackmydroid.shared.domain.usecase.settings.SetSuggestionsEnabledUseC
 import com.crackmydroid.shared.domain.usecase.settings.SetThemeUseCase
 import com.crackmydroid.shared.domain.usecase.settings.SetVerboseLogUseCase
 import com.crackmydroid.shared.presentation.BaseViewModel
+import com.crackmydroid.shared.presentation.components.SearchHistoryStore
 import com.crackmydroid.shared.util.runSuspendCatching
+import com.crackmydroid.shared.util.AppDispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -51,7 +53,7 @@ class SettingsViewModel(
     private val setIntroSeen: SetIntroSeenUseCase,
     private val getLanguage: GetLanguageUseCase,
     private val setLanguage: SetLanguageUseCase,
-    dispatchers: com.crackmydroid.shared.util.AppDispatchers,
+    dispatchers: AppDispatchers,
 ) : BaseViewModel(dispatchers) {
     private val _state = MutableStateFlow(SettingsState())
     val state: StateFlow<SettingsState> = _state
@@ -154,7 +156,7 @@ class SettingsViewModel(
         persistSetting(
             persist = {
                 setSuggestionsEnabled.invoke(enabled).onSuccess {
-                    com.crackmydroid.shared.presentation.components.SearchHistoryStore.setEnabled(enabled)
+                    SearchHistoryStore.setEnabled(enabled)
                 }
             },
         ) {
@@ -183,7 +185,7 @@ class SettingsViewModel(
     }
 
     fun clearSuggestions() {
-        com.crackmydroid.shared.presentation.components.SearchHistoryStore.clearAll()
+        SearchHistoryStore.clearAll()
     }
 
     fun setExportFormat(format: ExportFormat) {

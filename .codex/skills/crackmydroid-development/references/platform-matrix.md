@@ -27,6 +27,21 @@ Use the production dependency boundary—not the screen name—to choose a sourc
 Use a narrower available task for the changed class when possible. Inspect Gradle tasks if a
 target-specific task differs by variant.
 
+## Skill precedence
+
+When multiple local skills apply, use this order:
+
+| Priority | Rule |
+|---|---|
+| 1 | User request and explicit scope |
+| 2 | Task-specific skill, such as `crackmydroid-unit-tests` or `penpot-mcp` |
+| 3 | `crackmydroid-development` architecture and implementation rules |
+| 4 | This matrix and other supporting references |
+
+The more specific skill may add constraints for its task but must not redefine production-layer
+contracts. If a test-only workflow discovers a production defect, report it and hand the fix to the
+development workflow rather than silently expanding test scope.
+
 ## Dependency direction
 
 ```text
