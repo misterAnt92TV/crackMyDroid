@@ -9,6 +9,8 @@ import com.crackmydroid.shared.domain.usecase.installedapps.ShareApkUseCase
 import com.crackmydroid.shared.domain.usecase.reports.ExportReportUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetInstalledAppFavoritesUseCase
 import com.crackmydroid.shared.domain.usecase.settings.SetInstalledAppFavoritesUseCase
+import com.crackmydroid.shared.i18n.ScreenUiStrings
+import com.crackmydroid.shared.i18n.format
 import com.crackmydroid.shared.presentation.LocalizedBaseViewModel
 import com.crackmydroid.shared.presentation.operations.NoOpOperationLogRepository
 import com.crackmydroid.shared.util.runSuspendCatching
@@ -33,6 +35,7 @@ class InstalledAppsViewModel(
     val state: StateFlow<InstalledAppsState> = _state
     private val queryCount = mutableMapOf<String, Int>()
     private val multiSpaceRegex = Regex("\\s+")
+    private val uiStrings get() = ScreenUiStrings.from(strings)
 
     override fun onEvent(event: InstalledAppsEvent) = when (event) {
         is InstalledAppsEvent.Refresh -> refresh()
@@ -63,7 +66,7 @@ class InstalledAppsViewModel(
                 }
                 .onFailure { err ->
                     if (!isCurrent()) return@onFailure
-                    _state.update { it.copy(error = err.message ?: "Errore", loading = false) }
+                    _state.update { it.copy(error = err.message ?: strings.commandError, loading = false) }
                     operationLogs.record(
                         "Caricamento app installate",
                         success = false,
@@ -115,7 +118,7 @@ class InstalledAppsViewModel(
                     operationLogs.record("Export APK $packageName", success = true, details = path)
                 }
                 .onFailure { err ->
-                    _state.update { it.copy(error = err.message ?: "Errore") }
+                    _state.update { it.copy(error = err.message ?: strings.commandError) }
                     operationLogs.record(
                         "Export APK $packageName",
                         success = false,
@@ -171,7 +174,7 @@ class InstalledAppsViewModel(
                     operationLogs.record("Share APK $packageName", success = true)
                 }
                 .onFailure { err ->
-                    _state.update { it.copy(error = err.message ?: "Errore") }
+                    _state.update { it.copy(error = err.message ?: strings.commandError) }
                     operationLogs.record(
                         "Share APK $packageName",
                         success = false,
@@ -210,17 +213,17 @@ class InstalledAppsViewModel(
     private suspend fun buildListReport(baseName: String): GeneratedReport {
         val sortedApps = _state.value.apps.sortedBy { it.appLabel.lowercase() }
         val content = buildString {
-            appendLine("REPORT APP INSTALLATE")
+            appendLine(uiStrings.installedAppsReportTitle)
             appendLine("==============================================")
-            appendLine("Totale app: ${sortedApps.size}")
-            appendLine("Formato: testo leggibile")
+            appendLine(uiStrings.installedAppsTotal.format(sortedApps.size))
+            appendLine(uiStrings.readableTextFormat)
             appendLine()
             sortedApps.forEachIndexed { index, app ->
                 appendLine("${index + 1}) ${app.appLabel}")
-                appendLine("Package: ${app.packageName}")
-                appendLine("Path APK: ${app.sourcePath}")
-                appendLine("Origine installazione: ${app.installSource.classification}")
-                app.installSource.installingPackageName?.let { appendLine("Installer: $it") }
+                appendLine("${uiStrings.packageLabel}: ${app.packageName}")
+                appendLine("${uiStrings.apkPathLabel}: ${app.sourcePath}")
+                appendLine("${uiStrings.installSourceLabel}: ${app.installSource.classification}")
+                app.installSource.installingPackageName?.let { appendLine("${uiStrings.installerLabel}: $it") }
                 appendLine()
             }
         }

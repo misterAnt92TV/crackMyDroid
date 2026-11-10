@@ -4,6 +4,8 @@ import com.crackmydroid.architecture.coroutines.AppDispatchers
 import com.crackmydroid.shared.domain.model.shell.ShellCommand
 import com.crackmydroid.shared.domain.usecase.trick.ExecuteShellCommandUseCase
 import com.crackmydroid.shared.domain.usecase.trick.ListShellCommandsUseCase
+import com.crackmydroid.shared.i18n.ScreenUiStrings
+import com.crackmydroid.shared.i18n.format
 import com.crackmydroid.shared.presentation.LocalizedBaseViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,6 +18,7 @@ class TrickViewModel(
 ) : LocalizedBaseViewModel<TrickEvent>(dispatchers) {
     private val _state = MutableStateFlow(TrickState())
     val state: StateFlow<TrickState> = _state
+    private val uiStrings get() = ScreenUiStrings.from(strings)
 
     override fun onEvent(event: TrickEvent) = when (event) {
         is TrickEvent.Load -> load()
@@ -40,9 +43,9 @@ class TrickViewModel(
 
     private fun execute(command: ShellCommand) {
         if (_state.value.running) {
-            val active = _state.value.runningCommand?.title ?: "un altro comando"
+            val active = _state.value.runningCommand?.title ?: uiStrings.anotherCommand
             _state.update {
-                it.copy(interactionHint = "Attendi: \"$active\" e ancora in esecuzione.")
+                it.copy(interactionHint = uiStrings.waitCommandRunning.format(active))
             }
             return
         }
@@ -105,9 +108,9 @@ class TrickViewModel(
     private fun dismissResult() = _state.update { it.copy(resultToDisplay = null) }
 
     private fun notifyBusyInteraction(requestedCommand: ShellCommand) {
-        val active = _state.value.runningCommand?.title ?: "un altro comando"
+        val active = _state.value.runningCommand?.title ?: uiStrings.anotherCommand
         _state.update {
-            it.copy(interactionHint = "\"${requestedCommand.title}\" non avviato: prima termina \"$active\".")
+            it.copy(interactionHint = uiStrings.commandNotStartedUntilCurrentEnds.format(requestedCommand.title, active))
         }
     }
 
@@ -115,7 +118,7 @@ class TrickViewModel(
         _state.update {
             it.copy(
                 interactionHint = command.unsupportedReason
-                    ?: "\"${command.title}\" non disponibile sul device selezionato.",
+                    ?: uiStrings.commandNotAvailableOnSelectedDevice.format(command.title),
             )
         }
     }

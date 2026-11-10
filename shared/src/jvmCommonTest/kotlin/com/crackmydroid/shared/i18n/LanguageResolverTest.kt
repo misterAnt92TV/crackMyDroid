@@ -92,6 +92,9 @@ class LanguageResolverTest {
 
         assertEquals("ADB-Gerät auswählen", strings.desktopAdbPickerTitle)
         assertEquals("Datenquelle: Snapshot", strings.desktopDataSourceLabel.format("Snapshot"))
+        assertEquals(strings.desktopAdbPickerTitle, strings.app.desktopAdb.pickerTitle)
+        assertEquals(strings.desktopDetectDevices, strings.app.desktopAdb.detectDevices)
+        assertEquals(strings.desktopDataSourceLabel, strings.app.desktopAdb.dataSourceLabel)
     }
 
     @Test

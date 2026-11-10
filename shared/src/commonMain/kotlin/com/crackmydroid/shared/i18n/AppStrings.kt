@@ -1,0 +1,60 @@
+package com.crackmydroid.shared.i18n
+
+class AppStrings(
+    val desktopAdb: DesktopAdbStrings,
+)
+
+data class DesktopAdbStrings(
+    val pickerTitle: String,
+    val pickerDescription: String,
+    val pathLabel: String,
+    val pathConfigured: String,
+    val detectDevices: String,
+    val settings: String,
+    val noDevices: String,
+    val serialLabel: String,
+    val stateLabel: String,
+    val productLabel: String,
+    val deviceLabel: String,
+    val transportLabel: String,
+    val deviceOffline: String,
+    val deviceUnauthorized: String,
+    val deviceNotReady: String,
+    val changeDevice: String,
+    val rescan: String,
+    val dataSourceLabel: String,
+    val settingsDescription: String,
+    val save: String,
+    val cancel: String,
+    val adbSource: String,
+    val snapshotSource: String,
+)
+
+fun Strings.toAppStrings(): AppStrings =
+    AppStrings(
+        desktopAdb = DesktopAdbStrings(
+            pickerTitle = desktopAdbPickerTitle,
+            pickerDescription = desktopAdbPickerDescription,
+            pathLabel = desktopAdbPathLabel,
+            pathConfigured = desktopAdbPathConfigured,
+            detectDevices = desktopDetectDevices,
+            settings = desktopAdbSettings,
+            noDevices = desktopNoDevices,
+            serialLabel = desktopSerialLabel,
+            stateLabel = desktopStateLabel,
+            productLabel = desktopProductLabel,
+            deviceLabel = desktopDeviceLabel,
+            transportLabel = desktopTransportLabel,
+            deviceOffline = desktopDeviceOffline,
+            deviceUnauthorized = desktopDeviceUnauthorized,
+            deviceNotReady = desktopDeviceNotReady,
+            changeDevice = desktopChangeDevice,
+            rescan = desktopRescan,
+            dataSourceLabel = desktopDataSourceLabel,
+            settingsDescription = desktopAdbSettingsDescription,
+            save = desktopSave,
+            cancel = desktopCancel,
+            adbSource = desktopAdbSource,
+            snapshotSource = desktopSnapshotSource,
+        ),
+    )

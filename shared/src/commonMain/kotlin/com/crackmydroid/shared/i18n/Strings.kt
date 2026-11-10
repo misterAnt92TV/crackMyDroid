@@ -671,6 +671,73 @@ class ScreenUiStrings(private val language: String) {
     val safeTag get() = text("SAFE", "SAFE", "SICHER", "SEGURO", "SÛR")
     val unavailableTag get() = text("NON DISP.", "UNAVAILABLE", "NICHT VERF.", "NO DISP.", "INDISP.")
     val confirmationTag get() = text("CONFERMA", "CONFIRM", "BESTÄTIGUNG", "CONFIRMACIÓN", "CONFIRMATION")
+    val anotherCommand
+        get() = text(
+            "un altro comando",
+            "another command",
+            "ein anderer Befehl",
+            "otro comando",
+            "une autre commande",
+        )
+    val waitCommandRunning
+        get() = text(
+            "Attendi: \"%s\" è ancora in esecuzione.",
+            "Wait: \"%s\" is still running.",
+            "Warte: \"%s\" läuft noch.",
+            "Espera: \"%s\" aún se está ejecutando.",
+            "Attendez : \"%s\" est encore en cours d’exécution.",
+        )
+    val commandNotStartedUntilCurrentEnds
+        get() = text(
+            "\"%s\" non avviato: prima termina \"%s\".",
+            "\"%s\" not started: first finish \"%s\".",
+            "\"%s\" nicht gestartet: zuerst \"%s\" beenden.",
+            "\"%s\" no iniciado: primero termina \"%s\".",
+            "\"%s\" non démarrée : terminez d’abord \"%s\".",
+        )
+    val commandNotAvailableOnSelectedDevice
+        get() = text(
+            "\"%s\" non disponibile sul device selezionato.",
+            "\"%s\" is not available on the selected device.",
+            "\"%s\" ist auf dem ausgewählten Gerät nicht verfügbar.",
+            "\"%s\" no está disponible en el dispositivo seleccionado.",
+            "\"%s\" n’est pas disponible sur l’appareil sélectionné.",
+        )
+    val installedAppsReportTitle
+        get() = text(
+            "REPORT APP INSTALLATE",
+            "INSTALLED APPS REPORT",
+            "BERICHT INSTALLIERTE APPS",
+            "INFORME DE APPS INSTALADAS",
+            "RAPPORT APPLIS INSTALLÉES",
+        )
+    val installedAppsTotal
+        get() = text(
+            "Totale app: %d",
+            "Total apps: %d",
+            "Apps gesamt: %d",
+            "Total de apps: %d",
+            "Total d’applications : %d",
+        )
+    val readableTextFormat
+        get() = text(
+            "Formato: testo leggibile",
+            "Format: readable text",
+            "Format: lesbarer Text",
+            "Formato: texto legible",
+            "Format : texte lisible",
+        )
+    val packageLabel get() = text("Package", "Package", "Paket", "Paquete", "Package")
+    val apkPathLabel get() = text("Path APK", "APK Path", "APK-Pfad", "Ruta APK", "Chemin APK")
+    val installSourceLabel
+        get() = text(
+            "Origine installazione",
+            "Install source",
+            "Installationsquelle",
+            "Origen de instalación",
+            "Source d’installation",
+        )
+    val installerLabel get() = text("Installer", "Installer", "Installer", "Instalador", "Installeur")
     val queuedTarget get() = text("%s %s", "%s %s", "%s %s", "%s %s", "%s %s")
     val errorDetail get() = text("%s: %s", "%s: %s", "%s: %s", "%s: %s", "%s : %s")
     val noTargetValue get() = text("-", "-", "-", "-", "-")
@@ -1244,7 +1311,14 @@ data class Strings(
     val penTestQueuedContentDescription: String = "Queued",
     val penTestPendingContentDescription: String = "Pending",
     val penTestProgressSummary: String = "%1${'$'}d successful, %2${'$'}d errors, %3${'$'}d queued",
-)
+) {
+    val app: AppStrings
+        get() = toAppStrings()
+
+    @Deprecated("Use strings.app.desktopAdb.pickerTitle")
+    val desktopAdbPickerTitleLegacy: String
+        get() = app.desktopAdb.pickerTitle
+}
 
 val LocalStrings = staticCompositionLocalOf { stringsFor("en") }
 
