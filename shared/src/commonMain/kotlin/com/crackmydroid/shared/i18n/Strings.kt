@@ -1314,10 +1314,6 @@ data class Strings(
 ) {
     val app: AppStrings
         get() = toAppStrings()
-
-    @Deprecated("Use strings.app.desktopAdb.pickerTitle")
-    val desktopAdbPickerTitleLegacy: String
-        get() = app.desktopAdb.pickerTitle
 }
 
 val LocalStrings = staticCompositionLocalOf { stringsFor("en") }
