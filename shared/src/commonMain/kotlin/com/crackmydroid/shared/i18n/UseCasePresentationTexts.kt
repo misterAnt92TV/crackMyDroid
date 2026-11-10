@@ -139,6 +139,15 @@ class UseCasePresentationTexts(languageCode: String) {
             "Échec de l’analyse automatique",
         )
 
+    val exportFormatUseCaseRequired
+        get() = text(
+            "GetExportFormatUseCase è richiesto per esportare un report nel formato selezionato",
+            "GetExportFormatUseCase is required to export a report in the selected format",
+            "GetExportFormatUseCase ist erforderlich, um einen Bericht im ausgewählten Format zu exportieren",
+            "GetExportFormatUseCase es obligatorio para exportar un informe en el formato seleccionado",
+            "GetExportFormatUseCase est requis pour exporter un rapport dans le format sélectionné",
+        )
+
     fun activitySurface(level: String, count: Int): String = text(
         "Superficie intent/activity: $level ($count ${if (count == 1) "componente da verificare" else "componenti da verificare"})",
         "intent/activity surface: $level ($count ${if (count == 1) "component to review" else "components to review"})",
