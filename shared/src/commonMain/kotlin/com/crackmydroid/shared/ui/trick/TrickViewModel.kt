@@ -7,17 +7,17 @@ import com.crackmydroid.shared.presentation.BaseViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 
 class TrickViewModel(
     private val listUseCase: ListShellCommandsUseCase,
     private val execUseCase: ExecuteShellCommandUseCase,
-) : BaseViewModel() {
+    dispatchers: com.crackmydroid.shared.util.AppDispatchers,
+) : BaseViewModel(dispatchers) {
     private val _state = MutableStateFlow(TrickState())
     val state: StateFlow<TrickState> = _state
 
     fun load() {
-        scope.launch {
+        launchLatest("trick-load") {
             listUseCase()
                 .onSuccess { list -> _state.update { it.copy(commands = list) } }
                 .onFailure { error -> _state.update { it.copy(error = error.message) } }
@@ -40,7 +40,7 @@ class TrickViewModel(
                 error = null,
             )
         }
-        scope.launch {
+        launchTask {
             execUseCase(command)
                 .onSuccess { res ->
                     _state.update {

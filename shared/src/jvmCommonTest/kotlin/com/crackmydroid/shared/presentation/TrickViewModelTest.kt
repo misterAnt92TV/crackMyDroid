@@ -42,7 +42,7 @@ class TrickViewModelTest {
         val execUseCase = mockk<ExecuteShellCommandUseCase>()
         val cmd = ShellCommand("Elenco pacchetti", "pm list packages", requiresRoot = false)
         coEvery { listUseCase() } returns Result.success(listOf(cmd))
-        val vm = TrickViewModel(listUseCase, execUseCase)
+        val vm = TrickViewModel(listUseCase, execUseCase, TestAppDispatchers(dispatcher))
 
         vm.load()
         advanceUntilIdle()
@@ -70,7 +70,7 @@ class TrickViewModelTest {
                 code = 0,
             ),
         )
-        val vm = TrickViewModel(listUseCase, execUseCase)
+        val vm = TrickViewModel(listUseCase, execUseCase, TestAppDispatchers(dispatcher))
 
         vm.execute(packages)
         assertTrue(vm.state.value.running)
@@ -95,7 +95,7 @@ class TrickViewModelTest {
         val execUseCase = mockk<ExecuteShellCommandUseCase>()
         val command = ShellCommand("Root check", "id", requiresRoot = true)
         coEvery { execUseCase(command) } returns Result.failure(IllegalStateException("su unavailable"))
-        val vm = TrickViewModel(listUseCase, execUseCase)
+        val vm = TrickViewModel(listUseCase, execUseCase, TestAppDispatchers(dispatcher))
 
         vm.execute(command)
         advanceUntilIdle()
@@ -110,7 +110,7 @@ class TrickViewModelTest {
 
     @Test
     fun unsupportedCommand_andClearHint_manageInteractionHint() {
-        val vm = TrickViewModel(mockk(), mockk())
+        val vm = TrickViewModel(mockk(), mockk(), TestAppDispatchers(dispatcher))
         val command = ShellCommand("Root command", "id", requiresRoot = true, unsupportedReason = "Root unavailable")
 
         vm.notifyUnsupportedCommand(command)

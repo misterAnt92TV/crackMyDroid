@@ -50,6 +50,7 @@ class InstalledAppsViewModelTest {
         reportExporter = reportExporter,
         getFavorites = emptyFavorites(),
         setFavorites = mockk<SetInstalledAppFavoritesUseCase>(relaxed = true),
+        dispatchers = TestAppDispatchers(dispatcher),
     )
 
     private fun emptyFavorites(): GetInstalledAppFavoritesUseCase {

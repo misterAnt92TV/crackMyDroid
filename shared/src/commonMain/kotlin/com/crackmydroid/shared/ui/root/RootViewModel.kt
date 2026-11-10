@@ -8,13 +8,13 @@ import com.crackmydroid.shared.presentation.BaseViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 
 class RootViewModel(
     private val checkRoot: CheckRootUseCase,
     private val checkPlayIntegrity: CheckPlayIntegrityUseCase,
     private val reportExporter: ExportReportUseCase,
-) : BaseViewModel() {
+    dispatchers: com.crackmydroid.shared.util.AppDispatchers,
+) : BaseViewModel(dispatchers) {
     private val _state = MutableStateFlow(RootState())
     val state: StateFlow<RootState> = _state
 
@@ -45,11 +45,14 @@ class RootViewModel(
     }
 
     private fun verify(mode: RootCheckMode) {
-        scope.launch {
+        launchLatest("root-check") {
             _state.update { it.copy(loading = true, error = null) }
             checkRoot(mode)
-                .onSuccess { status -> _state.update { it.copy(status = status, loading = false) } }
+                .onSuccess { status ->
+                    if (isCurrent()) _state.update { it.copy(status = status, loading = false) }
+                }
                 .onFailure { err ->
+                    if (!isCurrent()) return@onFailure
                     _state.update {
                         it.copy(
                             error = err.message,
@@ -66,7 +69,7 @@ class RootViewModel(
 
     fun verifyPlayIntegrity() {
         val nonce = _state.value.playIntegrityNonce.ifBlank { "sample-nonce" }
-        scope.launch {
+        launchTask {
             _state.update { it.copy(loading = true, error = null) }
             checkPlayIntegrity(nonce)
                 .onSuccess { res ->
@@ -90,7 +93,7 @@ class RootViewModel(
 
     fun shareReport() {
         val content = buildReportContent()
-        scope.launch {
+        launchTask {
             reportExporter.shareTextReport("root_test_report", "root_test", content)
                 .onSuccess { path -> _state.update { it.copy(reportPath = path, error = null) } }
                 .onFailure { error -> _state.update { it.copy(error = error.message ?: presentationTexts.error) } }

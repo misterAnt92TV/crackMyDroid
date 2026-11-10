@@ -24,7 +24,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 
 class AppShellViewModel(
     private val getIntroSeen: GetIntroSeenUseCase,
@@ -40,7 +39,8 @@ class AppShellViewModel(
     private val installedApps: InstalledAppsViewModel,
     private val penTesting: PenTestingViewModel,
     private val getVerbose: GetVerboseLogUseCase,
-) : BaseViewModel() {
+    dispatchers: com.crackmydroid.shared.util.AppDispatchers,
+) : BaseViewModel(dispatchers) {
     private val _state = MutableStateFlow(AppShellState())
     val state: StateFlow<AppShellState> = _state
     private var initializing = false
@@ -48,7 +48,7 @@ class AppShellViewModel(
     fun initialize() {
         if (_state.value.initialized || initializing) return
         initializing = true
-        scope.launch {
+        launchLatest("app-shell-initialize") {
             try {
                 getVerbose().onSuccess(AppLogger::setVerbose)
                 val settingsLoad = settings.load()
@@ -108,7 +108,7 @@ class AppShellViewModel(
     fun showHelp(message: String) = _state.update { it.copy(helpDialog = message) }
     fun dismissIntro() {
         _state.update { it.copy(showIntro = false) }
-        scope.launch {
+        launchTask {
             setIntroSeen(true)
         }
     }

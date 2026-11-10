@@ -2,7 +2,6 @@ package com.crackmydroid.shared.domain.usecase
 
 import co.touchlab.kermit.Logger
 import com.crackmydroid.shared.AppLogger
-import com.crackmydroid.shared.util.runSuspendCatching
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.currentCoroutineContext
@@ -30,22 +29,23 @@ abstract class BaseUseCase(
         }
         debug("started")
         try {
-            return runSuspendCatching {
+            val value = try {
                 currentCoroutineContext().ensureActive()
                 val value = if (dispatcher == null) block() else withContext(dispatcher) { block() }
                 currentCoroutineContext().ensureActive()
                 value
-            }.also { result ->
-                result.fold(
-                    onSuccess = { debug("succeeded") },
-                    onFailure = { error ->
-                        currentCoroutineContext().ensureActive()
-                        logger.e {
-                            "useCase=$name operation=$operation outcome=failed durationMs=${started.elapsedNow().inWholeMilliseconds} category=${error::class.simpleName ?: "Exception"}"
-                        }
-                    },
-                )
+            } catch (cancellation: CancellationException) {
+                debug("cancelled")
+                throw cancellation
+            } catch (failure: Exception) {
+                currentCoroutineContext().ensureActive()
+                logger.e {
+                    "useCase=$name operation=$operation outcome=failed durationMs=${started.elapsedNow().inWholeMilliseconds} category=${failure::class.simpleName ?: "Exception"}"
+                }
+                return Result.failure(failure)
             }
+            debug("succeeded")
+            return Result.success(value)
         } catch (cancellation: CancellationException) {
             debug("cancelled")
             throw cancellation

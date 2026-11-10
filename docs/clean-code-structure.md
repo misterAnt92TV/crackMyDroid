@@ -37,7 +37,8 @@ La regola pratica è: il codice più vicino al dominio deve conoscere meno detta
   o nel Domain, mai nel composable.
 - Loading, successo, errore e stato vuoto devono essere rappresentati esplicitamente quando hanno
   significato per l'utente.
-- Le coroutine usano lo scope del ViewModel e devono essere cancellabili.
+- Le coroutine usano `BaseViewModel.launchTask` o `launchLatest(key)` e devono essere cancellabili;
+  i flussi sostituibili non duplicano contatori di richiesta o mappe di job.
 - `onCleared()` deve rilasciare lo scope e non lasciare lavori in background.
 - Il ViewModel non istanzia repository: riceve le dipendenze dal composition root.
 - Il ViewModel coordina la presentazione; non duplica regole di business già appartenenti al

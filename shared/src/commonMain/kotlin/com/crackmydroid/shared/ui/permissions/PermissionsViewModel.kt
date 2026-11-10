@@ -10,17 +10,12 @@ import com.crackmydroid.shared.domain.usecase.settings.GetPermissionFavoritesUse
 import com.crackmydroid.shared.domain.usecase.settings.SetPermissionFavoritesUseCase
 import com.crackmydroid.shared.presentation.BaseViewModel
 import com.crackmydroid.shared.util.AppDispatchers
-import com.crackmydroid.shared.util.DefaultAppDispatchers
 import com.crackmydroid.shared.util.runSuspendCatching
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class PermissionsViewModel(
@@ -30,17 +25,17 @@ class PermissionsViewModel(
     private val reportExporter: ExportReportUseCase,
     private val getFavorites: GetPermissionFavoritesUseCase,
     private val setFavorites: SetPermissionFavoritesUseCase,
-    dispatchers: AppDispatchers = DefaultAppDispatchers,
+    dispatchers: AppDispatchers,
 ) : BaseViewModel(dispatchers) {
+    private companion object {
+        const val REFRESH_KEY = "permissions-refresh"
+        const val RISK_SCAN_KEY = "permissions-risk-scan"
+        const val REPORT_PREVIEW_KEY = "permissions-preview"
+    }
+
     private val _state = MutableStateFlow(PermissionsState())
     val state: StateFlow<PermissionsState> = _state
     private val queryCount = mutableMapOf<String, Int>()
-    private var riskScanJob: Job? = null
-    private var riskScanId = 0L
-    private var refreshJob: Job? = null
-    private var refreshId = 0L
-    private var reportPreviewJob: Job? = null
-    private var reportPreviewId = 0L
     private val multiSpaceRegex = Regex("\\s+")
     override fun onLanguageChanged() {
         val previewPackage = _state.value.reportPreviewPackage
@@ -53,11 +48,9 @@ class PermissionsViewModel(
         cancelAutoRiskScan()
         dismissReportPreview()
         cancelRefresh()
-        val request = refreshId
-        refreshJob = scope.launch {
+        launchLatest(REFRESH_KEY) {
             val favoritesResult = getFavorites()
-            currentCoroutineContext().ensureActive()
-            if (request != refreshId) return@launch
+            ensureCurrent()
             favoritesResult.onSuccess { favorites ->
                 updatePresentation { it.copy(favorites = favorites) }
             }
@@ -76,8 +69,7 @@ class PermissionsViewModel(
                 )
             }
             val result = listPermissions()
-            currentCoroutineContext().ensureActive()
-            if (request != refreshId) return@launch
+            ensureCurrent()
             result
                 .onSuccess { apps -> updatePresentation { it.copy(apps = apps, loading = false) } }
                 .onFailure { err ->
@@ -147,7 +139,7 @@ class PermissionsViewModel(
 
     fun export() {
         val reportText = useCaseTexts
-        scope.launch {
+        launchTask {
             val currentState = _state.value
             runSuspendCatching {
                 val content = buildPermissionsReport(
@@ -181,7 +173,7 @@ class PermissionsViewModel(
             }
             it.copy(favorites = favorites)
         }
-        scope.launch {
+        launchTask {
             setFavorites(_state.value.favorites)
                 .onFailure { error -> _state.update { it.copy(error = error.message) } }
         }
@@ -190,7 +182,7 @@ class PermissionsViewModel(
     fun shareSingle(packageName: String, contentOverride: String? = null) {
         val reportText = useCaseTexts
         val noData = presentationTexts.noPackageData
-        scope.launch {
+        launchTask {
             val currentState = _state.value
             val app = currentState.apps.find { it.packageName == packageName }
             val risk = currentState.riskReports.find { it.packageName == packageName }
@@ -217,8 +209,6 @@ class PermissionsViewModel(
     }
 
     fun requestReportPreview(packageName: String) {
-        reportPreviewJob?.cancel()
-        val requestId = ++reportPreviewId
         val currentState = _state.value
         val app = currentState.apps.find { it.packageName == packageName }
         val risk = currentState.riskReports.find { it.packageName == packageName }
@@ -232,13 +222,13 @@ class PermissionsViewModel(
                 reportPreviewError = null,
             )
         }
-        reportPreviewJob = scope.launch {
+        launchLatest(REPORT_PREVIEW_KEY) {
             val result = if (app == null) {
                 Result.success(reportCopy.noPackageData)
             } else {
                 buildPermissionsReport.single(app, risk, reportText)
             }
-            if (requestId != reportPreviewId) return@launch
+            ensureCurrent()
             result.onSuccess { content ->
                 _state.update { it.copy(reportPreviewLoading = false, reportPreviewContent = content) }
             }.onFailure { error ->
@@ -253,9 +243,7 @@ class PermissionsViewModel(
     }
 
     fun dismissReportPreview() {
-        ++reportPreviewId
-        reportPreviewJob?.cancel()
-        reportPreviewJob = null
+        cancelLatest(REPORT_PREVIEW_KEY)
         _state.update {
             it.copy(
                 reportPreviewPackage = null,
@@ -276,8 +264,6 @@ class PermissionsViewModel(
         cancelRefresh()
         cancelAutoRiskScan()
         dismissReportPreview()
-        val request = riskScanId
-
         updatePresentation {
             it.copy(
                 error = null,
@@ -293,14 +279,14 @@ class PermissionsViewModel(
             )
         }
 
-        riskScanJob = scope.launch {
+        launchLatest(RISK_SCAN_KEY) {
             val results = mutableListOf<PermissionRiskReport>()
             try {
                 apps.forEachIndexed { index, app ->
+                    ensureCurrent()
                     _state.update { it.copy(autoScanCurrentLabel = app.appLabel) }
                     val report = analyzePermissionRisks(app).getOrThrow()
-                    currentCoroutineContext().ensureActive()
-                    if (request != riskScanId) return@launch
+                    ensureCurrent()
                     val sorted = if (report != null) {
                         results += report
                         withContext(dispatchers.default) {
@@ -309,8 +295,7 @@ class PermissionsViewModel(
                     } else {
                         _state.value.riskReports
                     }
-                    currentCoroutineContext().ensureActive()
-                    if (request != riskScanId) return@launch
+                    ensureCurrent()
                     updatePresentation {
                         it.copy(
                             autoScanScannedApps = index + 1,
@@ -322,11 +307,11 @@ class PermissionsViewModel(
             } catch (cancellation: CancellationException) {
                 throw cancellation
             } catch (failure: Exception) {
-                if (request == riskScanId) {
+                if (isCurrent()) {
                     _state.update { it.copy(error = failure.message ?: presentationTexts.permissionScanFailed) }
                 }
             } finally {
-                if (request == riskScanId) {
+                if (isCurrent()) {
                     _state.update {
                         it.copy(
                             autoScanRunning = false,
@@ -339,9 +324,7 @@ class PermissionsViewModel(
     }
 
     fun cancelAutoRiskScan() {
-        ++riskScanId
-        riskScanJob?.cancel()
-        riskScanJob = null
+        cancelLatest(RISK_SCAN_KEY)
         _state.update {
             it.copy(
                 autoScanRunning = false,
@@ -351,9 +334,7 @@ class PermissionsViewModel(
     }
 
     private fun cancelRefresh() {
-        ++refreshId
-        refreshJob?.cancel()
-        refreshJob = null
+        cancelLatest(REFRESH_KEY)
     }
 
     private fun normalizeQuery(value: String): String = value

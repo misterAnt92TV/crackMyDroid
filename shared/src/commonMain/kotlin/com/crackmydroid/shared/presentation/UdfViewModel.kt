@@ -16,7 +16,9 @@ interface UiViewState
  * UDF Pattern - Base ViewModel con proper state management
  * Usa MVI (Model-View-Intent) pattern con structured concurrency
  */
-abstract class UdfViewModel<Event : UiEvent, State : UiViewState> : BaseViewModel() {
+abstract class UdfViewModel<Event : UiEvent, State : UiViewState>(
+    dispatchers: com.crackmydroid.shared.util.AppDispatchers,
+) : BaseViewModel(dispatchers) {
     abstract val state: Flow<State>
 
     abstract suspend fun handleEvent(event: Event)

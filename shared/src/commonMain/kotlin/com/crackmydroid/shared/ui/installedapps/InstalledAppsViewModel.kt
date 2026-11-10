@@ -14,7 +14,6 @@ import com.crackmydroid.shared.util.runSuspendCatching
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.encodeToJsonElement
@@ -27,15 +26,17 @@ class InstalledAppsViewModel(
     private val getFavorites: GetInstalledAppFavoritesUseCase,
     private val setFavorites: SetInstalledAppFavoritesUseCase,
     private val operationLogs: OperationLogRepository = NoOpOperationLogRepository,
-) : BaseViewModel() {
+    dispatchers: com.crackmydroid.shared.util.AppDispatchers,
+) : BaseViewModel(dispatchers) {
     private val _state = MutableStateFlow(InstalledAppsState())
     val state: StateFlow<InstalledAppsState> = _state
     private val queryCount = mutableMapOf<String, Int>()
     private val multiSpaceRegex = Regex("\\s+")
 
     fun refresh() {
-        scope.launch {
+        launchLatest("installed-apps-refresh") {
             val favoritesResult = getFavorites()
+            ensureCurrent()
             favoritesResult.onSuccess { favorites ->
                 updatePresentation { it.copy(favorites = favorites) }
             }
@@ -44,10 +45,12 @@ class InstalledAppsViewModel(
             }
             listUseCase()
                 .onSuccess { list ->
+                    if (!isCurrent()) return@onSuccess
                     updatePresentation { it.copy(apps = list, loading = false) }
                     operationLogs.record("Caricate ${list.size} app installate", success = true)
                 }
                 .onFailure { err ->
+                    if (!isCurrent()) return@onFailure
                     _state.update { it.copy(error = err.message ?: "Errore", loading = false) }
                     operationLogs.record(
                         "Caricamento app installate",
@@ -91,7 +94,7 @@ class InstalledAppsViewModel(
     }
 
     fun export(packageName: String) {
-        scope.launch {
+        launchTask {
             _state.update { it.copy(error = null) }
             val result = exportUseCase(packageName)
             result
@@ -111,7 +114,7 @@ class InstalledAppsViewModel(
     }
 
     fun exportAll(baseName: String = "installed_apps") {
-        scope.launch {
+        launchTask {
             _state.update { it.copy(error = null) }
             runSuspendCatching {
                 val report = buildListReport(baseName)
@@ -129,7 +132,7 @@ class InstalledAppsViewModel(
     }
 
     fun shareAll(baseName: String = "installed_apps") {
-        scope.launch {
+        launchTask {
             _state.update { it.copy(error = null) }
             runSuspendCatching {
                 val report = buildListReport(baseName)
@@ -147,7 +150,7 @@ class InstalledAppsViewModel(
     }
 
     fun share(packageName: String, bluetoothOnly: Boolean) {
-        scope.launch {
+        launchTask {
             _state.update { it.copy(error = null) }
             val result = shareUseCase(packageName, bluetoothOnly)
             result
@@ -176,7 +179,7 @@ class InstalledAppsViewModel(
             if (favs.contains(packageName)) favs.remove(packageName) else favs.add(packageName)
             it.copy(favorites = favs)
         }
-        scope.launch {
+        launchTask {
             setFavorites(_state.value.favorites)
                 .onFailure { error -> _state.update { it.copy(error = error.message) } }
         }

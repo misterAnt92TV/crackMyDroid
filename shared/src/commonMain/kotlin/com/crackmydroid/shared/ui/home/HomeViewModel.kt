@@ -7,11 +7,11 @@ import com.crackmydroid.shared.ui.home.model.HomeState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 
 class HomeViewModel(
     private val operationLogs: OperationLogRepository,
-) : BaseViewModel() {
+    dispatchers: com.crackmydroid.shared.util.AppDispatchers,
+) : BaseViewModel(dispatchers) {
     private companion object {
         const val MAX_RECENT_OPERATIONS = 5
     }
@@ -20,7 +20,7 @@ class HomeViewModel(
     val state: StateFlow<HomeState> = _state
 
     init {
-        scope.launch {
+        launchTask {
             operationLogs.entries.collect { entries ->
                 _state.update {
                     it.copy(

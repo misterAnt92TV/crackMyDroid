@@ -194,6 +194,7 @@ class InfoViewModelTest {
                 CheckRootUseCase(rootRepository),
                 ExportReportUseCase(mockk()),
                 builder,
+                TestAppDispatchers(dispatcher),
             )
         vm.load()
         runCurrent()
@@ -221,6 +222,7 @@ class InfoViewModelTest {
             },
         ),
         BuildDeviceInfoReportUseCase(dispatchers = TestAppDispatchers(dispatcher)),
+        TestAppDispatchers(dispatcher),
     )
 
     private fun deviceInfo() = DeviceInfo(

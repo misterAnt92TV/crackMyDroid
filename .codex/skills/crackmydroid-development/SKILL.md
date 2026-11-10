@@ -65,6 +65,12 @@ file organization.
   fakes and mocks explicitly rather than omitting dependencies.
 - UseCases own business decisions, validation, and orchestration. Repository implementations own
   external access and error translation.
+- `BaseViewModel` owns the injected `AppDispatchers`, lifecycle scope, and coroutine primitives:
+  use `launchTask` for independent work and `launchLatest(key)` for replaceable refresh, preview,
+  scan, or recomputation flows. Check `LatestTask.isCurrent()`/`ensureCurrent()` before publishing
+  results; do not duplicate request counters when the base primitive provides the same guard.
+- `BaseUseCase` never owns a scope or job. It may switch CPU work to `AppDispatchers.default`,
+  propagates `CancellationException`, and leaves I/O dispatching to repositories and adapters.
 - Define repository contracts in `domain/repository`; inject implementations through Koin
   `platformModule()` or another composition root.
 - Add a mapper only for a meaningful boundary transformation. Do not create one-to-one wrappers with

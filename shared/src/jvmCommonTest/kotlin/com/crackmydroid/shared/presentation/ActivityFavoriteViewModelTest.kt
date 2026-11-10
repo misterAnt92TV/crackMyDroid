@@ -72,6 +72,7 @@ class ActivityFavoriteViewModelTest {
             getPackageFavorites = GetActivityPackageFavoritesUseCase(settings),
             setPackageFavorites = SetActivityPackageFavoritesUseCase(settings),
             reportExporter = ExportReportUseCase(mockk<ReportFileRepository>(relaxed = true)),
+            dispatchers = TestAppDispatchers(dispatcher),
         )
 
         viewModel.refresh()

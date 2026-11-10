@@ -268,5 +268,6 @@ class SettingsViewModelTest {
         getHighContrast, setHighContrast, getReduceMotion, setReduceMotion,
         getLargeText, setLargeText, getSuggestions, setSuggestions,
         getHints, setHints, getIntroSeen, setIntro, getLanguage, setLanguage,
+        TestAppDispatchers(dispatcher),
     )
 }

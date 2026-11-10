@@ -21,11 +21,9 @@ import com.crackmydroid.shared.presentation.BaseViewModel
 import com.crackmydroid.shared.presentation.operations.NoOpOperationLogRepository
 import com.crackmydroid.shared.ui.activities.view.uiLabel
 import com.crackmydroid.shared.util.runSuspendCatching
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
@@ -41,19 +39,20 @@ class ActivityListViewModel(
     private val setPackageFavorites: SetActivityPackageFavoritesUseCase,
     private val reportExporter: ExportReportUseCase,
     private val operationLogs: OperationLogRepository = NoOpOperationLogRepository,
-) : BaseViewModel() {
+    dispatchers: com.crackmydroid.shared.util.AppDispatchers,
+) : BaseViewModel(dispatchers) {
     private val json = Json { prettyPrint = true }
     private val _state = MutableStateFlow(ActivityListState())
     val state: StateFlow<ActivityListState> = _state
     private val queryCount = mutableMapOf<String, Int>()
-    private var recomputeJob: Job? = null
     private val multiSpaceRegex = Regex("\\s+")
 
     fun refresh() {
-        scope.launch {
+        launchLatest("activities-refresh") {
             val favoritesResult = runSuspendCatching {
                 getFavorites().getOrThrow() to getPackageFavorites().getOrThrow()
             }
+            ensureCurrent()
             favoritesResult.onSuccess { (favorites, packages) ->
                 _state.update { it.copy(favorites = favorites, favoritePackages = packages) }
             }
@@ -62,6 +61,7 @@ class ActivityListViewModel(
             }
             getActivities()
                 .onSuccess { list ->
+                    if (!isCurrent()) return@onSuccess
                     recomputeAsync(_state.value.copy(activities = list, loading = false))
                     operationLogs.record(
                         OperationEvent(OperationEventKey.ACTIVITY_LOAD, listOf(list.size.toString())),
@@ -69,6 +69,7 @@ class ActivityListViewModel(
                     )
                 }
                 .onFailure { err ->
+                    if (!isCurrent()) return@onFailure
                     _state.update { it.copy(error = err.message ?: presentationTexts.error, loading = false) }
                     operationLogs.record(
                         OperationEvent(OperationEventKey.ACTIVITY_LOAD),
@@ -139,7 +140,7 @@ class ActivityListViewModel(
             )
             return
         }
-        scope.launch {
+        launchTask {
             val result = launchActivity(entry, normalizedAction, normalizedData, normalizedMimeType)
             result.onFailure { err ->
                 val msg = err.message ?: "Impossibile avviare ${entry.activityName}"
@@ -170,7 +171,7 @@ class ActivityListViewModel(
         val favs = _state.value.favorites.toMutableSet()
         if (favs.contains(key)) favs.remove(key) else favs.add(key)
         recomputeAsync(_state.value.copy(favorites = favs))
-        scope.launch {
+        launchTask {
             setFavorites(favs)
                 .onFailure { error -> _state.update { it.copy(error = error.message) } }
         }
@@ -180,7 +181,7 @@ class ActivityListViewModel(
         val favs = _state.value.favoritePackages.toMutableSet()
         if (favs.contains(packageName)) favs.remove(packageName) else favs.add(packageName)
         recomputeAsync(_state.value.copy(favoritePackages = favs))
-        scope.launch {
+        launchTask {
             setPackageFavorites(favs)
                 .onFailure { error -> _state.update { it.copy(error = error.message) } }
         }
@@ -199,7 +200,7 @@ class ActivityListViewModel(
     }
 
     fun exportAll() {
-        scope.launch {
+        launchTask {
             runSuspendCatching {
                 val content = buildExportContent(_state.value.activities)
                 reportExporter.save(
@@ -233,7 +234,7 @@ class ActivityListViewModel(
             )
             return
         }
-        scope.launch {
+        launchTask {
             runSuspendCatching {
                 val content = buildExportContent(acts)
                 reportExporter.share(
@@ -443,11 +444,7 @@ class ActivityListViewModel(
 
     private fun recomputeAsync(state: ActivityListState) {
         _state.value = state
-        recomputeJob?.cancel()
-        recomputeJob = scope.launch {
-            val newState = recompute(state)
-            _state.value = newState
-        }
+        _state.value = recompute(state)
     }
 
     private fun normalizeQuery(value: String): String = value

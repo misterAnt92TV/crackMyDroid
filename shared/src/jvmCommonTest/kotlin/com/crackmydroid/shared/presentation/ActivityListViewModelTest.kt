@@ -56,6 +56,7 @@ class ActivityListViewModelTest {
         getPackageFavorites = emptyPackageFavorites(),
         setPackageFavorites = mockk<SetActivityPackageFavoritesUseCase>(relaxed = true),
         reportExporter = reportExporter,
+        dispatchers = TestAppDispatchers(dispatcher),
     )
 
     private fun emptyActivityFavorites(): GetActivityFavoritesUseCase {

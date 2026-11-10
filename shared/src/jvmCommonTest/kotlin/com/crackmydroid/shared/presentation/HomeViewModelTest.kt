@@ -34,7 +34,7 @@ class HomeViewModelTest {
     @Test
     fun recentOperations_isEmptyWhenRepositoryIsEmpty() = runTest(dispatcher) {
         val repository = FakeOperationLogRepository()
-        val viewModel = HomeViewModel(repository)
+        val viewModel = HomeViewModel(repository, TestAppDispatchers(dispatcher))
 
         advanceUntilIdle()
 
@@ -46,7 +46,7 @@ class HomeViewModelTest {
     fun recentOperations_keepsOnlyFiveInRepositoryOrder() = runTest(dispatcher) {
         val entries = (1..6).map { index -> entry("operation-$index", timestamp = 100L - index) }
         val repository = FakeOperationLogRepository(entries)
-        val viewModel = HomeViewModel(repository)
+        val viewModel = HomeViewModel(repository, TestAppDispatchers(dispatcher))
 
         advanceUntilIdle()
 
@@ -67,7 +67,7 @@ class HomeViewModelTest {
             entry("three", 0),
         )
         val repository = FakeOperationLogRepository(entries)
-        val viewModel = HomeViewModel(repository)
+        val viewModel = HomeViewModel(repository, TestAppDispatchers(dispatcher))
 
         advanceUntilIdle()
 

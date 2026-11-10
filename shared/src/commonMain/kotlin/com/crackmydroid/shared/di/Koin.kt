@@ -128,8 +128,8 @@ fun commonModule() = module {
 }
 
 fun presentationModule() = module {
-    factory { ActivityListViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get()) }
-    factory { HomeViewModel(get()) }
+    factory { ActivityListViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
+    factory { HomeViewModel(get(), get()) }
     factory {
         val activity = get<ActivityListViewModel>()
         val home = get<HomeViewModel>()
@@ -156,6 +156,7 @@ fun presentationModule() = module {
                 installedApps = installedApps,
                 penTesting = penTesting,
                 getVerbose = get(),
+                dispatchers = get(),
             ),
             activity = activity,
             home = home,
@@ -169,9 +170,9 @@ fun presentationModule() = module {
             penTesting = penTesting,
         )
     }
-    factory { RootViewModel(get(), get(), get()) }
-    factory { InfoViewModel(get(), get(), get(), get()) }
-    factory { TrickViewModel(get(), get()) }
+    factory { RootViewModel(get(), get(), get(), get()) }
+    factory { InfoViewModel(get(), get(), get(), get(), get()) }
+    factory { TrickViewModel(get(), get(), get()) }
     factory {
         SettingsViewModel(
             get(), get(), // theme
@@ -184,10 +185,11 @@ fun presentationModule() = module {
             get(), get(), // feature hints enabled
             get(), get(),  // intro seen
             get(), get(), // language
+            get(), // dispatchers
         )
     }
     factory { LogViewModel(get(), get(), get()) }
     factory { PermissionsViewModel(get(), get(), get(), get(), get(), get(), get()) }
-    factory { InstalledAppsViewModel(get(), get(), get(), get(), get(), get(), get()) }
-    factory { PenTestingViewModel(get(), get(), get(), get(), get(), get()) }
+    factory { InstalledAppsViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
+    factory { PenTestingViewModel(get(), get(), get(), get(), get(), get(), get()) }
 }

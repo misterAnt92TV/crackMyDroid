@@ -29,7 +29,6 @@ import com.crackmydroid.shared.util.runSuspendCatching
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 
 class SettingsViewModel(
     private val getTheme: GetThemeUseCase,
@@ -52,12 +51,13 @@ class SettingsViewModel(
     private val setIntroSeen: SetIntroSeenUseCase,
     private val getLanguage: GetLanguageUseCase,
     private val setLanguage: SetLanguageUseCase,
-) : BaseViewModel() {
+    dispatchers: com.crackmydroid.shared.util.AppDispatchers,
+) : BaseViewModel(dispatchers) {
     private val _state = MutableStateFlow(SettingsState())
     val state: StateFlow<SettingsState> = _state
     private var savingFormat = false
 
-    fun load() = scope.launch {
+    fun load() = launchLatest("settings-load") {
         _state.update { it.copy(loading = true, error = null) }
         val language = getLanguage().onSuccess { value ->
             _state.update { it.copy(language = value) }
@@ -190,7 +190,7 @@ class SettingsViewModel(
         if (_state.value.exportFormat == format) return
         if (savingFormat) return
         savingFormat = true
-        scope.launch {
+        launchTask {
             try {
                 setExportFormat.invoke(format)
                     .onSuccess { _state.update { it.copy(exportFormat = format, error = null) } }
@@ -202,7 +202,7 @@ class SettingsViewModel(
     }
 
     private fun persistSetting(persist: suspend () -> Result<Unit>, updateState: () -> Unit) {
-        scope.launch {
+        launchTask {
             runSuspendCatching {
                 persist().getOrThrow()
                 updateState()

@@ -58,9 +58,11 @@ Ogni nuova sezione applicativa concretizza il flusso con un `FeatureEvent` tipiz
 `SharedFlow<FeatureEffect>` per effetti one-shot. La screen collega questi contratti; il content
 renderizza soltanto `FeatureUiState` e inoltra gli eventi.
 
-I ViewModel usano `BaseViewModel` per possedere uno scope cancellabile. Il lavoro asincrono deve
-essere lanciato nello scope del ViewModel, con dispatcher forniti tramite `AppDispatchers`, e deve
-pubblicare stati coerenti per loading, successo ed errore.
+I ViewModel usano `BaseViewModel` per possedere uno scope cancellabile e l’iniezione di
+`AppDispatchers`. Il lavoro asincrono usa `launchTask` per operazioni indipendenti e
+`launchLatest(key)` per refresh, preview, scansioni o ricalcoli sostituibili; prima di pubblicare un
+risultato deve verificare che il lavoro sia ancora corrente. La cancellazione avviene sempre in
+`onCleared()` e deve pubblicare stati coerenti per loading, successo ed errore.
 
 La UI non contiene logica applicativa: Screen e composable ricevono `UiState` immutabile e callback,
 renderizzano il contenuto e inoltrano gli eventi. Non possono accedere a UseCase, repository,

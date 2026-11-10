@@ -124,6 +124,7 @@ class RootViewModelTest {
             CheckRootUseCase(repository),
             CheckPlayIntegrityUseCase(repository),
             ExportReportUseCase(files, format),
+            TestAppDispatchers(dispatcher),
         )
         viewModel.verify()
         advanceUntilIdle()
@@ -144,5 +145,6 @@ class RootViewModelTest {
         CheckRootUseCase(repository),
         CheckPlayIntegrityUseCase(repository),
         ExportReportUseCase(mockk<ReportFileRepository>(relaxed = true)),
+        TestAppDispatchers(dispatcher),
     )
 }

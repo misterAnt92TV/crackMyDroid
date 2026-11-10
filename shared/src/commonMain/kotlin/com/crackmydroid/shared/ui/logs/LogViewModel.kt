@@ -4,28 +4,25 @@ import com.crackmydroid.shared.domain.usecase.log.ExportLogsUseCase
 import com.crackmydroid.shared.domain.usecase.log.GetLogsUseCase
 import com.crackmydroid.shared.presentation.BaseViewModel
 import com.crackmydroid.shared.util.AppDispatchers
-import com.crackmydroid.shared.util.DefaultAppDispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class LogViewModel(
     private val getLogs: GetLogsUseCase,
     private val exportLogs: ExportLogsUseCase,
-    dispatchers: AppDispatchers = DefaultAppDispatchers,
+    dispatchers: AppDispatchers,
 ) : BaseViewModel(dispatchers) {
     private val _state = MutableStateFlow(LogState())
     val state: StateFlow<LogState> = _state
-    private var recomputeJob: Job? = null
 
     fun refresh() {
-        scope.launch {
+        launchLatest("logs-refresh") {
             _state.update { it.copy(loading = true, error = null, message = null) }
             getLogs()
                 .onSuccess { list ->
+                    if (!isCurrent()) return@onSuccess
                     val trimmed = if (list.size > MAX_LINES) list.takeLast(MAX_LINES) else list
                     recomputeAsync(
                         _state.value.copy(
@@ -36,6 +33,7 @@ class LogViewModel(
                     )
                 }
                 .onFailure { err ->
+                    if (!isCurrent()) return@onFailure
                     _state.update {
                         it.copy(
                             error = err.message,
@@ -53,7 +51,7 @@ class LogViewModel(
     fun filtered(): List<String> = _state.value.visibleLogs
 
     fun export() {
-        scope.launch {
+        launchTask {
             val current = _state.value.visibleLogs
             exportLogs(current)
                 .onSuccess { path -> _state.update { it.copy(message = path) } }
@@ -93,10 +91,10 @@ class LogViewModel(
 
     private fun recomputeAsync(state: LogState) {
         _state.value = state
-        recomputeJob?.cancel()
-        recomputeJob = scope.launch(dispatchers.default) {
-            val newState = recompute(state)
-            withContext(dispatchers.main) { _state.value = newState }
+        launchLatest("logs-recompute") {
+            val newState = withContext(dispatchers.default) { recompute(state) }
+            ensureCurrent()
+            _state.value = newState
         }
     }
 
