@@ -79,4 +79,6 @@ interface UseCaseReportText {
     fun noRiskyPermissions(): String
     fun noDataAvailable(): String
     fun noDeclaredPermissions(): String
+    fun sectionSeparator(): String
+    fun subsectionSeparator(): String
 }

@@ -57,7 +57,7 @@ class BuildPermissionsReportUseCase(
             )
 
             appendLine(text.label(ReportLabel.PERMISSIONS_REPORT_TITLE))
-            appendLine("==============================================")
+            appendLine(text.sectionSeparator())
             appendLine(
                 text.permissionOverview(
                     appCount = apps.size,
@@ -85,7 +85,7 @@ class BuildPermissionsReportUseCase(
 
             sortedApps.forEachIndexed { index, app ->
                 context.ensureActive()
-                appendLine("--------------------------------------------------")
+                appendLine(text.subsectionSeparator())
                 appendLine(text.permissionAppHeading(index + 1, app.appLabel))
                 appendLine("${text.label(ReportLabel.PACKAGE)}: ${app.packageName}")
                 appendLine(text.declaredPermissionCount(app.permissions.size))
@@ -136,7 +136,7 @@ class BuildPermissionsReportUseCase(
         buildString {
             val context = currentCoroutineContext()
             appendLine(text.label(ReportLabel.SINGLE_PERMISSIONS_REPORT_TITLE))
-            appendLine("==============================================")
+            appendLine(text.sectionSeparator())
             appendLine("${text.label(ReportLabel.APP)}: ${app.appLabel}")
             appendLine("${text.label(ReportLabel.PACKAGE)}: ${app.packageName}")
             appendLine(text.declaredPermissionCount(app.permissions.size))
@@ -148,7 +148,7 @@ class BuildPermissionsReportUseCase(
             )
             appendLine()
             appendLine(text.label(ReportLabel.RISK_ANALYSIS).uppercase())
-            appendLine("----------------------------------------------")
+            appendLine(text.subsectionSeparator())
             if (riskReport == null) {
                 appendLine(text.noRiskyPermissions())
             } else {
@@ -170,7 +170,7 @@ class BuildPermissionsReportUseCase(
             }
             appendLine()
             appendLine(text.label(ReportLabel.PERMISSIONS).uppercase())
-            appendLine("----------------------------------------------")
+            appendLine(text.subsectionSeparator())
             if (app.permissions.isEmpty()) {
                 appendLine(text.noDeclaredPermissions())
             } else {

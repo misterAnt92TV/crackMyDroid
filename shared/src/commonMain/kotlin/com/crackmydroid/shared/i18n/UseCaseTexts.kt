@@ -633,6 +633,10 @@ class UseCaseTexts(languageCode: String) : UseCaseReportText {
         "Aucune autorisation déclarée",
     )
 
+    override fun sectionSeparator(): String = "=============================================="
+
+    override fun subsectionSeparator(): String = "----------------------------------------------"
+
     private fun riskSummary(score: Int, critical: Int, high: Int, medium: Int): String =
         "score $score (" +
             t("critical", "critici", "kritisch", "críticos", "critiques") + ": $critical, " +
