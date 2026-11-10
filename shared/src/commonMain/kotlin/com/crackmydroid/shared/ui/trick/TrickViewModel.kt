@@ -19,6 +19,7 @@ class TrickViewModel(
 
     override fun onEvent(event: TrickEvent) = when (event) {
         is TrickEvent.Load -> load()
+        is TrickEvent.Execute -> execute(event.command)
         is TrickEvent.ExecutionRequested -> requestExecution(event.command)
         is TrickEvent.ExecutionConfirmed -> confirmPendingExecution()
         is TrickEvent.PendingCommandDismissed -> dismissPendingCommand()
@@ -29,7 +30,7 @@ class TrickViewModel(
         is TrickEvent.ErrorDismissed -> clearError()
     }
 
-    fun load() {
+    private fun load() {
         launchLatest("trick-load") {
             listUseCase()
                 .onSuccess { list -> _state.update { it.copy(commands = list) } }
@@ -37,7 +38,7 @@ class TrickViewModel(
         }
     }
 
-    fun execute(command: ShellCommand) {
+    private fun execute(command: ShellCommand) {
         if (_state.value.running) {
             val active = _state.value.runningCommand?.title ?: "un altro comando"
             _state.update {
@@ -86,7 +87,7 @@ class TrickViewModel(
         }
     }
 
-    fun requestExecution(command: ShellCommand) {
+    private fun requestExecution(command: ShellCommand) {
         if (command.confirmation != null) {
             _state.update { it.copy(pendingCommand = command) }
         } else {
@@ -94,23 +95,23 @@ class TrickViewModel(
         }
     }
 
-    fun confirmPendingExecution() {
+    private fun confirmPendingExecution() {
         val command = _state.value.pendingCommand ?: return
         _state.update { it.copy(pendingCommand = null) }
         execute(command)
     }
 
-    fun dismissPendingCommand() = _state.update { it.copy(pendingCommand = null) }
-    fun dismissResult() = _state.update { it.copy(resultToDisplay = null) }
+    private fun dismissPendingCommand() = _state.update { it.copy(pendingCommand = null) }
+    private fun dismissResult() = _state.update { it.copy(resultToDisplay = null) }
 
-    fun notifyBusyInteraction(requestedCommand: ShellCommand) {
+    private fun notifyBusyInteraction(requestedCommand: ShellCommand) {
         val active = _state.value.runningCommand?.title ?: "un altro comando"
         _state.update {
             it.copy(interactionHint = "\"${requestedCommand.title}\" non avviato: prima termina \"$active\".")
         }
     }
 
-    fun notifyUnsupportedCommand(command: ShellCommand) {
+    private fun notifyUnsupportedCommand(command: ShellCommand) {
         _state.update {
             it.copy(
                 interactionHint = command.unsupportedReason
@@ -119,11 +120,11 @@ class TrickViewModel(
         }
     }
 
-    fun clearInteractionHint() {
+    private fun clearInteractionHint() {
         _state.update { it.copy(interactionHint = null) }
     }
 
-    fun clearError() {
+    private fun clearError() {
         _state.update { it.copy(error = null) }
     }
 }

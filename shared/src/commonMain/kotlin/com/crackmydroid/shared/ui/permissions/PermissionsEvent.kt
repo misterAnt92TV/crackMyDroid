@@ -10,7 +10,7 @@ sealed class PermissionsEvent : UiEvent() {
     class ErrorDismissed : PermissionsEvent()
     class ExportRequested : PermissionsEvent()
     class FavoriteToggled(val packageName: String) : PermissionsEvent()
-    class ReportShared(val packageName: String) : PermissionsEvent()
+    class ReportShared(val packageName: String, val contentOverride: String? = null) : PermissionsEvent()
     class ReportPreviewRequested(val packageName: String) : PermissionsEvent()
     class ReportPreviewDismissed : PermissionsEvent()
     class AutoRiskScanStarted : PermissionsEvent()

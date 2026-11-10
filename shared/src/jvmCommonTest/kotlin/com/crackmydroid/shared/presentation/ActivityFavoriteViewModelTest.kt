@@ -13,6 +13,7 @@ import com.crackmydroid.shared.domain.usecase.settings.GetActivityPackageFavorit
 import com.crackmydroid.shared.domain.usecase.settings.GetExportFormatUseCase
 import com.crackmydroid.shared.domain.usecase.settings.SetActivityFavoritesUseCase
 import com.crackmydroid.shared.domain.usecase.settings.SetActivityPackageFavoritesUseCase
+import com.crackmydroid.shared.ui.activities.ActivityListEvent
 import com.crackmydroid.shared.ui.activities.ActivityListViewModel
 import io.mockk.coEvery
 import io.mockk.coJustRun
@@ -75,10 +76,10 @@ class ActivityFavoriteViewModelTest {
             dispatchers = TestAppDispatchers(dispatcher),
         )
 
-        viewModel.refresh()
+        viewModel.handleEvent(ActivityListEvent.Refresh())
         advanceUntilIdle()
         assertEquals(setOf(entry.favoriteKey()), viewModel.state.value.favorites)
-        viewModel.toggleFavorite(entry)
+        viewModel.handleEvent(ActivityListEvent.FavoriteToggled(entry))
         advanceUntilIdle()
 
         assertEquals(emptySet(), viewModel.state.value.favorites)

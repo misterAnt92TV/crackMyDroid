@@ -150,6 +150,9 @@ fun CrackMyDroidApp(
             LocalStrings provides strings,
             LocalAccessibilityPrefs provides accessibilityPrefs,
         ) {
+            val onHelp: (String) -> Unit = { message ->
+                shellVm.handleEvent(AppShellEvent.HelpRequested(message))
+            }
             val navigateFromDrawer: (Screen) -> Unit = { target ->
                 scope.launch { drawerState.close() }
                 shellVm.handleEvent(AppShellEvent.ScreenSelected(target, settingsState.value.featureHintsEnabled))
@@ -290,7 +293,7 @@ fun CrackMyDroidApp(
                                         viewModel = homeVm,
                                         padding = adjustedPadding,
                                         headerHelp = strings.helpHome,
-                                        onHelp = shellVm::showHelp,
+                                        onHelp = onHelp,
                                         onMenu = openDrawer,
                                         languageCode = languageCode,
                                     )
@@ -299,7 +302,7 @@ fun CrackMyDroidApp(
                                         viewModel = activityVm,
                                         padding = adjustedPadding,
                                         headerHelp = strings.helpActivities,
-                                        onHelp = shellVm::showHelp,
+                                        onHelp = onHelp,
                                         onBack = backToHome,
                                         onMenu = openDrawer,
                                     )
@@ -308,7 +311,7 @@ fun CrackMyDroidApp(
                                         rootVm,
                                         adjustedPadding,
                                         headerHelp = strings.helpRoot,
-                                        onHelp = shellVm::showHelp,
+                                        onHelp = onHelp,
                                         onBack = backToHome,
                                         onMenu = openDrawer,
                                     )
@@ -317,7 +320,7 @@ fun CrackMyDroidApp(
                                         infoVm,
                                         adjustedPadding,
                                         headerHelp = strings.helpInfo,
-                                        onHelp = shellVm::showHelp,
+                                        onHelp = onHelp,
                                         onMenu = openDrawer,
                                     )
 
@@ -325,7 +328,7 @@ fun CrackMyDroidApp(
                                         trickVm,
                                         adjustedPadding,
                                         headerHelp = strings.helpTrick,
-                                        onHelp = shellVm::showHelp,
+                                        onHelp = onHelp,
                                         onBack = backToHome,
                                         onMenu = openDrawer,
                                     )
@@ -334,7 +337,7 @@ fun CrackMyDroidApp(
                                         penTestingVm,
                                         adjustedPadding,
                                         headerHelp = strings.helpPentest,
-                                        onHelp = shellVm::showHelp,
+                                        onHelp = onHelp,
                                         onBack = backToHome,
                                         onMenu = openDrawer,
                                     )
@@ -343,7 +346,7 @@ fun CrackMyDroidApp(
                                         installedAppsVm,
                                         adjustedPadding,
                                         headerHelp = strings.helpApk,
-                                        onHelp = shellVm::showHelp,
+                                        onHelp = onHelp,
                                         onBack = backToHome,
                                         onMenu = openDrawer,
                                     )
@@ -352,7 +355,7 @@ fun CrackMyDroidApp(
                                         permissionsVm,
                                         adjustedPadding,
                                         headerHelp = strings.helpPermissions,
-                                        onHelp = shellVm::showHelp,
+                                        onHelp = onHelp,
                                         onBack = backToHome,
                                         onMenu = openDrawer,
                                     )
@@ -361,7 +364,7 @@ fun CrackMyDroidApp(
                                         logVm,
                                         adjustedPadding,
                                         headerHelp = strings.helpLog,
-                                        onHelp = shellVm::showHelp,
+                                        onHelp = onHelp,
                                         onBack = backToHome,
                                         onMenu = openDrawer,
                                     )
@@ -370,13 +373,13 @@ fun CrackMyDroidApp(
                                         settingsVm,
                                         adjustedPadding,
                                         headerHelp = strings.helpSettings,
-                                        onHelp = shellVm::showHelp,
+                                        onHelp = onHelp,
                                         onMenu = openDrawer,
                                     )
 
                                     Screen.Help -> HelpScreen(
                                         padding = adjustedPadding,
-                                        onHelp = shellVm::showHelp,
+                                        onHelp = onHelp,
                                         onMenu = openDrawer,
                                         onNavigate = { target -> shellVm.handleEvent(AppShellEvent.ScreenSelected(target, false)) },
                                     )
@@ -397,11 +400,11 @@ fun CrackMyDroidApp(
 
         if (shellState.showIntro) {
             androidx.compose.material3.AlertDialog(
-                onDismissRequest = shellVm::dismissIntro,
+                onDismissRequest = { shellVm.handleEvent(AppShellEvent.IntroDismissed()) },
                 title = { AppText(strings.introTitle) },
                 text = { AppText(strings.introBody) },
                 confirmButton = {
-                    androidx.compose.material3.Button(onClick = shellVm::dismissIntro) {
+                    androidx.compose.material3.Button(onClick = { shellVm.handleEvent(AppShellEvent.IntroDismissed()) }) {
                         AppText(strings.introAgree)
                     }
                 },
@@ -453,9 +456,9 @@ fun CrackMyDroidApp(
 
         shellState.helpDialog?.let { msg ->
             androidx.compose.material3.AlertDialog(
-                onDismissRequest = shellVm::dismissHelp,
+                onDismissRequest = { shellVm.handleEvent(AppShellEvent.HelpDismissed()) },
                 confirmButton = {
-                    androidx.compose.material3.TextButton(onClick = shellVm::dismissHelp) {
+                    androidx.compose.material3.TextButton(onClick = { shellVm.handleEvent(AppShellEvent.HelpDismissed()) }) {
                         AppText(strings.close)
                     }
                 },

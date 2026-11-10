@@ -4,6 +4,7 @@ import com.crackmydroid.shared.domain.model.shell.ShellCommand
 import com.crackmydroid.shared.domain.model.shell.ShellCommandResult
 import com.crackmydroid.shared.domain.usecase.trick.ExecuteShellCommandUseCase
 import com.crackmydroid.shared.domain.usecase.trick.ListShellCommandsUseCase
+import com.crackmydroid.shared.ui.trick.TrickEvent
 import com.crackmydroid.shared.ui.trick.TrickViewModel
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -44,7 +45,7 @@ class TrickViewModelTest {
         coEvery { listUseCase() } returns Result.success(listOf(cmd))
         val vm = TrickViewModel(listUseCase, execUseCase, TestAppDispatchers(dispatcher))
 
-        vm.load()
+        vm.handleEvent(TrickEvent.Load())
         advanceUntilIdle()
 
         assertEquals(1, vm.state.value.commands.size)
@@ -72,11 +73,11 @@ class TrickViewModelTest {
         )
         val vm = TrickViewModel(listUseCase, execUseCase, TestAppDispatchers(dispatcher))
 
-        vm.execute(packages)
+        vm.handleEvent(TrickEvent.Execute(packages))
         assertTrue(vm.state.value.running)
         assertEquals("Elenco pacchetti", vm.state.value.runningCommand?.title)
 
-        vm.execute(top)
+        vm.handleEvent(TrickEvent.Execute(top))
         assertTrue(vm.state.value.running)
         assertTrue(vm.state.value.interactionHint?.contains("Elenco pacchetti") == true)
 
@@ -97,13 +98,13 @@ class TrickViewModelTest {
         coEvery { execUseCase(command) } returns Result.failure(IllegalStateException("su unavailable"))
         val vm = TrickViewModel(listUseCase, execUseCase, TestAppDispatchers(dispatcher))
 
-        vm.execute(command)
+        vm.handleEvent(TrickEvent.Execute(command))
         advanceUntilIdle()
 
         assertEquals(false, vm.state.value.running)
         assertEquals("Root check", vm.state.value.lastCommandTitle)
         assertEquals("su unavailable", vm.state.value.error)
-        vm.clearError()
+        vm.handleEvent(TrickEvent.ErrorDismissed())
         assertEquals(null, vm.state.value.error)
         vm.onCleared()
     }
@@ -113,9 +114,9 @@ class TrickViewModelTest {
         val vm = TrickViewModel(mockk(), mockk(), TestAppDispatchers(dispatcher))
         val command = ShellCommand("Root command", "id", requiresRoot = true, unsupportedReason = "Root unavailable")
 
-        vm.notifyUnsupportedCommand(command)
+        vm.handleEvent(TrickEvent.UnsupportedCommandNotified(command))
         assertEquals("Root unavailable", vm.state.value.interactionHint)
-        vm.clearInteractionHint()
+        vm.handleEvent(TrickEvent.InteractionHintDismissed())
 
         assertEquals(null, vm.state.value.interactionHint)
         vm.onCleared()

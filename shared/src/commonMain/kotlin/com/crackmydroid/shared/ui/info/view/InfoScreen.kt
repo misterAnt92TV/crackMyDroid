@@ -133,7 +133,7 @@ fun InfoScreen(
         headerHelp = headerHelp,
         onHelp = onHelp,
         onMenu = onMenu,
-        onShare = { viewModel.handleEvent(InfoEvent.Share()) },
+        onShare = { content -> viewModel.handleEvent(InfoEvent.Share(content)) },
     )
 }
 

@@ -13,10 +13,12 @@ changes.
 
 ### ViewModel or state holder
 
-Use a deterministic dispatcher, stub repository calls with `coEvery`, invoke the public action, call
-`advanceUntilIdle()`, and assert the exposed state. Include an empty/error response when the
-ViewModel maps those states. Verify a repository interaction only when it represents a meaningful
-contract.
+Use a deterministic dispatcher, stub UseCase and repository calls with `coEvery`, and interact
+exclusively through `handleEvent(UiEvent)`. Keep all action functions private. Use Turbine with
+`assertEvent(event, vm.state)` and `assertEffect(event, vm.effects)` or `handleEvent(event)` followed
+by `advanceUntilIdle()` to assert state transitions. Include loading, success, empty, and error
+responses. Verify repository/UseCase interactions only when they represent a meaningful contract.
+Never use instrumentation tests for ViewModels.
 
 ### UseCase
 

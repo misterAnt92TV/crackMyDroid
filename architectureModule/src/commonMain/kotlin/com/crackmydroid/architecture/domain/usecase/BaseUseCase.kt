@@ -39,7 +39,8 @@ abstract class BaseUseCase(
                 currentCoroutineContext().ensureActive()
                 logger.e {
                     "useCase=$name operation=$operation outcome=failed " +
-                        "durationMs=${started.elapsedNow().inWholeMilliseconds} category=${failure::class.simpleName ?: "Exception"}"
+                        "durationMs=${started.elapsedNow().inWholeMilliseconds} " +
+                        "category=${failure::class.simpleName ?: "Exception"}"
                 }
                 return Result.failure(failure)
             }

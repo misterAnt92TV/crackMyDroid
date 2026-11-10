@@ -26,7 +26,7 @@ class LogViewModel(
         is LogEvent.ColorByLevelChanged -> setColorByLevel(event.enabled)
     }
 
-    fun refresh() {
+    private fun refresh() {
         launchLatest("logs-refresh") {
             _state.update { it.copy(loading = true, error = null, message = null) }
             getLogs()
@@ -53,13 +53,13 @@ class LogViewModel(
         }
     }
 
-    fun setFilter(value: String) {
+    private fun setFilter(value: String) {
         recomputeAsync(_state.value.copy(filter = value))
     }
 
-    fun filtered(): List<String> = _state.value.visibleLogs
+    private fun filtered(): List<String> = _state.value.visibleLogs
 
-    fun export() {
+    private fun export() {
         launchTask {
             val current = _state.value.visibleLogs
             exportLogs(current)
@@ -68,18 +68,18 @@ class LogViewModel(
         }
     }
 
-    fun clearError() {
+    private fun clearError() {
         _state.update { it.copy(error = null) }
     }
 
-    fun toggleLevel(level: Char) {
+    private fun toggleLevel(level: Char) {
         val current = _state.value
         val set = current.levels.toMutableSet()
         if (set.contains(level)) set.remove(level) else set.add(level)
         recomputeAsync(current.copy(levels = set))
     }
 
-    fun setColorByLevel(enabled: Boolean) {
+    private fun setColorByLevel(enabled: Boolean) {
         _state.update { it.copy(colorByLevel = enabled) }
     }
 

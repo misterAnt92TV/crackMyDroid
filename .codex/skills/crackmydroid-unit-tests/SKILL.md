@@ -66,6 +66,30 @@ whose behavior is outside the unit under test. A test must assert an outcome or 
 interaction; do not assert private implementation details, call counts without behavioral meaning,
 or a mock setup with no assertion.
 
+### ViewModel event-driven testing with Turbine and MockK
+
+CrackMyDroid ViewModels enforce a strict Unidirectional Data Flow (UDF) pattern based on `BaseViewModel<E : UiEvent>`:
+- All action functions invoked by `onEvent(event)` must remain **private**. The only public entry point for UI and tests is `handleEvent(event: UiEvent)`.
+- Never use Android instrumentation tests for ViewModel verification. ViewModel unit tests reside in `shared/src/jvmCommonTest` (or module unit tests), running as fast, deterministic JVM/Desktop tests.
+- Use **Turbine** (`app.cash.turbine`) and the project's testing extensions (`com.crackmydroid.shared.presentation.assertEvent` and `assertEffect`) to verify `StateFlow` and `SharedFlow` emissions sequentially without flaky sleeps or manual delays:
+  ```kotlin
+  viewModel.assertEvent(MyEvent.Refresh(), viewModel.state) {
+      val initial = awaitItem()
+      val loading = awaitItem()
+      assertTrue(loading.loading)
+      val loaded = awaitItem()
+      assertEquals(expectedData, loaded.data)
+      cancelAndIgnoreRemainingEvents() // if subsequent background work emits further states
+  }
+  ```
+- Alternatively, for discrete events with `advanceUntilIdle()`:
+  ```kotlin
+  viewModel.handleEvent(MyEvent.FilterChanged("query"))
+  advanceUntilIdle()
+  assertEquals(expectedList, viewModel.state.value.filteredItems)
+  ```
+- Use **MockK** to stub UseCases and Repositories (`coEvery { useCase() } returns Result.success(...)`) and verify effects (`coVerify(exactly = 1) { repository.save(...) }`).
+
 For coroutine-based code:
 
 - use `kotlinx-coroutines-test` and a deterministic test dispatcher/test scope;

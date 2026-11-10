@@ -1,9 +1,13 @@
 package com.crackmydroid.shared.presentation
 
+import app.cash.turbine.test
 import com.crackmydroid.shared.domain.model.operation.OperationEntry
-import com.crackmydroid.shared.domain.model.operation.OperationEvent
 import com.crackmydroid.shared.domain.repository.log.OperationLogRepository
+import com.crackmydroid.shared.ui.home.HomeEvent
 import com.crackmydroid.shared.ui.home.HomeViewModel
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,10 +24,13 @@ import kotlin.test.assertEquals
 @OptIn(ExperimentalCoroutinesApi::class)
 class HomeViewModelTest {
     private val dispatcher = StandardTestDispatcher()
+    private val operationLogs = mockk<OperationLogRepository>(relaxed = true)
+    private val entriesFlow = MutableStateFlow<List<OperationEntry>>(emptyList())
 
     @BeforeTest
     fun setUp() {
         Dispatchers.setMain(dispatcher)
+        every { operationLogs.entries } returns entriesFlow
     }
 
     @AfterTest
@@ -33,25 +40,28 @@ class HomeViewModelTest {
 
     @Test
     fun recentOperations_isEmptyWhenRepositoryIsEmpty() = runTest(dispatcher) {
-        val repository = FakeOperationLogRepository()
-        val viewModel = HomeViewModel(repository, TestAppDispatchers(dispatcher))
+        val viewModel = HomeViewModel(operationLogs, TestAppDispatchers(dispatcher))
 
-        advanceUntilIdle()
-
-        assertEquals(emptyList(), viewModel.state.value.recentOperations)
+        viewModel.state.test {
+            val item = awaitItem()
+            assertEquals(emptyList(), item.recentOperations)
+        }
         viewModel.onCleared()
     }
 
     @Test
     fun recentOperations_keepsOnlyFiveInRepositoryOrder() = runTest(dispatcher) {
         val entries = (1..6).map { index -> entry("operation-$index", timestamp = 100L - index) }
-        val repository = FakeOperationLogRepository(entries)
-        val viewModel = HomeViewModel(repository, TestAppDispatchers(dispatcher))
+        entriesFlow.value = entries
+        val viewModel = HomeViewModel(operationLogs, TestAppDispatchers(dispatcher))
 
         advanceUntilIdle()
 
-        assertEquals(5, viewModel.state.value.recentOperations.size)
-        assertEquals(entries.take(5), viewModel.state.value.recentOperations)
+        viewModel.state.test {
+            val current = awaitItem()
+            assertEquals(5, current.recentOperations.size)
+            assertEquals(entries.take(5), current.recentOperations)
+        }
         viewModel.onCleared()
     }
 
@@ -66,8 +76,8 @@ class HomeViewModelTest {
             entry("two", 1),
             entry("three", 0),
         )
-        val repository = FakeOperationLogRepository(entries)
-        val viewModel = HomeViewModel(repository, TestAppDispatchers(dispatcher))
+        entriesFlow.value = entries
+        val viewModel = HomeViewModel(operationLogs, TestAppDispatchers(dispatcher))
 
         advanceUntilIdle()
 
@@ -75,6 +85,34 @@ class HomeViewModelTest {
             listOf("duplicate", "duplicate", "one", "two", "three"),
             viewModel.state.value.recentOperations.map { it.description },
         )
+        viewModel.onCleared()
+    }
+
+    @Test
+    fun handleEvent_hideFromRecent_callsRepository() = runTest(dispatcher) {
+        val target = entry("test-op", 10)
+        entriesFlow.value = listOf(target)
+        val viewModel = HomeViewModel(operationLogs, TestAppDispatchers(dispatcher))
+        advanceUntilIdle()
+
+        viewModel.handleEvent(HomeEvent.HideFromRecent(target.operationId))
+        advanceUntilIdle()
+
+        verify { operationLogs.hideFromRecent(target) }
+        viewModel.onCleared()
+    }
+
+    @Test
+    fun handleEvent_remove_callsRepository() = runTest(dispatcher) {
+        val target = entry("test-op", 10)
+        entriesFlow.value = listOf(target)
+        val viewModel = HomeViewModel(operationLogs, TestAppDispatchers(dispatcher))
+        advanceUntilIdle()
+
+        viewModel.handleEvent(HomeEvent.Remove(target.operationId))
+        advanceUntilIdle()
+
+        verify { operationLogs.remove(target) }
         viewModel.onCleared()
     }
 
@@ -90,15 +128,4 @@ class HomeViewModelTest {
         operationId = "$description-$timestamp",
         hiddenFromRecent = hidden,
     )
-
-    private class FakeOperationLogRepository(initialEntries: List<OperationEntry> = emptyList()) :
-        OperationLogRepository {
-        private val flow = MutableStateFlow(initialEntries)
-        override val entries = flow
-
-        override fun record(description: String, success: Boolean, details: String?) = Unit
-        override fun record(event: OperationEvent, success: Boolean, details: String?) = Unit
-        override fun hideFromRecent(entry: OperationEntry) = Unit
-        override fun remove(entry: OperationEntry) = Unit
-    }
 }

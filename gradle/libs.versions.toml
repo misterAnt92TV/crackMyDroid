@@ -9,6 +9,7 @@ koinCompose = "1.1.5"
 kermit = "2.0.4"
 coroutines = "1.8.1"
 mockk = "1.13.13"
+turbine = "1.2.0"
 rootbeer = "0.1.1"
 datastore = "1.1.7"
 playIntegrity = "1.4.0"
@@ -58,6 +59,7 @@ coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", ve
 coroutines-swing = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-swing", version.ref = "coroutines" }
 coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
+turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
 rootbeer = { module = "com.scottyab:rootbeer-lib", version.ref = "rootbeer" }
 datastore = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore" }
 play-integrity = { module = "com.google.android.play:integrity", version.ref = "playIntegrity" }

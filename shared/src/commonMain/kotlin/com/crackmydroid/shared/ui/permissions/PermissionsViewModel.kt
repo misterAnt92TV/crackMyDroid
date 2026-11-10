@@ -50,7 +50,7 @@ class PermissionsViewModel(
         is PermissionsEvent.ErrorDismissed -> clearError()
         is PermissionsEvent.ExportRequested -> export()
         is PermissionsEvent.FavoriteToggled -> toggleFavorite(event.packageName)
-        is PermissionsEvent.ReportShared -> sharePreview(event.packageName)
+        is PermissionsEvent.ReportShared -> shareSingle(event.packageName, event.contentOverride ?: _state.value.reportPreviewContent)
         is PermissionsEvent.ReportPreviewRequested -> requestReportPreview(event.packageName)
         is PermissionsEvent.ReportPreviewDismissed -> dismissReportPreview()
         is PermissionsEvent.AutoRiskScanStarted -> startAutoRiskScan()
@@ -63,7 +63,7 @@ class PermissionsViewModel(
         if (previewPackage != null) requestReportPreview(previewPackage)
     }
 
-    fun refresh() {
+    private fun refresh() {
         cancelAutoRiskScan()
         dismissReportPreview()
         cancelRefresh()
@@ -102,7 +102,7 @@ class PermissionsViewModel(
         }
     }
 
-    fun setFilter(value: String, trackUsage: Boolean = false) {
+    private fun setFilter(value: String, trackUsage: Boolean = false) {
         if (trackUsage) {
             val normalized = normalizeQuery(value)
             if (normalized.length >= 2) {
@@ -115,11 +115,11 @@ class PermissionsViewModel(
         updatePresentation { it.copy(filter = value) }
     }
 
-    fun setShowOnlyRisky(enabled: Boolean) {
+    private fun setShowOnlyRisky(enabled: Boolean) {
         updatePresentation { it.copy(showOnlyRisky = enabled) }
     }
 
-    fun toggleShowOnlyRisky() {
+    private fun toggleShowOnlyRisky() {
         updatePresentation { it.copy(showOnlyRisky = !it.showOnlyRisky) }
     }
 
@@ -152,11 +152,11 @@ class PermissionsViewModel(
         )
     }
 
-    fun clearError() {
+    private fun clearError() {
         _state.update { it.copy(error = null) }
     }
 
-    fun export() {
+    private fun export() {
         val reportText = useCaseTexts
         launchTask {
             val currentState = _state.value
@@ -180,7 +180,7 @@ class PermissionsViewModel(
         }
     }
 
-    fun toggleFavorite(packageName: String) {
+    private fun toggleFavorite(packageName: String) {
         updatePresentation {
             val favorites = it.favorites.toMutableSet()
             if (favorites.contains(packageName)) {
@@ -198,7 +198,7 @@ class PermissionsViewModel(
         }
     }
 
-    fun shareSingle(packageName: String, contentOverride: String? = null) {
+    private fun shareSingle(packageName: String, contentOverride: String? = null) {
         val reportText = useCaseTexts
         val noData = presentationTexts.noPackageData
         launchTask {
@@ -236,7 +236,7 @@ class PermissionsViewModel(
         dismissReportPreview()
     }
 
-    fun requestReportPreview(packageName: String) {
+    private fun requestReportPreview(packageName: String) {
         val currentState = _state.value
         val app = currentState.apps.find { it.packageName == packageName }
         val risk = currentState.riskReports.find { it.packageName == packageName }
@@ -270,7 +270,7 @@ class PermissionsViewModel(
         }
     }
 
-    fun dismissReportPreview() {
+    private fun dismissReportPreview() {
         cancelLatest(REPORT_PREVIEW_KEY)
         _state.update {
             it.copy(
@@ -282,7 +282,7 @@ class PermissionsViewModel(
         }
     }
 
-    fun startAutoRiskScan() {
+    private fun startAutoRiskScan() {
         val apps = _state.value.apps
         if (apps.isEmpty()) {
             _state.update { it.copy(error = presentationTexts.noPermissionApps) }
@@ -351,7 +351,7 @@ class PermissionsViewModel(
         }
     }
 
-    fun cancelAutoRiskScan() {
+    private fun cancelAutoRiskScan() {
         cancelLatest(RISK_SCAN_KEY)
         _state.update {
             it.copy(

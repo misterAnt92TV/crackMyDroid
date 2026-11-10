@@ -45,7 +45,7 @@ class InstalledAppsViewModel(
         is InstalledAppsEvent.FavoriteToggled -> toggleFavorite(event.packageName)
     }
 
-    fun refresh() {
+    private fun refresh() {
         launchLatest("installed-apps-refresh") {
             val favoritesResult = getFavorites()
             ensureCurrent()
@@ -73,7 +73,7 @@ class InstalledAppsViewModel(
         }
     }
 
-    fun setFilter(value: String, trackUsage: Boolean = false) {
+    private fun setFilter(value: String, trackUsage: Boolean = false) {
         if (trackUsage) {
             val normalized = normalizeQuery(value)
             if (normalized.length >= 2) {
@@ -105,7 +105,7 @@ class InstalledAppsViewModel(
         )
     }
 
-    fun export(packageName: String) {
+    private fun export(packageName: String) {
         launchTask {
             _state.update { it.copy(error = null) }
             val result = exportUseCase(packageName)
@@ -125,7 +125,7 @@ class InstalledAppsViewModel(
         }
     }
 
-    fun exportAll(baseName: String = "installed_apps") {
+    private fun exportAll(baseName: String = "installed_apps") {
         launchTask {
             _state.update { it.copy(error = null) }
             runSuspendCatching {
@@ -143,7 +143,7 @@ class InstalledAppsViewModel(
         }
     }
 
-    fun shareAll(baseName: String = "installed_apps") {
+    private fun shareAll(baseName: String = "installed_apps") {
         launchTask {
             _state.update { it.copy(error = null) }
             runSuspendCatching {
@@ -161,7 +161,7 @@ class InstalledAppsViewModel(
         }
     }
 
-    fun share(packageName: String, bluetoothOnly: Boolean) {
+    private fun share(packageName: String, bluetoothOnly: Boolean) {
         launchTask {
             _state.update { it.copy(error = null) }
             val result = shareUseCase(packageName, bluetoothOnly)
@@ -181,11 +181,11 @@ class InstalledAppsViewModel(
         }
     }
 
-    fun clearError() {
+    private fun clearError() {
         _state.update { it.copy(error = null) }
     }
 
-    fun toggleFavorite(packageName: String) {
+    private fun toggleFavorite(packageName: String) {
         updatePresentation {
             val favs = it.favorites.toMutableSet()
             if (favs.contains(packageName)) favs.remove(packageName) else favs.add(packageName)

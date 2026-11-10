@@ -38,13 +38,13 @@ class HomeViewModel(private val operationLogs: OperationLogRepository, dispatche
         }
     }
 
-    fun hideFromRecent(operationId: String) {
+    private fun hideFromRecent(operationId: String) {
         operationLogs.entries.value
             .firstOrNull { entry -> entry.stableId() == operationId }
             ?.let(operationLogs::hideFromRecent)
     }
 
-    fun remove(operationId: String) {
+    private fun remove(operationId: String) {
         operationLogs.entries.value
             .firstOrNull { entry -> entry.stableId() == operationId }
             ?.let(operationLogs::remove)

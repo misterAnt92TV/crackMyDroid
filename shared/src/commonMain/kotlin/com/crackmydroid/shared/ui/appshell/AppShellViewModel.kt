@@ -9,17 +9,24 @@ import com.crackmydroid.shared.i18n.platformLanguage
 import com.crackmydroid.shared.i18n.resolveLanguageCode
 import com.crackmydroid.shared.presentation.LocalizedBaseViewModel
 import com.crackmydroid.shared.presentation.navigation.Screen
+import com.crackmydroid.shared.ui.activities.ActivityListEvent
 import com.crackmydroid.shared.ui.activities.ActivityListViewModel
 import com.crackmydroid.shared.ui.home.HomeViewModel
+import com.crackmydroid.shared.ui.info.InfoEvent
 import com.crackmydroid.shared.ui.info.InfoViewModel
+import com.crackmydroid.shared.ui.installedapps.InstalledAppsEvent
 import com.crackmydroid.shared.ui.installedapps.InstalledAppsViewModel
+import com.crackmydroid.shared.ui.logs.LogEvent
 import com.crackmydroid.shared.ui.logs.LogViewModel
+import com.crackmydroid.shared.ui.pentest.PenTestingEvent
 import com.crackmydroid.shared.ui.pentest.PenTestingViewModel
+import com.crackmydroid.shared.ui.permissions.PermissionsEvent
 import com.crackmydroid.shared.ui.permissions.PermissionsViewModel
 import com.crackmydroid.shared.ui.root.RootViewModel
+import com.crackmydroid.shared.ui.settings.SettingsEvent
 import com.crackmydroid.shared.ui.settings.SettingsViewModel
+import com.crackmydroid.shared.ui.trick.TrickEvent
 import com.crackmydroid.shared.ui.trick.TrickViewModel
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -56,25 +63,23 @@ class AppShellViewModel(
         is AppShellEvent.IntroDismissed -> dismissIntro()
     }
 
-    fun initialize() {
+    private fun initialize() {
         if (_state.value.initialized || initializing) return
         initializing = true
         launchLatest("app-shell-initialize") {
             try {
                 getVerbose().onSuccess(AppLogger::setVerbose)
-                val settingsLoad = settings.load()
-                settingsLoad.join()
-                if (settingsLoad.isCancelled) throw CancellationException("Settings initialization cancelled")
+                settings.handleEvent(SettingsEvent.Load())
                 updateLanguage(resolveLanguageCode(settings.state.value.language, platformLanguage()))
                 val introSeen = getIntroSeen().getOrDefault(false)
                 _state.update { it.copy(showIntro = !introSeen, initialized = true) }
-                activity.refresh()
-                info.load()
-                trick.load()
-                logs.refresh()
-                permissions.refresh()
-                installedApps.refresh()
-                penTesting.refresh()
+                activity.handleEvent(ActivityListEvent.Refresh())
+                info.handleEvent(InfoEvent.Load())
+                trick.handleEvent(TrickEvent.Load())
+                logs.handleEvent(LogEvent.Refresh())
+                permissions.handleEvent(PermissionsEvent.Refresh())
+                installedApps.handleEvent(InstalledAppsEvent.Refresh())
+                penTesting.handleEvent(PenTestingEvent.Refresh())
                 settings.state.map { it.language }.distinctUntilChanged().collect { language ->
                     updateLanguage(resolveLanguageCode(language, platformLanguage()))
                 }
@@ -98,7 +103,7 @@ class AppShellViewModel(
         installedApps.updateLanguage(languageCode)
     }
 
-    fun navigate(screen: Screen, hintsEnabled: Boolean) {
+    private fun navigate(screen: Screen, hintsEnabled: Boolean) {
         if (hintsEnabled && screen in setOf(
                 Screen.Permissions,
                 Screen.InstalledApps,
@@ -114,15 +119,15 @@ class AppShellViewModel(
         }
     }
 
-    fun confirmHint(disableHints: Boolean, target: Screen) {
-        if (disableHints) settings.setFeatureHintsEnabled(false)
+    private fun confirmHint(disableHints: Boolean, target: Screen) {
+        if (disableHints) settings.handleEvent(SettingsEvent.FeatureHintsEnabledChanged(false))
         _state.update { it.copy(selectedScreen = target, pendingHintScreen = null) }
     }
 
-    fun dismissHint() = _state.update { it.copy(pendingHintScreen = null) }
-    fun dismissHelp() = _state.update { it.copy(helpDialog = null) }
-    fun showHelp(message: String) = _state.update { it.copy(helpDialog = message) }
-    fun dismissIntro() {
+    private fun dismissHint() = _state.update { it.copy(pendingHintScreen = null) }
+    private fun dismissHelp() = _state.update { it.copy(helpDialog = null) }
+    private fun showHelp(message: String) = _state.update { it.copy(helpDialog = message) }
+    private fun dismissIntro() {
         _state.update { it.copy(showIntro = false) }
         launchTask {
             setIntroSeen(true)

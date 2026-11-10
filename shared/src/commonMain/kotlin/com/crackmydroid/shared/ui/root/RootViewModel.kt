@@ -46,11 +46,11 @@ class RootViewModel(
         }
     }
 
-    fun verify() {
+    private fun verify() {
         verify(RootCheckMode.PASSIVE)
     }
 
-    fun verifyRootAccess() {
+    private fun verifyRootAccess() {
         verify(RootCheckMode.PRIVILEGE_ACCESS)
     }
 
@@ -73,11 +73,11 @@ class RootViewModel(
         }
     }
 
-    fun updatePlayIntegrityNonce(value: String) {
+    private fun updatePlayIntegrityNonce(value: String) {
         _state.update { it.copy(playIntegrityNonce = value) }
     }
 
-    fun verifyPlayIntegrity() {
+    private fun verifyPlayIntegrity() {
         val nonce = _state.value.playIntegrityNonce.ifBlank { "sample-nonce" }
         launchTask {
             _state.update { it.copy(loading = true, error = null) }
@@ -101,7 +101,7 @@ class RootViewModel(
         }
     }
 
-    fun shareReport() {
+    private fun shareReport() {
         val content = buildReportContent()
         launchTask {
             reportExporter.shareTextReport("root_test_report", "root_test", content)
@@ -110,7 +110,7 @@ class RootViewModel(
         }
     }
 
-    fun clearError() {
+    private fun clearError() {
         _state.update { it.copy(error = null) }
     }
 }

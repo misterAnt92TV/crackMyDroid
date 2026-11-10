@@ -12,6 +12,7 @@ import com.crackmydroid.shared.domain.usecase.root.CheckPlayIntegrityUseCase
 import com.crackmydroid.shared.domain.usecase.root.CheckRootUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetExportFormatUseCase
 import com.crackmydroid.shared.i18n.stringsFor
+import com.crackmydroid.shared.ui.root.RootEvent
 import com.crackmydroid.shared.ui.root.RootViewModel
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -52,7 +53,7 @@ class RootViewModelTest {
         )
         val viewModel = viewModel(repository)
 
-        viewModel.verify()
+        viewModel.handleEvent(RootEvent.Verify())
         advanceUntilIdle()
 
         assertEquals(true, viewModel.state.value.status?.isRooted)
@@ -70,8 +71,8 @@ class RootViewModelTest {
         )
         val viewModel = viewModel(repository)
 
-        viewModel.updatePlayIntegrityNonce("nonce")
-        viewModel.verifyPlayIntegrity()
+        viewModel.handleEvent(RootEvent.PlayIntegrityNonceChanged("nonce"))
+        viewModel.handleEvent(RootEvent.VerifyPlayIntegrity())
         advanceUntilIdle()
 
         assertEquals(true, viewModel.state.value.playIntegrity?.basicIntegrity)
@@ -85,7 +86,7 @@ class RootViewModelTest {
         coEvery { repository.checkRoot() } throws IllegalStateException("root service unavailable")
         val viewModel = viewModel(repository)
 
-        viewModel.verify()
+        viewModel.handleEvent(RootEvent.Verify())
         advanceUntilIdle()
 
         assertEquals(false, viewModel.state.value.loading)
@@ -102,7 +103,7 @@ class RootViewModelTest {
         )
         val viewModel = viewModel(repository)
 
-        viewModel.verifyRootAccess()
+        viewModel.handleEvent(RootEvent.VerifyRootAccess())
         advanceUntilIdle()
 
         assertEquals(true, viewModel.state.value.status?.isRooted)
@@ -126,11 +127,11 @@ class RootViewModelTest {
             ExportReportUseCase(files, format),
             TestAppDispatchers(dispatcher),
         )
-        viewModel.verify()
+        viewModel.handleEvent(RootEvent.Verify())
         advanceUntilIdle()
 
         viewModel.updateLanguage("en")
-        viewModel.shareReport()
+        viewModel.handleEvent(RootEvent.ShareReport())
         advanceUntilIdle()
 
         assertEquals("/tmp/root.pdf", viewModel.state.value.reportPath)

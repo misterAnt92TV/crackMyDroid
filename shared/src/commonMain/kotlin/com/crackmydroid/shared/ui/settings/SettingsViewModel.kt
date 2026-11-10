@@ -77,7 +77,7 @@ class SettingsViewModel(
     }
     private var savingFormat = false
 
-    fun load() = launchLatest("settings-load") {
+    private fun load() = launchLatest("settings-load") {
         _state.update { it.copy(loading = true, error = null) }
         val language = getLanguage().onSuccess { value ->
             _state.update { it.copy(language = value) }
@@ -117,26 +117,26 @@ class SettingsViewModel(
         }
     }
 
-    fun selectTheme(theme: AppTheme) {
+    private fun selectTheme(theme: AppTheme) {
         persistSetting(persist = { setTheme(theme) }) {
             _state.update { it.copy(theme = theme, error = null) }
         }
     }
 
-    fun selectLanguage(language: AppLanguage) {
+    private fun selectLanguage(language: AppLanguage) {
         persistSetting(persist = { setLanguage(language) }) {
             _state.update { it.copy(language = language, error = null) }
         }
     }
 
-    fun toggleVerbose(enabled: Boolean) {
+    private fun toggleVerbose(enabled: Boolean) {
         persistSetting(persist = { setVerbose(enabled) }) {
             AppLogger.setVerbose(enabled)
             _state.update { it.copy(verbose = enabled, error = null) }
         }
     }
 
-    fun setHighContrast(enabled: Boolean) {
+    private fun setHighContrast(enabled: Boolean) {
         persistSetting(
             persist = {
                 setHighContrast.invoke(enabled)
@@ -146,7 +146,7 @@ class SettingsViewModel(
         }
     }
 
-    fun setReduceMotion(enabled: Boolean) {
+    private fun setReduceMotion(enabled: Boolean) {
         persistSetting(
             persist = {
                 setReduceMotion.invoke(enabled)
@@ -156,7 +156,7 @@ class SettingsViewModel(
         }
     }
 
-    fun setLargeText(enabled: Boolean) {
+    private fun setLargeText(enabled: Boolean) {
         persistSetting(
             persist = {
                 setLargeText.invoke(enabled)
@@ -166,11 +166,11 @@ class SettingsViewModel(
         }
     }
 
-    fun clearError() {
+    private fun clearError() {
         _state.update { it.copy(error = null) }
     }
 
-    fun setSuggestionsEnabled(enabled: Boolean) {
+    private fun setSuggestionsEnabled(enabled: Boolean) {
         persistSetting(
             persist = {
                 setSuggestionsEnabled.invoke(enabled).onSuccess {
@@ -182,7 +182,7 @@ class SettingsViewModel(
         }
     }
 
-    fun setFeatureHintsEnabled(enabled: Boolean) {
+    private fun setFeatureHintsEnabled(enabled: Boolean) {
         persistSetting(
             persist = {
                 setFeatureHintsEnabled.invoke(enabled)
@@ -192,7 +192,7 @@ class SettingsViewModel(
         }
     }
 
-    fun setShowIntroOnLaunch(enabled: Boolean) {
+    private fun setShowIntroOnLaunch(enabled: Boolean) {
         persistSetting(
             persist = {
                 setIntroSeen(!enabled)
@@ -202,11 +202,11 @@ class SettingsViewModel(
         }
     }
 
-    fun clearSuggestions() {
+    private fun clearSuggestions() {
         SearchHistoryStore.clearAll()
     }
 
-    fun setExportFormat(format: ExportFormat) {
+    private fun setExportFormat(format: ExportFormat) {
         if (_state.value.exportFormat == format) return
         if (savingFormat) return
         savingFormat = true

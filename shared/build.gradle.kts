@@ -47,6 +47,7 @@ kotlin {
         commonTest.dependencies {
             implementation(kotlin("test"))
             implementation(libs.coroutines.test)
+            implementation(libs.turbine)
             implementation(libs.ktor.client.mock)
         }
         val jvmCommonTest by creating {

@@ -74,7 +74,7 @@ class ActivityListViewModel(
         }
     }
 
-    fun refresh() {
+    private fun refresh() {
         launchLatest("activities-refresh") {
             val favoritesResult = runSuspendCatching {
                 getFavorites().getOrThrow() to getPackageFavorites().getOrThrow()
@@ -107,7 +107,7 @@ class ActivityListViewModel(
         }
     }
 
-    fun setFilter(value: String, trackUsage: Boolean = false) {
+    private fun setFilter(value: String, trackUsage: Boolean = false) {
         val top = if (trackUsage) {
             val normalized = normalizeQuery(value)
             if (normalized.length >= 2) {
@@ -123,25 +123,25 @@ class ActivityListViewModel(
         recomputeAsync(_state.value.copy(topQuery = top, filter = value))
     }
 
-    fun launch(entry: ActivityEntry) {
+    private fun launch(entry: ActivityEntry) {
         launchInternal(entry)
     }
 
-    fun openGuidedLaunch(entry: ActivityEntry) {
+    private fun openGuidedLaunch(entry: ActivityEntry) {
         val supported = !entry.launchIntentAction.isNullOrBlank() ||
             !entry.launchIntentData.isNullOrBlank() || !entry.launchIntentMimeType.isNullOrBlank()
         if (supported) _state.update { it.copy(guidedLaunch = GuidedLaunchState(entry)) }
     }
 
-    fun dismissGuidedLaunch() = _state.update { it.copy(guidedLaunch = null) }
+    private fun dismissGuidedLaunch() = _state.update { it.copy(guidedLaunch = null) }
 
-    fun launchGuided(action: String?, dataUri: String?, mimeType: String?) {
+    private fun launchGuided(action: String?, dataUri: String?, mimeType: String?) {
         val entry = _state.value.guidedLaunch?.entry ?: return
         _state.update { it.copy(guidedLaunch = null) }
         launchWithIntent(entry, action, dataUri, mimeType)
     }
 
-    fun launchWithIntent(entry: ActivityEntry, action: String?, dataUri: String?, mimeType: String?) {
+    private fun launchWithIntent(entry: ActivityEntry, action: String?, dataUri: String?, mimeType: String?) {
         launchInternal(entry, action, dataUri, mimeType)
     }
 
@@ -187,13 +187,11 @@ class ActivityListViewModel(
         }
     }
 
-    fun groups(): List<ActivityGroup> = _state.value.groups
-
-    fun clearError() {
+    private fun clearError() {
         _state.update { it.copy(error = null) }
     }
 
-    fun toggleFavorite(entry: ActivityEntry) {
+    private fun toggleFavorite(entry: ActivityEntry) {
         val key = entry.favoriteKey()
         val favs = _state.value.favorites.toMutableSet()
         if (favs.contains(key)) favs.remove(key) else favs.add(key)
@@ -204,7 +202,7 @@ class ActivityListViewModel(
         }
     }
 
-    fun toggleFavoritePackage(packageName: String) {
+    private fun toggleFavoritePackage(packageName: String) {
         val favs = _state.value.favoritePackages.toMutableSet()
         if (favs.contains(packageName)) favs.remove(packageName) else favs.add(packageName)
         recomputeAsync(_state.value.copy(favoritePackages = favs))
@@ -214,7 +212,7 @@ class ActivityListViewModel(
         }
     }
 
-    fun toggleExpanded(packageName: String) {
+    private fun toggleExpanded(packageName: String) {
         val expanded = _state.value.expandedPackages.toMutableSet()
         if (expanded.contains(packageName)) {
             expanded.remove(packageName)
@@ -226,7 +224,7 @@ class ActivityListViewModel(
         _state.update { it.copy(expandedPackages = expanded) }
     }
 
-    fun exportAll() {
+    private fun exportAll() {
         launchTask {
             runSuspendCatching {
                 val content = buildExportContent(_state.value.activities)
@@ -250,7 +248,7 @@ class ActivityListViewModel(
         }
     }
 
-    fun exportGroup(packageName: String) {
+    private fun exportGroup(packageName: String) {
         val acts = _state.value.activities.filter { it.packageName == packageName }
         if (acts.isEmpty()) {
             _state.update { it.copy(error = presentationTexts.noPackageData) }
@@ -288,7 +286,7 @@ class ActivityListViewModel(
         }
     }
 
-    suspend fun groupContent(packageName: String): String? {
+    private suspend fun groupContent(packageName: String): String? {
         val acts = _state.value.activities.filter { it.packageName == packageName }
         if (acts.isEmpty()) return null
         return buildExportContent(acts)
@@ -300,7 +298,7 @@ class ActivityListViewModel(
         }
     }
 
-    fun buildReport(packageName: String): ActivityAppReport? {
+    private fun buildReport(packageName: String): ActivityAppReport? {
         val activities = _state.value.activities.filter { it.packageName == packageName }
         if (activities.isEmpty()) return null
 
@@ -394,7 +392,7 @@ class ActivityListViewModel(
         }
     }
 
-    suspend fun exportVisualReport(packageName: String): Result<String> {
+    private suspend fun exportVisualReport(packageName: String): Result<String> {
         val report = buildReport(packageName)
             ?: run {
                 _state.update { it.copy(error = presentationTexts.noPackageData) }

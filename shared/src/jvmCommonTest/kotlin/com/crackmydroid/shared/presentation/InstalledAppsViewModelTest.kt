@@ -11,6 +11,7 @@ import com.crackmydroid.shared.domain.usecase.reports.ExportReportUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetExportFormatUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetInstalledAppFavoritesUseCase
 import com.crackmydroid.shared.domain.usecase.settings.SetInstalledAppFavoritesUseCase
+import com.crackmydroid.shared.ui.installedapps.InstalledAppsEvent
 import com.crackmydroid.shared.ui.installedapps.InstalledAppsViewModel
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -77,11 +78,15 @@ class InstalledAppsViewModelTest {
         coEvery { list() } returns Result.success(listOf(InstalledAppEntry("App", "pkg", "/path")))
         val vm = installedAppsViewModel(list, export, share, reportExporter())
 
-        vm.refresh()
-        advanceUntilIdle()
+        vm.assertEvent(InstalledAppsEvent.Refresh(), vm.state) {
+            val initialState = awaitItem()
+            val loadingState = awaitItem()
+            assertEquals(true, loadingState.loading)
+            val loadedState = awaitItem()
+            assertEquals(1, loadedState.apps.size)
+            assertNull(loadedState.error)
+        }
 
-        assertEquals(1, vm.state.value.apps.size)
-        assertNull(vm.state.value.error)
         coVerify { list() }
         vm.onCleared()
     }
@@ -95,7 +100,7 @@ class InstalledAppsViewModelTest {
         coEvery { export("pkg") } returns Result.success("/tmp/pkg.apk")
         val vm = installedAppsViewModel(list, export, share, reportExporter())
 
-        vm.export("pkg")
+        vm.handleEvent(InstalledAppsEvent.ApkExportRequested("pkg"))
         advanceUntilIdle()
 
         assertEquals("/tmp/pkg.apk", vm.state.value.lastExportPath)
@@ -119,9 +124,9 @@ class InstalledAppsViewModelTest {
         } returns Result.success("/tmp/apps.pdf")
         val vm = installedAppsViewModel(list, export, share, ExportReportUseCase(reportFiles, format))
 
-        vm.refresh()
+        vm.handleEvent(InstalledAppsEvent.Refresh())
         advanceUntilIdle()
-        vm.exportAll()
+        vm.handleEvent(InstalledAppsEvent.AllExportRequested())
         advanceUntilIdle()
 
         assertEquals("/tmp/apps.pdf", vm.state.value.lastExportPath)
@@ -145,7 +150,7 @@ class InstalledAppsViewModelTest {
         coEvery { share("pkg", false) } returns Result.success(Unit)
         val vm = installedAppsViewModel(list, export, share, reportExporter())
 
-        vm.share("pkg", false)
+        vm.handleEvent(InstalledAppsEvent.ApkShareRequested("pkg", false))
         advanceUntilIdle()
 
         assertEquals("pkg", vm.state.value.lastSharedPackage)
@@ -163,7 +168,7 @@ class InstalledAppsViewModelTest {
         coEvery { share("pkg", true) } returns Result.failure(IllegalStateException("fail"))
         val vm = installedAppsViewModel(list, export, share, reportExporter())
 
-        vm.share("pkg", true)
+        vm.handleEvent(InstalledAppsEvent.ApkShareRequested("pkg", true))
         advanceUntilIdle()
 
         assertNotNull(vm.state.value.error)
@@ -184,12 +189,12 @@ class InstalledAppsViewModelTest {
         )
         val vm = installedAppsViewModel(list, export, share, reportExporter())
 
-        vm.refresh()
+        vm.handleEvent(InstalledAppsEvent.Refresh())
         advanceUntilIdle()
-        vm.setFilter("app", trackUsage = true)
-        vm.setFilter("beta", trackUsage = true)
-        vm.setFilter("app", trackUsage = true)
-        vm.toggleFavorite("pkg.beta")
+        vm.handleEvent(InstalledAppsEvent.FilterChanged("app", trackUsage = true))
+        vm.handleEvent(InstalledAppsEvent.FilterChanged("beta", trackUsage = true))
+        vm.handleEvent(InstalledAppsEvent.FilterChanged("app", trackUsage = true))
+        vm.handleEvent(InstalledAppsEvent.FavoriteToggled("pkg.beta"))
 
         val filtered = vm.state.value.visibleApps
 
@@ -206,10 +211,10 @@ class InstalledAppsViewModelTest {
         coEvery { list() } returns Result.success(emptyList())
         val vm = installedAppsViewModel(list, export, share, reportExporter())
 
-        vm.setFilter("alpha")
+        vm.handleEvent(InstalledAppsEvent.FilterChanged("alpha"))
         assertNull(vm.state.value.topQuery)
 
-        vm.setFilter("alpha", trackUsage = true)
+        vm.handleEvent(InstalledAppsEvent.FilterChanged("alpha", trackUsage = true))
         assertEquals("alpha", vm.state.value.topQuery)
         vm.onCleared()
     }

@@ -26,6 +26,8 @@ import com.crackmydroid.shared.i18n.UseCaseTexts
 import com.crackmydroid.shared.presentation.navigation.Screen
 import com.crackmydroid.shared.presentation.operations.NoOpOperationLogRepository
 import com.crackmydroid.shared.ui.AppPresentationDependencies
+import com.crackmydroid.shared.ui.appshell.AppShellEvent
+import com.crackmydroid.shared.ui.settings.SettingsEvent
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -138,14 +140,14 @@ class AppPresentationDependenciesTest {
         coEvery { settingsRepository.getLanguage() } returns AppLanguage.FRENCH
         coEvery { settingsRepository.setLanguage(AppLanguage.GERMAN) } returns Unit
         val graph = resolveGraph()
-        graph.shell.initialize()
+        graph.shell.handleEvent(AppShellEvent.Initialize())
         advanceUntilIdle()
         assertTrue(
             graph.info.state.value.reportContent.orEmpty()
                 .startsWith(UseCaseTexts("fr").label(ReportLabel.DEVICE_INFO_TITLE)),
         )
 
-        graph.settings.selectLanguage(AppLanguage.GERMAN)
+        graph.settings.handleEvent(SettingsEvent.LanguageSelected(AppLanguage.GERMAN))
         advanceUntilIdle()
         assertTrue(
             graph.info.state.value.reportContent.orEmpty()
@@ -159,7 +161,7 @@ class AppPresentationDependenciesTest {
     fun failedVerboseBootstrapDoesNotBlockFeatureInitialization() = runTest(dispatcher) {
         coEvery { settingsRepository.isVerboseLog() } throws IllegalStateException("diagnostics unavailable")
         val graph = resolveGraph()
-        graph.shell.initialize()
+        graph.shell.handleEvent(AppShellEvent.Initialize())
         advanceUntilIdle()
 
         assertFalse(AppLogger.isVerbose())
@@ -172,7 +174,7 @@ class AppPresentationDependenciesTest {
     fun initialize_populatesTheViewModelsExposedToScreens_onlyOnce() = runTest(dispatcher) {
         val graph = resolveGraph()
 
-        graph.shell.initialize()
+        graph.shell.handleEvent(AppShellEvent.Initialize())
         advanceUntilIdle()
 
         assertEquals(device, graph.info.state.value.info)
@@ -194,7 +196,7 @@ class AppPresentationDependenciesTest {
         assertTrue(AppLogger.isVerbose())
         assertTrue(graph.shell.state.value.showIntro)
 
-        graph.shell.initialize()
+        graph.shell.handleEvent(AppShellEvent.Initialize())
         advanceUntilIdle()
 
         coVerify(exactly = 1) { deviceRepository.getDeviceInfo() }
@@ -206,8 +208,8 @@ class AppPresentationDependenciesTest {
         coVerify(exactly = 1) { permissionsRepository.listAppPermissions() }
         coVerify(exactly = 2) { installedRepository.listInstalled() }
 
-        graph.shell.confirmHint(disableHints = true, target = Screen.Permissions)
-        graph.shell.dismissIntro()
+        graph.shell.handleEvent(AppShellEvent.HintConfirmed(disableHints = true, target = Screen.Permissions))
+        graph.shell.handleEvent(AppShellEvent.IntroDismissed())
         advanceUntilIdle()
 
         assertFalse(graph.settings.state.value.featureHintsEnabled)
@@ -225,7 +227,7 @@ class AppPresentationDependenciesTest {
         viewModels(first).zip(viewModels(second)).forEach { (left, right) ->
             assertNotSame(left, right)
         }
-        first.shell.initialize()
+        first.shell.handleEvent(AppShellEvent.Initialize())
         advanceUntilIdle()
 
         assertEquals(device, first.info.state.value.info)

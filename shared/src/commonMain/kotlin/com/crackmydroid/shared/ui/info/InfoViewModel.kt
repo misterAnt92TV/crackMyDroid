@@ -25,14 +25,14 @@ class InfoViewModel(
     override fun onEvent(event: InfoEvent) = when (event) {
         is InfoEvent.Load -> load()
         is InfoEvent.Export -> export()
-        is InfoEvent.Share -> share()
+        is InfoEvent.Share -> share(event.contentOverride)
     }
 
     override fun onLanguageChanged() {
         refreshReport()
     }
 
-    fun load() {
+    private fun load() {
         launchTask {
             _state.update { it.copy(loading = true, error = null) }
             runSuspendCatching {
@@ -68,7 +68,7 @@ class InfoViewModel(
         }
     }
 
-    fun export() {
+    private fun export() {
         val info = _state.value.info ?: return
         val root = _state.value.root
         val reportText = useCaseTexts
@@ -82,7 +82,7 @@ class InfoViewModel(
         }
     }
 
-    fun share(contentOverride: String? = null) {
+    private fun share(contentOverride: String? = null) {
         val info = _state.value.info ?: return
         val root = _state.value.root
         val reportText = useCaseTexts

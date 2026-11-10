@@ -5,6 +5,7 @@ import com.crackmydroid.shared.domain.model.shell.ShellCommand
 
 sealed class TrickEvent : UiEvent() {
     class Load : TrickEvent()
+    class Execute(val command: ShellCommand) : TrickEvent()
     class ExecutionRequested(val command: ShellCommand) : TrickEvent()
     class ExecutionConfirmed : TrickEvent()
     class PendingCommandDismissed : TrickEvent()

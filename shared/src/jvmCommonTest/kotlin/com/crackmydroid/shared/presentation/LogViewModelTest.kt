@@ -9,6 +9,7 @@ import com.crackmydroid.shared.domain.usecase.log.ExportLogsUseCase
 import com.crackmydroid.shared.domain.usecase.log.GetLogsUseCase
 import com.crackmydroid.shared.domain.usecase.reports.ExportReportUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetExportFormatUseCase
+import com.crackmydroid.shared.ui.logs.LogEvent
 import com.crackmydroid.shared.ui.logs.LogViewModel
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -44,12 +45,12 @@ class LogViewModelTest {
             appDispatchers,
         )
 
-        viewModel.refresh()
+        viewModel.handleEvent(LogEvent.Refresh())
         advanceUntilIdle()
-        viewModel.setFilter("app: failed")
+        viewModel.handleEvent(LogEvent.FilterChanged("app: failed"))
         advanceUntilIdle()
 
-        assertEquals(listOf("E/App: failed"), viewModel.filtered())
+        assertEquals(listOf("E/App: failed"), viewModel.state.value.visibleLogs)
         viewModel.onCleared()
     }
 
@@ -67,11 +68,11 @@ class LogViewModelTest {
             appDispatchers,
         )
 
-        viewModel.refresh()
+        viewModel.handleEvent(LogEvent.Refresh())
         advanceUntilIdle()
-        viewModel.setFilter("failed")
+        viewModel.handleEvent(LogEvent.FilterChanged("failed"))
         advanceUntilIdle()
-        viewModel.export()
+        viewModel.handleEvent(LogEvent.Export())
         advanceUntilIdle()
 
         coVerify {
