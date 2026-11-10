@@ -4,8 +4,8 @@ import com.crackmydroid.architecture.coroutines.AppDispatchers
 import com.crackmydroid.architecture.presentation.BaseViewModel
 import com.crackmydroid.architecture.presentation.model.UiEvent
 import com.crackmydroid.shared.i18n.Strings
-import com.crackmydroid.shared.i18n.UseCasePresentationTexts
-import com.crackmydroid.shared.i18n.UseCaseTexts
+import com.crackmydroid.shared.i18n.usecase.UseCasePresentationTexts
+import com.crackmydroid.shared.i18n.usecase.UseCaseTexts
 import com.crackmydroid.shared.i18n.stringsFor
 
 abstract class LocalizedBaseViewModel<E : UiEvent>(dispatchers: AppDispatchers) : BaseViewModel<E>(dispatchers) {

@@ -6,7 +6,7 @@ import com.crackmydroid.shared.domain.model.PermissionRiskLevel
 import com.crackmydroid.shared.domain.model.PermissionRiskReport
 import com.crackmydroid.shared.domain.model.app.AppPermissionEntry
 import com.crackmydroid.shared.domain.usecase.UseCaseTestDispatchers
-import com.crackmydroid.shared.i18n.UseCaseTexts
+import com.crackmydroid.shared.i18n.usecase.UseCaseTexts
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals

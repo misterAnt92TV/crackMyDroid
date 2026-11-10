@@ -1,5 +1,6 @@
 package com.crackmydroid.shared.i18n
 
+import com.crackmydroid.shared.i18n.usecase.UseCasePresentationTexts
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals

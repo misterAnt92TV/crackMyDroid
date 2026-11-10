@@ -2,8 +2,8 @@ package com.crackmydroid.shared.ui.home.model
 
 import com.crackmydroid.shared.domain.model.operation.OperationEntry
 import com.crackmydroid.shared.i18n.Strings
-import com.crackmydroid.shared.i18n.formatOperationTimestamp
-import com.crackmydroid.shared.i18n.renderOperation
+import com.crackmydroid.shared.i18n.operation.formatOperationTimestamp
+import com.crackmydroid.shared.i18n.operation.renderOperation
 import com.crackmydroid.shared.ui.home.HomeUiState
 import com.crackmydroid.shared.ui.home.LastOperationItem
 import com.crackmydroid.shared.ui.home.OperationOutcome

@@ -1,4 +1,4 @@
-package com.crackmydroid.shared.i18n
+package com.crackmydroid.shared.i18n.usecase
 
 import com.crackmydroid.shared.domain.model.PenTestActivityRisk
 import com.crackmydroid.shared.domain.model.PenTestMessage

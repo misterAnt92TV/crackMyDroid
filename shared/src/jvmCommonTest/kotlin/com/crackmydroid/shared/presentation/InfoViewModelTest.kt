@@ -14,7 +14,7 @@ import com.crackmydroid.shared.domain.usecase.info.GetDeviceInfoUseCase
 import com.crackmydroid.shared.domain.usecase.reports.ExportReportUseCase
 import com.crackmydroid.shared.domain.usecase.root.CheckRootUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetExportFormatUseCase
-import com.crackmydroid.shared.i18n.UseCaseTexts
+import com.crackmydroid.shared.i18n.usecase.UseCaseTexts
 import com.crackmydroid.shared.ui.info.InfoEvent
 import com.crackmydroid.shared.ui.info.InfoViewModel
 import io.mockk.coEvery

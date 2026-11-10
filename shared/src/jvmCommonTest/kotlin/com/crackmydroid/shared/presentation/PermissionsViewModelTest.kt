@@ -12,7 +12,7 @@ import com.crackmydroid.shared.domain.usecase.reports.ExportReportUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetExportFormatUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetPermissionFavoritesUseCase
 import com.crackmydroid.shared.domain.usecase.settings.SetPermissionFavoritesUseCase
-import com.crackmydroid.shared.i18n.UseCaseTexts
+import com.crackmydroid.shared.i18n.usecase.UseCaseTexts
 import com.crackmydroid.shared.ui.permissions.PermissionsEvent
 import com.crackmydroid.shared.ui.permissions.PermissionsViewModel
 import io.mockk.coEvery

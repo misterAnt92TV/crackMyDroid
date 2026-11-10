@@ -1,5 +1,7 @@
 package com.crackmydroid.shared.i18n
 
+import com.crackmydroid.shared.i18n.pentest.penTestUiStringsForLanguage
+
 internal val itStrings = Strings(
     navActivities = "Lista activity",
     navHome = "Home",

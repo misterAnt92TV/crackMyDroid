@@ -8,6 +8,7 @@ import com.crackmydroid.shared.domain.model.PermissionRiskFinding
 import com.crackmydroid.shared.domain.model.PermissionRiskLevel
 import com.crackmydroid.shared.domain.model.ReportLabel
 import com.crackmydroid.shared.domain.model.activity.ActivityIntentRiskLevel
+import com.crackmydroid.shared.i18n.usecase.UseCaseTexts
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse

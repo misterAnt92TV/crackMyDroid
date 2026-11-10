@@ -4,7 +4,7 @@ import com.crackmydroid.shared.domain.model.DeviceInfo
 import com.crackmydroid.shared.domain.model.ReportLabel
 import com.crackmydroid.shared.domain.model.RootStatus
 import com.crackmydroid.shared.domain.usecase.UseCaseTestDispatchers
-import com.crackmydroid.shared.i18n.UseCaseTexts
+import com.crackmydroid.shared.i18n.usecase.UseCaseTexts
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertTrue

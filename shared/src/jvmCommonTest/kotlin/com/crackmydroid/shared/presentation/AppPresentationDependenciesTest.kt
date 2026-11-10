@@ -22,7 +22,7 @@ import com.crackmydroid.shared.domain.repository.SettingsRepository
 import com.crackmydroid.shared.domain.repository.ShellCommandRepository
 import com.crackmydroid.shared.domain.repository.log.LogRepository
 import com.crackmydroid.shared.domain.repository.log.OperationLogRepository
-import com.crackmydroid.shared.i18n.UseCaseTexts
+import com.crackmydroid.shared.i18n.usecase.UseCaseTexts
 import com.crackmydroid.shared.presentation.navigation.Screen
 import com.crackmydroid.shared.presentation.operations.NoOpOperationLogRepository
 import com.crackmydroid.shared.ui.AppPresentationDependencies

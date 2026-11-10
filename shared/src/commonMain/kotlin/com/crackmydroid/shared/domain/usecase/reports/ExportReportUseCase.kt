@@ -7,7 +7,7 @@ import com.crackmydroid.shared.domain.model.ExportDocument
 import com.crackmydroid.shared.domain.model.ExportFormat
 import com.crackmydroid.shared.domain.repository.ReportFileRepository
 import com.crackmydroid.shared.domain.usecase.settings.GetExportFormatUseCase
-import com.crackmydroid.shared.i18n.UseCasePresentationTexts
+import com.crackmydroid.shared.i18n.usecase.UseCasePresentationTexts
 import kotlinx.serialization.json.JsonElement
 
 class ExportReportUseCase(

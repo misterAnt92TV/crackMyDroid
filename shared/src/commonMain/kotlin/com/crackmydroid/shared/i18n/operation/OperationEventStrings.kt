@@ -1,7 +1,8 @@
-package com.crackmydroid.shared.i18n
+package com.crackmydroid.shared.i18n.operation
 
 import com.crackmydroid.shared.domain.model.operation.OperationEvent
 import com.crackmydroid.shared.domain.model.operation.OperationEventKey
+import com.crackmydroid.shared.i18n.Strings
 
 fun Strings.renderOperation(event: OperationEvent): String = when (event.key) {
     OperationEventKey.ACTIVITY_EXPORT -> exportLog

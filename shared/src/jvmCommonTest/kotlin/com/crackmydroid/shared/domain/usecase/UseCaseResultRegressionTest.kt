@@ -20,7 +20,7 @@ import com.crackmydroid.shared.domain.usecase.pentest.RunPenTestChecksUseCase
 import com.crackmydroid.shared.domain.usecase.permissions.AnalyzePermissionRisksUseCase
 import com.crackmydroid.shared.domain.usecase.permissions.BuildPermissionsReportUseCase
 import com.crackmydroid.shared.domain.usecase.settings.SetVerboseLogUseCase
-import com.crackmydroid.shared.i18n.UseCaseTexts
+import com.crackmydroid.shared.i18n.usecase.UseCaseTexts
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.CancellationException

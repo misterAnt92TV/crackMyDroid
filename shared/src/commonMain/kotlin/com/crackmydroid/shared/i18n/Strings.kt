@@ -1,6 +1,8 @@
 package com.crackmydroid.shared.i18n
 
 import androidx.compose.runtime.staticCompositionLocalOf
+import com.crackmydroid.shared.i18n.pentest.PenTestUiStrings
+import com.crackmydroid.shared.i18n.pentest.penTestUiStringsForLanguage
 
 
 data class Strings(

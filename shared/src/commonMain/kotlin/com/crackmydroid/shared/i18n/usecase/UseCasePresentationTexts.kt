@@ -1,4 +1,4 @@
-package com.crackmydroid.shared.i18n
+package com.crackmydroid.shared.i18n.usecase
 
 class UseCasePresentationTexts(languageCode: String) {
     private val language = UseCaseTexts(languageCode).languageCode

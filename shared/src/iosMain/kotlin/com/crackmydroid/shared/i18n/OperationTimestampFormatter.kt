@@ -1,4 +1,4 @@
-package com.crackmydroid.shared.i18n
+package com.crackmydroid.shared.i18n.operation
 
 import platform.Foundation.NSDate
 import platform.Foundation.NSDateFormatter
