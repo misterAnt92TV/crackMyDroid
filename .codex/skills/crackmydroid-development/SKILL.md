@@ -196,8 +196,9 @@ orchestration. Keep only strictly visual calculations in composables.
   behavior, concurrency, platform limitations, interoperability, and workarounds.
 - Do not add comments that merely restate self-explanatory code. Ordinary code must remain readable
   through its structure and names.
-- Treat 250 lines as the target maximum for a file. Before exceeding it, separate distinct
-  responsibilities; do not split a small cohesive model simply to meet a number.
+- Keep files cohesive and readable. Split a file when it contains distinct responsibilities, but do
+  not divide a coherent catalog, model, or other data-oriented structure solely to meet a line
+  count target.
 
 ## Compose UI and previews
 
