@@ -1,15 +1,13 @@
 package com.crackmydroid.shared.domain.usecase.activities
 
 import co.touchlab.kermit.Logger
-import com.crackmydroid.shared.AppLogger
+import com.crackmydroid.architecture.domain.usecase.BaseUseCase
+import com.crackmydroid.architecture.logging.AppLogger
 import com.crackmydroid.shared.domain.model.activity.ActivityEntry
 import com.crackmydroid.shared.domain.repository.ActivityRepository
-import com.crackmydroid.shared.domain.usecase.BaseUseCase
 
-class LaunchActivityUseCase(
-    private val repository: ActivityRepository,
-    logger: Logger = AppLogger.logger,
-) : BaseUseCase(TAG, logger = logger) {
+class LaunchActivityUseCase(private val repository: ActivityRepository, logger: Logger = AppLogger.logger) :
+    BaseUseCase(TAG, logger = logger) {
     private companion object {
         private const val TAG = "LaunchActivityUseCase"
     }

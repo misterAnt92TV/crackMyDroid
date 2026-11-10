@@ -1,5 +1,6 @@
 package com.crackmydroid.shared.ui.activities
 
+import com.crackmydroid.architecture.coroutines.AppDispatchers
 import com.crackmydroid.shared.domain.model.activity.ActivityEntry
 import com.crackmydroid.shared.domain.model.activity.ActivityIntentRiskAnalyzer
 import com.crackmydroid.shared.domain.model.activity.ActivityIntentRiskLevel
@@ -17,11 +18,10 @@ import com.crackmydroid.shared.domain.usecase.settings.GetExportFormatUseCase
 import com.crackmydroid.shared.domain.usecase.settings.SetActivityFavoritesUseCase
 import com.crackmydroid.shared.domain.usecase.settings.SetActivityPackageFavoritesUseCase
 import com.crackmydroid.shared.i18n.format
-import com.crackmydroid.shared.presentation.BaseViewModel
+import com.crackmydroid.shared.presentation.LocalizedBaseViewModel
 import com.crackmydroid.shared.presentation.operations.NoOpOperationLogRepository
 import com.crackmydroid.shared.ui.activities.view.uiLabel
 import com.crackmydroid.shared.util.runSuspendCatching
-import com.crackmydroid.shared.util.AppDispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -41,7 +41,7 @@ class ActivityListViewModel(
     private val reportExporter: ExportReportUseCase,
     private val operationLogs: OperationLogRepository = NoOpOperationLogRepository,
     dispatchers: AppDispatchers,
-) : BaseViewModel(dispatchers) {
+) : LocalizedBaseViewModel(dispatchers) {
     private val json = Json { prettyPrint = true }
     private val _state = MutableStateFlow(ActivityListState())
     val state: StateFlow<ActivityListState> = _state

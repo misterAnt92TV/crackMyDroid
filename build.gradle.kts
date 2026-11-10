@@ -88,6 +88,7 @@ listOf("ktlintFilesCheck", "ktlintFilesFormat").forEach { taskName ->
 
 dependencies {
     ktlintCli(libs.ktlint.cli)
+    kover(project(":architectureModule"))
     kover(project(":shared"))
     kover(project(":androidApp"))
 }

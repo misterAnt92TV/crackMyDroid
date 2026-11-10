@@ -1,6 +1,7 @@
 package com.crackmydroid.shared.presentation
 
-import com.crackmydroid.shared.AppLogger
+import com.crackmydroid.architecture.coroutines.AppDispatchers
+import com.crackmydroid.architecture.logging.AppLogger
 import com.crackmydroid.shared.di.commonModule
 import com.crackmydroid.shared.di.presentationModule
 import com.crackmydroid.shared.domain.model.DeviceInfo
@@ -25,10 +26,17 @@ import com.crackmydroid.shared.i18n.UseCaseTexts
 import com.crackmydroid.shared.presentation.navigation.Screen
 import com.crackmydroid.shared.presentation.operations.NoOpOperationLogRepository
 import com.crackmydroid.shared.ui.AppPresentationDependencies
-import com.crackmydroid.shared.util.AppDispatchers
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertNotSame
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -39,14 +47,6 @@ import kotlinx.coroutines.test.setMain
 import org.koin.core.KoinApplication
 import org.koin.dsl.koinApplication
 import org.koin.dsl.module
-import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertNotSame
-import kotlin.test.assertNull
-import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class AppPresentationDependenciesTest {
@@ -62,8 +62,11 @@ class AppPresentationDependenciesTest {
     private val graphs = mutableListOf<AppPresentationDependencies>()
     private lateinit var application: KoinApplication
     private val device = DeviceInfo(
-        manufacturer = "Acme", model = "Device under test",
-        batteryLevel = 75, totalMemory = 4096L, freeMemory = 2048L,
+        manufacturer = "Acme",
+        model = "Device under test",
+        batteryLevel = 75,
+        totalMemory = 4096L,
+        freeMemory = 2048L,
     )
     private val root = RootStatus(false, "not rooted")
     private val apps = listOf(InstalledAppEntry("Test app", "test.app", "/test.apk"))
@@ -98,7 +101,8 @@ class AppPresentationDependenciesTest {
         coEvery { logRepository.fetchLog() } returns listOf("I/Test: loaded")
         application = koinApplication {
             modules(
-                commonModule(), presentationModule(),
+                commonModule(),
+                presentationModule(),
                 module {
                     single { deviceRepository }
                     single { rootRepository }
@@ -232,7 +236,7 @@ class AppPresentationDependenciesTest {
     private fun resolveGraph(): AppPresentationDependencies =
         application.koin.get<AppPresentationDependencies>().also { graphs += it }
 
-    private fun viewModels(graph: AppPresentationDependencies): List<BaseViewModel> = with(graph) {
+    private fun viewModels(graph: AppPresentationDependencies): List<LocalizedBaseViewModel> = with(graph) {
         listOf(shell, activity, home, root, info, trick, settings, logs, permissions, installedApps, penTesting)
     }
 }

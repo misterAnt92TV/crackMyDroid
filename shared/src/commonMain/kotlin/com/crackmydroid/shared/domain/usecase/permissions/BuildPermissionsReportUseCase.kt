@@ -1,15 +1,15 @@
 package com.crackmydroid.shared.domain.usecase.permissions
 
 import co.touchlab.kermit.Logger
-import com.crackmydroid.shared.AppLogger
+import com.crackmydroid.architecture.coroutines.AppDispatchers
+import com.crackmydroid.architecture.coroutines.DefaultAppDispatchers
+import com.crackmydroid.architecture.domain.usecase.BaseUseCase
+import com.crackmydroid.architecture.logging.AppLogger
 import com.crackmydroid.shared.domain.model.PermissionRiskLevel
 import com.crackmydroid.shared.domain.model.PermissionRiskReport
 import com.crackmydroid.shared.domain.model.ReportLabel
 import com.crackmydroid.shared.domain.model.UseCaseReportText
 import com.crackmydroid.shared.domain.model.app.AppPermissionEntry
-import com.crackmydroid.shared.domain.usecase.BaseUseCase
-import com.crackmydroid.shared.util.AppDispatchers
-import com.crackmydroid.shared.util.DefaultAppDispatchers
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 
@@ -33,10 +33,22 @@ class BuildPermissionsReportUseCase(
                 context.ensureActive()
                 it.packageName
             }
-            val criticalTotal = riskReports.sumOf { context.ensureActive(); it.criticalCount }
-            val highTotal = riskReports.sumOf { context.ensureActive(); it.highCount }
-            val mediumTotal = riskReports.sumOf { context.ensureActive(); it.mediumCount }
-            val sortedApps = apps.map { context.ensureActive(); it }.sortedWith(
+            val criticalTotal = riskReports.sumOf {
+                context.ensureActive()
+                it.criticalCount
+            }
+            val highTotal = riskReports.sumOf {
+                context.ensureActive()
+                it.highCount
+            }
+            val mediumTotal = riskReports.sumOf {
+                context.ensureActive()
+                it.mediumCount
+            }
+            val sortedApps = apps.map {
+                context.ensureActive()
+                it
+            }.sortedWith(
                 compareByDescending<AppPermissionEntry> {
                     context.ensureActive()
                     riskByPackage[it.packageName]?.score ?: 0
@@ -49,7 +61,10 @@ class BuildPermissionsReportUseCase(
             appendLine(
                 text.permissionOverview(
                     appCount = apps.size,
-                    permissionCount = apps.sumOf { context.ensureActive(); it.permissions.size },
+                    permissionCount = apps.sumOf {
+                        context.ensureActive()
+                        it.permissions.size
+                    },
                     appsWithRisksCount = riskReports.size,
                 ),
             )
@@ -100,7 +115,10 @@ class BuildPermissionsReportUseCase(
                 if (app.permissions.isEmpty()) {
                     appendLine("- ${text.noDeclaredPermissions()}")
                 } else {
-                    app.permissions.map { context.ensureActive(); it }.sorted().forEach { perm ->
+                    app.permissions.map {
+                        context.ensureActive()
+                        it
+                    }.sorted().forEach { perm ->
                         context.ensureActive()
                         appendLine("- $perm")
                     }
@@ -156,7 +174,10 @@ class BuildPermissionsReportUseCase(
             if (app.permissions.isEmpty()) {
                 appendLine(text.noDeclaredPermissions())
             } else {
-                app.permissions.map { context.ensureActive(); it }.sorted().forEachIndexed { index, permission ->
+                app.permissions.map {
+                    context.ensureActive()
+                    it
+                }.sorted().forEachIndexed { index, permission ->
                     context.ensureActive()
                     appendLine("${index + 1}. $permission")
                 }

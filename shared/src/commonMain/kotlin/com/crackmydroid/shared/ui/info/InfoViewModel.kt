@@ -1,12 +1,12 @@
 package com.crackmydroid.shared.ui.info
 
+import com.crackmydroid.architecture.coroutines.AppDispatchers
 import com.crackmydroid.shared.domain.usecase.info.BuildDeviceInfoReportUseCase
 import com.crackmydroid.shared.domain.usecase.info.GetDeviceInfoUseCase
 import com.crackmydroid.shared.domain.usecase.reports.ExportReportUseCase
 import com.crackmydroid.shared.domain.usecase.root.CheckRootUseCase
-import com.crackmydroid.shared.presentation.BaseViewModel
+import com.crackmydroid.shared.presentation.LocalizedBaseViewModel
 import com.crackmydroid.shared.util.runSuspendCatching
-import com.crackmydroid.shared.util.AppDispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -18,7 +18,7 @@ class InfoViewModel(
     private val reportExporter: ExportReportUseCase,
     private val buildReport: BuildDeviceInfoReportUseCase,
     dispatchers: AppDispatchers,
-) : BaseViewModel(dispatchers) {
+) : LocalizedBaseViewModel(dispatchers) {
     private val _state = MutableStateFlow(InfoState())
     val state: StateFlow<InfoState> = _state
 

@@ -1,10 +1,10 @@
 package com.crackmydroid.shared.ui.trick
 
+import com.crackmydroid.architecture.coroutines.AppDispatchers
 import com.crackmydroid.shared.domain.model.shell.ShellCommand
 import com.crackmydroid.shared.domain.usecase.trick.ExecuteShellCommandUseCase
 import com.crackmydroid.shared.domain.usecase.trick.ListShellCommandsUseCase
-import com.crackmydroid.shared.presentation.BaseViewModel
-import com.crackmydroid.shared.util.AppDispatchers
+import com.crackmydroid.shared.presentation.LocalizedBaseViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -13,7 +13,7 @@ class TrickViewModel(
     private val listUseCase: ListShellCommandsUseCase,
     private val execUseCase: ExecuteShellCommandUseCase,
     dispatchers: AppDispatchers,
-) : BaseViewModel(dispatchers) {
+) : LocalizedBaseViewModel(dispatchers) {
     private val _state = MutableStateFlow(TrickState())
     val state: StateFlow<TrickState> = _state
 
@@ -75,8 +75,11 @@ class TrickViewModel(
     }
 
     fun requestExecution(command: ShellCommand) {
-        if (command.confirmation != null) _state.update { it.copy(pendingCommand = command) }
-        else execute(command)
+        if (command.confirmation != null) {
+            _state.update { it.copy(pendingCommand = command) }
+        } else {
+            execute(command)
+        }
     }
 
     fun confirmPendingExecution() {

@@ -1,11 +1,11 @@
 package com.crackmydroid.shared.ui.root
 
+import com.crackmydroid.architecture.coroutines.AppDispatchers
 import com.crackmydroid.shared.domain.model.root.RootCheckMode
 import com.crackmydroid.shared.domain.usecase.reports.ExportReportUseCase
 import com.crackmydroid.shared.domain.usecase.root.CheckPlayIntegrityUseCase
 import com.crackmydroid.shared.domain.usecase.root.CheckRootUseCase
-import com.crackmydroid.shared.presentation.BaseViewModel
-import com.crackmydroid.shared.util.AppDispatchers
+import com.crackmydroid.shared.presentation.LocalizedBaseViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -15,7 +15,7 @@ class RootViewModel(
     private val checkPlayIntegrity: CheckPlayIntegrityUseCase,
     private val reportExporter: ExportReportUseCase,
     dispatchers: AppDispatchers,
-) : BaseViewModel(dispatchers) {
+) : LocalizedBaseViewModel(dispatchers) {
     private val _state = MutableStateFlow(RootState())
     val state: StateFlow<RootState> = _state
 

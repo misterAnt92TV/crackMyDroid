@@ -1,11 +1,11 @@
 package com.crackmydroid.shared.domain.usecase.reports
 
 import co.touchlab.kermit.Logger
-import com.crackmydroid.shared.AppLogger
+import com.crackmydroid.architecture.domain.usecase.BaseUseCase
+import com.crackmydroid.architecture.logging.AppLogger
 import com.crackmydroid.shared.domain.model.ExportDocument
 import com.crackmydroid.shared.domain.model.ExportFormat
 import com.crackmydroid.shared.domain.repository.ReportFileRepository
-import com.crackmydroid.shared.domain.usecase.BaseUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetExportFormatUseCase
 import kotlinx.serialization.json.JsonElement
 

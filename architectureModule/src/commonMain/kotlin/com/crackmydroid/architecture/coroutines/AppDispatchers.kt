@@ -1,4 +1,4 @@
-package com.crackmydroid.shared.util
+package com.crackmydroid.architecture.coroutines
 
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers

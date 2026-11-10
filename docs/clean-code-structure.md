@@ -14,6 +14,10 @@ test unitari.
 | Platform        | API native, processi, driver, entry point e configurazione | regole applicative duplicate                         |
 | Infrastructure  | DI, serializzazione, logging, dispatcher e database        | logica di feature non riutilizzabile                 |
 
+Le fondamenta KMP riusabili (`BaseUseCase`, `BaseViewModel`, contratti UDF, dispatcher e logger)
+vivono in `:architectureModule`. `:shared` ospita `LocalizedBaseViewModel`, che aggiunge i cataloghi
+di localizzazione specifici di CrackMyDroid al lifecycle comune.
+
 La regola pratica è: il codice più vicino al dominio deve conoscere meno dettagli esterni.
 
 ### Localizzazione dei componenti

@@ -1,14 +1,14 @@
 package com.crackmydroid.shared.ui.appshell
 
-import com.crackmydroid.shared.AppLogger
+import com.crackmydroid.architecture.coroutines.AppDispatchers
+import com.crackmydroid.architecture.logging.AppLogger
 import com.crackmydroid.shared.domain.usecase.settings.GetIntroSeenUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetVerboseLogUseCase
 import com.crackmydroid.shared.domain.usecase.settings.SetIntroSeenUseCase
 import com.crackmydroid.shared.i18n.platformLanguage
 import com.crackmydroid.shared.i18n.resolveLanguageCode
-import com.crackmydroid.shared.presentation.BaseViewModel
+import com.crackmydroid.shared.presentation.LocalizedBaseViewModel
 import com.crackmydroid.shared.presentation.navigation.Screen
-import com.crackmydroid.shared.util.AppDispatchers
 import com.crackmydroid.shared.ui.activities.ActivityListViewModel
 import com.crackmydroid.shared.ui.home.HomeViewModel
 import com.crackmydroid.shared.ui.info.InfoViewModel
@@ -41,7 +41,7 @@ class AppShellViewModel(
     private val penTesting: PenTestingViewModel,
     private val getVerbose: GetVerboseLogUseCase,
     dispatchers: AppDispatchers,
-) : BaseViewModel(dispatchers) {
+) : LocalizedBaseViewModel(dispatchers) {
     private val _state = MutableStateFlow(AppShellState())
     val state: StateFlow<AppShellState> = _state
     private var initializing = false
@@ -58,8 +58,13 @@ class AppShellViewModel(
                 updateLanguage(resolveLanguageCode(settings.state.value.language, platformLanguage()))
                 val introSeen = getIntroSeen().getOrDefault(false)
                 _state.update { it.copy(showIntro = !introSeen, initialized = true) }
-                activity.refresh(); info.load(); trick.load(); logs.refresh()
-                permissions.refresh(); installedApps.refresh(); penTesting.refresh()
+                activity.refresh()
+                info.load()
+                trick.load()
+                logs.refresh()
+                permissions.refresh()
+                installedApps.refresh()
+                penTesting.refresh()
                 settings.state.map { it.language }.distinctUntilChanged().collect { language ->
                     updateLanguage(resolveLanguageCode(language, platformLanguage()))
                 }

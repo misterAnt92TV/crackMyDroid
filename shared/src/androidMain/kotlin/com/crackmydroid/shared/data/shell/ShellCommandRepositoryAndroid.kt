@@ -1,17 +1,17 @@
 package com.crackmydroid.shared.data.shell
 
 import android.os.Build
-import com.crackmydroid.shared.AppLogger
+import com.crackmydroid.architecture.logging.AppLogger
 import com.crackmydroid.shared.domain.model.shell.ShellCommand
 import com.crackmydroid.shared.domain.model.shell.ShellCommandResult
 import com.crackmydroid.shared.domain.repository.ShellCommandRepository
+import java.util.Locale
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runInterruptible
 import kotlinx.coroutines.withContext
-import java.util.Locale
 
 class ShellCommandRepositoryAndroid : ShellCommandRepository {
 
@@ -277,10 +277,9 @@ class ShellCommandRepositoryAndroid : ShellCommandRepository {
         return baseCommands + oemCommands
     }
 
-    override suspend fun execute(command: ShellCommand): ShellCommandResult =
-        withContext(Dispatchers.IO) {
-            runCommand(command.command, command.requiresRoot)
-        }
+    override suspend fun execute(command: ShellCommand): ShellCommandResult = withContext(Dispatchers.IO) {
+        runCommand(command.command, command.requiresRoot)
+    }
 
     private suspend fun runCommand(cmd: String, root: Boolean): ShellCommandResult = coroutineScope {
         var process: Process? = null
@@ -318,21 +317,13 @@ class ShellCommandRepositoryAndroid : ShellCommandRepository {
         }
     }
 
-    private fun packageProbeCommand(
-        title: String,
-        regex: String,
-        emptyMessage: String,
-    ): ShellCommand = ShellCommand(
+    private fun packageProbeCommand(title: String, regex: String, emptyMessage: String): ShellCommand = ShellCommand(
         title = title,
         command = "pm list packages | grep -Ei \"$regex\" || echo \"$emptyMessage\"",
         requiresRoot = false,
     )
 
-    private fun propertyProbeCommand(
-        title: String,
-        regex: String,
-        emptyMessage: String,
-    ): ShellCommand = ShellCommand(
+    private fun propertyProbeCommand(title: String, regex: String, emptyMessage: String): ShellCommand = ShellCommand(
         title = title,
         command = "getprop | grep -Ei \"$regex\" || echo \"$emptyMessage\"",
         requiresRoot = false,
@@ -355,6 +346,6 @@ class ShellCommandRepositoryAndroid : ShellCommandRepository {
         Nothing(listOf("nothing", "cmf")),
         Zte(listOf("zte", "nubia", "redmagic")),
         Lenovo(listOf("lenovo", "zuk")),
-        Google(listOf("google", "pixel"))
+        Google(listOf("google", "pixel")),
     }
 }

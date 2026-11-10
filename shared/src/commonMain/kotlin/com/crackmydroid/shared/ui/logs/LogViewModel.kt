@@ -1,9 +1,9 @@
 package com.crackmydroid.shared.ui.logs
 
+import com.crackmydroid.architecture.coroutines.AppDispatchers
 import com.crackmydroid.shared.domain.usecase.log.ExportLogsUseCase
 import com.crackmydroid.shared.domain.usecase.log.GetLogsUseCase
-import com.crackmydroid.shared.presentation.BaseViewModel
-import com.crackmydroid.shared.util.AppDispatchers
+import com.crackmydroid.shared.presentation.LocalizedBaseViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -13,7 +13,7 @@ class LogViewModel(
     private val getLogs: GetLogsUseCase,
     private val exportLogs: ExportLogsUseCase,
     dispatchers: AppDispatchers,
-) : BaseViewModel(dispatchers) {
+) : LocalizedBaseViewModel(dispatchers) {
     private val _state = MutableStateFlow(LogState())
     val state: StateFlow<LogState> = _state
 
@@ -79,12 +79,14 @@ class LogViewModel(
         val lv = state.levels
         val filtered = state.logs.filter { line ->
             (f.isBlank() || line.contains(f, ignoreCase = true)) &&
-                (lv.isEmpty() || lv.any { level ->
-                    line.startsWith("$level/") || line.contains(
-                        " $level/",
-                        ignoreCase = true,
+                (
+                    lv.isEmpty() || lv.any { level ->
+                        line.startsWith("$level/") || line.contains(
+                            " $level/",
+                            ignoreCase = true,
+                        )
+                    }
                     )
-                })
         }
         return state.copy(visibleLogs = filtered)
     }

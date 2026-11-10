@@ -1,15 +1,15 @@
 package com.crackmydroid.shared.domain.usecase.permissions
 
 import co.touchlab.kermit.Logger
-import com.crackmydroid.shared.AppLogger
+import com.crackmydroid.architecture.coroutines.AppDispatchers
+import com.crackmydroid.architecture.coroutines.DefaultAppDispatchers
+import com.crackmydroid.architecture.domain.usecase.BaseUseCase
+import com.crackmydroid.architecture.logging.AppLogger
 import com.crackmydroid.shared.domain.model.PermissionFindingKind
 import com.crackmydroid.shared.domain.model.PermissionRiskFinding
 import com.crackmydroid.shared.domain.model.PermissionRiskLevel
 import com.crackmydroid.shared.domain.model.PermissionRiskReport
 import com.crackmydroid.shared.domain.model.app.AppPermissionEntry
-import com.crackmydroid.shared.domain.usecase.BaseUseCase
-import com.crackmydroid.shared.util.AppDispatchers
-import com.crackmydroid.shared.util.DefaultAppDispatchers
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 
@@ -23,6 +23,16 @@ class AnalyzePermissionRisksUseCase(
         private const val PATTERN_INSTALL_QUERY = "pattern_install_query"
         private const val PATTERN_BOOT_SMS = "pattern_boot_sms"
         private const val PATTERN_BACKGROUND_CAPTURE = "pattern_background_capture"
+        private val phoneAndContactPermissionTokens = listOf(
+            "READ_CALL_LOG",
+            "WRITE_CALL_LOG",
+            "PROCESS_OUTGOING_CALLS",
+            "READ_CONTACTS",
+            "WRITE_CONTACTS",
+            "READ_PHONE_STATE",
+            "CALL_PHONE",
+            "ANSWER_PHONE_CALLS",
+        )
     }
 
     suspend operator fun invoke(app: AppPermissionEntry): Result<PermissionRiskReport?> = execute {
@@ -127,12 +137,11 @@ class AnalyzePermissionRisksUseCase(
         )
     }
 
-    fun sortReports(reports: List<PermissionRiskReport>): List<PermissionRiskReport> =
-        reports.sortedWith(
-            compareByDescending<PermissionRiskReport> { it.score }
-                .thenByDescending { it.criticalCount }
-                .thenBy { it.appLabel.lowercase() },
-        )
+    fun sortReports(reports: List<PermissionRiskReport>): List<PermissionRiskReport> = reports.sortedWith(
+        compareByDescending<PermissionRiskReport> { it.score }
+            .thenByDescending { it.criticalCount }
+            .thenBy { it.appLabel.lowercase() },
+    )
 
     private fun detectPermissionRisk(permission: String): PermissionRiskFinding? {
         val key = permission.uppercase()
@@ -174,9 +183,7 @@ class AnalyzePermissionRisksUseCase(
                 level = PermissionRiskLevel.High,
             )
 
-            "READ_CALL_LOG" in key || "WRITE_CALL_LOG" in key || "PROCESS_OUTGOING_CALLS" in key ||
-                "READ_CONTACTS" in key || "WRITE_CONTACTS" in key ||
-                "READ_PHONE_STATE" in key || "CALL_PHONE" in key || "ANSWER_PHONE_CALLS" in key -> PermissionRiskFinding(
+            hasPhoneOrContactPermission(key) -> PermissionRiskFinding(
                 key = permission,
                 kind = PermissionFindingKind.PHONE_AND_CONTACTS_ACCESS,
                 level = PermissionRiskLevel.High,
@@ -206,14 +213,16 @@ class AnalyzePermissionRisksUseCase(
         }
     }
 
-    private suspend fun containsPermission(permissions: List<String>, token: String): Boolean =
-        permissions.any {
-            currentCoroutineContext().ensureActive()
-            it.uppercase().contains(token)
-        }
+    private suspend fun containsPermission(permissions: List<String>, token: String): Boolean = permissions.any {
+        currentCoroutineContext().ensureActive()
+        it.uppercase().contains(token)
+    }
 
     private suspend fun containsAnyPermission(permissions: List<String>, tokens: List<String>): Boolean =
         tokens.any { token -> containsPermission(permissions, token) }
+
+    private fun hasPhoneOrContactPermission(permission: String): Boolean =
+        phoneAndContactPermissionTokens.any(permission::contains)
 
     private fun registerFinding(
         findingsByKey: MutableMap<String, PermissionRiskFinding>,

@@ -1,5 +1,6 @@
 package com.crackmydroid.shared.ui.permissions
 
+import com.crackmydroid.architecture.coroutines.AppDispatchers
 import com.crackmydroid.shared.domain.model.PermissionRiskReport
 import com.crackmydroid.shared.domain.model.app.AppPermissionEntry
 import com.crackmydroid.shared.domain.usecase.permissions.AnalyzePermissionRisksUseCase
@@ -8,8 +9,7 @@ import com.crackmydroid.shared.domain.usecase.permissions.ListPermissionsUseCase
 import com.crackmydroid.shared.domain.usecase.reports.ExportReportUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetPermissionFavoritesUseCase
 import com.crackmydroid.shared.domain.usecase.settings.SetPermissionFavoritesUseCase
-import com.crackmydroid.shared.presentation.BaseViewModel
-import com.crackmydroid.shared.util.AppDispatchers
+import com.crackmydroid.shared.presentation.LocalizedBaseViewModel
 import com.crackmydroid.shared.util.runSuspendCatching
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
@@ -26,7 +26,7 @@ class PermissionsViewModel(
     private val getFavorites: GetPermissionFavoritesUseCase,
     private val setFavorites: SetPermissionFavoritesUseCase,
     dispatchers: AppDispatchers,
-) : BaseViewModel(dispatchers) {
+) : LocalizedBaseViewModel(dispatchers) {
     private companion object {
         const val REFRESH_KEY = "permissions-refresh"
         const val RISK_SCAN_KEY = "permissions-risk-scan"
@@ -189,7 +189,7 @@ class PermissionsViewModel(
             runSuspendCatching {
                 val content =
                     contentOverride ?: app?.let { buildPermissionsReport.single(it, risk, reportText).getOrThrow() }
-                    ?: noData
+                        ?: noData
                 reportExporter.shareTextReport(
                     buildPermissionsReport.singleFileName(packageName).removeSuffix(".txt"),
                     "permissions",

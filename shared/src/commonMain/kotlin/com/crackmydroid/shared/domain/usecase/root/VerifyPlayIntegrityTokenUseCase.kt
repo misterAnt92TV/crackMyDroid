@@ -1,10 +1,10 @@
 package com.crackmydroid.shared.domain.usecase.root
 
 import co.touchlab.kermit.Logger
-import com.crackmydroid.shared.AppLogger
+import com.crackmydroid.architecture.domain.usecase.BaseUseCase
+import com.crackmydroid.architecture.logging.AppLogger
 import com.crackmydroid.shared.domain.model.PlayIntegrityResult
 import com.crackmydroid.shared.domain.repository.IntegrityVerificationRepository
-import com.crackmydroid.shared.domain.usecase.BaseUseCase
 
 class VerifyPlayIntegrityTokenUseCase(
     private val repository: IntegrityVerificationRepository,

@@ -1,5 +1,6 @@
 package com.crackmydroid.shared.ui.installedapps
 
+import com.crackmydroid.architecture.coroutines.AppDispatchers
 import com.crackmydroid.shared.domain.model.InstalledAppEntry
 import com.crackmydroid.shared.domain.repository.log.OperationLogRepository
 import com.crackmydroid.shared.domain.usecase.installedapps.ExportApkUseCase
@@ -8,10 +9,9 @@ import com.crackmydroid.shared.domain.usecase.installedapps.ShareApkUseCase
 import com.crackmydroid.shared.domain.usecase.reports.ExportReportUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetInstalledAppFavoritesUseCase
 import com.crackmydroid.shared.domain.usecase.settings.SetInstalledAppFavoritesUseCase
-import com.crackmydroid.shared.presentation.BaseViewModel
+import com.crackmydroid.shared.presentation.LocalizedBaseViewModel
 import com.crackmydroid.shared.presentation.operations.NoOpOperationLogRepository
 import com.crackmydroid.shared.util.runSuspendCatching
-import com.crackmydroid.shared.util.AppDispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -28,7 +28,7 @@ class InstalledAppsViewModel(
     private val setFavorites: SetInstalledAppFavoritesUseCase,
     private val operationLogs: OperationLogRepository = NoOpOperationLogRepository,
     dispatchers: AppDispatchers,
-) : BaseViewModel(dispatchers) {
+) : LocalizedBaseViewModel(dispatchers) {
     private val _state = MutableStateFlow(InstalledAppsState())
     val state: StateFlow<InstalledAppsState> = _state
     private val queryCount = mutableMapOf<String, Int>()

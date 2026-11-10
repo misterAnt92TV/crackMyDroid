@@ -1,23 +1,21 @@
 package com.crackmydroid.shared.data.network
 
 import co.touchlab.kermit.Logger
-import com.crackmydroid.shared.AppLogger
+import com.crackmydroid.architecture.logging.AppLogger
 import io.ktor.client.HttpClientConfig
 import io.ktor.client.engine.HttpClientEngineConfig
 import io.ktor.client.plugins.DefaultRequest
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.logging.LogLevel
+import io.ktor.client.plugins.logging.Logger as KtorLogger
 import io.ktor.client.plugins.logging.Logging
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
-import io.ktor.client.plugins.logging.Logger as KtorLogger
 
-internal fun <T : HttpClientEngineConfig> HttpClientConfig<T>.configureCrackMyDroidNetwork(
-    debugLogging: Boolean,
-) {
+internal fun <T : HttpClientEngineConfig> HttpClientConfig<T>.configureCrackMyDroidNetwork(debugLogging: Boolean) {
     expectSuccess = false
     install(ContentNegotiation) {
         json(Json { ignoreUnknownKeys = true })

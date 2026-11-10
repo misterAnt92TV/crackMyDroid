@@ -1,7 +1,9 @@
 package com.crackmydroid.shared.di
 
 import co.touchlab.kermit.Logger
-import com.crackmydroid.shared.AppLogger
+import com.crackmydroid.architecture.coroutines.AppDispatchers
+import com.crackmydroid.architecture.coroutines.DefaultAppDispatchers
+import com.crackmydroid.architecture.logging.AppLogger
 import com.crackmydroid.shared.domain.usecase.activities.GetActivitiesUseCase
 import com.crackmydroid.shared.domain.usecase.activities.LaunchActivityUseCase
 import com.crackmydroid.shared.domain.usecase.info.BuildDeviceInfoReportUseCase
@@ -61,8 +63,6 @@ import com.crackmydroid.shared.ui.permissions.PermissionsViewModel
 import com.crackmydroid.shared.ui.root.RootViewModel
 import com.crackmydroid.shared.ui.settings.SettingsViewModel
 import com.crackmydroid.shared.ui.trick.TrickViewModel
-import com.crackmydroid.shared.util.AppDispatchers
-import com.crackmydroid.shared.util.DefaultAppDispatchers
 import org.koin.core.context.startKoin
 import org.koin.core.module.Module
 import org.koin.dsl.KoinAppDeclaration
@@ -183,7 +183,7 @@ fun presentationModule() = module {
             get(), get(), // large text
             get(), get(), // suggestions enabled
             get(), get(), // feature hints enabled
-            get(), get(),  // intro seen
+            get(), get(), // intro seen
             get(), get(), // language
             get(), // dispatchers
         )

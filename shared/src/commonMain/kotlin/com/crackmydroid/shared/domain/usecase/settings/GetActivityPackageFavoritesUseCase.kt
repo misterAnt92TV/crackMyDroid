@@ -1,9 +1,9 @@
 package com.crackmydroid.shared.domain.usecase.settings
 
 import co.touchlab.kermit.Logger
-import com.crackmydroid.shared.AppLogger
+import com.crackmydroid.architecture.domain.usecase.BaseUseCase
+import com.crackmydroid.architecture.logging.AppLogger
 import com.crackmydroid.shared.domain.repository.SettingsRepository
-import com.crackmydroid.shared.domain.usecase.BaseUseCase
 
 class GetActivityPackageFavoritesUseCase(
     private val repository: SettingsRepository,

@@ -1,6 +1,7 @@
 package com.crackmydroid.shared.ui.settings
 
-import com.crackmydroid.shared.AppLogger
+import com.crackmydroid.architecture.coroutines.AppDispatchers
+import com.crackmydroid.architecture.logging.AppLogger
 import com.crackmydroid.shared.domain.model.ExportFormat
 import com.crackmydroid.shared.domain.model.app.AppLanguage
 import com.crackmydroid.shared.domain.model.app.AppTheme
@@ -24,10 +25,9 @@ import com.crackmydroid.shared.domain.usecase.settings.SetReduceMotionUseCase
 import com.crackmydroid.shared.domain.usecase.settings.SetSuggestionsEnabledUseCase
 import com.crackmydroid.shared.domain.usecase.settings.SetThemeUseCase
 import com.crackmydroid.shared.domain.usecase.settings.SetVerboseLogUseCase
-import com.crackmydroid.shared.presentation.BaseViewModel
+import com.crackmydroid.shared.presentation.LocalizedBaseViewModel
 import com.crackmydroid.shared.presentation.components.SearchHistoryStore
 import com.crackmydroid.shared.util.runSuspendCatching
-import com.crackmydroid.shared.util.AppDispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -54,7 +54,7 @@ class SettingsViewModel(
     private val getLanguage: GetLanguageUseCase,
     private val setLanguage: SetLanguageUseCase,
     dispatchers: AppDispatchers,
-) : BaseViewModel(dispatchers) {
+) : LocalizedBaseViewModel(dispatchers) {
     private val _state = MutableStateFlow(SettingsState())
     val state: StateFlow<SettingsState> = _state
     private var savingFormat = false

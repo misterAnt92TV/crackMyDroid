@@ -1,5 +1,6 @@
 package com.crackmydroid.shared.presentation
 
+import com.crackmydroid.architecture.coroutines.AppDispatchers
 import com.crackmydroid.shared.domain.model.ExportDocument
 import com.crackmydroid.shared.domain.model.ExportFormat
 import com.crackmydroid.shared.domain.repository.ReportFileRepository
@@ -9,16 +10,15 @@ import com.crackmydroid.shared.domain.usecase.log.GetLogsUseCase
 import com.crackmydroid.shared.domain.usecase.reports.ExportReportUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetExportFormatUseCase
 import com.crackmydroid.shared.ui.logs.LogViewModel
-import com.crackmydroid.shared.util.AppDispatchers
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
+import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
-import kotlin.test.Test
-import kotlin.test.assertEquals
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class LogViewModelTest {

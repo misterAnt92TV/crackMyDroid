@@ -1,8 +1,8 @@
 package com.crackmydroid.shared.data.snapshot
 
 import android.content.Context
+import com.crackmydroid.architecture.logging.AppLogger
 import com.crackmydroid.database.CacheDatabase
-import com.crackmydroid.shared.AppLogger
 import com.crackmydroid.shared.domain.model.PlayIntegrityResult
 import com.crackmydroid.shared.domain.model.scansnapshot.DeviceScanSnapshot
 import com.crackmydroid.shared.domain.model.scansnapshot.DeviceScanSnapshotContract
@@ -92,12 +92,11 @@ class AndroidDeviceSnapshotCoordinator(
         }
     }
 
-    private suspend inline fun <T> captureSection(crossinline loader: suspend () -> T): SnapshotSection<T> =
-        try {
-            SnapshotSection.ready(loader())
-        } catch (error: Throwable) {
-            SnapshotSection.failed(error.message ?: "Errore sconosciuto")
-        }
+    private suspend inline fun <T> captureSection(crossinline loader: suspend () -> T): SnapshotSection<T> = try {
+        SnapshotSection.ready(loader())
+    } catch (error: Throwable) {
+        SnapshotSection.failed(error.message ?: "Errore sconosciuto")
+    }
 
     private fun writeAtomically(snapshot: DeviceScanSnapshot) {
         val target = targetFile()
@@ -122,11 +121,10 @@ class AndroidDeviceSnapshotCoordinator(
         return File(baseDir, DeviceScanSnapshotContract.SNAPSHOT_FILE_NAME)
     }
 
-    private fun appVersionName(): String =
-        runCatching {
-            val info = context.packageManager.getPackageInfo(context.packageName, 0)
-            info.versionName ?: "n/d"
-        }.getOrDefault("n/d")
+    private fun appVersionName(): String = runCatching {
+        val info = context.packageManager.getPackageInfo(context.packageName, 0)
+        info.versionName ?: "n/d"
+    }.getOrDefault("n/d")
 
     private companion object {
         const val MAX_LOG_LINES: Int = 1500

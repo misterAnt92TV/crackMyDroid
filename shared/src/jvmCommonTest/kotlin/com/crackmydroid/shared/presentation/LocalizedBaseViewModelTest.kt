@@ -1,0 +1,37 @@
+package com.crackmydroid.shared.presentation
+
+import com.crackmydroid.architecture.coroutines.DefaultAppDispatchers
+import kotlin.test.Test
+import kotlin.test.assertEquals
+
+class LocalizedBaseViewModelTest {
+    @Test
+    fun updateLanguageUpdatesAllCatalogsAndNotifiesOnlyForEffectiveChanges() {
+        val viewModel = TestViewModel()
+
+        viewModel.updateLanguage("fr-FR")
+
+        assertEquals("fr", viewModel.useCaseLanguage)
+        assertEquals("Test root", viewModel.localizedStrings.navRoot)
+        assertEquals("Erreur", viewModel.localizedCopy.error)
+        assertEquals(1, viewModel.languageChanges)
+
+        viewModel.updateLanguage("fr")
+        viewModel.updateLanguage("unknown")
+
+        assertEquals(2, viewModel.languageChanges)
+        assertEquals("en", viewModel.useCaseLanguage)
+        viewModel.onCleared()
+    }
+
+    private class TestViewModel : LocalizedBaseViewModel(DefaultAppDispatchers) {
+        var languageChanges = 0
+        val useCaseLanguage get() = useCaseTexts.languageCode
+        val localizedStrings get() = strings
+        val localizedCopy get() = presentationTexts
+
+        override fun onLanguageChanged() {
+            languageChanges++
+        }
+    }
+}

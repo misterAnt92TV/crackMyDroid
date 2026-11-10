@@ -1,13 +1,13 @@
-package com.crackmydroid.shared.domain.usecase
+package com.crackmydroid.architecture.domain.usecase
 
 import co.touchlab.kermit.Logger
-import com.crackmydroid.shared.AppLogger
+import com.crackmydroid.architecture.logging.AppLogger
+import kotlin.time.TimeSource
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
-import kotlin.time.TimeSource
 
 abstract class BaseUseCase(
     private val name: String,
@@ -15,10 +15,7 @@ abstract class BaseUseCase(
     private val logger: Logger = AppLogger.logger,
     private val verbose: () -> Boolean = AppLogger::isVerbose,
 ) {
-    protected suspend fun <T> execute(
-        operation: String = "invoke",
-        block: suspend () -> T,
-    ): Result<T> {
+    protected suspend fun <T> execute(operation: String = "invoke", block: suspend () -> T): Result<T> {
         val started = TimeSource.Monotonic.markNow()
         fun debug(outcome: String) {
             if (verbose()) {

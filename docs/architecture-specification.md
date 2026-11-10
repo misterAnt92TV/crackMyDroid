@@ -21,11 +21,13 @@ I principi guida sono:
 
 | Modulo/source set        | Responsabilità                                                                                |
 |--------------------------|-----------------------------------------------------------------------------------------------|
+| `:architectureModule`    | Fondamenta KMP riusabili: coroutine, logging, base UseCase/ViewModel e contratti UDF          |
 | `:shared`                | Logica condivisa, dominio, UI Compose, contratti, DI e implementazioni platform-specific      |
 | `:androidApp`            | Entry point Android, lifecycle applicativo, Activity e integrazioni Android app-specific      |
 | `:desktopApp`            | Entry point JVM Desktop e composizione della finestra Desktop                                 |
 | `iosApp`                 | Wrapper SwiftUI che ospita la UI condivisa                                                    |
-| `shared/src/commonMain`  | Modelli, repository contract, use case, ViewModel, schermate e API comuni                     |
+| `shared/src/commonMain`  | Modelli e feature CrackMyDroid, repository contract, use case, UI e API comuni                |
+| `architectureModule/src/commonMain` | Base models UDF, dispatcher, logging e lifecycle comuni, senza feature o localizzazione |
 | `shared/src/androidMain` | Repository Android, RootBeer, DataStore, Play Integrity, SQLDelight Android e adapter Android |
 | `shared/src/desktopMain` | ADB, processi JVM, import snapshot, filesystem e repository Desktop                           |
 | `shared/src/iosMain`     | Adapter iOS, database driver e implementazioni `actual`                                       |
@@ -58,7 +60,8 @@ Ogni nuova sezione applicativa concretizza il flusso con un `FeatureEvent` tipiz
 `SharedFlow<FeatureEffect>` per effetti one-shot. La screen collega questi contratti; il content
 renderizza soltanto `FeatureUiState` e inoltra gli eventi.
 
-I ViewModel usano `BaseViewModel` per possedere uno scope cancellabile e l’iniezione di
+I ViewModel usano `LocalizedBaseViewModel`, estensione CrackMyDroid di `BaseViewModel` in
+`:architectureModule`, per possedere uno scope cancellabile e l’iniezione di
 `AppDispatchers`. Il lavoro asincrono usa `launchTask` per operazioni indipendenti e
 `launchLatest(key)` per refresh, preview, scansioni o ricalcoli sostituibili; prima di pubblicare un
 risultato deve verificare che il lavoro sia ancora corrente. La cancellazione avviene sempre in
@@ -106,7 +109,7 @@ Ogni use case dichiara `private const val TAG = "NomeClasse"` nel proprio
 `private companion object` e passa `TAG` a `BaseUseCase`, mantenendo stabile
 l'identificativo diagnostico senza stringhe letterali nel costruttore della base.
 
-Gli use case CPU usano `AppDispatchers.default` iniettabile, con controlli
+Gli use case CPU usano `AppDispatchers.default` di `:architectureModule`, iniettabile, con controlli
 cooperativi di cancellazione. Gli altri mantengono il contesto del chiamante e il
 dispatching I/O dei repository. `AppDispatchers` risiede in `shared.util`, non
 nel layer Presentation. I ViewModel consumano i risultati e preparano report
@@ -274,6 +277,7 @@ Presentation → Domain
 Data implementation → Domain contracts
 Platform adapter → Data/Domain contracts
 Composition root → tutti i componenti concreti
+shared → architectureModule
 ```
 
 Sono vietate:

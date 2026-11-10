@@ -1,4 +1,4 @@
-package com.crackmydroid.shared
+package com.crackmydroid.architecture.logging
 
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.flow.MutableStateFlow
