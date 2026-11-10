@@ -4,7 +4,6 @@ import com.crackmydroid.shared.domain.model.root.RootCheckMode
 import com.crackmydroid.shared.domain.usecase.reports.ExportReportUseCase
 import com.crackmydroid.shared.domain.usecase.root.CheckPlayIntegrityUseCase
 import com.crackmydroid.shared.domain.usecase.root.CheckRootUseCase
-import com.crackmydroid.shared.i18n.Strings
 import com.crackmydroid.shared.presentation.BaseViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -19,7 +18,7 @@ class RootViewModel(
     private val _state = MutableStateFlow(RootState())
     val state: StateFlow<RootState> = _state
 
-    private fun buildReportContent(strings: Strings): String = buildString {
+    private fun buildReportContent(): String = buildString {
         appendLine(strings.navRoot)
         appendLine("-----------")
         _state.value.status?.let { status ->
@@ -89,12 +88,12 @@ class RootViewModel(
         }
     }
 
-    fun shareReport(strings: Strings) {
-        val content = buildReportContent(strings)
+    fun shareReport() {
+        val content = buildReportContent()
         scope.launch {
             reportExporter.shareTextReport("root_test_report", "root_test", content)
                 .onSuccess { path -> _state.update { it.copy(reportPath = path, error = null) } }
-                .onFailure { error -> _state.update { it.copy(error = error.message ?: "Errore") } }
+                .onFailure { error -> _state.update { it.copy(error = error.message ?: presentationTexts.error) } }
         }
     }
 

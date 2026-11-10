@@ -1,6 +1,7 @@
 package com.crackmydroid.shared.presentation
 
 import com.crackmydroid.shared.util.AppDispatchers
+import com.crackmydroid.shared.util.DefaultAppDispatchers
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
@@ -9,6 +10,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import kotlin.test.assertEquals
 import kotlin.test.Test
 import kotlin.test.assertTrue
 
@@ -42,7 +44,35 @@ class BaseViewModelTest {
         assertTrue(cleanupRan)
     }
 
+    @Test
+    fun updateLanguageUpdatesAllCatalogsAndNotifiesOnlyForEffectiveChanges() {
+        val viewModel = TestViewModel(DefaultAppDispatchers)
+
+        viewModel.updateLanguage("fr-FR")
+
+        assertEquals("fr", viewModel.useCaseLanguage)
+        assertEquals("Test root", viewModel.localizedStrings.navRoot)
+        assertEquals("Erreur", viewModel.localizedCopy.error)
+        assertEquals(1, viewModel.languageChanges)
+
+        viewModel.updateLanguage("fr")
+        viewModel.updateLanguage("unknown")
+
+        assertEquals(2, viewModel.languageChanges)
+        assertEquals("en", viewModel.useCaseLanguage)
+        viewModel.onCleared()
+    }
+
     private class TestViewModel(dispatchers: AppDispatchers) : BaseViewModel(dispatchers) {
+        var languageChanges = 0
+        val useCaseLanguage get() = useCaseTexts.languageCode
+        val localizedStrings get() = strings
+        val localizedCopy get() = presentationTexts
+
         fun launch(block: suspend () -> Unit): Job = scope.launch { block() }
+
+        override fun onLanguageChanged() {
+            languageChanges++
+        }
     }
 }

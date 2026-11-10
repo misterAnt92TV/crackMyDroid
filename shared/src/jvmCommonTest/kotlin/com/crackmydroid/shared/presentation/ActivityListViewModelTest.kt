@@ -275,7 +275,8 @@ class ActivityListViewModelTest {
         )
         advanceUntilIdle()
 
-        val report = vm.buildReport("com.demo.app", stringsFor("en"))
+        vm.updateLanguage("en")
+        val report = vm.buildReport("com.demo.app")
 
         assertNotNull(report)
         assertEquals(3, report.totalActivities)

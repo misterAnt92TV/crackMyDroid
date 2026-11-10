@@ -128,7 +128,8 @@ class RootViewModelTest {
         viewModel.verify()
         advanceUntilIdle()
 
-        viewModel.shareReport(stringsFor("en"))
+        viewModel.updateLanguage("en")
+        viewModel.shareReport()
         advanceUntilIdle()
 
         assertEquals("/tmp/root.pdf", viewModel.state.value.reportPath)

@@ -8,8 +8,6 @@ import com.crackmydroid.shared.domain.usecase.permissions.ListPermissionsUseCase
 import com.crackmydroid.shared.domain.usecase.reports.ExportReportUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetPermissionFavoritesUseCase
 import com.crackmydroid.shared.domain.usecase.settings.SetPermissionFavoritesUseCase
-import com.crackmydroid.shared.i18n.UseCasePresentationTexts
-import com.crackmydroid.shared.i18n.UseCaseTexts
 import com.crackmydroid.shared.presentation.BaseViewModel
 import com.crackmydroid.shared.util.AppDispatchers
 import com.crackmydroid.shared.util.DefaultAppDispatchers
@@ -44,16 +42,9 @@ class PermissionsViewModel(
     private var reportPreviewJob: Job? = null
     private var reportPreviewId = 0L
     private val multiSpaceRegex = Regex("\\s+")
-    private var text = UseCaseTexts("en")
-    private var copy = UseCasePresentationTexts("en")
-
-    fun updateLanguage(languageCode: String) {
-        val next = UseCaseTexts(languageCode)
-        if (text.languageCode == next.languageCode) return
+    override fun onLanguageChanged() {
         val previewPackage = _state.value.reportPreviewPackage
         dismissReportPreview()
-        text = next
-        copy = UseCasePresentationTexts(next.languageCode)
         updatePresentation(languageChanged = true) { it }
         if (previewPackage != null) requestReportPreview(previewPackage)
     }
@@ -155,7 +146,7 @@ class PermissionsViewModel(
     }
 
     fun export() {
-        val reportText = text
+        val reportText = useCaseTexts
         scope.launch {
             val currentState = _state.value
             runSuspendCatching {
@@ -197,8 +188,8 @@ class PermissionsViewModel(
     }
 
     fun shareSingle(packageName: String, contentOverride: String? = null) {
-        val reportText = text
-        val noData = copy.noPackageData
+        val reportText = useCaseTexts
+        val noData = presentationTexts.noPackageData
         scope.launch {
             val currentState = _state.value
             val app = currentState.apps.find { it.packageName == packageName }
@@ -231,8 +222,8 @@ class PermissionsViewModel(
         val currentState = _state.value
         val app = currentState.apps.find { it.packageName == packageName }
         val risk = currentState.riskReports.find { it.packageName == packageName }
-        val reportText = text
-        val reportCopy = copy
+        val reportText = useCaseTexts
+        val reportCopy = presentationTexts
         _state.update {
             it.copy(
                 reportPreviewPackage = packageName,
@@ -278,7 +269,7 @@ class PermissionsViewModel(
     fun startAutoRiskScan() {
         val apps = _state.value.apps
         if (apps.isEmpty()) {
-            _state.update { it.copy(error = copy.noPermissionApps) }
+            _state.update { it.copy(error = presentationTexts.noPermissionApps) }
             return
         }
 
@@ -332,7 +323,7 @@ class PermissionsViewModel(
                 throw cancellation
             } catch (failure: Exception) {
                 if (request == riskScanId) {
-                    _state.update { it.copy(error = failure.message ?: copy.permissionScanFailed) }
+                    _state.update { it.copy(error = failure.message ?: presentationTexts.permissionScanFailed) }
                 }
             } finally {
                 if (request == riskScanId) {
@@ -388,7 +379,7 @@ class PermissionsViewModel(
                     val items = if (!languageChanged && report === previousReports[report.packageName]) {
                         current.findingsByPackage.getValue(report.packageName)
                     } else {
-                        report.findings.map { it.toUi(text) }
+                        report.findings.map { it.toUi(useCaseTexts) }
                     }
                     report.packageName to items
                 }

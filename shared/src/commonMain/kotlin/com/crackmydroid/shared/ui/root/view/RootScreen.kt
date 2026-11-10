@@ -52,7 +52,6 @@ import androidx.compose.ui.unit.dp
 import com.crackmydroid.shared.domain.model.RootStatus
 import com.crackmydroid.shared.i18n.LocalStrings
 import com.crackmydroid.shared.i18n.ScreenUiStrings
-import com.crackmydroid.shared.i18n.Strings
 import com.crackmydroid.shared.i18n.format
 import com.crackmydroid.shared.presentation.components.AppButton
 import com.crackmydroid.shared.presentation.components.AppProgressIndicator
@@ -90,7 +89,7 @@ fun RootScreen(
         onVerifyRootAccess = viewModel::verifyRootAccess,
         onPlayIntegrityNonceChange = viewModel::updatePlayIntegrityNonce,
         onVerifyPlayIntegrity = viewModel::verifyPlayIntegrity,
-        onShareReport = { strings -> viewModel.shareReport(strings) },
+        onShareReport = viewModel::shareReport,
         onClearError = viewModel::clearError,
         onLoad = viewModel::verify,
     )
@@ -109,7 +108,7 @@ private fun RootScreenContent(
     onVerifyRootAccess: () -> Unit,
     onPlayIntegrityNonceChange: (String) -> Unit,
     onVerifyPlayIntegrity: () -> Unit,
-    onShareReport: (Strings) -> Unit,
+    onShareReport: () -> Unit,
     onClearError: () -> Unit,
     onLoad: () -> Unit,
 ) {
@@ -285,7 +284,7 @@ private fun RootScreenContent(
                                             label = "rootStatus",
                                         ) { statusContent(it) }
                                     }
-                                    IconButton(onClick = { onShareReport(strings) }) {
+                                    IconButton(onClick = onShareReport) {
                                         Icon(
                                             imageVector = Icons.Filled.Share,
                                             contentDescription = strings.pentestShare,
@@ -346,7 +345,7 @@ private fun RootScreenContent(
                                         style = MaterialTheme.typography.titleMedium,
                                         fontWeight = FontWeight.SemiBold,
                                     )
-                                    IconButton(onClick = { onShareReport(strings) }) {
+                                    IconButton(onClick = onShareReport) {
                                         Icon(
                                             imageVector = Icons.Filled.Share,
                                             contentDescription = strings.pentestShare,

@@ -74,10 +74,14 @@ file organization.
 - Never hardcode user-visible strings in composables, ViewModels, UseCases, or UI models. The sole
   exception is deterministic sample copy inside a function annotated as a Compose preview. Add every
   production UI string to `shared/src/commonMain/kotlin/com/crackmydroid/shared/i18n/Strings.kt` for
-  all languages already supported by the project. Read strings from `LocalStrings.current` in
-  Compose UI; pass or inject the `Strings` model into ViewModels, UseCases, and other non-composable
-  logic according to the existing conventions. Update preview fixtures whenever a new user-visible
-  string is introduced. Hardcoded technical constants that are not shown to users, such as
+  all languages already supported by the project. Read static labels and accessibility copy from
+  `LocalStrings.current` in Compose UI. ViewModels must use the protected `strings`,
+  `useCaseTexts`, and `presentationTexts` catalogs inherited from `BaseViewModel` for dynamic
+  copy, reports, errors, and effects; never recreate those catalogs or accept `Strings` from a
+  composable/callback. Override `onLanguageChanged()` to remap already-loaded localized state or
+  regenerate in-memory reports without reloading repositories or rerunning scans. Update preview
+  fixtures whenever a new user-visible string is introduced. Hardcoded technical constants that are
+  not shown to users, such as
   identifiers, keys, codes, regular expressions, and protocol values, are allowed.
 - Reusable components follow the same localization rule: runtime labels, actions, accessibility
   text, and status copy must come from `LocalStrings` or an explicit localized parameter.

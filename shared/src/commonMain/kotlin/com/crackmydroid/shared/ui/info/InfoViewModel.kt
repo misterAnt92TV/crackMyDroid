@@ -4,8 +4,6 @@ import com.crackmydroid.shared.domain.usecase.info.BuildDeviceInfoReportUseCase
 import com.crackmydroid.shared.domain.usecase.info.GetDeviceInfoUseCase
 import com.crackmydroid.shared.domain.usecase.reports.ExportReportUseCase
 import com.crackmydroid.shared.domain.usecase.root.CheckRootUseCase
-import com.crackmydroid.shared.i18n.UseCasePresentationTexts
-import com.crackmydroid.shared.i18n.UseCaseTexts
 import com.crackmydroid.shared.presentation.BaseViewModel
 import com.crackmydroid.shared.util.runSuspendCatching
 import kotlinx.coroutines.Job
@@ -22,14 +20,10 @@ class InfoViewModel(
 ) : BaseViewModel() {
     private val _state = MutableStateFlow(InfoState())
     val state: StateFlow<InfoState> = _state
-    private var text = UseCaseTexts("en")
     private var reportJob: Job? = null
     private var reportRequest = 0L
 
-    fun updateLanguage(languageCode: String) {
-        val next = UseCaseTexts(languageCode)
-        if (text.languageCode == next.languageCode) return
-        text = next
+    override fun onLanguageChanged() {
         refreshReport()
     }
 
@@ -52,7 +46,7 @@ class InfoViewModel(
         val request = ++reportRequest
         val info = _state.value.info ?: return
         val root = _state.value.root
-        val reportText = text
+        val reportText = useCaseTexts
         _state.update { it.copy(reportContent = null, reportLoading = true) }
         reportJob = scope.launch {
             val result = buildReport(info, root, reportText)
@@ -62,7 +56,7 @@ class InfoViewModel(
             }.onFailure { error ->
                 _state.update {
                     it.copy(
-                        error = error.message ?: UseCasePresentationTexts(reportText.languageCode).reportFailed,
+                        error = error.message ?: presentationTexts.reportFailed,
                         reportLoading = false,
                     )
                 }
@@ -73,7 +67,7 @@ class InfoViewModel(
     fun export() {
         val info = _state.value.info ?: return
         val root = _state.value.root
-        val reportText = text
+        val reportText = useCaseTexts
         scope.launch {
             runSuspendCatching {
                 val content = buildReport(info, root, reportText).getOrThrow()
@@ -87,7 +81,7 @@ class InfoViewModel(
     fun share(contentOverride: String? = null) {
         val info = _state.value.info ?: return
         val root = _state.value.root
-        val reportText = text
+        val reportText = useCaseTexts
         scope.launch {
             runSuspendCatching {
                 val content = contentOverride ?: buildReport(info, root, reportText).getOrThrow()

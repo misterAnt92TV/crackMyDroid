@@ -9,11 +9,13 @@ import com.crackmydroid.shared.i18n.resolveLanguageCode
 import com.crackmydroid.shared.presentation.BaseViewModel
 import com.crackmydroid.shared.presentation.navigation.Screen
 import com.crackmydroid.shared.ui.activities.ActivityListViewModel
+import com.crackmydroid.shared.ui.home.HomeViewModel
 import com.crackmydroid.shared.ui.info.InfoViewModel
 import com.crackmydroid.shared.ui.installedapps.InstalledAppsViewModel
 import com.crackmydroid.shared.ui.logs.LogViewModel
 import com.crackmydroid.shared.ui.pentest.PenTestingViewModel
 import com.crackmydroid.shared.ui.permissions.PermissionsViewModel
+import com.crackmydroid.shared.ui.root.RootViewModel
 import com.crackmydroid.shared.ui.settings.SettingsViewModel
 import com.crackmydroid.shared.ui.trick.TrickViewModel
 import kotlinx.coroutines.CancellationException
@@ -28,6 +30,8 @@ class AppShellViewModel(
     private val getIntroSeen: GetIntroSeenUseCase,
     private val setIntroSeen: SetIntroSeenUseCase,
     private val activity: ActivityListViewModel,
+    private val home: HomeViewModel,
+    private val root: RootViewModel,
     private val info: InfoViewModel,
     private val trick: TrickViewModel,
     private val settings: SettingsViewModel,
@@ -64,10 +68,18 @@ class AppShellViewModel(
         }
     }
 
-    fun updateLanguage(languageCode: String) {
+    override fun updateLanguage(languageCode: String) {
+        super.updateLanguage(languageCode)
         info.updateLanguage(languageCode)
         permissions.updateLanguage(languageCode)
         penTesting.updateLanguage(languageCode)
+        activity.updateLanguage(languageCode)
+        home.updateLanguage(languageCode)
+        root.updateLanguage(languageCode)
+        trick.updateLanguage(languageCode)
+        settings.updateLanguage(languageCode)
+        logs.updateLanguage(languageCode)
+        installedApps.updateLanguage(languageCode)
     }
 
     fun navigate(screen: Screen, hintsEnabled: Boolean) {

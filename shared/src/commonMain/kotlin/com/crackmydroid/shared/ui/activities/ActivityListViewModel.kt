@@ -16,9 +16,7 @@ import com.crackmydroid.shared.domain.usecase.settings.GetActivityPackageFavorit
 import com.crackmydroid.shared.domain.usecase.settings.GetExportFormatUseCase
 import com.crackmydroid.shared.domain.usecase.settings.SetActivityFavoritesUseCase
 import com.crackmydroid.shared.domain.usecase.settings.SetActivityPackageFavoritesUseCase
-import com.crackmydroid.shared.i18n.Strings
 import com.crackmydroid.shared.i18n.format
-import com.crackmydroid.shared.i18n.stringsFor
 import com.crackmydroid.shared.presentation.BaseViewModel
 import com.crackmydroid.shared.presentation.operations.NoOpOperationLogRepository
 import com.crackmydroid.shared.ui.activities.view.uiLabel
@@ -71,7 +69,7 @@ class ActivityListViewModel(
                     )
                 }
                 .onFailure { err ->
-                    _state.update { it.copy(error = err.message ?: "Errore", loading = false) }
+                    _state.update { it.copy(error = err.message ?: presentationTexts.error, loading = false) }
                     operationLogs.record(
                         OperationEvent(OperationEventKey.ACTIVITY_LOAD),
                         success = false,
@@ -227,7 +225,7 @@ class ActivityListViewModel(
     fun exportGroup(packageName: String) {
         val acts = _state.value.activities.filter { it.packageName == packageName }
         if (acts.isEmpty()) {
-            _state.update { it.copy(error = "Nessuna activity per $packageName") }
+            _state.update { it.copy(error = presentationTexts.noPackageData) }
             operationLogs.record(
                 "Export attività $packageName",
                 success = false,
@@ -268,7 +266,7 @@ class ActivityListViewModel(
         return buildExportContent(acts)
     }
 
-    fun buildReport(packageName: String, strings: Strings = stringsFor("it")): ActivityAppReport? {
+    fun buildReport(packageName: String): ActivityAppReport? {
         val activities = _state.value.activities.filter { it.packageName == packageName }
         if (activities.isEmpty()) return null
 
@@ -346,11 +344,11 @@ class ActivityListViewModel(
         )
     }
 
-    suspend fun exportVisualReport(packageName: String, strings: Strings = stringsFor("it")): Result<String> {
-        val report = buildReport(packageName, strings)
+    suspend fun exportVisualReport(packageName: String): Result<String> {
+        val report = buildReport(packageName)
             ?: run {
-                _state.update { it.copy(error = "Nessuna activity per $packageName") }
-                return Result.failure(IllegalArgumentException("Nessuna activity per $packageName"))
+                _state.update { it.copy(error = presentationTexts.noPackageData) }
+                return Result.failure(IllegalArgumentException(presentationTexts.noPackageData))
             }
         val baseName = "activity_report_${packageName.replace('.', '_')}.html"
         val content = buildHtmlReport(report)

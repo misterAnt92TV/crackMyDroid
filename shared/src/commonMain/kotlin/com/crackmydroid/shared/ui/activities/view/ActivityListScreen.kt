@@ -49,7 +49,6 @@ import com.crackmydroid.shared.domain.model.activity.ActivityEntry
 import com.crackmydroid.shared.domain.model.activity.favoriteKey
 import com.crackmydroid.shared.i18n.LocalStrings
 import com.crackmydroid.shared.i18n.ScreenUiStrings
-import com.crackmydroid.shared.i18n.Strings
 import com.crackmydroid.shared.i18n.format
 import com.crackmydroid.shared.presentation.components.AppAccordion
 import com.crackmydroid.shared.presentation.components.AppButton
@@ -115,8 +114,8 @@ fun ActivityListScreen(
 private data class ActivityListCallbacks(
     val onRefresh: () -> Unit,
     val onSetFilter: (String, Boolean) -> Unit,
-    val onBuildReport: (String, Strings) -> ActivityAppReport?,
-    val onExportVisualReport: suspend (String, Strings) -> Result<String>,
+    val onBuildReport: (String) -> ActivityAppReport?,
+    val onExportVisualReport: suspend (String) -> Result<String>,
     val onClearError: () -> Unit,
     val onToggleExpanded: (String) -> Unit,
     val onGroupContent: suspend (String) -> String?,
@@ -252,7 +251,7 @@ private fun ActivityListContent(
 
             selectedReportPackage?.let { packageName ->
                 item(key = "activity-report-$packageName") {
-                    callbacks.onBuildReport(packageName, strings)?.let { report ->
+                    callbacks.onBuildReport(packageName)?.let { report ->
                         ActivityReportCard(
                             report = report,
                             lastExportPath = lastReportPath,
@@ -262,7 +261,7 @@ private fun ActivityListContent(
                             },
                             onExport = {
                                 scope.launch {
-                                    callbacks.onExportVisualReport(report.packageName, strings)
+                                    callbacks.onExportVisualReport(report.packageName)
                                         .onSuccess { path ->
                                             lastReportPath = path
                                             snackbarHostState.showSnackbar(
@@ -764,8 +763,8 @@ private fun ActivityListScreenPreview() {
     val callbacks = ActivityListCallbacks(
         onRefresh = {},
         onSetFilter = { _, _ -> },
-        onBuildReport = { _, _ -> null },
-        onExportVisualReport = { _, _ -> Result.failure(UnsupportedOperationException("Preview action")) },
+        onBuildReport = { null },
+        onExportVisualReport = { Result.failure(UnsupportedOperationException("Preview action")) },
         onClearError = {},
         onToggleExpanded = {},
         onGroupContent = { null },

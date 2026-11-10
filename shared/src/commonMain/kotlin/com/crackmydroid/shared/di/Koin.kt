@@ -132,6 +132,8 @@ fun presentationModule() = module {
     factory { HomeViewModel(get()) }
     factory {
         val activity = get<ActivityListViewModel>()
+        val home = get<HomeViewModel>()
+        val root = get<RootViewModel>()
         val info = get<InfoViewModel>()
         val trick = get<TrickViewModel>()
         val settings = get<SettingsViewModel>()
@@ -144,6 +146,8 @@ fun presentationModule() = module {
                 getIntroSeen = get(),
                 setIntroSeen = get(),
                 activity = activity,
+                home = home,
+                root = root,
                 info = info,
                 trick = trick,
                 settings = settings,
@@ -154,8 +158,8 @@ fun presentationModule() = module {
                 getVerbose = get(),
             ),
             activity = activity,
-            home = get(),
-            root = get(),
+            home = home,
+            root = root,
             info = info,
             trick = trick,
             settings = settings,
