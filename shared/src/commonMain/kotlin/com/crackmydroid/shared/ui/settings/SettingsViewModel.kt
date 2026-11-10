@@ -227,7 +227,7 @@ class SettingsViewModel(
                 persist().getOrThrow()
                 updateState()
             }.onFailure { error ->
-                _state.update { it.copy(error = error.message ?: "Impossibile salvare l'impostazione") }
+                _state.update { it.copy(error = error.message ?: presentationTexts.saveSettingFailed) }
             }
         }
     }

@@ -35,7 +35,7 @@ class RootViewModel(
             appendLine(
                 "${strings.verifyRoot}: ${if (status.isRooted) strings.rootDetected else strings.rootNotDetected}",
             )
-            appendLine("Dettagli root: ${status.details}")
+            appendLine("${strings.rootDetectedDetails}: ${status.details}")
         } ?: appendLine("${strings.verifyRoot}: ${strings.notAvailable}")
         _state.value.playIntegrity?.let { pi ->
             appendLine()

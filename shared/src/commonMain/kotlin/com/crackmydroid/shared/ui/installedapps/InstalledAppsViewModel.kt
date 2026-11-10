@@ -62,13 +62,13 @@ class InstalledAppsViewModel(
                 .onSuccess { list ->
                     if (!isCurrent()) return@onSuccess
                     updatePresentation { it.copy(apps = list, loading = false) }
-                    operationLogs.record("Caricate ${list.size} app installate", success = true)
+                    operationLogs.record(uiStrings.appsLoaded.format(list.size), success = true)
                 }
                 .onFailure { err ->
                     if (!isCurrent()) return@onFailure
                     _state.update { it.copy(error = err.message ?: strings.commandError, loading = false) }
                     operationLogs.record(
-                        "Caricamento app installate",
+                        uiStrings.loadingInstalledApps,
                         success = false,
                         details = err.message,
                     )
@@ -115,12 +115,12 @@ class InstalledAppsViewModel(
             result
                 .onSuccess { path ->
                     _state.update { it.copy(lastExportPath = path, lastSharedPackage = null) }
-                    operationLogs.record("Export APK $packageName", success = true, details = path)
+                    operationLogs.record("${uiStrings.exportApk} $packageName", success = true, details = path)
                 }
                 .onFailure { err ->
                     _state.update { it.copy(error = err.message ?: strings.commandError) }
                     operationLogs.record(
-                        "Export APK $packageName",
+                        "${uiStrings.exportApk} $packageName",
                         success = false,
                         details = err.message,
                     )
@@ -137,11 +137,11 @@ class InstalledAppsViewModel(
             }
                 .onSuccess { path ->
                     _state.update { it.copy(lastExportPath = path, error = null) }
-                    operationLogs.record("Export lista app", success = true, details = path)
+                    operationLogs.record(uiStrings.exportApps, success = true, details = path)
                 }
                 .onFailure { err ->
                     _state.update { it.copy(error = err.message) }
-                    operationLogs.record("Export lista app", success = false, details = err.message)
+                    operationLogs.record(uiStrings.exportApps, success = false, details = err.message)
                 }
         }
     }
@@ -155,11 +155,11 @@ class InstalledAppsViewModel(
             }
                 .onSuccess { path ->
                     _state.update { it.copy(lastExportPath = path, error = null) }
-                    operationLogs.record("Share lista app", success = true, details = path)
+                    operationLogs.record(uiStrings.shareApps, success = true, details = path)
                 }
                 .onFailure { err ->
                     _state.update { it.copy(error = err.message) }
-                    operationLogs.record("Share lista app", success = false, details = err.message)
+                    operationLogs.record(uiStrings.shareApps, success = false, details = err.message)
                 }
         }
     }
@@ -171,12 +171,12 @@ class InstalledAppsViewModel(
             result
                 .onSuccess {
                     _state.update { it.copy(lastSharedPackage = packageName) }
-                    operationLogs.record("Share APK $packageName", success = true)
+                    operationLogs.record("${uiStrings.shareApk} $packageName", success = true)
                 }
                 .onFailure { err ->
                     _state.update { it.copy(error = err.message ?: strings.commandError) }
                     operationLogs.record(
-                        "Share APK $packageName",
+                        "${uiStrings.shareApk} $packageName",
                         success = false,
                         details = err.message,
                     )

@@ -138,6 +138,14 @@ class UseCasePresentationTexts(languageCode: String) {
             "Error en el análisis automático",
             "Échec de l’analyse automatique",
         )
+    val saveSettingFailed
+        get() = text(
+            "Impossibile salvare l'impostazione",
+            "Unable to save the setting",
+            "Einstellung konnte nicht gespeichert werden",
+            "No se pudo guardar el ajuste",
+            "Impossible d’enregistrer le réglage",
+        )
 
     val exportFormatUseCaseRequired
         get() = text(

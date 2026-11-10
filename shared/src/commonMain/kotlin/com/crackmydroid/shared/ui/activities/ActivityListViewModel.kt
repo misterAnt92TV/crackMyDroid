@@ -158,7 +158,7 @@ class ActivityListViewModel(
         val hasGuidedIntent =
             normalizedAction != null || normalizedData != null || normalizedMimeType != null
         if (!entry.launchableViaShell && !hasGuidedIntent) {
-            val msg = entry.launchabilityReason ?: "Activity non avviabile via am start -n"
+            val msg = entry.launchabilityReason ?: strings.activityUi.activityNotLaunchable
             _state.update { it.copy(error = msg) }
             operationLogs.record(
                 "Lancio ${entry.activityName}",
@@ -170,7 +170,7 @@ class ActivityListViewModel(
         launchTask {
             val result = launchActivity(entry, normalizedAction, normalizedData, normalizedMimeType)
             result.onFailure { err ->
-                val msg = err.message ?: "Impossibile avviare ${entry.activityName}"
+                val msg = err.message ?: strings.activityUi.unableToLaunch.format(entry.activityName)
                 _state.update { it.copy(error = msg) }
                 operationLogs.record(
                     "Lancio ${entry.activityName}",
@@ -181,7 +181,7 @@ class ActivityListViewModel(
                 operationLogs.record(
                     "Lancio ${entry.activityName}",
                     success = true,
-                    details = "Rischio ${ActivityIntentRiskAnalyzer.formatLevel(risk.level)} • ${risk.summary}",
+                    details = "${strings.activityUi.riskLabel} ${ActivityIntentRiskAnalyzer.formatLevel(risk.level)} • ${risk.summary}",
                 )
             }
         }
@@ -236,11 +236,11 @@ class ActivityListViewModel(
                 ).getOrThrow()
             }
                 .onSuccess { path ->
-                    operationLogs.record("Export attività", success = true, details = path)
+                    operationLogs.record(strings.activityUi.activityExport, success = true, details = path)
                 }.onFailure { error ->
                     _state.update { it.copy(error = error.message) }
                     operationLogs.record(
-                        "Export attività",
+                        strings.activityUi.activityExport,
                         success = false,
                         details = error.message,
                     )
@@ -253,9 +253,9 @@ class ActivityListViewModel(
         if (acts.isEmpty()) {
             _state.update { it.copy(error = presentationTexts.noPackageData) }
             operationLogs.record(
-                "Export attività $packageName",
+                "${strings.activityUi.activityExport} $packageName",
                 success = false,
-                details = "Nessuna activity",
+                details = strings.activityUi.noActivity,
             )
             return
         }
@@ -271,14 +271,14 @@ class ActivityListViewModel(
             }
                 .onSuccess { path ->
                     operationLogs.record(
-                        "Export attività $packageName",
+                        "${strings.activityUi.activityExport} $packageName",
                         success = true,
                         details = path,
                     )
                 }.onFailure { error ->
                     _state.update { it.copy(error = error.message) }
                     operationLogs.record(
-                        "Export attività $packageName",
+                        "${strings.activityUi.activityExport} $packageName",
                         success = false,
                         details = error.message,
                     )
@@ -402,11 +402,11 @@ class ActivityListViewModel(
         val content = buildHtmlReport(report)
         return runSuspendCatching { reportExporter.share(baseName, content).getOrThrow() }
             .onSuccess { path ->
-                operationLogs.record("Report activity $packageName", success = true, details = path)
+                operationLogs.record("${strings.activityUi.activityReport} $packageName", success = true, details = path)
             }.onFailure { error ->
                 _state.update { it.copy(error = error.message) }
                 operationLogs.record(
-                    "Report activity $packageName",
+                    "${strings.activityUi.activityReport} $packageName",
                     success = false,
                     details = error.message,
                 )
@@ -419,7 +419,7 @@ class ActivityListViewModel(
             appendLine("${act.label} (${act.packageName})")
             appendLine("Activity: ${act.activityName}")
             appendLine("Launch mode: ${risk.launchMode}")
-            appendLine("Rischio: ${ActivityIntentRiskAnalyzer.formatLevel(risk.level)}")
+            appendLine("${strings.activityUi.riskLabel}: ${ActivityIntentRiskAnalyzer.formatLevel(risk.level)}")
             act.launchIntentAction?.takeIf { it.isNotBlank() }
                 ?.let { appendLine("Action: $it") }
             act.launchIntentData?.takeIf { it.isNotBlank() }
@@ -558,27 +558,27 @@ class ActivityListViewModel(
         appendLine("    <section class=\"hero\">")
         appendLine("      <div class=\"eyebrow\">CrackMyDroid desktop report</div>")
         appendLine("      <h1>${report.appLabel.htmlEscape()}</h1>")
-        appendLine("      <p>Package analizzato: <code>${report.packageName.htmlEscape()}</code></p>")
-        appendLine("      <p>Report generato dalla sezione Activity con dettaglio intent e indicazioni PenTest.</p>")
+        appendLine("      <p>${strings.activityUi.packageAnalyzed}: <code>${report.packageName.htmlEscape()}</code></p>")
+        appendLine("      <p>${strings.activityUi.generatedActivityReport}</p>")
         appendLine("    </section>")
         appendLine("    <section class=\"stats\">")
         appendLine(
-            "      <div class=\"stat\"><strong>${report.totalActivities}</strong><span>Activity totali</span></div>",
+            "      <div class=\"stat\"><strong>${report.totalActivities}</strong><span>${strings.activityUi.totalActivities}</span></div>",
         )
         appendLine(
-            "      <div class=\"stat\"><strong>${report.shellLaunchableCount}</strong><span>Avviabili via shell</span></div>",
+            "      <div class=\"stat\"><strong>${report.shellLaunchableCount}</strong><span>${strings.activityUi.shellLaunchable}</span></div>",
         )
         appendLine(
             "      <div class=\"stat\"><strong>${report.guidedLaunchCount}</strong><span>Guided launch</span></div>",
         )
-        appendLine("      <div class=\"stat\"><strong>${report.dumpOnlyCount}</strong><span>Solo dump</span></div>")
+        appendLine("      <div class=\"stat\"><strong>${report.dumpOnlyCount}</strong><span>${strings.activityUi.activityDumpOnlyLabel}</span></div>")
         appendLine(
             "      <div class=\"stat\"><strong>${report.riskyActivitiesCount}</strong><span>Con rischio intent</span></div>",
         )
         appendLine("    </section>")
         appendLine("    <div class=\"grid\">")
         appendLine("      <section class=\"card\">")
-        appendLine("        <h2>Osservazioni chiave</h2>")
+        appendLine("        <h2>${strings.activityUi.keyObservations}</h2>")
         appendLine("        <ul>")
         report.findings.forEach { finding ->
             appendLine("          <li>${finding.htmlEscape()}</li>")
@@ -586,7 +586,7 @@ class ActivityListViewModel(
         appendLine("        </ul>")
         appendLine("      </section>")
         appendLine("      <section class=\"card\">")
-        appendLine("        <h2>Profilo vulnerabilita</h2>")
+        appendLine("        <h2>${strings.activityUi.vulnerabilityProfile}</h2>")
         appendLine(
             "        <p>Severita massima rilevata: <strong>${
                 ActivityIntentRiskAnalyzer.formatLevel(
@@ -602,7 +602,7 @@ class ActivityListViewModel(
             appendLine("        </ul>")
         } else {
             appendLine(
-                "        <p class=\"muted\">Nessuna raccomandazione aggiuntiva oltre ai test di reachability.</p>",
+                "        <p class=\"muted\">${strings.activityUi.noAdditionalRecommendation}</p>",
             )
         }
         appendLine("      </section>")
@@ -610,7 +610,7 @@ class ActivityListViewModel(
         appendLine("        <h2>Activity in evidenza</h2>")
         appendLine("        <table>")
         appendLine(
-            "          <thead><tr><th>Label</th><th>Component</th><th>Launch</th><th>Rischio</th><th>Hint</th></tr></thead>",
+            "          <thead><tr><th>Label</th><th>Component</th><th>Launch</th><th>${strings.activityUi.riskColumn}</th><th>Hint</th></tr></thead>",
         )
         appendLine("          <tbody>")
         report.highlights.forEach { activity ->
@@ -633,7 +633,7 @@ class ActivityListViewModel(
         appendLine("        <h2>Inventario completo</h2>")
         appendLine("        <table>")
         appendLine(
-            "          <thead><tr><th>#</th><th>Label</th><th>Activity</th><th>Modalita</th><th>Rischio</th><th>Dettagli</th></tr></thead>",
+            "          <thead><tr><th>#</th><th>Label</th><th>Activity</th><th>Mode</th><th>${strings.activityUi.riskColumn}</th><th>${strings.activityUi.detailsColumn}</th></tr></thead>",
         )
         appendLine("          <tbody>")
         _state.value.activities
@@ -675,13 +675,13 @@ class ActivityListViewModel(
             launchIntentData?.takeIf { it.isNotBlank() }?.let { add("data=$it") }
             launchIntentMimeType?.takeIf { it.isNotBlank() }?.let { add("mime=$it") }
         }.joinToString(" • ")
-            .ifBlank { "Nessun dettaglio aggiuntivo" }
+            .ifBlank { strings.activityUi.noAdditionalDetails }
 
     private fun ActivityEntry.launchModeBadge(): String = when {
-        !launchableViaShell && hasGuidedLaunchMetadata() -> "<span class=\"tag tag-guided\">Guided launch</span>"
-        !launchableViaShell -> "<span class=\"tag tag-dump\">Solo dump</span>"
-        hasGuidedLaunchMetadata() -> "<span class=\"tag tag-guided\">Shell + hint</span>"
-        else -> "<span class=\"tag tag-shell\">Shell</span>"
+        !launchableViaShell && hasGuidedLaunchMetadata() -> "<span class=\"tag tag-guided\">${strings.activityUi.guidedLaunch}</span>"
+        !launchableViaShell -> "<span class=\"tag tag-dump\">${strings.activityUi.activityDumpOnly}</span>"
+        hasGuidedLaunchMetadata() -> "<span class=\"tag tag-guided\">${strings.activityUi.shellHint}</span>"
+        else -> "<span class=\"tag tag-shell\">${strings.activityUi.shell}</span>"
     }
 
     private fun ActivityIntentRiskReport.launchModeBadge(): String = entry.launchModeBadge()
@@ -695,13 +695,13 @@ class ActivityListViewModel(
         entry.launchIntentAction?.takeIf { it.isNotBlank() }?.let { add("action=$it") }
         entry.launchIntentData?.takeIf { it.isNotBlank() }?.let { add("data=$it") }
         entry.launchIntentMimeType?.takeIf { it.isNotBlank() }?.let { add("mime=$it") }
-    }.joinToString(" • ").ifBlank { "Nessun dettaglio aggiuntivo" }
+    }.joinToString(" • ").ifBlank { strings.activityUi.noAdditionalDetails }
 
     private fun ActivityIntentRiskReport.riskBadge(): String = when (level) {
-        ActivityIntentRiskLevel.Critical -> "<span class=\"tag tag-dump\">Critica</span>"
-        ActivityIntentRiskLevel.High -> "<span class=\"tag tag-guided\">Alta</span>"
-        ActivityIntentRiskLevel.Medium -> "<span class=\"tag tag-shell\">Media</span>"
-        ActivityIntentRiskLevel.Low -> "<span class=\"tag tag-shell\">Bassa</span>"
+        ActivityIntentRiskLevel.Critical -> "<span class=\"tag tag-dump\">${strings.activityUi.riskCriticalLabel}</span>"
+        ActivityIntentRiskLevel.High -> "<span class=\"tag tag-guided\">${strings.activityUi.riskHighLabel}</span>"
+        ActivityIntentRiskLevel.Medium -> "<span class=\"tag tag-shell\">${strings.activityUi.riskMediumLabel}</span>"
+        ActivityIntentRiskLevel.Low -> "<span class=\"tag tag-shell\">${strings.activityUi.riskLowLabel}</span>"
     }
 
     private fun ActivityEntry.toExportPayload(): ActivityExportPayload {
