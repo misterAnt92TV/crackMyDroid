@@ -118,6 +118,46 @@ class ActivityUiStrings(private val language: String) {
             "Lanzador guiado",
             "Lanceur guidé",
         )
+    val packageLabel get() = "Package"
+    val componentLabel get() = text("Componente", "Component", "Komponente", "Componente", "Composant")
+    val exportedLabel get() = "Exported"
+    val permissionLabel get() = text("Permesso", "Permission", "Berechtigung", "Permiso", "Permission")
+    val launchModeLabel
+        get() = text(
+            "Launch mode",
+            "Launch mode",
+            "Startmodus",
+            "Modo de inicio",
+            "Mode de lancement",
+        )
+    val targetActivityLabel
+        get() = text(
+            "Target alias",
+            "Target alias",
+            "Ziel-Alias",
+            "Alias de destino",
+            "Cible d’alias",
+        )
+    val shellLaunchableLabel
+        get() = text(
+            "Avvio da shell",
+            "Shell launch",
+            "Shell-Start",
+            "Inicio por shell",
+            "Lancement shell",
+        )
+    val constraintLabel get() = text("Vincolo", "Constraint", "Einschränkung", "Restricción", "Contrainte")
+    val yesLabel get() = text("Sì", "Yes", "Ja", "Sí", "Oui")
+    val noLabel get() = text("No", "No", "Nein", "No", "Non")
+    val noneLabel get() = text("Nessuno", "None", "Keine", "Ninguno", "Aucun")
+    val copyComponent get() = text("Copia nome", "Copy name", "Namen kopieren", "Copiar nombre", "Copier le nom")
+    val componentCopied get() = text(
+        "Nome componente copiato negli appunti",
+        "Component name copied to clipboard",
+        "Komponentenname in die Zwischenablage kopiert",
+        "Nombre de componente copiado al portapapeles",
+        "Nom du composant copié dans le presse-papiers",
+    )
     val actionLabel get() = "Action"
     val dataUriLabel get() = "Data URI"
     val mimeTypeLabel get() = "MIME type"

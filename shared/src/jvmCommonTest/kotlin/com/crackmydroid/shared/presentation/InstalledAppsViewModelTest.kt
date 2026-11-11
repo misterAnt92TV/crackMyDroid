@@ -13,6 +13,7 @@ import com.crackmydroid.shared.domain.usecase.settings.GetInstalledAppFavoritesU
 import com.crackmydroid.shared.domain.usecase.settings.SetInstalledAppFavoritesUseCase
 import com.crackmydroid.shared.ui.installedapps.InstalledAppsEvent
 import com.crackmydroid.shared.ui.installedapps.InstalledAppsViewModel
+import com.crackmydroid.shared.ui.installedapps.view.formatApkSize
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -217,5 +218,15 @@ class InstalledAppsViewModelTest {
         vm.handleEvent(InstalledAppsEvent.FilterChanged("alpha", trackUsage = true))
         assertEquals("alpha", vm.state.value.topQuery)
         vm.onCleared()
+    }
+
+    @Test
+    fun formatApkSizeFormatsBytesCorrectly() {
+        assertEquals("0 B", formatApkSize(0L))
+        assertEquals("512 B", formatApkSize(512L))
+        assertEquals("1 KB", formatApkSize(1024L))
+        assertEquals("1.5 KB", formatApkSize(1536L))
+        assertEquals("12 MB", formatApkSize(12_582_912L))
+        assertEquals("14.8 MB", formatApkSize(15_482_880L))
     }
 }

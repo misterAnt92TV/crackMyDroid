@@ -5,8 +5,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -15,6 +17,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Star
@@ -36,6 +39,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -53,7 +57,6 @@ import com.crackmydroid.shared.i18n.ScreenUiStrings
 import com.crackmydroid.shared.i18n.format
 import com.crackmydroid.shared.presentation.components.AppAccordion
 import com.crackmydroid.shared.presentation.components.AppButton
-import com.crackmydroid.shared.presentation.components.AppListItem
 import com.crackmydroid.shared.presentation.components.ButtonVariant
 import com.crackmydroid.shared.presentation.components.ErrorDialogComponent
 import com.crackmydroid.shared.presentation.components.PackageIcon
@@ -158,8 +161,11 @@ private fun ActivityListContent(
 ) {
     val strings = LocalStrings.current
 
+    @Suppress("DEPRECATION")
+    val clipboard = LocalClipboardManager.current
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+    val expandedActivities = remember { mutableStateMapOf<String, Boolean>() }
     val groups = state.groups
     val favoriteQueries = state.favoriteQueries
     val listState = rememberLazyListState()
@@ -401,6 +407,8 @@ private fun ActivityListContent(
                 ) {
                     group.activities.forEach { activity ->
                         val favKey = activity.favoriteKey()
+                        val isFav = state.favorites.contains(favKey)
+                        val isActivityExpanded = expandedActivities[favKey] == true
                         val activityMeta = when {
                             !activity.launchableViaShell && activity.launchContextHint != null ->
                                 strings.activityUi.intentRequired
@@ -411,60 +419,170 @@ private fun ActivityListContent(
 
                             else -> strings.activityUi.shellStart
                         }
-                        AppListItem(
+                        AppAccordion(
                             title = activity.label,
-                            subtitle = when {
-                                activity.launchabilityReason != null ->
-                                    "${activity.activityName} • ${activity.launchabilityReason}"
-
-                                activity.launchContextHint != null ->
-                                    "${activity.activityName} • ${activity.launchContextHint}"
-
-                                else -> activity.activityName
-                            },
+                            subtitle = activity.activityName,
                             meta = activityMeta,
-                            onClick = when {
-                                activity.launchableViaShell -> ({ callbacks.onLaunch(activity) })
-                                !activity.launchableViaShell -> ({ callbacks.onOpenGuidedLaunch(activity) })
-                                else -> null
-                            },
-                            titleMaxLines = 3,
-                            subtitleMaxLines = 4,
-                            textOverflow = TextOverflow.Clip,
-                            trailing = {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    if (!activity.launchableViaShell) {
-                                        Icon(
-                                            imageVector = Icons.Filled.Warning,
-                                            contentDescription = strings.shellUnavailableContentDescription,
-                                            tint = MaterialTheme.colorScheme.error,
-                                            modifier = Modifier.padding(end = 4.dp),
-                                        )
-                                    }
-                                    IconButton(onClick = { callbacks.onToggleFavorite(activity) }) {
-                                        Icon(
-                                            imageVector = if (state.favorites.contains(
-                                                    favKey,
-                                                )
-                                            ) {
-                                                Icons.Filled.Star
-                                            } else {
-                                                Icons.Filled.StarBorder
-                                            },
-                                            contentDescription = strings.favoriteContentDescription,
-                                            tint = if (state.favorites.contains(
-                                                    favKey,
-                                                )
-                                            ) {
-                                                MaterialTheme.colorScheme.primary
-                                            } else {
-                                                MaterialTheme.colorScheme.onSurfaceVariant
-                                            },
-                                        )
-                                    }
+                            expanded = isActivityExpanded,
+                            onToggle = { expandedActivities[favKey] = !isActivityExpanded },
+                            titleMaxLines = 2,
+                            subtitleMaxLines = 2,
+                            textOverflow = TextOverflow.Ellipsis,
+                            headerVerticalPadding = 6.dp,
+                            actionsBelowHeader = false,
+                            actions = {
+                                if (!activity.launchableViaShell) {
+                                    Icon(
+                                        imageVector = Icons.Filled.Warning,
+                                        contentDescription = strings.shellUnavailableContentDescription,
+                                        tint = MaterialTheme.colorScheme.error,
+                                        modifier = Modifier.size(20.dp).padding(end = 2.dp),
+                                    )
+                                }
+                                IconButton(
+                                    onClick = {
+                                        if (activity.launchableViaShell) {
+                                            callbacks.onLaunch(activity)
+                                        } else {
+                                            callbacks.onOpenGuidedLaunch(activity)
+                                        }
+                                    },
+                                    modifier = Modifier.size(36.dp),
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Filled.PlayArrow,
+                                        contentDescription = strings.activityUi.launch,
+                                        tint = MaterialTheme.colorScheme.primary,
+                                    )
+                                }
+                                IconButton(
+                                    onClick = { callbacks.onToggleFavorite(activity) },
+                                    modifier = Modifier.size(36.dp),
+                                ) {
+                                    Icon(
+                                        imageVector = if (isFav) Icons.Filled.Star else Icons.Filled.StarBorder,
+                                        contentDescription = strings.favoriteContentDescription,
+                                        tint = if (isFav) {
+                                            MaterialTheme.colorScheme.primary
+                                        } else {
+                                            MaterialTheme.colorScheme.onSurfaceVariant
+                                        },
+                                    )
                                 }
                             },
-                        )
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                        ) {
+                            ActivityDetailRow(
+                                label = strings.activityUi.packageLabel,
+                                value = activity.packageName,
+                                maxLines = Int.MAX_VALUE,
+                                overflow = TextOverflow.Clip,
+                            )
+                            ActivityDetailRow(
+                                label = strings.activityUi.componentLabel,
+                                value = activity.activityName,
+                                maxLines = Int.MAX_VALUE,
+                                overflow = TextOverflow.Clip,
+                            )
+                            ActivityDetailRow(
+                                label = strings.activityUi.exportedLabel,
+                                value = if (activity.exported) {
+                                    strings.activityUi.yesLabel
+                                } else {
+                                    strings.activityUi.noLabel
+                                },
+                            )
+                            ActivityDetailRow(
+                                label = strings.activityUi.permissionLabel,
+                                value = activity.permission ?: strings.activityUi.noneLabel,
+                            )
+                            ActivityDetailRow(
+                                label = strings.activityUi.shellLaunchableLabel,
+                                value = if (activity.launchableViaShell) {
+                                    strings.activityUi.yesLabel
+                                } else {
+                                    strings.activityUi.noLabel
+                                },
+                            )
+                            activity.launchMode?.let { mode ->
+                                ActivityDetailRow(
+                                    label = strings.activityUi.launchModeLabel,
+                                    value = mode,
+                                )
+                            }
+                            activity.targetActivity?.let { target ->
+                                ActivityDetailRow(
+                                    label = strings.activityUi.targetActivityLabel,
+                                    value = target,
+                                )
+                            }
+                            activity.launchabilityReason?.let { reason ->
+                                ActivityDetailRow(
+                                    label = strings.activityUi.constraintLabel,
+                                    value = reason,
+                                )
+                            }
+                            activity.launchContextHint?.let { hint ->
+                                ActivityDetailRow(
+                                    label = strings.activityUi.hintLabel,
+                                    value = hint,
+                                )
+                            }
+                            activity.launchIntentAction?.let { action ->
+                                ActivityDetailRow(
+                                    label = strings.activityUi.actionLabel,
+                                    value = action,
+                                )
+                            }
+                            activity.launchIntentData?.let { dataUri ->
+                                ActivityDetailRow(
+                                    label = strings.activityUi.dataUriLabel,
+                                    value = dataUri,
+                                )
+                            }
+                            activity.launchIntentMimeType?.let { mime ->
+                                ActivityDetailRow(
+                                    label = strings.activityUi.mimeTypeLabel,
+                                    value = mime,
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.height(6.dp))
+
+                            Column(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalArrangement = Arrangement.spacedBy(8.dp),
+                            ) {
+                                if (activity.launchableViaShell) {
+                                    AppButton(
+                                        text = strings.activityUi.launch,
+                                        onClick = { callbacks.onLaunch(activity) },
+                                        modifier = Modifier.fillMaxWidth(),
+                                    )
+                                }
+                                AppButton(
+                                    text = strings.activityUi.guidedLauncherTitle,
+                                    onClick = { callbacks.onOpenGuidedLaunch(activity) },
+                                    variant = if (activity.launchableViaShell) {
+                                        ButtonVariant.Secondary
+                                    } else {
+                                        ButtonVariant.Primary
+                                    },
+                                    modifier = Modifier.fillMaxWidth(),
+                                )
+                                AppButton(
+                                    text = strings.activityUi.copyComponent,
+                                    onClick = {
+                                        clipboard.setText(AnnotatedString(activity.activityName))
+                                        scope.launch {
+                                            snackbarHostState.showSnackbar(strings.activityUi.componentCopied)
+                                        }
+                                    },
+                                    variant = ButtonVariant.Tonal,
+                                    modifier = Modifier.fillMaxWidth(),
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -732,22 +850,25 @@ private fun ActivityReportCard(
 @AppScreenPreviews
 @Composable
 private fun ActivityListScreenPreview() {
-    val packageName = "com.crackmydroid"
+    val packageName = "com.example.security.monitor"
     val mainActivity = ActivityEntry(
-        label = "Main activity",
-        appLabel = "CrackMyDroid",
+        label = "Security monitor main activity",
+        appLabel = "Security Monitor",
         packageName = packageName,
         activityName = "$packageName.MainActivity",
         exported = true,
+        launchMode = "standard",
     )
     val settingsActivity = ActivityEntry(
-        label = "Settings activity",
-        appLabel = "CrackMyDroid",
+        label = "Settings and diagnostics activity with a long title",
+        appLabel = "Security Monitor",
         packageName = packageName,
         activityName = "$packageName.SettingsActivity",
         launchableViaShell = false,
         launchabilityReason = "Requires app context",
         launchContextHint = "Open from the app",
+        permission = "android.permission.BIND_QUICK_SETTINGS_TILE",
+        launchMode = "singleTop",
     )
     val activities = listOf(mainActivity, settingsActivity)
     val callbacks = ActivityListCallbacks(
@@ -772,12 +893,12 @@ private fun ActivityListScreenPreview() {
         ActivityListContent(
             state = ActivityListState(
                 activities = activities,
-                topQuery = "com.crackmydroid",
+                topQuery = packageName,
                 favorites = setOf(mainActivity.favoriteKey()),
                 favoritePackages = setOf(packageName),
                 expandedPackages = setOf(packageName),
                 groups = listOf(ActivityGroup(packageName, "CrackMyDroid", activities)),
-                favoriteQueries = listOf("com.crackmydroid", "MainActivity"),
+                favoriteQueries = listOf(packageName, "MainActivity"),
             ),
             padding = PaddingValues(),
             headerHelp = "Ricerca e avvio delle activity installate.",
@@ -785,6 +906,36 @@ private fun ActivityListScreenPreview() {
             onBack = {},
             onMenu = {},
             callbacks = callbacks,
+        )
+    }
+}
+
+@Composable
+private fun ActivityDetailRow(
+    label: String,
+    value: String,
+    modifier: Modifier = Modifier,
+    maxLines: Int = 3,
+    overflow: TextOverflow = TextOverflow.Ellipsis,
+) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.Top,
+    ) {
+        AppText(
+            text = label,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.weight(0.38f),
+        )
+        AppText(
+            text = value,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.weight(0.62f),
+            maxLines = maxLines,
+            overflow = overflow,
         )
     }
 }

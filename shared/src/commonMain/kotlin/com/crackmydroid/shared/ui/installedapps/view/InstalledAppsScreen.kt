@@ -92,9 +92,7 @@ fun InstalledAppsScreen(
             viewModel.handleEvent(InstalledAppsEvent.FilterChanged(value, trackUsage))
         },
         onToggleFavorite = { viewModel.handleEvent(InstalledAppsEvent.FavoriteToggled(it)) },
-        onShare = { packageName, bluetoothOnly ->
-            viewModel.handleEvent(InstalledAppsEvent.ApkShareRequested(packageName, bluetoothOnly))
-        },
+        onShare = { viewModel.handleEvent(InstalledAppsEvent.ApkShareRequested(it)) },
         onExport = { viewModel.handleEvent(InstalledAppsEvent.ApkExportRequested(it)) },
         onClearError = { viewModel.handleEvent(InstalledAppsEvent.ErrorDismissed()) },
     )
@@ -112,7 +110,7 @@ private fun InstalledAppsScreenContent(
     onShareAll: (String) -> Unit,
     onFilterChange: (String, Boolean) -> Unit,
     onToggleFavorite: (String) -> Unit,
-    onShare: (String, Boolean) -> Unit,
+    onShare: (String) -> Unit,
     onExport: (String) -> Unit,
     onClearError: () -> Unit,
 ) {
@@ -332,17 +330,24 @@ private fun InstalledAppsScreenContent(
                 val isFavorite = state.favorites.contains(app.packageName)
                 AppAccordion(
                     title = app.appLabel,
-                    subtitle = "${app.packageName} · ${app.installSource.label(strings)}",
+                    subtitle = app.packageName,
+                    meta = app.installSource.label(strings),
                     expanded = expanded,
                     onToggle = { expandedPackages[app.packageName] = !expanded },
                     leading = {
                         PackageIcon(
                             packageName = app.packageName,
-                            modifier = Modifier.size(48.dp),
+                            modifier = Modifier.size(44.dp),
                         )
                     },
+                    titleMaxLines = 3,
+                    subtitleMaxLines = 3,
+                    textOverflow = TextOverflow.Clip,
+                    headerVerticalPadding = 10.dp,
+                    headerMinHeight = 88.dp,
+                    actionsBelowHeader = true,
                     actions = {
-                        IconButton(onClick = { onShare(app.packageName, false) }) {
+                        IconButton(onClick = { onShare(app.packageName) }) {
                             Icon(
                                 imageVector = Icons.Filled.Share,
                                 contentDescription = strings.shareApkContentDescription,
@@ -363,67 +368,66 @@ private fun InstalledAppsScreenContent(
                     },
                     modifier = Modifier.fillMaxWidth(),
                 ) {
-                    AppText(
-                        "${strings.apkPath}: ${app.sourcePath}",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis,
+                    ApkDetailRow(
+                        label = strings.apkSize,
+                        value = app.apkSizeBytes?.let { formatApkSize(it) } ?: "-",
                     )
-                    AppText(
-                        "${strings.appInstallSource}: ${app.installSource.label(strings)}",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    ApkDetailRow(
+                        label = strings.apkTargetSdk,
+                        value = app.targetSdkVersion?.toString() ?: "-",
+                    )
+                    ApkDetailRow(
+                        label = strings.apkMinSdk,
+                        value = app.minSdkVersion?.toString() ?: "-",
+                    )
+                    ApkDetailRow(
+                        label = strings.appInstallSource,
+                        value = app.installSource.label(strings),
                     )
                     app.installSource.installingPackageName?.let { installer ->
-                        AppText(
-                            "${strings.appInstallerPackage}: $installer",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        ApkDetailRow(
+                            label = strings.appInstallerPackage,
+                            value = installer,
                         )
                     }
                     app.installSource.initiatingPackageName?.let { initiator ->
-                        AppText(
-                            "${strings.appInitiatingPackage}: $initiator",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        ApkDetailRow(
+                            label = strings.appInitiatingPackage,
+                            value = initiator,
                         )
                     }
                     app.installSource.originatingPackageName?.let { origin ->
-                        AppText(
-                            "${strings.appOriginatingPackage}: $origin",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        ApkDetailRow(
+                            label = strings.appOriginatingPackage,
+                            value = origin,
                         )
                     }
+                    ApkDetailRow(
+                        label = strings.apkPath,
+                        value = app.sourcePath,
+                    )
                     AppText(
                         strings.appInstallSourceLimit,
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
 
-                    Spacer(modifier = Modifier.height(6.dp))
-
-                    AppButton(
-                        text = strings.apkExtract,
-                        onClick = { onExport(app.packageName) },
-                    )
+                    Spacer(modifier = Modifier.height(4.dp))
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         AppButton(
-                            text = strings.apkShare,
-                            onClick = { onShare(app.packageName, false) },
-                            variant = ButtonVariant.Secondary,
+                            text = strings.apkExtract,
+                            onClick = { onExport(app.packageName) },
                             modifier = Modifier.weight(1f),
                             fullWidth = false,
                         )
                         AppButton(
-                            text = strings.apkShareBt,
-                            onClick = { onShare(app.packageName, true) },
-                            variant = ButtonVariant.Tonal,
+                            text = strings.apkShare,
+                            onClick = { onShare(app.packageName) },
+                            variant = ButtonVariant.Secondary,
                             modifier = Modifier.weight(1f),
                             fullWidth = false,
                         )
@@ -455,15 +459,22 @@ private fun InstalledAppsScreenContent(
 private fun InstalledAppsScreenPreview() {
     val apps = listOf(
         InstalledAppEntry(
-            appLabel = "CrackMyDroid",
-            packageName = "com.crackmydroid",
-            sourcePath = "/data/app/com.crackmydroid/base.apk",
+            appLabel = "Security Monitor",
+            packageName = "com.example.security.monitor",
+            sourcePath = "/data/app/example/security-monitor/base.apk",
             debuggable = true,
+            apkSizeBytes = 12_582_912L,
+            minSdkVersion = 26,
+            targetSdkVersion = 34,
         ),
         InstalledAppEntry(
-            appLabel = "Settings",
-            packageName = "com.android.settings",
-            sourcePath = "/system/priv-app/Settings/Settings.apk",
+            appLabel = "Long Enterprise Device Security Companion",
+            packageName = "com.example.enterprise.device.security.companion",
+            sourcePath = "/data/app/example/enterprise-companion/base.apk",
+            allowBackup = true,
+            apkSizeBytes = 45_200_000L,
+            minSdkVersion = 21,
+            targetSdkVersion = 35,
         ),
     )
     AppPreviewEnvironment {
@@ -483,10 +494,57 @@ private fun InstalledAppsScreenPreview() {
             onShareAll = {},
             onFilterChange = { _, _ -> },
             onToggleFavorite = {},
-            onShare = { _, _ -> },
+            onShare = {},
             onExport = {},
             onClearError = {},
         )
+    }
+}
+
+@Composable
+private fun ApkDetailRow(label: String, value: String, modifier: Modifier = Modifier) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.Top,
+    ) {
+        AppText(
+            text = label,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.weight(0.38f),
+        )
+        AppText(
+            text = value,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.weight(0.62f),
+            maxLines = 3,
+            overflow = TextOverflow.Ellipsis,
+        )
+    }
+}
+
+internal fun formatApkSize(bytes: Long): String {
+    if (bytes <= 0L) return "0 B"
+    val units = listOf("B", "KB", "MB", "GB")
+    var value = bytes.toDouble()
+    var unitIndex = 0
+    while (value >= 1024.0 && unitIndex < units.lastIndex) {
+        value /= 1024.0
+        unitIndex++
+    }
+    return if (unitIndex == 0) {
+        "$bytes B"
+    } else {
+        val scaled = ((value * 10) + 0.5).toLong()
+        val whole = scaled / 10
+        val dec = scaled % 10
+        if (dec == 0L) {
+            "$whole ${units[unitIndex]}"
+        } else {
+            "$whole.$dec ${units[unitIndex]}"
+        }
     }
 }
 

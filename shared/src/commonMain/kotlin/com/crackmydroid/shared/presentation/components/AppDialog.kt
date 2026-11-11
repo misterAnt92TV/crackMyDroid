@@ -4,6 +4,9 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.font.FontWeight
 import com.crackmydroid.shared.presentation.components.text.AppText
+import com.crackmydroid.shared.presentation.preview.AppComponentPreviews
+import com.crackmydroid.shared.presentation.preview.ComponentPreviewContainer
+
 
 @Composable
 fun AppDialog(
@@ -38,4 +41,19 @@ fun AppDialog(
             null
         },
     )
+}
+
+@AppComponentPreviews
+@Composable
+private fun AppDialogPreview() = ComponentPreviewContainer {
+    AppDialog(
+        title = "Conferma scansione sicurezza",
+        confirmLabel = "Avvia scansione",
+        dismissLabel = "Annulla",
+        onDismiss = {},
+        onConfirm = {},
+        onDismissAction = {},
+    ) {
+        AppText("La scansione analizzerà i controlli disponibili sul dispositivo selezionato.")
+    }
 }

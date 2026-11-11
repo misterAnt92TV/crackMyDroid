@@ -26,6 +26,9 @@ class InstalledAppsRepositoryAndroid(private val context: Context, private val d
     private val cacheDir = File(context.cacheDir, "extracted_apks")
     private val cachingDecorator = CachingRepositoryDecorator()
 
+    private fun readFileSize(path: String): Long? =
+        if (path.isNotBlank()) runCatching { File(path).takeIf { it.exists() }?.length() }.getOrNull() else null
+
     override suspend fun listInstalled(): List<InstalledAppEntry> = withContext(Dispatchers.IO) {
         val cached = db.cacheDatabaseQueries.selectAllInstalled().executeAsList().map {
             InstalledAppEntry(
@@ -47,6 +50,7 @@ class InstalledAppsRepositoryAndroid(private val context: Context, private val d
                     observedAtEpochMs = it.installSourceObservedAtEpochMs,
                     unavailableReason = it.installSourceUnavailableReason,
                 ),
+                apkSizeBytes = readFileSize(it.sourcePath),
             )
         }
         if (cached.isNotEmpty()) return@withContext cached
@@ -70,6 +74,7 @@ class InstalledAppsRepositoryAndroid(private val context: Context, private val d
                 targetSdkVersion = pkg.applicationInfo?.targetSdkVersion,
                 minSdkVersion = pkg.applicationInfo?.minSdkVersion,
                 installSource = readInstallSource(pkg.packageName),
+                apkSizeBytes = readFileSize(source),
             )
         }.sortedBy { it.appLabel.lowercase() }
 

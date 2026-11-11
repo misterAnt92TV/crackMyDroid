@@ -16,4 +16,6 @@ data class ActivityEntry(
     val launchIntentMimeType: String? = null,
     val exported: Boolean = false,
     val permission: String? = null,
+    val launchMode: String? = null,
+    val targetActivity: String? = null,
 )

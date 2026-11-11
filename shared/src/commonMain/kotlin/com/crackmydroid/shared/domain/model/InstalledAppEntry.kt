@@ -13,4 +13,5 @@ data class InstalledAppEntry(
     val targetSdkVersion: Int? = null,
     val minSdkVersion: Int? = null,
     val installSource: InstallSourceInfo = InstallSourceInfo(),
+    val apkSizeBytes: Long? = null,
 )

@@ -8,7 +8,7 @@ sealed class InstalledAppsEvent : UiEvent() {
     class ApkExportRequested(val packageName: String) : InstalledAppsEvent()
     class AllExportRequested(val baseName: String = "installed_apps") : InstalledAppsEvent()
     class AllShareRequested(val baseName: String = "installed_apps") : InstalledAppsEvent()
-    class ApkShareRequested(val packageName: String, val bluetoothOnly: Boolean) : InstalledAppsEvent()
+    class ApkShareRequested(val packageName: String, val bluetoothOnly: Boolean = false) : InstalledAppsEvent()
     class ErrorDismissed : InstalledAppsEvent()
     class FavoriteToggled(val packageName: String) : InstalledAppsEvent()
 }

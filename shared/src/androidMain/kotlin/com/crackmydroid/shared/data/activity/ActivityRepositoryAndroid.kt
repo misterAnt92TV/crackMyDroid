@@ -3,6 +3,7 @@ package com.crackmydroid.shared.data.activity
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
 import androidx.core.net.toUri
 import com.crackmydroid.database.CacheDatabase
@@ -59,6 +60,14 @@ class ActivityRepositoryAndroid(private val context: Context, private val db: Ca
                 )
                 val label = activityInfo.loadLabel(pm).toString()
                     .ifBlank { activityInfo.name.substringAfterLast('.') }
+                val launchModeStr = when (activityInfo.launchMode) {
+                    ActivityInfo.LAUNCH_MULTIPLE -> "standard"
+                    ActivityInfo.LAUNCH_SINGLE_TOP -> "singleTop"
+                    ActivityInfo.LAUNCH_SINGLE_TASK -> "singleTask"
+                    ActivityInfo.LAUNCH_SINGLE_INSTANCE -> "singleInstance"
+                    ActivityInfo.LAUNCH_SINGLE_INSTANCE_PER_TASK -> "singleInstancePerTask"
+                    else -> null
+                }
                 ActivityEntry(
                     label = label,
                     appLabel = appLabel,
@@ -68,6 +77,8 @@ class ActivityRepositoryAndroid(private val context: Context, private val db: Ca
                     launchabilityReason = launchability.launchabilityReason,
                     exported = activityInfo.exported,
                     permission = activityInfo.permission,
+                    launchMode = launchModeStr,
+                    targetActivity = activityInfo.targetActivity,
                 )
             }
         }.sortedBy { it.label.lowercase() }

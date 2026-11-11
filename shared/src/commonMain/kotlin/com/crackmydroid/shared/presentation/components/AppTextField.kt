@@ -9,6 +9,8 @@ import androidx.compose.ui.semantics.error
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.crackmydroid.shared.presentation.components.text.AppText
+import com.crackmydroid.shared.presentation.preview.AppComponentPreviews
+import com.crackmydroid.shared.presentation.preview.ComponentPreviewContainer
 
 @Composable
 fun AppTextField(
@@ -33,5 +35,21 @@ fun AppTextField(
             .fillMaxWidth()
             .defaultMinSize(minHeight = if (prefs.largeText) 64.dp else 56.dp)
             .semantics { error?.let { this.error(it) } },
+    )
+}
+
+@AppComponentPreviews
+@Composable
+private fun AppTextFieldPreview() = ComponentPreviewContainer {
+    AppTextField(
+        value = "com.example.enterprise.device.security.companion",
+        onValueChange = {},
+        label = "Package applicazione",
+    )
+    AppTextField(
+        value = "",
+        onValueChange = {},
+        label = "Package applicazione",
+        error = "Inserisci un package valido",
     )
 }
