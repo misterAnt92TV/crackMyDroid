@@ -35,8 +35,11 @@ La regola pratica è: il codice più vicino al dominio deve conoscere meno detta
 ## 2. ViewModel e stato
 
 - Un ViewModel espone stato immutabile e azioni pubbliche comprensibili dalla UI.
-- Una nuova feature estende `BaseViewModel<FeatureEvent>`, espone `StateFlow<FeatureUiState>` e
-  riceve ogni input esclusivamente tramite `handleEvent(FeatureEvent)`; l'handler protetto
+- Ogni stato emesso implementa `UiState`; una nuova feature estende
+  `BaseViewModel<FeatureEvent, FeatureUiState>`, passa lo stato iniziale alla base ed espone lo
+  `StateFlow<FeatureUiState>` centralizzato. La sottoclasse usa soltanto `currentState`,
+  `updateState` e `setState`: non dichiara `MutableStateFlow`, `StateFlow` o `_state` locali.
+  Riceve ogni input esclusivamente tramite `handleEvent(FeatureEvent)`; l'handler protetto
   `onEvent` resta esaustivo e non si espongono comandi pubblici agli screen.
   gli effetti transitori usano un flusso separato, non flag consumabili nello state.
 - Le chiamate ai UseCase, la gestione degli eventi e le transizioni di stato avvengono nel ViewModel

@@ -28,35 +28,30 @@ import com.crackmydroid.shared.domain.usecase.settings.SetVerboseLogUseCase
 import com.crackmydroid.shared.presentation.LocalizedBaseViewModel
 import com.crackmydroid.shared.presentation.components.SearchHistoryStore
 import com.crackmydroid.shared.util.runSuspendCatching
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.update
 
 class SettingsViewModel(
-    private val getTheme: GetThemeUseCase,
-    private val setTheme: SetThemeUseCase,
-    private val getVerbose: GetVerboseLogUseCase,
-    private val setVerbose: SetVerboseLogUseCase,
-    private val getExportFormat: GetExportFormatUseCase,
-    private val setExportFormat: SetExportFormatUseCase,
-    private val getHighContrast: GetHighContrastUseCase,
-    private val setHighContrast: SetHighContrastUseCase,
-    private val getReduceMotion: GetReduceMotionUseCase,
-    private val setReduceMotion: SetReduceMotionUseCase,
-    private val getLargeText: GetLargeTextUseCase,
-    private val setLargeText: SetLargeTextUseCase,
-    private val getSuggestionsEnabled: GetSuggestionsEnabledUseCase,
-    private val setSuggestionsEnabled: SetSuggestionsEnabledUseCase,
-    private val getFeatureHintsEnabled: GetFeatureHintsEnabledUseCase,
-    private val setFeatureHintsEnabled: SetFeatureHintsEnabledUseCase,
-    private val getIntroSeen: GetIntroSeenUseCase,
-    private val setIntroSeen: SetIntroSeenUseCase,
-    private val getLanguage: GetLanguageUseCase,
-    private val setLanguage: SetLanguageUseCase,
+    private val getThemeUseCase: GetThemeUseCase,
+    private val setThemeUseCase: SetThemeUseCase,
+    private val getVerboseLogUseCase: GetVerboseLogUseCase,
+    private val setVerboseLogUseCase: SetVerboseLogUseCase,
+    private val getExportFormatUseCase: GetExportFormatUseCase,
+    private val setExportFormatUseCase: SetExportFormatUseCase,
+    private val getHighContrastUseCase: GetHighContrastUseCase,
+    private val setHighContrastUseCase: SetHighContrastUseCase,
+    private val getReduceMotionUseCase: GetReduceMotionUseCase,
+    private val setReduceMotionUseCase: SetReduceMotionUseCase,
+    private val getLargeTextUseCase: GetLargeTextUseCase,
+    private val setLargeTextUseCase: SetLargeTextUseCase,
+    private val getSuggestionsEnabledUseCase: GetSuggestionsEnabledUseCase,
+    private val setSuggestionsEnabledUseCase: SetSuggestionsEnabledUseCase,
+    private val getFeatureHintsEnabledUseCase: GetFeatureHintsEnabledUseCase,
+    private val setFeatureHintsEnabledUseCase: SetFeatureHintsEnabledUseCase,
+    private val getIntroSeenUseCase: GetIntroSeenUseCase,
+    private val setIntroSeenUseCase: SetIntroSeenUseCase,
+    private val getLanguageUseCase: GetLanguageUseCase,
+    private val setLanguageUseCase: SetLanguageUseCase,
     dispatchers: AppDispatchers,
-) : LocalizedBaseViewModel<SettingsEvent>(dispatchers) {
-    private val _state = MutableStateFlow(SettingsState())
-    val state: StateFlow<SettingsState> = _state
+) : LocalizedBaseViewModel<SettingsEvent, SettingsState>(SettingsState(), dispatchers) {
 
     override fun onEvent(event: SettingsEvent) {
         when (event) {
@@ -78,26 +73,26 @@ class SettingsViewModel(
     private var savingFormat = false
 
     private fun load() = launchLatest("settings-load") {
-        _state.update { it.copy(loading = true, error = null) }
-        val language = getLanguage().onSuccess { value ->
-            _state.update { it.copy(language = value) }
+        updateState { it.copy(loading = true, error = null) }
+        val language = getLanguageUseCase().onSuccess { value ->
+            updateState { it.copy(language = value) }
         }
-        val verbose = getVerbose().onSuccess(AppLogger::setVerbose)
+        val verbose = getVerboseLogUseCase().onSuccess(AppLogger::setVerbose)
         runSuspendCatching {
             LoadedSettings(
                 language = language.getOrThrow(),
-                theme = getTheme().getOrThrow(),
+                theme = getThemeUseCase().getOrThrow(),
                 verbose = verbose.getOrThrow(),
-                format = getExportFormat().getOrThrow(),
-                highContrast = getHighContrast().getOrThrow(),
-                reduceMotion = getReduceMotion().getOrThrow(),
-                largeText = getLargeText().getOrThrow(),
-                suggestionsEnabled = getSuggestionsEnabled().getOrThrow(),
-                featureHintsEnabled = getFeatureHintsEnabled().getOrThrow(),
-                introSeen = getIntroSeen().getOrThrow(),
+                format = getExportFormatUseCase().getOrThrow(),
+                highContrast = getHighContrastUseCase().getOrThrow(),
+                reduceMotion = getReduceMotionUseCase().getOrThrow(),
+                largeText = getLargeTextUseCase().getOrThrow(),
+                suggestionsEnabled = getSuggestionsEnabledUseCase().getOrThrow(),
+                featureHintsEnabled = getFeatureHintsEnabledUseCase().getOrThrow(),
+                introSeen = getIntroSeenUseCase().getOrThrow(),
             )
         }.onSuccess { loaded ->
-            _state.update {
+            updateState {
                 it.copy(
                     theme = loaded.theme,
                     language = loaded.language,
@@ -113,92 +108,92 @@ class SettingsViewModel(
                 )
             }
         }.onFailure { err ->
-            _state.update { it.copy(error = err.message, loading = false) }
+            updateState { it.copy(error = err.message, loading = false) }
         }
     }
 
     private fun selectTheme(theme: AppTheme) {
-        persistSetting(persist = { setTheme(theme) }) {
-            _state.update { it.copy(theme = theme, error = null) }
+        persistSetting(persist = { setThemeUseCase(theme) }) {
+            updateState { it.copy(theme = theme, error = null) }
         }
     }
 
     private fun selectLanguage(language: AppLanguage) {
-        persistSetting(persist = { setLanguage(language) }) {
-            _state.update { it.copy(language = language, error = null) }
+        persistSetting(persist = { setLanguageUseCase(language) }) {
+            updateState { it.copy(language = language, error = null) }
         }
     }
 
     private fun toggleVerbose(enabled: Boolean) {
-        persistSetting(persist = { setVerbose(enabled) }) {
+        persistSetting(persist = { setVerboseLogUseCase(enabled) }) {
             AppLogger.setVerbose(enabled)
-            _state.update { it.copy(verbose = enabled, error = null) }
+            updateState { it.copy(verbose = enabled, error = null) }
         }
     }
 
     private fun setHighContrast(enabled: Boolean) {
         persistSetting(
             persist = {
-                setHighContrast.invoke(enabled)
+                setHighContrastUseCase(enabled)
             },
         ) {
-            _state.update { it.copy(highContrast = enabled, error = null) }
+            updateState { it.copy(highContrast = enabled, error = null) }
         }
     }
 
     private fun setReduceMotion(enabled: Boolean) {
         persistSetting(
             persist = {
-                setReduceMotion.invoke(enabled)
+                setReduceMotionUseCase(enabled)
             },
         ) {
-            _state.update { it.copy(reduceMotion = enabled, error = null) }
+            updateState { it.copy(reduceMotion = enabled, error = null) }
         }
     }
 
     private fun setLargeText(enabled: Boolean) {
         persistSetting(
             persist = {
-                setLargeText.invoke(enabled)
+                setLargeTextUseCase(enabled)
             },
         ) {
-            _state.update { it.copy(largeText = enabled, error = null) }
+            updateState { it.copy(largeText = enabled, error = null) }
         }
     }
 
     private fun clearError() {
-        _state.update { it.copy(error = null) }
+        updateState { it.copy(error = null) }
     }
 
     private fun setSuggestionsEnabled(enabled: Boolean) {
         persistSetting(
             persist = {
-                setSuggestionsEnabled.invoke(enabled).onSuccess {
+                setSuggestionsEnabledUseCase(enabled).onSuccess {
                     SearchHistoryStore.setEnabled(enabled)
                 }
             },
         ) {
-            _state.update { it.copy(suggestionsEnabled = enabled, error = null) }
+            updateState { it.copy(suggestionsEnabled = enabled, error = null) }
         }
     }
 
     private fun setFeatureHintsEnabled(enabled: Boolean) {
         persistSetting(
             persist = {
-                setFeatureHintsEnabled.invoke(enabled)
+                setFeatureHintsEnabledUseCase(enabled)
             },
         ) {
-            _state.update { it.copy(featureHintsEnabled = enabled, error = null) }
+            updateState { it.copy(featureHintsEnabled = enabled, error = null) }
         }
     }
 
     private fun setShowIntroOnLaunch(enabled: Boolean) {
         persistSetting(
             persist = {
-                setIntroSeen(!enabled)
+                setIntroSeenUseCase(!enabled)
             },
         ) {
-            _state.update { it.copy(showIntroOnLaunch = enabled, error = null) }
+            updateState { it.copy(showIntroOnLaunch = enabled, error = null) }
         }
     }
 
@@ -207,14 +202,14 @@ class SettingsViewModel(
     }
 
     private fun setExportFormat(format: ExportFormat) {
-        if (_state.value.exportFormat == format) return
+        if (currentState.exportFormat == format) return
         if (savingFormat) return
         savingFormat = true
         launchTask {
             try {
-                setExportFormat.invoke(format)
-                    .onSuccess { _state.update { it.copy(exportFormat = format, error = null) } }
-                    .onFailure { err -> _state.update { it.copy(error = err.message) } }
+                setExportFormatUseCase(format)
+                    .onSuccess { updateState { it.copy(exportFormat = format, error = null) } }
+                    .onFailure { err -> updateState { it.copy(error = err.message) } }
             } finally {
                 savingFormat = false
             }
@@ -227,7 +222,7 @@ class SettingsViewModel(
                 persist().getOrThrow()
                 updateState()
             }.onFailure { error ->
-                _state.update { it.copy(error = error.message ?: presentationTexts.saveSettingFailed) }
+                updateState { it.copy(error = error.message ?: presentationTexts.saveSettingFailed) }
             }
         }
     }

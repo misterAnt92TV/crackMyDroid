@@ -1,5 +1,6 @@
 package com.crackmydroid.shared.ui.trick
 
+import com.crackmydroid.architecture.presentation.model.UiState
 import com.crackmydroid.shared.domain.model.shell.ShellCommand
 import com.crackmydroid.shared.domain.model.shell.ShellCommandResult
 
@@ -17,4 +18,4 @@ data class TrickState(
     val running: Boolean = false,
     val interactionHint: String? = null,
     val error: String? = null,
-)
+) : UiState

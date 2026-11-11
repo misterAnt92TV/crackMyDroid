@@ -5,18 +5,13 @@ import com.crackmydroid.shared.domain.model.operation.OperationEntry
 import com.crackmydroid.shared.domain.repository.log.OperationLogRepository
 import com.crackmydroid.shared.presentation.LocalizedBaseViewModel
 import com.crackmydroid.shared.ui.home.model.HomeState
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.update
 
 class HomeViewModel(private val operationLogs: OperationLogRepository, dispatchers: AppDispatchers) :
-    LocalizedBaseViewModel<HomeEvent>(dispatchers) {
+    LocalizedBaseViewModel<HomeEvent, HomeState>(HomeState(), dispatchers) {
     private companion object {
         const val MAX_RECENT_OPERATIONS = 5
     }
 
-    private val _state = MutableStateFlow(HomeState())
-    val state: StateFlow<HomeState> = _state
 
     override fun onEvent(event: HomeEvent) = when (event) {
         is HomeEvent.HideFromRecent -> hideFromRecent(event.operationId)
@@ -26,7 +21,7 @@ class HomeViewModel(private val operationLogs: OperationLogRepository, dispatche
     init {
         launchTask {
             operationLogs.entries.collect { entries ->
-                _state.update {
+                updateState {
                     it.copy(
                         recentOperations = entries
                             .filterNot(OperationEntry::hiddenFromRecent)

@@ -56,14 +56,18 @@ User interaction → UI event/callback → ViewModel action → UseCase → Repo
 ```
 
 Ogni nuova sezione applicativa concretizza il flusso con un `FeatureEvent : UiEvent()` tipizzato,
-un singolo ingresso `ViewModel.handleEvent(event)` che delega all'hook protetto `onEvent`, uno
-`StateFlow<FeatureUiState>` immutabile e, quando necessario, un
+un `FeatureUiState : UiState` immutabile, un singolo ingresso `ViewModel.handleEvent(event)` che
+delega all'hook protetto `onEvent`, uno `StateFlow<FeatureUiState>` centralizzato in
+`BaseViewModel` e, quando necessario, un
 `SharedFlow<FeatureEffect>` per effetti one-shot. La screen collega questi contratti; il content
 renderizza soltanto `FeatureUiState` e inoltra gli eventi.
 
-I ViewModel usano `LocalizedBaseViewModel`, estensione CrackMyDroid di `BaseViewModel` in
+I ViewModel usano `LocalizedBaseViewModel<E, S>`, estensione CrackMyDroid di `BaseViewModel<E, S>` in
 `:architectureModule`, per possedere uno scope cancellabile e l’iniezione di
-`AppDispatchers`. Il lavoro asincrono usa `launchTask` per operazioni indipendenti e
+`AppDispatchers`. La base riceve lo stato iniziale, mantiene privatamente il `MutableStateFlow` ed
+espone soltanto `StateFlow<S>`; le sottoclassi pubblicano transizioni immutabili con
+`currentState`, `updateState` e `setState`, senza dichiarare o accedere a `_state`. Il lavoro
+asincrono usa `launchTask` per operazioni indipendenti e
 `launchLatest(key)` per refresh, preview, scansioni o ricalcoli sostituibili; prima di pubblicare un
 risultato deve verificare che il lavoro sia ancora corrente. La cancellazione avviene sempre in
 `onCleared()` e deve pubblicare stati coerenti per loading, successo ed errore.

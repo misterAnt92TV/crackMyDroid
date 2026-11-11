@@ -6,18 +6,13 @@ import com.crackmydroid.shared.domain.usecase.reports.ExportReportUseCase
 import com.crackmydroid.shared.domain.usecase.root.CheckPlayIntegrityUseCase
 import com.crackmydroid.shared.domain.usecase.root.CheckRootUseCase
 import com.crackmydroid.shared.presentation.LocalizedBaseViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.update
 
 class RootViewModel(
-    private val checkRoot: CheckRootUseCase,
-    private val checkPlayIntegrity: CheckPlayIntegrityUseCase,
-    private val reportExporter: ExportReportUseCase,
+    private val checkRootUseCase: CheckRootUseCase,
+    private val checkPlayIntegrityUseCase: CheckPlayIntegrityUseCase,
+    private val reportExporterUseCase: ExportReportUseCase,
     dispatchers: AppDispatchers,
-) : LocalizedBaseViewModel<RootEvent>(dispatchers) {
-    private val _state = MutableStateFlow(RootState())
-    val state: StateFlow<RootState> = _state
+) : LocalizedBaseViewModel<RootEvent, RootState>(RootState(), dispatchers) {
 
     override fun onEvent(event: RootEvent) = when (event) {
         is RootEvent.Verify -> verify()
@@ -31,13 +26,13 @@ class RootViewModel(
     private fun buildReportContent(): String = buildString {
         appendLine(strings.navRoot)
         appendLine("-----------")
-        _state.value.status?.let { status ->
+        currentState.status?.let { status ->
             appendLine(
                 "${strings.verifyRoot}: ${if (status.isRooted) strings.rootDetected else strings.rootNotDetected}",
             )
             appendLine("${strings.rootDetectedDetails}: ${status.details}")
         } ?: appendLine("${strings.verifyRoot}: ${strings.notAvailable}")
-        _state.value.playIntegrity?.let { pi ->
+        currentState.playIntegrity?.let { pi ->
             appendLine()
             appendLine(strings.playIntegrityTitle)
             appendLine("${strings.playIntegrityBasic}: ${pi.basicIntegrity ?: strings.notAvailable}")
@@ -56,14 +51,14 @@ class RootViewModel(
 
     private fun verify(mode: RootCheckMode) {
         launchLatest("root-check") {
-            _state.update { it.copy(loading = true, error = null) }
-            checkRoot(mode)
+            updateState { it.copy(loading = true, error = null) }
+            checkRootUseCase(mode)
                 .onSuccess { status ->
-                    if (isCurrent()) _state.update { it.copy(status = status, loading = false) }
+                    if (isCurrent()) updateState { it.copy(status = status, loading = false) }
                 }
                 .onFailure { err ->
                     if (!isCurrent()) return@onFailure
-                    _state.update {
+                    updateState {
                         it.copy(
                             error = err.message,
                             loading = false,
@@ -74,16 +69,16 @@ class RootViewModel(
     }
 
     private fun updatePlayIntegrityNonce(value: String) {
-        _state.update { it.copy(playIntegrityNonce = value) }
+        updateState { it.copy(playIntegrityNonce = value) }
     }
 
     private fun verifyPlayIntegrity() {
-        val nonce = _state.value.playIntegrityNonce.ifBlank { "sample-nonce" }
+        val nonce = currentState.playIntegrityNonce.ifBlank { "sample-nonce" }
         launchTask {
-            _state.update { it.copy(loading = true, error = null) }
-            checkPlayIntegrity(nonce)
+            updateState { it.copy(loading = true, error = null) }
+            checkPlayIntegrityUseCase(nonce)
                 .onSuccess { res ->
-                    _state.update {
+                    updateState {
                         it.copy(
                             playIntegrity = res,
                             loading = false,
@@ -91,7 +86,7 @@ class RootViewModel(
                     }
                 }
                 .onFailure { err ->
-                    _state.update {
+                    updateState {
                         it.copy(
                             error = err.message,
                             loading = false,
@@ -104,13 +99,13 @@ class RootViewModel(
     private fun shareReport() {
         val content = buildReportContent()
         launchTask {
-            reportExporter.shareTextReport("root_test_report", "root_test", content)
-                .onSuccess { path -> _state.update { it.copy(reportPath = path, error = null) } }
-                .onFailure { error -> _state.update { it.copy(error = error.message ?: presentationTexts.error) } }
+            reportExporterUseCase.shareTextReport("root_test_report", "root_test", content)
+                .onSuccess { path -> updateState { it.copy(reportPath = path, error = null) } }
+                .onFailure { error -> updateState { it.copy(error = error.message ?: presentationTexts.error) } }
         }
     }
 
     private fun clearError() {
-        _state.update { it.copy(error = null) }
+        updateState { it.copy(error = null) }
     }
 }

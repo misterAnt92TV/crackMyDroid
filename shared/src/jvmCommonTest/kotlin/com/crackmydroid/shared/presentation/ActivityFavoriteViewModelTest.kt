@@ -65,14 +65,14 @@ class ActivityFavoriteViewModelTest {
         coJustRun { settings.setActivityPackageFavorites(any()) }
 
         val viewModel = ActivityListViewModel(
-            getActivities = getActivities,
-            launchActivity = launchActivity,
-            getExportFormat = getExportFormat,
-            getFavorites = GetActivityFavoritesUseCase(settings),
-            setFavorites = SetActivityFavoritesUseCase(settings),
-            getPackageFavorites = GetActivityPackageFavoritesUseCase(settings),
-            setPackageFavorites = SetActivityPackageFavoritesUseCase(settings),
-            reportExporter = ExportReportUseCase(mockk<ReportFileRepository>(relaxed = true)),
+            getActivitiesUseCase = getActivities,
+            launchActivityUseCase = launchActivity,
+            getExportFormatUseCase = getExportFormat,
+            getFavoritesUseCase = GetActivityFavoritesUseCase(settings),
+            setFavoritesUseCase = SetActivityFavoritesUseCase(settings),
+            getPackageFavoritesUseCase = GetActivityPackageFavoritesUseCase(settings),
+            setPackageFavoritesUseCase = SetActivityPackageFavoritesUseCase(settings),
+            reportExporterUseCase = ExportReportUseCase(mockk<ReportFileRepository>(relaxed = true)),
             dispatchers = TestAppDispatchers(dispatcher),
         )
 

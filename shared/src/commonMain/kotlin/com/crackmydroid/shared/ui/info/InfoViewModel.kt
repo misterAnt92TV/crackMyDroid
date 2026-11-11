@@ -7,19 +7,14 @@ import com.crackmydroid.shared.domain.usecase.reports.ExportReportUseCase
 import com.crackmydroid.shared.domain.usecase.root.CheckRootUseCase
 import com.crackmydroid.shared.presentation.LocalizedBaseViewModel
 import com.crackmydroid.shared.util.runSuspendCatching
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.update
 
 class InfoViewModel(
-    private val getInfo: GetDeviceInfoUseCase,
-    private val checkRoot: CheckRootUseCase,
-    private val reportExporter: ExportReportUseCase,
-    private val buildReport: BuildDeviceInfoReportUseCase,
+    private val getInfoUseCase: GetDeviceInfoUseCase,
+    private val checkRootUseCase: CheckRootUseCase,
+    private val reportExporterUseCase: ExportReportUseCase,
+    private val buildReportUseCase: BuildDeviceInfoReportUseCase,
     dispatchers: AppDispatchers,
-) : LocalizedBaseViewModel<InfoEvent>(dispatchers) {
-    private val _state = MutableStateFlow(InfoState())
-    val state: StateFlow<InfoState> = _state
+) : LocalizedBaseViewModel<InfoEvent, InfoState>(InfoState(), dispatchers) {
 
     override fun onEvent(event: InfoEvent) = when (event) {
         is InfoEvent.Load -> load()
@@ -33,31 +28,31 @@ class InfoViewModel(
 
     private fun load() {
         launchTask {
-            _state.update { it.copy(loading = true, error = null) }
+            updateState { it.copy(loading = true, error = null) }
             runSuspendCatching {
-                getInfo().getOrThrow() to checkRoot().getOrThrow()
+                getInfoUseCase().getOrThrow() to checkRootUseCase().getOrThrow()
             }.onSuccess { (info, root) ->
-                _state.update { it.copy(info = info, root = root, loading = false) }
+                updateState { it.copy(info = info, root = root, loading = false) }
                 refreshReport()
             }.onFailure { error ->
-                _state.update { it.copy(error = error.message, loading = false) }
+                updateState { it.copy(error = error.message, loading = false) }
             }
         }
     }
 
     private fun refreshReport() {
-        val info = _state.value.info ?: return
-        val root = _state.value.root
+        val info = currentState.info ?: return
+        val root = currentState.root
         val reportText = useCaseTexts
-        _state.update { it.copy(reportContent = null, reportLoading = true) }
+        updateState { it.copy(reportContent = null, reportLoading = true) }
         launchLatest("info-report") {
-            val result = buildReport(info, root, reportText)
+            val result = buildReportUseCase(info, root, reportText)
             if (!isCurrent()) return@launchLatest
             result.onSuccess { content ->
-                _state.update { it.copy(reportContent = content, reportLoading = false) }
+                updateState { it.copy(reportContent = content, reportLoading = false) }
             }.onFailure { error ->
                 if (!isCurrent()) return@onFailure
-                _state.update {
+                updateState {
                     it.copy(
                         error = error.message ?: presentationTexts.reportFailed,
                         reportLoading = false,
@@ -68,30 +63,30 @@ class InfoViewModel(
     }
 
     private fun export() {
-        val info = _state.value.info ?: return
-        val root = _state.value.root
+        val info = currentState.info ?: return
+        val root = currentState.root
         val reportText = useCaseTexts
         launchTask {
             runSuspendCatching {
-                val content = buildReport(info, root, reportText).getOrThrow()
-                reportExporter.saveTextReport("device_info", "device_info", content).getOrThrow()
+                val content = buildReportUseCase(info, root, reportText).getOrThrow()
+                reportExporterUseCase.saveTextReport("device_info", "device_info", content).getOrThrow()
             }.onSuccess { path ->
-                _state.update { it.copy(lastExportPath = path, error = null) }
-            }.onFailure { error -> _state.update { it.copy(error = error.message) } }
+                updateState { it.copy(lastExportPath = path, error = null) }
+            }.onFailure { error -> updateState { it.copy(error = error.message) } }
         }
     }
 
     private fun share(contentOverride: String? = null) {
-        val info = _state.value.info ?: return
-        val root = _state.value.root
+        val info = currentState.info ?: return
+        val root = currentState.root
         val reportText = useCaseTexts
         launchTask {
             runSuspendCatching {
-                val content = contentOverride ?: buildReport(info, root, reportText).getOrThrow()
-                reportExporter.shareTextReport("device_info", "device_info", content).getOrThrow()
+                val content = contentOverride ?: buildReportUseCase(info, root, reportText).getOrThrow()
+                reportExporterUseCase.shareTextReport("device_info", "device_info", content).getOrThrow()
             }.onSuccess { path ->
-                _state.update { it.copy(lastExportPath = path, error = null) }
-            }.onFailure { error -> _state.update { it.copy(error = error.message) } }
+                updateState { it.copy(lastExportPath = path, error = null) }
+            }.onFailure { error -> updateState { it.copy(error = error.message) } }
         }
     }
 }

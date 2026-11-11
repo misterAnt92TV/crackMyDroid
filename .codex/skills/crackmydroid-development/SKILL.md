@@ -135,8 +135,11 @@ ui/<feature>/
     └── <Feature>Component.kt
 ```
 
-- For a new feature, the ViewModel extends `BaseViewModel<FeatureEvent>`, exposes
-  `StateFlow<FeatureUiState>`, and receives all UI input only through its inherited public
+- For a new feature, `FeatureUiState` implements `UiState` and the ViewModel extends
+  `BaseViewModel<FeatureEvent, FeatureUiState>`, passing its initial state to the base. The base
+  exposes `StateFlow<FeatureUiState>` and owns the private `MutableStateFlow`; subclasses mutate
+  state only with `currentState`, `updateState`, or `setState` and never declare `_state`. The
+  ViewModel receives all UI input only through its inherited public
   `handleEvent(event: FeatureEvent)`. Implement the protected exhaustive `onEvent` hook; do not
   expose a growing set of application commands directly to the screen.
 - `FeatureEvent` is a feature-specific sealed class extending `UiEvent`, with typed events and minimal stable

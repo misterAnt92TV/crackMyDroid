@@ -217,7 +217,7 @@ class InfoViewModelTest {
         coEvery { rootRepository.checkRoot() } returns RootStatus(true, "su available")
         val vm = viewModel(infoRepository, rootRepository)
 
-        vm.assertEvent(InfoEvent.Load(), vm.state) {
+        vm.assertEvent(InfoEvent.Load()) {
             val initialState = awaitItem()
             val loadingState = awaitItem()
             val loadedState = awaitItem()

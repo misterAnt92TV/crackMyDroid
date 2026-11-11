@@ -2,6 +2,7 @@ package com.crackmydroid.architecture.presentation
 
 import com.crackmydroid.architecture.coroutines.AppDispatchers
 import com.crackmydroid.architecture.presentation.model.UiEvent
+import com.crackmydroid.architecture.presentation.model.UiState
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
@@ -39,6 +40,16 @@ class BaseViewModelTest {
         viewModel.handleEvent(event)
 
         assertEquals(event, viewModel.handledEvent)
+    }
+
+    @Test
+    fun exposesInitialStateAndPublishesAtomicUpdates() {
+        val viewModel = TestViewModel(testDispatchers(StandardTestDispatcher()))
+
+        assertEquals(TestState(), viewModel.state.value)
+        viewModel.incrementState()
+
+        assertEquals(TestState(count = 1), viewModel.state.value)
     }
     @Test
     fun onClearedCancelsChildCoroutines() = runTest {
@@ -83,7 +94,8 @@ class BaseViewModelTest {
         override val default = dispatcher
     }
 
-    private class TestViewModel(dispatchers: AppDispatchers) : BaseViewModel<TestEvent>(dispatchers) {
+    private class TestViewModel(dispatchers: AppDispatchers) :
+        BaseViewModel<TestEvent, TestState>(TestState(), dispatchers) {
         var handledEvent: TestEvent? = null
 
         override fun onEvent(event: TestEvent) {
@@ -92,6 +104,7 @@ class BaseViewModelTest {
 
         fun launch(block: suspend () -> Unit): Job = scope.launch { block() }
         fun latest(key: String, block: suspend () -> Unit): Job = launchLatest(key) { block() }
+        fun incrementState() = updateState { it.copy(count = it.count + 1) }
         fun nonCooperativeLatest(key: String, gate: CompletableDeferred<Unit>, publish: () -> Unit): Job =
             launchLatest(key) {
                 withContext(NonCancellable) { gate.await() }
@@ -101,4 +114,5 @@ class BaseViewModelTest {
     }
 
     private class TestEvent : UiEvent()
+    private data class TestState(val count: Int = 0) : UiState
 }

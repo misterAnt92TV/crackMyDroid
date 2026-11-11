@@ -48,14 +48,14 @@ class ActivityListViewModelTest {
         getExportFormat: GetExportFormatUseCase,
         reportExporter: ExportReportUseCase = reportExporter(),
     ) = ActivityListViewModel(
-        getActivities = getActivities,
-        launchActivity = launchActivity,
-        getExportFormat = getExportFormat,
-        getFavorites = emptyActivityFavorites(),
-        setFavorites = mockk<SetActivityFavoritesUseCase>(relaxed = true),
-        getPackageFavorites = emptyPackageFavorites(),
-        setPackageFavorites = mockk<SetActivityPackageFavoritesUseCase>(relaxed = true),
-        reportExporter = reportExporter,
+        getActivitiesUseCase = getActivities,
+        launchActivityUseCase = launchActivity,
+        getExportFormatUseCase = getExportFormat,
+        getFavoritesUseCase = emptyActivityFavorites(),
+        setFavoritesUseCase = mockk<SetActivityFavoritesUseCase>(relaxed = true),
+        getPackageFavoritesUseCase = emptyPackageFavorites(),
+        setPackageFavoritesUseCase = mockk<SetActivityPackageFavoritesUseCase>(relaxed = true),
+        reportExporterUseCase = reportExporter,
         dispatchers = TestAppDispatchers(dispatcher),
     )
 

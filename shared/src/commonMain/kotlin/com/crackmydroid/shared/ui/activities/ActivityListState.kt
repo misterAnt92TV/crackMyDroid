@@ -1,5 +1,6 @@
 package com.crackmydroid.shared.ui.activities
 
+import com.crackmydroid.architecture.presentation.model.UiState
 import com.crackmydroid.shared.domain.model.activity.ActivityEntry
 import com.crackmydroid.shared.domain.model.activity.ActivityIntentRiskLevel
 import com.crackmydroid.shared.domain.model.activity.ActivityIntentRiskReport
@@ -18,7 +19,7 @@ data class ActivityListState(
     val guidedLaunch: GuidedLaunchState? = null,
     val selectedReport: ActivityAppReport? = null,
     val reportExportPath: String? = null,
-)
+) : UiState
 
 data class GuidedLaunchState(val entry: ActivityEntry)
 

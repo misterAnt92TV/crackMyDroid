@@ -143,8 +143,8 @@ fun presentationModule() = module {
         val penTesting = get<PenTestingViewModel>()
         AppPresentationDependencies(
             shell = AppShellViewModel(
-                getIntroSeen = get(),
-                setIntroSeen = get(),
+                getIntroSeenUseCase = get(),
+                setIntroSeenUseCase = get(),
                 activity = activity,
                 home = home,
                 root = root,
@@ -155,7 +155,7 @@ fun presentationModule() = module {
                 permissions = permissions,
                 installedApps = installedApps,
                 penTesting = penTesting,
-                getVerbose = get(),
+                getVerboseLogUseCase = get(),
                 dispatchers = get(),
             ),
             activity = activity,

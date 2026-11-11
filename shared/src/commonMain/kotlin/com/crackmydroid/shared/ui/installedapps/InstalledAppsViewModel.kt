@@ -14,25 +14,20 @@ import com.crackmydroid.shared.i18n.format
 import com.crackmydroid.shared.presentation.LocalizedBaseViewModel
 import com.crackmydroid.shared.presentation.operations.NoOpOperationLogRepository
 import com.crackmydroid.shared.util.runSuspendCatching
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.encodeToJsonElement
 
 class InstalledAppsViewModel(
-    private val listUseCase: ListInstalledAppsUseCase,
-    private val exportUseCase: ExportApkUseCase,
-    private val shareUseCase: ShareApkUseCase,
-    private val reportExporter: ExportReportUseCase,
-    private val getFavorites: GetInstalledAppFavoritesUseCase,
-    private val setFavorites: SetInstalledAppFavoritesUseCase,
+    private val listInstalledAppsUseCase: ListInstalledAppsUseCase,
+    private val exportApkUseCase: ExportApkUseCase,
+    private val shareApkUseCase: ShareApkUseCase,
+    private val reportExporterUseCase: ExportReportUseCase,
+    private val getFavoritesUseCase: GetInstalledAppFavoritesUseCase,
+    private val setFavoritesUseCase: SetInstalledAppFavoritesUseCase,
     private val operationLogs: OperationLogRepository = NoOpOperationLogRepository,
     dispatchers: AppDispatchers,
-) : LocalizedBaseViewModel<InstalledAppsEvent>(dispatchers) {
-    private val _state = MutableStateFlow(InstalledAppsState())
-    val state: StateFlow<InstalledAppsState> = _state
+) : LocalizedBaseViewModel<InstalledAppsEvent, InstalledAppsState>(InstalledAppsState(), dispatchers) {
     private val queryCount = mutableMapOf<String, Int>()
     private val multiSpaceRegex = Regex("\\s+")
     private val uiStrings get() = ScreenUiStrings.from(strings)
@@ -50,15 +45,15 @@ class InstalledAppsViewModel(
 
     private fun refresh() {
         launchLatest("installed-apps-refresh") {
-            val favoritesResult = getFavorites()
+            val favoritesResult = getFavoritesUseCase()
             ensureCurrent()
             favoritesResult.onSuccess { favorites ->
                 updatePresentation { it.copy(favorites = favorites) }
             }
-            _state.update {
+            updateState {
                 it.copy(loading = true, error = favoritesResult.exceptionOrNull()?.message)
             }
-            listUseCase()
+            listInstalledAppsUseCase()
                 .onSuccess { list ->
                     if (!isCurrent()) return@onSuccess
                     updatePresentation { it.copy(apps = list, loading = false) }
@@ -66,7 +61,7 @@ class InstalledAppsViewModel(
                 }
                 .onFailure { err ->
                     if (!isCurrent()) return@onFailure
-                    _state.update { it.copy(error = err.message ?: strings.commandError, loading = false) }
+                    updateState { it.copy(error = err.message ?: strings.commandError, loading = false) }
                     operationLogs.record(
                         uiStrings.loadingInstalledApps,
                         success = false,
@@ -84,7 +79,7 @@ class InstalledAppsViewModel(
                 queryCount[normalized] = count
             }
             val top = queryCount.maxByOrNull { it.value }?.key
-            _state.update { it.copy(topQuery = top) }
+            updateState { it.copy(topQuery = top) }
         }
         updatePresentation { it.copy(filter = value) }
     }
@@ -110,15 +105,15 @@ class InstalledAppsViewModel(
 
     private fun export(packageName: String) {
         launchTask {
-            _state.update { it.copy(error = null) }
-            val result = exportUseCase(packageName)
+            updateState { it.copy(error = null) }
+            val result = exportApkUseCase(packageName)
             result
                 .onSuccess { path ->
-                    _state.update { it.copy(lastExportPath = path, lastSharedPackage = null) }
+                    updateState { it.copy(lastExportPath = path, lastSharedPackage = null) }
                     operationLogs.record("${uiStrings.exportApk} $packageName", success = true, details = path)
                 }
                 .onFailure { err ->
-                    _state.update { it.copy(error = err.message ?: strings.commandError) }
+                    updateState { it.copy(error = err.message ?: strings.commandError) }
                     operationLogs.record(
                         "${uiStrings.exportApk} $packageName",
                         success = false,
@@ -130,17 +125,17 @@ class InstalledAppsViewModel(
 
     private fun exportAll(baseName: String = "installed_apps") {
         launchTask {
-            _state.update { it.copy(error = null) }
+            updateState { it.copy(error = null) }
             runSuspendCatching {
                 val report = buildListReport(baseName)
-                reportExporter.save(baseName, "installed_apps", report.textContent, report.data).getOrThrow()
+                reportExporterUseCase.save(baseName, "installed_apps", report.textContent, report.data).getOrThrow()
             }
                 .onSuccess { path ->
-                    _state.update { it.copy(lastExportPath = path, error = null) }
+                    updateState { it.copy(lastExportPath = path, error = null) }
                     operationLogs.record(uiStrings.exportApps, success = true, details = path)
                 }
                 .onFailure { err ->
-                    _state.update { it.copy(error = err.message) }
+                    updateState { it.copy(error = err.message) }
                     operationLogs.record(uiStrings.exportApps, success = false, details = err.message)
                 }
         }
@@ -148,17 +143,17 @@ class InstalledAppsViewModel(
 
     private fun shareAll(baseName: String = "installed_apps") {
         launchTask {
-            _state.update { it.copy(error = null) }
+            updateState { it.copy(error = null) }
             runSuspendCatching {
                 val report = buildListReport(baseName)
-                reportExporter.share(baseName, "installed_apps", report.textContent, report.data).getOrThrow()
+                reportExporterUseCase.share(baseName, "installed_apps", report.textContent, report.data).getOrThrow()
             }
                 .onSuccess { path ->
-                    _state.update { it.copy(lastExportPath = path, error = null) }
+                    updateState { it.copy(lastExportPath = path, error = null) }
                     operationLogs.record(uiStrings.shareApps, success = true, details = path)
                 }
                 .onFailure { err ->
-                    _state.update { it.copy(error = err.message) }
+                    updateState { it.copy(error = err.message) }
                     operationLogs.record(uiStrings.shareApps, success = false, details = err.message)
                 }
         }
@@ -166,15 +161,15 @@ class InstalledAppsViewModel(
 
     private fun share(packageName: String, bluetoothOnly: Boolean) {
         launchTask {
-            _state.update { it.copy(error = null) }
-            val result = shareUseCase(packageName, bluetoothOnly)
+            updateState { it.copy(error = null) }
+            val result = shareApkUseCase(packageName, bluetoothOnly)
             result
                 .onSuccess {
-                    _state.update { it.copy(lastSharedPackage = packageName) }
+                    updateState { it.copy(lastSharedPackage = packageName) }
                     operationLogs.record("${uiStrings.shareApk} $packageName", success = true)
                 }
                 .onFailure { err ->
-                    _state.update { it.copy(error = err.message ?: strings.commandError) }
+                    updateState { it.copy(error = err.message ?: strings.commandError) }
                     operationLogs.record(
                         "${uiStrings.shareApk} $packageName",
                         success = false,
@@ -185,7 +180,7 @@ class InstalledAppsViewModel(
     }
 
     private fun clearError() {
-        _state.update { it.copy(error = null) }
+        updateState { it.copy(error = null) }
     }
 
     private fun toggleFavorite(packageName: String) {
@@ -195,13 +190,13 @@ class InstalledAppsViewModel(
             it.copy(favorites = favs)
         }
         launchTask {
-            setFavorites(_state.value.favorites)
-                .onFailure { error -> _state.update { it.copy(error = error.message) } }
+            setFavoritesUseCase(currentState.favorites)
+                .onFailure { error -> updateState { it.copy(error = error.message) } }
         }
     }
 
     private fun updatePresentation(transform: (InstalledAppsState) -> InstalledAppsState) {
-        _state.update { current ->
+        updateState { current ->
             val updated = transform(current)
             updated.copy(
                 visibleApps = visibleApps(updated),
@@ -211,7 +206,7 @@ class InstalledAppsViewModel(
     }
 
     private suspend fun buildListReport(baseName: String): GeneratedReport {
-        val sortedApps = _state.value.apps.sortedBy { it.appLabel.lowercase() }
+        val sortedApps = currentState.apps.sortedBy { it.appLabel.lowercase() }
         val content = buildString {
             appendLine(uiStrings.installedAppsReportTitle)
             appendLine("==============================================")

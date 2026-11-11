@@ -7,17 +7,12 @@ import com.crackmydroid.shared.domain.usecase.trick.ListShellCommandsUseCase
 import com.crackmydroid.shared.i18n.ScreenUiStrings
 import com.crackmydroid.shared.i18n.format
 import com.crackmydroid.shared.presentation.LocalizedBaseViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.update
 
 class TrickViewModel(
-    private val listUseCase: ListShellCommandsUseCase,
-    private val execUseCase: ExecuteShellCommandUseCase,
+    private val listShellCommandsUseCase: ListShellCommandsUseCase,
+    private val executeShellCommandUseCase: ExecuteShellCommandUseCase,
     dispatchers: AppDispatchers,
-) : LocalizedBaseViewModel<TrickEvent>(dispatchers) {
-    private val _state = MutableStateFlow(TrickState())
-    val state: StateFlow<TrickState> = _state
+) : LocalizedBaseViewModel<TrickEvent, TrickState>(TrickState(), dispatchers) {
     private val uiStrings get() = ScreenUiStrings.from(strings)
 
     override fun onEvent(event: TrickEvent) = when (event) {
@@ -35,21 +30,21 @@ class TrickViewModel(
 
     private fun load() {
         launchLatest("trick-load") {
-            listUseCase()
-                .onSuccess { list -> _state.update { it.copy(commands = list) } }
-                .onFailure { error -> _state.update { it.copy(error = error.message) } }
+            listShellCommandsUseCase()
+                .onSuccess { list -> updateState { it.copy(commands = list) } }
+                .onFailure { error -> updateState { it.copy(error = error.message) } }
         }
     }
 
     private fun execute(command: ShellCommand) {
-        if (_state.value.running) {
-            val active = _state.value.runningCommand?.title ?: uiStrings.anotherCommand
-            _state.update {
+        if (currentState.running) {
+            val active = currentState.runningCommand?.title ?: uiStrings.anotherCommand
+            updateState {
                 it.copy(interactionHint = uiStrings.waitCommandRunning.format(active))
             }
             return
         }
-        _state.update {
+        updateState {
             it.copy(
                 running = true,
                 runningCommand = command,
@@ -58,9 +53,9 @@ class TrickViewModel(
             )
         }
         launchTask {
-            execUseCase(command)
+            executeShellCommandUseCase(command)
                 .onSuccess { res ->
-                    _state.update {
+                    updateState {
                         it.copy(
                             lastResult = res,
                             resultToDisplay = res,
@@ -78,7 +73,7 @@ class TrickViewModel(
                     }
                 }
                 .onFailure { err ->
-                    _state.update {
+                    updateState {
                         it.copy(
                             error = err.message,
                             lastCommandTitle = command.title,
@@ -92,24 +87,24 @@ class TrickViewModel(
 
     private fun requestExecution(command: ShellCommand) {
         if (command.confirmation != null) {
-            _state.update { it.copy(pendingCommand = command) }
+            updateState { it.copy(pendingCommand = command) }
         } else {
             execute(command)
         }
     }
 
     private fun confirmPendingExecution() {
-        val command = _state.value.pendingCommand ?: return
-        _state.update { it.copy(pendingCommand = null) }
+        val command = currentState.pendingCommand ?: return
+        updateState { it.copy(pendingCommand = null) }
         execute(command)
     }
 
-    private fun dismissPendingCommand() = _state.update { it.copy(pendingCommand = null) }
-    private fun dismissResult() = _state.update { it.copy(resultToDisplay = null) }
+    private fun dismissPendingCommand() = updateState { it.copy(pendingCommand = null) }
+    private fun dismissResult() = updateState { it.copy(resultToDisplay = null) }
 
     private fun notifyBusyInteraction(requestedCommand: ShellCommand) {
-        val active = _state.value.runningCommand?.title ?: uiStrings.anotherCommand
-        _state.update {
+        val active = currentState.runningCommand?.title ?: uiStrings.anotherCommand
+        updateState {
             it.copy(
                 interactionHint = uiStrings.commandNotStartedUntilCurrentEnds.format(requestedCommand.title, active),
             )
@@ -117,7 +112,7 @@ class TrickViewModel(
     }
 
     private fun notifyUnsupportedCommand(command: ShellCommand) {
-        _state.update {
+        updateState {
             it.copy(
                 interactionHint = command.unsupportedReason
                     ?: uiStrings.commandNotAvailableOnSelectedDevice.format(command.title),
@@ -126,10 +121,10 @@ class TrickViewModel(
     }
 
     private fun clearInteractionHint() {
-        _state.update { it.copy(interactionHint = null) }
+        updateState { it.copy(interactionHint = null) }
     }
 
     private fun clearError() {
-        _state.update { it.copy(error = null) }
+        updateState { it.copy(error = null) }
     }
 }

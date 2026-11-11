@@ -1,5 +1,7 @@
 package com.crackmydroid.shared.ui.logs
 
+import com.crackmydroid.architecture.presentation.model.UiState
+
 data class LogState(
     val logs: List<String> = emptyList(),
     val filter: String = "",
@@ -10,4 +12,4 @@ data class LogState(
     val error: String? = null,
     val visibleLogs: List<String> = emptyList(),
     val trimmed: Boolean = false,
-)
+) : UiState

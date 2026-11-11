@@ -2,6 +2,7 @@ package com.crackmydroid.architecture.presentation
 
 import com.crackmydroid.architecture.coroutines.AppDispatchers
 import com.crackmydroid.architecture.presentation.model.UiEvent
+import com.crackmydroid.architecture.presentation.model.UiState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
@@ -9,13 +10,38 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-abstract class BaseViewModel<E : UiEvent>(protected val dispatchers: AppDispatchers) {
+abstract class BaseViewModel<E : UiEvent, S : UiState>(
+    initialState: S,
+    protected val dispatchers: AppDispatchers,
+) {
     private val job = SupervisorJob()
     protected val scope = CoroutineScope(job + dispatchers.main)
     private val latestJobs = mutableMapOf<String, Job>()
     private val latestVersions = mutableMapOf<String, Long>()
+    private val mutableState = MutableStateFlow(initialState)
+
+    /** Immutable state observed by the screen. */
+    val state: StateFlow<S> = mutableState.asStateFlow()
+
+    /** Current state for deriving the next immutable state. */
+    protected val currentState: S
+        get() = mutableState.value
+
+    /** Atomically derives and publishes the next rendering state. */
+    protected fun updateState(transform: (S) -> S) {
+        mutableState.update(transform)
+    }
+
+    /** Replaces the complete rendering state. */
+    protected fun setState(state: S) {
+        mutableState.value = state
+    }
 
     /** The only public input boundary for a ViewModel. */
     fun handleEvent(event: E) = onEvent(event)

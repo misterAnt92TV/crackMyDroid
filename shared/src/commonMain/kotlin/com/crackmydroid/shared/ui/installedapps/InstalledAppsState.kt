@@ -1,5 +1,6 @@
 package com.crackmydroid.shared.ui.installedapps
 
+import com.crackmydroid.architecture.presentation.model.UiState
 import com.crackmydroid.shared.domain.model.InstalledAppEntry
 
 data class InstalledAppsState(
@@ -13,4 +14,4 @@ data class InstalledAppsState(
     val favorites: Set<String> = emptySet(),
     val visibleApps: List<InstalledAppEntry> = emptyList(),
     val favoriteQueries: List<String> = emptyList(),
-)
+) : UiState

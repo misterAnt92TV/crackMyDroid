@@ -46,12 +46,12 @@ class InstalledAppsViewModelTest {
         share: ShareApkUseCase,
         reportExporter: ExportReportUseCase,
     ) = InstalledAppsViewModel(
-        listUseCase = list,
-        exportUseCase = export,
-        shareUseCase = share,
-        reportExporter = reportExporter,
-        getFavorites = emptyFavorites(),
-        setFavorites = mockk<SetInstalledAppFavoritesUseCase>(relaxed = true),
+        listInstalledAppsUseCase = list,
+        exportApkUseCase = export,
+        shareApkUseCase = share,
+        reportExporterUseCase = reportExporter,
+        getFavoritesUseCase = emptyFavorites(),
+        setFavoritesUseCase = mockk<SetInstalledAppFavoritesUseCase>(relaxed = true),
         dispatchers = TestAppDispatchers(dispatcher),
     )
 
@@ -79,7 +79,7 @@ class InstalledAppsViewModelTest {
         coEvery { list() } returns Result.success(listOf(InstalledAppEntry("App", "pkg", "/path")))
         val vm = installedAppsViewModel(list, export, share, reportExporter())
 
-        vm.assertEvent(InstalledAppsEvent.Refresh(), vm.state) {
+        vm.assertEvent(InstalledAppsEvent.Refresh()) {
             val initialState = awaitItem()
             val loadingState = awaitItem()
             assertEquals(true, loadingState.loading)

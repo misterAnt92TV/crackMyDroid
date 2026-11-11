@@ -1,5 +1,6 @@
 package com.crackmydroid.shared.ui.settings
 
+import com.crackmydroid.architecture.presentation.model.UiState
 import com.crackmydroid.shared.domain.model.ExportFormat
 import com.crackmydroid.shared.domain.model.app.AppLanguage
 import com.crackmydroid.shared.domain.model.app.AppTheme
@@ -20,4 +21,4 @@ data class SettingsState(
     val loading: Boolean = false,
     val error: String? = null,
     val thirdPartyLibraries: List<ThirdPartyLibrary> = ThirdPartyLibraries.catalog,
-)
+) : UiState

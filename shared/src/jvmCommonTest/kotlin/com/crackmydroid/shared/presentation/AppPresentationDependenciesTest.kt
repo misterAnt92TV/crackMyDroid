@@ -238,7 +238,7 @@ class AppPresentationDependenciesTest {
     private fun resolveGraph(): AppPresentationDependencies =
         application.koin.get<AppPresentationDependencies>().also { graphs += it }
 
-    private fun viewModels(graph: AppPresentationDependencies): List<LocalizedBaseViewModel<*>> = with(graph) {
+    private fun viewModels(graph: AppPresentationDependencies): List<LocalizedBaseViewModel<*, *>> = with(graph) {
         listOf(shell, activity, home, root, info, trick, settings, logs, permissions, installedApps, penTesting)
     }
 }

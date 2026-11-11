@@ -27,15 +27,12 @@ import com.crackmydroid.shared.ui.settings.SettingsEvent
 import com.crackmydroid.shared.ui.settings.SettingsViewModel
 import com.crackmydroid.shared.ui.trick.TrickEvent
 import com.crackmydroid.shared.ui.trick.TrickViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.update
 
 class AppShellViewModel(
-    private val getIntroSeen: GetIntroSeenUseCase,
-    private val setIntroSeen: SetIntroSeenUseCase,
+    private val getIntroSeenUseCase: GetIntroSeenUseCase,
+    private val setIntroSeenUseCase: SetIntroSeenUseCase,
     private val activity: ActivityListViewModel,
     private val home: HomeViewModel,
     private val root: RootViewModel,
@@ -46,11 +43,9 @@ class AppShellViewModel(
     private val permissions: PermissionsViewModel,
     private val installedApps: InstalledAppsViewModel,
     private val penTesting: PenTestingViewModel,
-    private val getVerbose: GetVerboseLogUseCase,
+    private val getVerboseLogUseCase: GetVerboseLogUseCase,
     dispatchers: AppDispatchers,
-) : LocalizedBaseViewModel<AppShellEvent>(dispatchers) {
-    private val _state = MutableStateFlow(AppShellState())
-    val state: StateFlow<AppShellState> = _state
+) : LocalizedBaseViewModel<AppShellEvent, AppShellState>(AppShellState(), dispatchers) {
     private var initializing = false
 
     override fun onEvent(event: AppShellEvent) = when (event) {
@@ -64,15 +59,15 @@ class AppShellViewModel(
     }
 
     private fun initialize() {
-        if (_state.value.initialized || initializing) return
+        if (currentState.initialized || initializing) return
         initializing = true
         launchLatest("app-shell-initialize") {
             try {
-                getVerbose().onSuccess(AppLogger::setVerbose)
+                getVerboseLogUseCase().onSuccess(AppLogger::setVerbose)
                 settings.handleEvent(SettingsEvent.Load())
                 updateLanguage(resolveLanguageCode(settings.state.value.language, platformLanguage()))
-                val introSeen = getIntroSeen().getOrDefault(false)
-                _state.update { it.copy(showIntro = !introSeen, initialized = true) }
+                val introSeen = getIntroSeenUseCase().getOrDefault(false)
+                updateState { it.copy(showIntro = !introSeen, initialized = true) }
                 activity.handleEvent(ActivityListEvent.Refresh())
                 info.handleEvent(InfoEvent.Load())
                 trick.handleEvent(TrickEvent.Load())
@@ -113,24 +108,24 @@ class AppShellViewModel(
                 Screen.Trick,
             )
         ) {
-            _state.update { it.copy(pendingHintScreen = screen) }
+            updateState { it.copy(pendingHintScreen = screen) }
         } else {
-            _state.update { it.copy(selectedScreen = screen) }
+            updateState { it.copy(selectedScreen = screen) }
         }
     }
 
     private fun confirmHint(disableHints: Boolean, target: Screen) {
         if (disableHints) settings.handleEvent(SettingsEvent.FeatureHintsEnabledChanged(false))
-        _state.update { it.copy(selectedScreen = target, pendingHintScreen = null) }
+        updateState { it.copy(selectedScreen = target, pendingHintScreen = null) }
     }
 
-    private fun dismissHint() = _state.update { it.copy(pendingHintScreen = null) }
-    private fun dismissHelp() = _state.update { it.copy(helpDialog = null) }
-    private fun showHelp(message: String) = _state.update { it.copy(helpDialog = message) }
+    private fun dismissHint() = updateState { it.copy(pendingHintScreen = null) }
+    private fun dismissHelp() = updateState { it.copy(helpDialog = null) }
+    private fun showHelp(message: String) = updateState { it.copy(helpDialog = message) }
     private fun dismissIntro() {
-        _state.update { it.copy(showIntro = false) }
+        updateState { it.copy(showIntro = false) }
         launchTask {
-            setIntroSeen(true)
+            setIntroSeenUseCase(true)
         }
     }
 }

@@ -4,26 +4,25 @@ import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.test
 import com.crackmydroid.architecture.presentation.BaseViewModel
 import com.crackmydroid.architecture.presentation.model.UiEvent
+import com.crackmydroid.architecture.presentation.model.UiState
 import kotlin.time.Duration
 import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.StateFlow
 
 /**
  * Asserts the emissions of a ViewModel's [StateFlow] after dispatching an [event] through [BaseViewModel.handleEvent].
  */
-suspend fun <E : UiEvent, S> BaseViewModel<E>.assertEvent(
+suspend fun <E : UiEvent, S : UiState> BaseViewModel<E, S>.assertEvent(
     event: E,
-    stateFlow: StateFlow<S>,
     timeout: Duration? = null,
     validate: suspend ReceiveTurbine<S>.() -> Unit,
 ) {
     if (timeout != null) {
-        stateFlow.test(timeout = timeout) {
+        state.test(timeout = timeout) {
             handleEvent(event)
             validate()
         }
     } else {
-        stateFlow.test {
+        state.test {
             handleEvent(event)
             validate()
         }
@@ -33,7 +32,7 @@ suspend fun <E : UiEvent, S> BaseViewModel<E>.assertEvent(
 /**
  * Asserts the emissions of a ViewModel's [SharedFlow] (e.g. effects) after dispatching an [event] through [BaseViewModel.handleEvent].
  */
-suspend fun <E : UiEvent, F> BaseViewModel<E>.assertEffect(
+suspend fun <E : UiEvent, S : UiState, F> BaseViewModel<E, S>.assertEffect(
     event: E,
     effectFlow: SharedFlow<F>,
     timeout: Duration? = null,

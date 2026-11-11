@@ -1,5 +1,6 @@
 package com.crackmydroid.shared.ui.permissions
 
+import com.crackmydroid.architecture.presentation.model.UiState
 import com.crackmydroid.shared.domain.model.PermissionRiskReport
 import com.crackmydroid.shared.domain.model.app.AppPermissionEntry
 import com.crackmydroid.shared.ui.permissions.model.PermissionFindingUi
@@ -26,4 +27,4 @@ data class PermissionsState(
     val reportPreviewLoading: Boolean = false,
     val reportPreviewContent: String? = null,
     val reportPreviewError: String? = null,
-)
+) : UiState

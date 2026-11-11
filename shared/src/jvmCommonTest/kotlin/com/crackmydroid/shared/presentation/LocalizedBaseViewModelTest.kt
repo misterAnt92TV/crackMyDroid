@@ -2,6 +2,7 @@ package com.crackmydroid.shared.presentation
 
 import com.crackmydroid.architecture.coroutines.DefaultAppDispatchers
 import com.crackmydroid.architecture.presentation.model.UiEvent
+import com.crackmydroid.architecture.presentation.model.UiState
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -25,7 +26,8 @@ class LocalizedBaseViewModelTest {
         viewModel.onCleared()
     }
 
-    private class TestViewModel : LocalizedBaseViewModel<TestEvent>(DefaultAppDispatchers) {
+    private class TestViewModel :
+        LocalizedBaseViewModel<TestEvent, TestState>(TestState, DefaultAppDispatchers) {
         var languageChanges = 0
         val useCaseLanguage get() = useCaseTexts.languageCode
         val localizedStrings get() = strings
@@ -39,4 +41,5 @@ class LocalizedBaseViewModelTest {
     }
 
     private class TestEvent : UiEvent()
+    private data object TestState : UiState
 }

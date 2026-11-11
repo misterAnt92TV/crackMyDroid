@@ -4,18 +4,13 @@ import com.crackmydroid.architecture.coroutines.AppDispatchers
 import com.crackmydroid.shared.domain.usecase.log.ExportLogsUseCase
 import com.crackmydroid.shared.domain.usecase.log.GetLogsUseCase
 import com.crackmydroid.shared.presentation.LocalizedBaseViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
 
 class LogViewModel(
-    private val getLogs: GetLogsUseCase,
-    private val exportLogs: ExportLogsUseCase,
+    private val getLogsUseCase: GetLogsUseCase,
+    private val exportLogsUseCase: ExportLogsUseCase,
     dispatchers: AppDispatchers,
-) : LocalizedBaseViewModel<LogEvent>(dispatchers) {
-    private val _state = MutableStateFlow(LogState())
-    val state: StateFlow<LogState> = _state
+) : LocalizedBaseViewModel<LogEvent, LogState>(LogState(), dispatchers) {
 
     override fun onEvent(event: LogEvent) = when (event) {
         is LogEvent.Refresh -> refresh()
@@ -28,13 +23,13 @@ class LogViewModel(
 
     private fun refresh() {
         launchLatest("logs-refresh") {
-            _state.update { it.copy(loading = true, error = null, message = null) }
-            getLogs()
+            updateState { it.copy(loading = true, error = null, message = null) }
+            getLogsUseCase()
                 .onSuccess { list ->
                     if (!isCurrent()) return@onSuccess
                     val trimmed = if (list.size > MAX_LINES) list.takeLast(MAX_LINES) else list
                     recomputeAsync(
-                        _state.value.copy(
+                        currentState.copy(
                             logs = trimmed,
                             trimmed = list.size > MAX_LINES,
                             loading = false,
@@ -43,7 +38,7 @@ class LogViewModel(
                 }
                 .onFailure { err ->
                     if (!isCurrent()) return@onFailure
-                    _state.update {
+                    updateState {
                         it.copy(
                             error = err.message,
                             loading = false,
@@ -54,33 +49,33 @@ class LogViewModel(
     }
 
     private fun setFilter(value: String) {
-        recomputeAsync(_state.value.copy(filter = value))
+        recomputeAsync(currentState.copy(filter = value))
     }
 
-    private fun filtered(): List<String> = _state.value.visibleLogs
+    private fun filtered(): List<String> = currentState.visibleLogs
 
     private fun export() {
         launchTask {
-            val current = _state.value.visibleLogs
-            exportLogs(current)
-                .onSuccess { path -> _state.update { it.copy(message = path) } }
-                .onFailure { err -> _state.update { it.copy(error = err.message) } }
+            val current = currentState.visibleLogs
+            exportLogsUseCase(current)
+                .onSuccess { path -> updateState { it.copy(message = path) } }
+                .onFailure { err -> updateState { it.copy(error = err.message) } }
         }
     }
 
     private fun clearError() {
-        _state.update { it.copy(error = null) }
+        updateState { it.copy(error = null) }
     }
 
     private fun toggleLevel(level: Char) {
-        val current = _state.value
+        val current = currentState
         val set = current.levels.toMutableSet()
         if (set.contains(level)) set.remove(level) else set.add(level)
         recomputeAsync(current.copy(levels = set))
     }
 
     private fun setColorByLevel(enabled: Boolean) {
-        _state.update { it.copy(colorByLevel = enabled) }
+        updateState { it.copy(colorByLevel = enabled) }
     }
 
     private fun recompute(state: LogState): LogState {
@@ -101,11 +96,11 @@ class LogViewModel(
     }
 
     private fun recomputeAsync(state: LogState) {
-        _state.value = state
+        setState(state)
         launchLatest("logs-recompute") {
             val newState = withContext(dispatchers.default) { recompute(state) }
             ensureCurrent()
-            _state.value = newState
+            setState(newState)
         }
     }
 

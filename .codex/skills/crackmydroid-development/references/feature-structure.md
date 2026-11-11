@@ -58,9 +58,13 @@ introduce a mapper.
 The development skill defines the architecture, coroutine, localization, and migration policy.
 This reference only records the feature shape and UI ownership rules.
 
-- State is immutable and exposes only what the screen needs through `StateFlow<FeatureUiState>`.
+- State is immutable, implements `UiState`, and exposes only what the screen needs through the
+  `StateFlow<FeatureUiState>` owned by `BaseViewModel`. The base receives the initial state and
+  provides `currentState`, `updateState`, and `setState`; feature ViewModels never own a mutable
+  state flow.
 - For new features, define a feature-specific sealed `FeatureEvent : UiEvent()` and extend
-  `BaseViewModel<FeatureEvent>`. Screens may call only the inherited `ViewModel.handleEvent(event)`;
+  `BaseViewModel<FeatureEvent, FeatureUiState>`. Screens may call only the inherited
+  `ViewModel.handleEvent(event)`;
   the ViewModel implements its protected exhaustive `onEvent(event)` hook. Do not add public command
   methods for screens. Existing features may retain their public API during a bounded change unless
   UDF migration is explicitly requested.

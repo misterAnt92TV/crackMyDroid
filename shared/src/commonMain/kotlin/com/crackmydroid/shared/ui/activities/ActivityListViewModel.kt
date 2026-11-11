@@ -24,30 +24,25 @@ import com.crackmydroid.shared.ui.activities.model.ActivityListEffect
 import com.crackmydroid.shared.ui.activities.model.uiLabel
 import com.crackmydroid.shared.util.runSuspendCatching
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.encodeToJsonElement
 
 class ActivityListViewModel(
-    private val getActivities: GetActivitiesUseCase,
-    private val launchActivity: LaunchActivityUseCase,
-    private val getExportFormat: GetExportFormatUseCase,
-    private val getFavorites: GetActivityFavoritesUseCase,
-    private val setFavorites: SetActivityFavoritesUseCase,
-    private val getPackageFavorites: GetActivityPackageFavoritesUseCase,
-    private val setPackageFavorites: SetActivityPackageFavoritesUseCase,
-    private val reportExporter: ExportReportUseCase,
+    private val getActivitiesUseCase: GetActivitiesUseCase,
+    private val launchActivityUseCase: LaunchActivityUseCase,
+    private val getExportFormatUseCase: GetExportFormatUseCase,
+    private val getFavoritesUseCase: GetActivityFavoritesUseCase,
+    private val setFavoritesUseCase: SetActivityFavoritesUseCase,
+    private val getPackageFavoritesUseCase: GetActivityPackageFavoritesUseCase,
+    private val setPackageFavoritesUseCase: SetActivityPackageFavoritesUseCase,
+    private val reportExporterUseCase: ExportReportUseCase,
     private val operationLogs: OperationLogRepository = NoOpOperationLogRepository,
     dispatchers: AppDispatchers,
-) : LocalizedBaseViewModel<ActivityListEvent>(dispatchers) {
+) : LocalizedBaseViewModel<ActivityListEvent, ActivityListState>(ActivityListState(), dispatchers) {
     private val json = Json { prettyPrint = true }
-    private val _state = MutableStateFlow(ActivityListState())
-    val state: StateFlow<ActivityListState> = _state
     private val _effects = MutableSharedFlow<ActivityListEffect>()
     val effects: SharedFlow<ActivityListEffect> = _effects
     private val queryCount = mutableMapOf<String, Int>()
@@ -99,19 +94,19 @@ class ActivityListViewModel(
     private fun refresh() {
         launchLatest("activities-refresh") {
             val favoritesResult = runSuspendCatching {
-                getFavorites().getOrThrow() to getPackageFavorites().getOrThrow()
+                getFavoritesUseCase().getOrThrow() to getPackageFavoritesUseCase().getOrThrow()
             }
             ensureCurrent()
             favoritesResult.onSuccess { (favorites, packages) ->
-                _state.update { it.copy(favorites = favorites, favoritePackages = packages) }
+                updateState { it.copy(favorites = favorites, favoritePackages = packages) }
             }
-            _state.update {
+            updateState {
                 it.copy(loading = true, error = favoritesResult.exceptionOrNull()?.message)
             }
-            getActivities()
+            getActivitiesUseCase()
                 .onSuccess { list ->
                     if (!isCurrent()) return@onSuccess
-                    recomputeAsync(_state.value.copy(activities = list, loading = false))
+                    recomputeAsync(currentState.copy(activities = list, loading = false))
                     operationLogs.record(
                         OperationEvent(OperationEventKey.ACTIVITY_LOAD, listOf(list.size.toString())),
                         success = true,
@@ -119,7 +114,7 @@ class ActivityListViewModel(
                 }
                 .onFailure { err ->
                     if (!isCurrent()) return@onFailure
-                    _state.update { it.copy(error = err.message ?: presentationTexts.error, loading = false) }
+                    updateState { it.copy(error = err.message ?: presentationTexts.error, loading = false) }
                     operationLogs.record(
                         OperationEvent(OperationEventKey.ACTIVITY_LOAD),
                         success = false,
@@ -137,12 +132,12 @@ class ActivityListViewModel(
                 queryCount[normalized] = count
                 queryCount.maxByOrNull { it.value }?.key
             } else {
-                _state.value.topQuery
+                currentState.topQuery
             }
         } else {
-            _state.value.topQuery
+            currentState.topQuery
         }
-        recomputeAsync(_state.value.copy(topQuery = top, filter = value))
+        recomputeAsync(currentState.copy(topQuery = top, filter = value))
     }
 
     private fun launch(entry: ActivityEntry) {
@@ -152,14 +147,14 @@ class ActivityListViewModel(
     private fun openGuidedLaunch(entry: ActivityEntry) {
         val supported = !entry.launchIntentAction.isNullOrBlank() ||
             !entry.launchIntentData.isNullOrBlank() || !entry.launchIntentMimeType.isNullOrBlank()
-        if (supported) _state.update { it.copy(guidedLaunch = GuidedLaunchState(entry)) }
+        if (supported) updateState { it.copy(guidedLaunch = GuidedLaunchState(entry)) }
     }
 
-    private fun dismissGuidedLaunch() = _state.update { it.copy(guidedLaunch = null) }
+    private fun dismissGuidedLaunch() = updateState { it.copy(guidedLaunch = null) }
 
     private fun launchGuided(action: String?, dataUri: String?, mimeType: String?) {
-        val entry = _state.value.guidedLaunch?.entry ?: return
-        _state.update { it.copy(guidedLaunch = null) }
+        val entry = currentState.guidedLaunch?.entry ?: return
+        updateState { it.copy(guidedLaunch = null) }
         launchWithIntent(entry, action, dataUri, mimeType)
     }
 
@@ -181,7 +176,7 @@ class ActivityListViewModel(
             normalizedAction != null || normalizedData != null || normalizedMimeType != null
         if (!entry.launchableViaShell && !hasGuidedIntent) {
             val msg = entry.launchabilityReason ?: strings.activityUi.activityNotLaunchable
-            _state.update { it.copy(error = msg) }
+            updateState { it.copy(error = msg) }
             operationLogs.record(
                 "Lancio ${entry.activityName}",
                 success = false,
@@ -190,10 +185,10 @@ class ActivityListViewModel(
             return
         }
         launchTask {
-            val result = launchActivity(entry, normalizedAction, normalizedData, normalizedMimeType)
+            val result = launchActivityUseCase(entry, normalizedAction, normalizedData, normalizedMimeType)
             result.onFailure { err ->
                 val msg = err.message ?: strings.activityUi.unableToLaunch.format(entry.activityName)
-                _state.update { it.copy(error = msg) }
+                updateState { it.copy(error = msg) }
                 operationLogs.record(
                     "Lancio ${entry.activityName}",
                     success = false,
@@ -212,32 +207,32 @@ class ActivityListViewModel(
     }
 
     private fun clearError() {
-        _state.update { it.copy(error = null) }
+        updateState { it.copy(error = null) }
     }
 
     private fun toggleFavorite(entry: ActivityEntry) {
         val key = entry.favoriteKey()
-        val favs = _state.value.favorites.toMutableSet()
+        val favs = currentState.favorites.toMutableSet()
         if (favs.contains(key)) favs.remove(key) else favs.add(key)
-        recomputeAsync(_state.value.copy(favorites = favs))
+        recomputeAsync(currentState.copy(favorites = favs))
         launchTask {
-            setFavorites(favs)
-                .onFailure { error -> _state.update { it.copy(error = error.message) } }
+            setFavoritesUseCase(favs)
+                .onFailure { error -> updateState { it.copy(error = error.message) } }
         }
     }
 
     private fun toggleFavoritePackage(packageName: String) {
-        val favs = _state.value.favoritePackages.toMutableSet()
+        val favs = currentState.favoritePackages.toMutableSet()
         if (favs.contains(packageName)) favs.remove(packageName) else favs.add(packageName)
-        recomputeAsync(_state.value.copy(favoritePackages = favs))
+        recomputeAsync(currentState.copy(favoritePackages = favs))
         launchTask {
-            setPackageFavorites(favs)
-                .onFailure { error -> _state.update { it.copy(error = error.message) } }
+            setPackageFavoritesUseCase(favs)
+                .onFailure { error -> updateState { it.copy(error = error.message) } }
         }
     }
 
     private fun toggleExpanded(packageName: String) {
-        val expanded = _state.value.expandedPackages.toMutableSet()
+        val expanded = currentState.expandedPackages.toMutableSet()
         if (expanded.contains(packageName)) {
             expanded.remove(packageName)
         } else {
@@ -245,24 +240,24 @@ class ActivityListViewModel(
                 packageName,
             )
         }
-        _state.update { it.copy(expandedPackages = expanded) }
+        updateState { it.copy(expandedPackages = expanded) }
     }
 
     private fun exportAll() {
         launchTask {
             runSuspendCatching {
-                val content = buildExportContent(_state.value.activities)
-                reportExporter.save(
+                val content = buildExportContent(currentState.activities)
+                reportExporterUseCase.save(
                     baseName = "activities",
                     reportType = "activities",
                     textContent = content,
-                    data = exportData(_state.value.activities),
+                    data = exportData(currentState.activities),
                 ).getOrThrow()
             }
                 .onSuccess { path ->
                     operationLogs.record(strings.activityUi.activityExport, success = true, details = path)
                 }.onFailure { error ->
-                    _state.update { it.copy(error = error.message) }
+                    updateState { it.copy(error = error.message) }
                     operationLogs.record(
                         strings.activityUi.activityExport,
                         success = false,
@@ -273,9 +268,9 @@ class ActivityListViewModel(
     }
 
     private fun exportGroup(packageName: String) {
-        val acts = _state.value.activities.filter { it.packageName == packageName }
+        val acts = currentState.activities.filter { it.packageName == packageName }
         if (acts.isEmpty()) {
-            _state.update { it.copy(error = presentationTexts.noPackageData) }
+            updateState { it.copy(error = presentationTexts.noPackageData) }
             operationLogs.record(
                 "${strings.activityUi.activityExport} $packageName",
                 success = false,
@@ -286,7 +281,7 @@ class ActivityListViewModel(
         launchTask {
             runSuspendCatching {
                 val content = buildExportContent(acts)
-                reportExporter.share(
+                reportExporterUseCase.share(
                     baseName = "activities_${packageName.replace('.', '_')}",
                     reportType = "activities",
                     textContent = content,
@@ -300,7 +295,7 @@ class ActivityListViewModel(
                         details = path,
                     )
                 }.onFailure { error ->
-                    _state.update { it.copy(error = error.message) }
+                    updateState { it.copy(error = error.message) }
                     operationLogs.record(
                         "${strings.activityUi.activityExport} $packageName",
                         success = false,
@@ -311,7 +306,7 @@ class ActivityListViewModel(
     }
 
     private suspend fun groupContent(packageName: String): String? {
-        val acts = _state.value.activities.filter { it.packageName == packageName }
+        val acts = currentState.activities.filter { it.packageName == packageName }
         if (acts.isEmpty()) return null
         return buildExportContent(acts)
     }
@@ -323,10 +318,10 @@ class ActivityListViewModel(
     }
 
     private fun buildReport(packageName: String): ActivityAppReport? {
-        val activities = _state.value.activities.filter { it.packageName == packageName }
+        val activities = currentState.activities.filter { it.packageName == packageName }
         if (activities.isEmpty()) return null
 
-        val favorites = _state.value.favorites
+        val favorites = currentState.favorites
         val riskReports = activities.map(ActivityIntentRiskAnalyzer::analyze)
         val shellLaunchableCount = activities.count { it.launchableViaShell }
         val contextualLaunchCount = activities.count { it.hasGuidedLaunchMetadata() }
@@ -348,7 +343,7 @@ class ActivityListViewModel(
             if (contextualLaunchCount > 0) {
                 add(activityUi.findingContextual.format(contextualLaunchCount))
             }
-            if (_state.value.favoritePackages.contains(packageName)) {
+            if (currentState.favoritePackages.contains(packageName)) {
                 add(activityUi.findingFavoritePackage)
             }
             if (favoriteActivitiesCount > 0) {
@@ -392,7 +387,7 @@ class ActivityListViewModel(
             dumpOnlyCount = dumpOnlyCount,
             riskyActivitiesCount = riskyActivitiesCount,
             favoriteActivitiesCount = favoriteActivitiesCount,
-            packageFavorite = _state.value.favoritePackages.contains(packageName),
+            packageFavorite = currentState.favoritePackages.contains(packageName),
             highestRiskLevel = highestRiskLevel,
             recommendations = recommendations,
             findings = findings,
@@ -401,30 +396,30 @@ class ActivityListViewModel(
     }
 
     private fun showReport(packageName: String) {
-        _state.update { it.copy(selectedReport = buildReport(packageName), reportExportPath = null) }
+        updateState { it.copy(selectedReport = buildReport(packageName), reportExportPath = null) }
     }
 
     private fun dismissReport() {
-        _state.update { it.copy(selectedReport = null, reportExportPath = null) }
+        updateState { it.copy(selectedReport = null, reportExportPath = null) }
     }
 
     private fun exportVisualReportAsync(packageName: String) {
         launchTask {
             exportVisualReport(packageName).onSuccess { path ->
-                _state.update { it.copy(reportExportPath = path, error = null) }
-            }.onFailure { error -> _state.update { it.copy(error = error.message ?: presentationTexts.reportFailed) } }
+                updateState { it.copy(reportExportPath = path, error = null) }
+            }.onFailure { error -> updateState { it.copy(error = error.message ?: presentationTexts.reportFailed) } }
         }
     }
 
     private suspend fun exportVisualReport(packageName: String): Result<String> {
         val report = buildReport(packageName)
             ?: run {
-                _state.update { it.copy(error = presentationTexts.noPackageData) }
+                updateState { it.copy(error = presentationTexts.noPackageData) }
                 return Result.failure(IllegalArgumentException(presentationTexts.noPackageData))
             }
         val baseName = "activity_report_${packageName.replace('.', '_')}.html"
         val content = buildHtmlReport(report)
-        return runSuspendCatching { reportExporter.share(baseName, content).getOrThrow() }
+        return runSuspendCatching { reportExporterUseCase.share(baseName, content).getOrThrow() }
             .onSuccess { path ->
                 operationLogs.record(
                     "${strings.activityUi.activityReport} $packageName",
@@ -432,7 +427,7 @@ class ActivityListViewModel(
                     details = path,
                 )
             }.onFailure { error ->
-                _state.update { it.copy(error = error.message) }
+                updateState { it.copy(error = error.message) }
                 operationLogs.record(
                     "${strings.activityUi.activityReport} $packageName",
                     success = false,
@@ -518,8 +513,8 @@ class ActivityListViewModel(
     }
 
     private fun recomputeAsync(state: ActivityListState) {
-        _state.value = state
-        _state.value = recompute(state)
+        setState(state)
+        setState(recompute(state))
     }
 
     private fun normalizeQuery(value: String): String = value
@@ -668,7 +663,7 @@ class ActivityListViewModel(
             "          <thead><tr><th>#</th><th>Label</th><th>Activity</th><th>Mode</th><th>${strings.activityUi.riskColumn}</th><th>${strings.activityUi.detailsColumn}</th></tr></thead>",
         )
         appendLine("          <tbody>")
-        _state.value.activities
+        currentState.activities
             .filter { it.packageName == report.packageName }
             .map(ActivityIntentRiskAnalyzer::analyze)
             .sortedByDescending { it.score }
