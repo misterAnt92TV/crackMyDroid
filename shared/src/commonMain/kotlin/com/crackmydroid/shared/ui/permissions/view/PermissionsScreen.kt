@@ -64,6 +64,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.crackmydroid.shared.domain.model.PermissionRiskLevel
 import com.crackmydroid.shared.domain.model.app.AppPermissionEntry
@@ -227,19 +228,19 @@ private fun PermissionsScreenContent(
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
-                    Row(
+                    Column(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(top = 8.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         AppButton(
                             text = screenStrings.startScan,
                             onClick = onStartAutoRiskScan,
                             enabled = state.apps.isNotEmpty() && !state.autoScanRunning,
                             variant = ButtonVariant.Tonal,
-                            modifier = Modifier.weight(1f),
-                            fullWidth = false,
+                            modifier = Modifier.fillMaxWidth(),
+                            fullWidth = true,
                             leadingIcon = Icons.Filled.Warning,
                         )
                         AppButton(
@@ -247,8 +248,8 @@ private fun PermissionsScreenContent(
                             onClick = onCancelAutoRiskScan,
                             enabled = state.autoScanRunning,
                             variant = ButtonVariant.Secondary,
-                            modifier = Modifier.weight(1f),
-                            fullWidth = false,
+                            modifier = Modifier.fillMaxWidth(),
+                            fullWidth = true,
                             leadingIcon = Icons.Filled.Stop,
                         )
                     }
@@ -491,6 +492,12 @@ private fun PermissionsScreenContent(
                             modifier = Modifier.size(44.dp),
                         )
                     },
+                    titleMaxLines = 3,
+                    subtitleMaxLines = 3,
+                    textOverflow = TextOverflow.Clip,
+                    headerVerticalPadding = 10.dp,
+                    headerMinHeight = 88.dp,
+                    actionsBelowHeader = true,
                     actions = {
                         IconButton(
                             onClick = {
@@ -587,8 +594,8 @@ private fun PermissionsScreenContent(
 private fun PermissionsScreenPreview() {
     val apps = listOf(
         AppPermissionEntry(
-            appLabel = "CrackMyDroid",
-            packageName = "com.crackmydroid",
+            appLabel = "CrackMyDroid Security Analysis Application",
+            packageName = "com.crackmydroid.security.analysis.application",
             permissions = listOf(
                 "android.permission.CAMERA",
                 "android.permission.ACCESS_FINE_LOCATION",
