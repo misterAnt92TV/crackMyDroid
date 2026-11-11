@@ -14,24 +14,44 @@ class SettingsStringsTest {
     fun settingsSections_haveExpectedTranslationsInEveryLanguage() {
         val expected = mapOf(
             "it" to listOf(
-                "Suggerimenti di ricerca", "Dialoghi di ingresso alle sezioni", "Introduzione",
-                "Formato di esportazione", "Informazioni app", "Nessun permesso richiesto",
+                "Suggerimenti di ricerca",
+                "Dialoghi di ingresso alle sezioni",
+                "Introduzione",
+                "Formato di esportazione",
+                "Informazioni app",
+                "Nessun permesso richiesto",
             ),
             "en" to listOf(
-                "Search suggestions", "Section introduction dialogs", "Introduction",
-                "Export format", "App information", "No permissions requested",
+                "Search suggestions",
+                "Section introduction dialogs",
+                "Introduction",
+                "Export format",
+                "App information",
+                "No permissions requested",
             ),
             "de" to listOf(
-                "Suchvorschläge", "Einführungsdialoge für Bereiche", "Einführung",
-                "Exportformat", "App-Informationen", "Keine Berechtigungen angefordert",
+                "Suchvorschläge",
+                "Einführungsdialoge für Bereiche",
+                "Einführung",
+                "Exportformat",
+                "App-Informationen",
+                "Keine Berechtigungen angefordert",
             ),
             "fr" to listOf(
-                "Suggestions de recherche", "Dialogues de présentation des sections", "Présentation",
-                "Format d'exportation", "Informations sur l'application", "Aucune autorisation demandée",
+                "Suggestions de recherche",
+                "Dialogues de présentation des sections",
+                "Présentation",
+                "Format d'exportation",
+                "Informations sur l'application",
+                "Aucune autorisation demandée",
             ),
             "es" to listOf(
-                "Sugerencias de búsqueda", "Diálogos de introducción a las secciones", "Introducción",
-                "Formato de exportación", "Información de la aplicación", "No se han solicitado permisos",
+                "Sugerencias de búsqueda",
+                "Diálogos de introducción a las secciones",
+                "Introducción",
+                "Formato de exportación",
+                "Información de la aplicación",
+                "No se han solicitado permisos",
             ),
         )
         languages.forEach { code ->
@@ -39,9 +59,12 @@ class SettingsStringsTest {
             assertEquals(
                 expected.getValue(code),
                 listOf(
-                    strings.settingsSearchSuggestionsTitle, strings.settingsSectionHintsTitle,
-                    strings.settingsOnboardingTitle, strings.settingsExportFormatTitle,
-                    strings.settingsAppInfoTitle, strings.settingsNoRequestedPermissions,
+                    strings.settingsSearchSuggestionsTitle,
+                    strings.settingsSectionHintsTitle,
+                    strings.settingsOnboardingTitle,
+                    strings.settingsExportFormatTitle,
+                    strings.settingsAppInfoTitle,
+                    strings.settingsNoRequestedPermissions,
                 ),
                 code,
             )

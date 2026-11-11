@@ -50,73 +50,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.crackmydroid.shared.domain.model.DeviceInfo
-import com.crackmydroid.shared.domain.model.RootStatus
 import com.crackmydroid.shared.i18n.LocalStrings
-import com.crackmydroid.shared.i18n.Strings
 import com.crackmydroid.shared.presentation.components.ScrollToTopButton
 import com.crackmydroid.shared.presentation.components.SectionHeader
 import com.crackmydroid.shared.presentation.components.card.AppCard
 import com.crackmydroid.shared.presentation.components.text.AppText
 import com.crackmydroid.shared.presentation.preview.AppPreviewEnvironment
 import com.crackmydroid.shared.presentation.preview.AppScreenPreviews
+import com.crackmydroid.shared.ui.info.InfoEvent
 import com.crackmydroid.shared.ui.info.InfoState
 import com.crackmydroid.shared.ui.info.InfoViewModel
-import com.crackmydroid.shared.ui.info.InfoEvent
 import kotlinx.coroutines.launch
-
-private fun buildInfoContent(info: DeviceInfo, root: RootStatus?, strings: Strings): String = buildString {
-    val brand = info.brand ?: strings.notAvailable
-    val device = info.device ?: strings.notAvailable
-    val product = info.product ?: strings.notAvailable
-    val buildId = info.buildId ?: strings.notAvailable
-    val display = info.buildDisplay ?: strings.notAvailable
-    val fingerprint = info.buildFingerprint ?: strings.notAvailable
-    val radio = info.radio ?: strings.notAvailable
-    val kernel = info.kernelVersion ?: strings.notAvailable
-    val battery = info.batteryLevel?.let { "$it%" } ?: strings.notAvailable
-    val screen = info.screenResolution ?: strings.notAvailable
-    val density = info.densityDpi?.toString() ?: strings.notAvailable
-    val imei = info.imei ?: strings.notAvailable
-    val serial = info.serial ?: strings.notAvailable
-
-    appendLine(strings.infoReportTitle)
-    appendLine("${strings.manufacturer}: ${info.manufacturer}")
-    appendLine("${strings.model}: ${info.model}")
-    appendLine("${strings.infoBrand}: $brand")
-    appendLine("${strings.infoDevice}: $device")
-    appendLine("${strings.infoProduct}: $product")
-    appendLine("${strings.androidVersion}: ${info.androidVersion}")
-    appendLine("${strings.securityPatch}: ${info.securityPatch}")
-    appendLine("${strings.infoBuildId}: $buildId")
-    appendLine("${strings.infoDisplay}: $display")
-    appendLine("${strings.infoFingerprint}: $fingerprint")
-    appendLine("${strings.infoRadio}: $radio")
-    appendLine("${strings.infoKernel}: $kernel")
-    appendLine("${strings.hardware}: ${info.hardware}")
-    appendLine("${strings.bootloader}: ${info.bootloader}")
-    appendLine("${strings.battery}: $battery")
-    appendLine("${strings.network}: ${info.networkType}")
-    appendLine("${strings.infoRamTotal}: ${info.totalMemory}")
-    appendLine("${strings.infoRamFree}: ${info.freeMemory}")
-    appendLine("${strings.infoScreen}: $screen ($density ${strings.infoDpi})")
-    appendLine("${strings.infoUsbDebug}: ${if (info.adbEnabled) strings.infoEnabled else strings.infoDisabled}")
-    appendLine(
-        "${strings.infoDeveloperOptions}: ${if (info.developerOptions) strings.infoEnabledPlural else strings.infoDisabledPlural}",
-    )
-    appendLine("${strings.infoAppDebuggable}: ${if (info.appDebuggable) strings.infoYes else strings.infoNo}")
-    root?.let {
-        appendLine("${strings.infoRoot}: ${if (it.isRooted) strings.infoYes else strings.infoNo}")
-        appendLine("${strings.infoRootDetails}: ${it.details}")
-    }
-    appendLine("${strings.infoImei}: $imei")
-    appendLine("${strings.infoSerial}: $serial")
-    if (!info.systemPropDump.isNullOrBlank()) {
-        appendLine()
-        appendLine("${strings.infoSystemPropertiesSource}: ${info.systemPropSource ?: strings.notAvailable}")
-        appendLine("${strings.infoSystemPropertiesDump}:")
-        appendLine(info.systemPropDump)
-    }
-}
 
 @Composable
 fun InfoScreen(

@@ -441,13 +441,43 @@ class ScreenUiStrings(private val language: String) {
     val riskCritical get() = text("CRITICO", "CRITICAL", "KRITISCH", "CRÍTICO", "CRITIQUE")
     val riskHigh get() = text("ALTO", "HIGH", "HOCH", "ALTO", "ÉLEVÉ")
     val riskMedium get() = text("MEDIO", "MEDIUM", "MITTEL", "MEDIO", "MOYEN")
-    val appsLoaded get() = text("Caricate %d app installate", "%d installed apps loaded", "%d installierte Apps geladen", "%d apps instaladas cargadas", "%d applications installées chargées")
-    val loadingInstalledApps get() = text("Caricamento app installate", "Loading installed apps", "Installierte Apps werden geladen", "Cargando apps instaladas", "Chargement des applications installées")
+    val appsLoaded get() = text(
+        "Caricate %d app installate",
+        "%d installed apps loaded",
+        "%d installierte Apps geladen",
+        "%d apps instaladas cargadas",
+        "%d applications installées chargées",
+    )
+    val loadingInstalledApps get() = text(
+        "Caricamento app installate",
+        "Loading installed apps",
+        "Installierte Apps werden geladen",
+        "Cargando apps instaladas",
+        "Chargement des applications installées",
+    )
     val exportApk get() = text("Export APK", "APK export", "APK-Export", "Exportación APK", "Export APK")
-    val exportApps get() = text("Export lista app", "App list export", "Export der App-Liste", "Exportación de lista de apps", "Export de la liste des applications")
-    val shareApps get() = text("Share lista app", "Share app list", "App-Liste teilen", "Compartir lista de apps", "Partager la liste des applications")
+    val exportApps get() = text(
+        "Export lista app",
+        "App list export",
+        "Export der App-Liste",
+        "Exportación de lista de apps",
+        "Export de la liste des applications",
+    )
+    val shareApps get() = text(
+        "Share lista app",
+        "Share app list",
+        "App-Liste teilen",
+        "Compartir lista de apps",
+        "Partager la liste des applications",
+    )
     val shareApk get() = text("Share APK", "Share APK", "APK teilen", "Compartir APK", "Partager l’APK")
-    val saveSettingFailed get() = text("Impossibile salvare l'impostazione", "Unable to save the setting", "Einstellung konnte nicht gespeichert werden", "No se pudo guardar el ajuste", "Impossible d’enregistrer le réglage")
+    val saveSettingFailed get() = text(
+        "Impossibile salvare l'impostazione",
+        "Unable to save the setting",
+        "Einstellung konnte nicht gespeichert werden",
+        "No se pudo guardar el ajuste",
+        "Impossible d’enregistrer le réglage",
+    )
 
     companion object {
         fun from(strings: Strings): ScreenUiStrings = ScreenUiStrings(strings.activityUi.languageCode)

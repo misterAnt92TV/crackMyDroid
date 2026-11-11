@@ -13,8 +13,8 @@ import com.crackmydroid.shared.presentation.LocalizedBaseViewModel
 import com.crackmydroid.shared.util.runSuspendCatching
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -44,16 +44,30 @@ class PermissionsViewModel(
 
     override fun onEvent(event: PermissionsEvent) = when (event) {
         is PermissionsEvent.Refresh -> refresh()
+
         is PermissionsEvent.FilterChanged -> setFilter(event.value, event.trackUsage)
+
         is PermissionsEvent.RiskFilterChanged -> setShowOnlyRisky(event.enabled)
+
         is PermissionsEvent.RiskFilterToggled -> toggleShowOnlyRisky()
+
         is PermissionsEvent.ErrorDismissed -> clearError()
+
         is PermissionsEvent.ExportRequested -> export()
+
         is PermissionsEvent.FavoriteToggled -> toggleFavorite(event.packageName)
-        is PermissionsEvent.ReportShared -> shareSingle(event.packageName, event.contentOverride ?: _state.value.reportPreviewContent)
+
+        is PermissionsEvent.ReportShared -> shareSingle(
+            event.packageName,
+            event.contentOverride ?: _state.value.reportPreviewContent,
+        )
+
         is PermissionsEvent.ReportPreviewRequested -> requestReportPreview(event.packageName)
+
         is PermissionsEvent.ReportPreviewDismissed -> dismissReportPreview()
+
         is PermissionsEvent.AutoRiskScanStarted -> startAutoRiskScan()
+
         is PermissionsEvent.AutoRiskScanCancelled -> cancelAutoRiskScan()
     }
     override fun onLanguageChanged() {
@@ -225,15 +239,6 @@ class PermissionsViewModel(
                 }
                 .onFailure { error -> _state.update { it.copy(error = error.message) } }
         }
-    }
-
-    private fun sharePreview(packageName: String) {
-        val content = _state.value.reportPreviewContent
-        if (content != null) {
-            launchTask { _effects.emit(PermissionsEffect.CopyToClipboard(content)) }
-        }
-        shareSingle(packageName, content)
-        dismissReportPreview()
     }
 
     private fun requestReportPreview(packageName: String) {

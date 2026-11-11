@@ -4,12 +4,12 @@ import com.crackmydroid.shared.domain.model.PermissionFindingKind
 import com.crackmydroid.shared.domain.model.PermissionRiskLevel
 import com.crackmydroid.shared.domain.model.app.AppPermissionEntry
 import com.crackmydroid.shared.domain.usecase.UseCaseTestDispatchers
-import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import kotlinx.coroutines.test.runTest
 
 class AnalyzePermissionRisksUseCaseTest {
 
@@ -77,8 +77,13 @@ class AnalyzePermissionRisksUseCaseTest {
     fun `permission families receive their expected severity weight and counts`() = runTest(dispatchers.default) {
         val families = mapOf(
             PermissionRiskLevel.Critical to listOf(
-                "BIND_ACCESSIBILITY_SERVICE", "SYSTEM_ALERT_WINDOW", "SEND_SMS", "READ_SMS",
-                "RECEIVE_SMS", "RECEIVE_MMS", "RECEIVE_WAP_PUSH",
+                "BIND_ACCESSIBILITY_SERVICE",
+                "SYSTEM_ALERT_WINDOW",
+                "SEND_SMS",
+                "READ_SMS",
+                "RECEIVE_SMS",
+                "RECEIVE_MMS",
+                "RECEIVE_WAP_PUSH",
             ),
             PermissionRiskLevel.High to listOf(
                 "REQUEST_INSTALL_PACKAGES", "MANAGE_EXTERNAL_STORAGE", "QUERY_ALL_PACKAGES",
@@ -87,8 +92,14 @@ class AnalyzePermissionRisksUseCaseTest {
                 "ACCESS_BACKGROUND_LOCATION", "ACCESS_FINE_LOCATION", "RECORD_AUDIO", "CAMERA",
             ),
             PermissionRiskLevel.Medium to listOf(
-                "READ_EXTERNAL_STORAGE", "WRITE_EXTERNAL_STORAGE", "READ_MEDIA_IMAGES",
-                "READ_CALENDAR", "WRITE_CALENDAR", "BODY_SENSORS", "USE_BIOMETRIC", "USE_FINGERPRINT",
+                "READ_EXTERNAL_STORAGE",
+                "WRITE_EXTERNAL_STORAGE",
+                "READ_MEDIA_IMAGES",
+                "READ_CALENDAR",
+                "WRITE_CALENDAR",
+                "BODY_SENSORS",
+                "USE_BIOMETRIC",
+                "USE_FINGERPRINT",
             ),
         )
         for ((level, tokens) in families) {
@@ -171,20 +182,27 @@ class AnalyzePermissionRisksUseCaseTest {
 
     private fun expectedKind(token: String): PermissionFindingKind = when (token) {
         "BIND_ACCESSIBILITY_SERVICE" -> PermissionFindingKind.ACCESSIBILITY_SERVICE
+
         "SYSTEM_ALERT_WINDOW" -> PermissionFindingKind.OVERLAY_ACCESS
+
         "SEND_SMS", "READ_SMS", "RECEIVE_SMS", "RECEIVE_MMS", "RECEIVE_WAP_PUSH" ->
             PermissionFindingKind.SMS_MMS_ACCESS
 
         "REQUEST_INSTALL_PACKAGES" -> PermissionFindingKind.APK_INSTALLATION
+
         "MANAGE_EXTERNAL_STORAGE" -> PermissionFindingKind.BROAD_STORAGE_ACCESS
+
         "QUERY_ALL_PACKAGES" -> PermissionFindingKind.INSTALLED_APP_INVENTORY
+
         "READ_CALL_LOG", "WRITE_CALL_LOG", "PROCESS_OUTGOING_CALLS", "READ_CONTACTS",
         "WRITE_CONTACTS", "READ_PHONE_STATE", "CALL_PHONE", "ANSWER_PHONE_CALLS",
-            ->
+        ->
             PermissionFindingKind.PHONE_AND_CONTACTS_ACCESS
 
         "ACCESS_BACKGROUND_LOCATION", "ACCESS_FINE_LOCATION" -> PermissionFindingKind.LOCATION_ACCESS
+
         "RECORD_AUDIO", "CAMERA" -> PermissionFindingKind.MICROPHONE_CAMERA_ACCESS
+
         else -> PermissionFindingKind.SENSITIVE_DATA_ACCESS
     }
 }

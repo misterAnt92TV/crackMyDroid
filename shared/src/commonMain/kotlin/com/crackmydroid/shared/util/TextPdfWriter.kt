@@ -29,7 +29,7 @@ internal object TextPdfWriter {
         pages.indices.forEach { index ->
             objects[pageIds[index] - 1] =
                 "<< /Type /Page /Parent $pagesId 0 R /MediaBox [0 0 $PAGE_WIDTH $PAGE_HEIGHT] " +
-                    "/Resources << /Font << /F1 $fontId 0 R >> >> /Contents ${contentIds[index]} 0 R >>"
+                "/Resources << /Font << /F1 $fontId 0 R >> >> /Contents ${contentIds[index]} 0 R >>"
         }
 
         val pdf = StringBuilder("%PDF-1.4\n")

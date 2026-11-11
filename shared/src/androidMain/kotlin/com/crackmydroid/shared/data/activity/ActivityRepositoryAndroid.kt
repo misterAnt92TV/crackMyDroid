@@ -38,7 +38,13 @@ class ActivityRepositoryAndroid(private val context: Context, private val db: Ca
         if (cached.isNotEmpty()) return@withContext cached
 
         val pm = context.packageManager
-        val packages = pm.getInstalledPackages(PackageManager.GET_ACTIVITIES)
+        val packages = runCatching {
+            pm.getInstalledPackages(PackageManager.GET_ACTIVITIES)
+        }.getOrElse {
+            pm.getInstalledPackages(0).mapNotNull { pkg ->
+                runCatching { pm.getPackageInfo(pkg.packageName, PackageManager.GET_ACTIVITIES) }.getOrNull()
+            }
+        }
         val fresh = packages.flatMap { pkgInfo ->
             val activities = pkgInfo.activities ?: emptyArray()
             val appLabel = pkgInfo.applicationInfo
@@ -90,11 +96,16 @@ class ActivityRepositoryAndroid(private val context: Context, private val db: Ca
 
     override suspend fun getComponents(): List<AppComponent> = withContext(Dispatchers.IO) {
         val pm = context.packageManager
-        val packages = pm.getInstalledPackages(
-            PackageManager.GET_SERVICES or
-                PackageManager.GET_RECEIVERS or
-                PackageManager.GET_PROVIDERS,
-        )
+        val componentFlags = PackageManager.GET_SERVICES or
+            PackageManager.GET_RECEIVERS or
+            PackageManager.GET_PROVIDERS
+        val packages = runCatching {
+            pm.getInstalledPackages(componentFlags)
+        }.getOrElse {
+            pm.getInstalledPackages(0).mapNotNull { pkg ->
+                runCatching { pm.getPackageInfo(pkg.packageName, componentFlags) }.getOrNull()
+            }
+        }
 
         packages.flatMap { pkgInfo ->
             val appLabel = pkgInfo.applicationInfo

@@ -6,13 +6,13 @@ import com.crackmydroid.shared.domain.model.DeviceSessionState
 import com.crackmydroid.shared.domain.model.shell.ShellCommandResult
 import com.crackmydroid.shared.domain.repository.AdbBridge
 import com.crackmydroid.shared.domain.repository.DeviceSessionController
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.test.runTest
 
 class ShellCommandRepositoryDesktopTest {
     @Test
@@ -69,11 +69,8 @@ private class FakeShellAdbBridge : AdbBridge {
         configuredPath: String?,
     ): Result<String> = Result.success(localPath)
 
-    override suspend fun logcat(
-        serial: String,
-        configuredPath: String?,
-        lines: Int,
-    ): Result<List<String>> = Result.success(emptyList())
+    override suspend fun logcat(serial: String, configuredPath: String?, lines: Int): Result<List<String>> =
+        Result.success(emptyList())
 }
 
 private class FakeShellSessionController : DeviceSessionController {
@@ -89,14 +86,10 @@ private class FakeShellSessionController : DeviceSessionController {
     override suspend fun refreshDevices(adbPathOverride: String?): Result<List<ConnectedDevice>> =
         Result.success(emptyList())
 
-    override suspend fun selectDevice(
-        device: ConnectedDevice,
-        adbPathOverride: String?,
-    ): Result<Unit> =
+    override suspend fun selectDevice(device: ConnectedDevice, adbPathOverride: String?): Result<Unit> =
         Result.success(Unit)
 
     override suspend fun clearSelection() = Unit
 
-    override suspend fun rescanSelectedDevice(): Result<Unit> =
-        Result.success(Unit)
+    override suspend fun rescanSelectedDevice(): Result<Unit> = Result.success(Unit)
 }

@@ -51,7 +51,7 @@ enum class ReportLabel {
     PERMISSIONS,
     NO_SENSITIVE_BEHAVIOR,
     NO_RISKY_PERMISSIONS,
-    NO_PERMISSION_DECLARED
+    NO_PERMISSION_DECLARED,
 }
 
 interface UseCaseReportText {

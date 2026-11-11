@@ -51,9 +51,9 @@ import com.crackmydroid.shared.presentation.components.ScrollToTopButton
 import com.crackmydroid.shared.presentation.components.SectionHeader
 import com.crackmydroid.shared.presentation.components.card.CardBlock
 import com.crackmydroid.shared.presentation.components.text.AppText
+import com.crackmydroid.shared.ui.settings.SettingsEvent
 import com.crackmydroid.shared.ui.settings.SettingsState
 import com.crackmydroid.shared.ui.settings.SettingsViewModel
-import com.crackmydroid.shared.ui.settings.SettingsEvent
 import com.crackmydroid.shared.ui.settings.model.SettingsActions
 import com.crackmydroid.shared.ui.settings.model.SettingsAppInfo
 import com.crackmydroid.shared.util.appPackageName
@@ -335,7 +335,6 @@ internal fun SettingsContent(
                 Spacer(modifier = Modifier.height(8.dp))
             }
 
-
             state.error?.let { err ->
                 AppText(err, color = MaterialTheme.colorScheme.error)
             }
@@ -376,12 +375,7 @@ private fun ExportFormatRow(label: String, selected: Boolean, onClick: () -> Uni
 }
 
 @Composable
-private fun SwitchRow(
-    label: String,
-    checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit,
-    subtitle: String? = null,
-) {
+private fun SwitchRow(label: String, checked: Boolean, onCheckedChange: (Boolean) -> Unit, subtitle: String? = null) {
     val accessibilityPrefs = LocalAccessibilityPrefs.current
     Row(
         modifier = Modifier

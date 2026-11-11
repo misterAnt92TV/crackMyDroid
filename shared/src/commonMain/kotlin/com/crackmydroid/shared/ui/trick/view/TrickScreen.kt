@@ -61,9 +61,9 @@ import com.crackmydroid.shared.presentation.components.text.AppText
 import com.crackmydroid.shared.presentation.preview.AppPreviewEnvironment
 import com.crackmydroid.shared.presentation.preview.AppScreenPreviews
 import com.crackmydroid.shared.ui.screens.screenContentPadding
+import com.crackmydroid.shared.ui.trick.TrickEvent
 import com.crackmydroid.shared.ui.trick.TrickState
 import com.crackmydroid.shared.ui.trick.TrickViewModel
-import com.crackmydroid.shared.ui.trick.TrickEvent
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 

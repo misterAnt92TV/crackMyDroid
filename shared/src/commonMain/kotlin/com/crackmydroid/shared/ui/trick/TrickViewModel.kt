@@ -110,7 +110,9 @@ class TrickViewModel(
     private fun notifyBusyInteraction(requestedCommand: ShellCommand) {
         val active = _state.value.runningCommand?.title ?: uiStrings.anotherCommand
         _state.update {
-            it.copy(interactionHint = uiStrings.commandNotStartedUntilCurrentEnds.format(requestedCommand.title, active))
+            it.copy(
+                interactionHint = uiStrings.commandNotStartedUntilCurrentEnds.format(requestedCommand.title, active),
+            )
         }
     }
 

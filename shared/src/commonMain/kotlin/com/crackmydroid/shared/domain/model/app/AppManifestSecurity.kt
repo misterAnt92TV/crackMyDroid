@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 enum class AppComponentType {
     SERVICE,
     RECEIVER,
-    PROVIDER
+    PROVIDER,
 }
 
 @Serializable
@@ -41,15 +41,11 @@ enum class ManifestRiskLevel {
     Low,
     Medium,
     High,
-    Critical
+    Critical,
 }
 
 @Serializable
-data class ManifestSecurityFinding(
-    val level: ManifestRiskLevel,
-    val title: String,
-    val detail: String,
-)
+data class ManifestSecurityFinding(val level: ManifestRiskLevel, val title: String, val detail: String)
 
 @Serializable
 data class ManifestSecurityReport(
@@ -67,7 +63,8 @@ object ManifestSecurityAnalyzer {
             findings += ManifestSecurityFinding(
                 level = ManifestRiskLevel.Critical,
                 title = "App debuggable in produzione",
-                detail = "android:debuggable=true consente di attaccare un debugger, dumpare memoria ed eseguire codice nel processo dell'app.",
+                detail = "android:debuggable=true consente di attaccare un debugger, " +
+                    "dumpare memoria ed eseguire codice nel processo dell'app.",
             )
         }
 
@@ -84,13 +81,15 @@ object ManifestSecurityAnalyzer {
                 findings += ManifestSecurityFinding(
                     level = ManifestRiskLevel.Medium,
                     title = "Backup abilitato con BackupAgent custom",
-                    detail = "allowBackup=true con BackupAgent dedicato: verifica comunque quali dati vengono incluso nel backup.",
+                    detail = "allowBackup=true con BackupAgent dedicato: " +
+                        "verifica comunque quali dati vengono incluso nel backup.",
                 )
             } else {
                 findings += ManifestSecurityFinding(
                     level = ManifestRiskLevel.High,
                     title = "Backup dati abilitato (allowBackup)",
-                    detail = "allowBackup=true senza BackupAgent custom: dati privati estraibili via 'adb backup' anche senza root.",
+                    detail = "allowBackup=true senza BackupAgent custom: " +
+                        "dati privati estraibili via 'adb backup' anche senza root.",
                 )
             }
         }
@@ -107,7 +106,8 @@ object ManifestSecurityAnalyzer {
             findings += ManifestSecurityFinding(
                 level = ManifestRiskLevel.High,
                 title = "Firmata con certificato di debug",
-                detail = "L'APK risulta firmato con il certificato di debug standard: build non da rilasciare in produzione.",
+                detail = "L'APK risulta firmato con il certificato di debug standard: " +
+                    "build non da rilasciare in produzione.",
             )
         }
 

@@ -4,7 +4,6 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import com.crackmydroid.shared.i18n.pentest.PenTestUiStrings
 import com.crackmydroid.shared.i18n.pentest.penTestUiStringsForLanguage
 
-
 data class Strings(
     val navActivities: String,
     val navRoot: String,
@@ -123,17 +122,14 @@ data class Strings(
     val infoRamTotal: String,
     val infoRamFree: String,
     val infoRoot: String,
-    val infoRootDetails: String,
     val infoSystemProperties: String,
     val infoSystemPropertiesSource: String,
-    val infoSystemPropertiesDump: String,
     val infoEnabled: String,
     val infoDisabled: String,
     val infoEnabledPlural: String,
     val infoDisabledPlural: String,
     val infoYes: String,
     val infoNo: String,
-    val infoReportTitle: String,
     val homeDescription: String,
     val homeLatestOperations: String,
     val homeLatestOperationsEmpty: String,
@@ -152,10 +148,8 @@ data class Strings(
     val pentestIntro: String,
     val pentestSelectApp: String,
     val pentestNoApps: String,
-    val pentestQueued: String,
     val pentestNeedTarget: String,
     val pentestRootTag: String,
-    val pentestResultOk: String,
     val pentestResultError: String,
     val pentestReportTitle: String,
     val pentestExport: String,
@@ -250,18 +244,18 @@ data class Strings(
     val penTestQueuedContentDescription: String = "Queued",
     val penTestPendingContentDescription: String = "Pending",
     val penTestProgressSummary: String = "%1${'$'}d successful, %2${'$'}d errors, %3${'$'}d queued",
+    val appSubtitle: String = "Android security analysis and testing toolkit",
+    val appVersionLabel: String = "Version %s",
 ) {
     val app: AppStrings
         get() = toAppStrings()
 }
 val LocalStrings = staticCompositionLocalOf { stringsFor("en") }
 
-fun stringsFor(lang: String): Strings {
-    return when (lang.lowercase().take(2)) {
-        "it" -> itStrings
-        "de" -> deStrings
-        "es" -> esStrings
-        "fr" -> frStrings
-        else -> enStrings
-    }
+fun stringsFor(lang: String): Strings = when (lang.lowercase().take(2)) {
+    "it" -> itStrings
+    "de" -> deStrings
+    "es" -> esStrings
+    "fr" -> frStrings
+    else -> enStrings
 }

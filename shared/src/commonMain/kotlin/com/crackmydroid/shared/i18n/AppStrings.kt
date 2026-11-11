@@ -1,8 +1,6 @@
 package com.crackmydroid.shared.i18n
 
-class AppStrings(
-    val desktopAdb: DesktopAdbStrings,
-)
+class AppStrings(val desktopAdb: DesktopAdbStrings)
 
 data class DesktopAdbStrings(
     val pickerTitle: String,
@@ -30,31 +28,30 @@ data class DesktopAdbStrings(
     val snapshotSource: String,
 )
 
-fun Strings.toAppStrings(): AppStrings =
-    AppStrings(
-        desktopAdb = DesktopAdbStrings(
-            pickerTitle = desktopAdbPickerTitle,
-            pickerDescription = desktopAdbPickerDescription,
-            pathLabel = desktopAdbPathLabel,
-            pathConfigured = desktopAdbPathConfigured,
-            detectDevices = desktopDetectDevices,
-            settings = desktopAdbSettings,
-            noDevices = desktopNoDevices,
-            serialLabel = desktopSerialLabel,
-            stateLabel = desktopStateLabel,
-            productLabel = desktopProductLabel,
-            deviceLabel = desktopDeviceLabel,
-            transportLabel = desktopTransportLabel,
-            deviceOffline = desktopDeviceOffline,
-            deviceUnauthorized = desktopDeviceUnauthorized,
-            deviceNotReady = desktopDeviceNotReady,
-            changeDevice = desktopChangeDevice,
-            rescan = desktopRescan,
-            dataSourceLabel = desktopDataSourceLabel,
-            settingsDescription = desktopAdbSettingsDescription,
-            save = desktopSave,
-            cancel = desktopCancel,
-            adbSource = desktopAdbSource,
-            snapshotSource = desktopSnapshotSource,
-        ),
-    )
+fun Strings.toAppStrings(): AppStrings = AppStrings(
+    desktopAdb = DesktopAdbStrings(
+        pickerTitle = desktopAdbPickerTitle,
+        pickerDescription = desktopAdbPickerDescription,
+        pathLabel = desktopAdbPathLabel,
+        pathConfigured = desktopAdbPathConfigured,
+        detectDevices = desktopDetectDevices,
+        settings = desktopAdbSettings,
+        noDevices = desktopNoDevices,
+        serialLabel = desktopSerialLabel,
+        stateLabel = desktopStateLabel,
+        productLabel = desktopProductLabel,
+        deviceLabel = desktopDeviceLabel,
+        transportLabel = desktopTransportLabel,
+        deviceOffline = desktopDeviceOffline,
+        deviceUnauthorized = desktopDeviceUnauthorized,
+        deviceNotReady = desktopDeviceNotReady,
+        changeDevice = desktopChangeDevice,
+        rescan = desktopRescan,
+        dataSourceLabel = desktopDataSourceLabel,
+        settingsDescription = desktopAdbSettingsDescription,
+        save = desktopSave,
+        cancel = desktopCancel,
+        adbSource = desktopAdbSource,
+        snapshotSource = desktopSnapshotSource,
+    ),
+)

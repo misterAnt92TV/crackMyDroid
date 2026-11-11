@@ -5,7 +5,9 @@ import android.content.Context
 import android.content.Intent
 import com.crackmydroid.database.CacheDatabase
 import com.crackmydroid.shared.domain.repository.CacheMaintenance
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.core.context.GlobalContext
 
@@ -15,14 +17,13 @@ class PackageChangeReceiver : BroadcastReceiver() {
             Intent.ACTION_PACKAGE_ADDED,
             Intent.ACTION_PACKAGE_REPLACED,
             Intent.ACTION_PACKAGE_REMOVED,
-                -> {
-                goAsync().apply {
+            -> {
+                val pendingResult = goAsync()
+                CoroutineScope(Dispatchers.IO).launch {
                     try {
-                        kotlinx.coroutines.runBlocking {
-                            GlobalContext.get().get<CacheMaintenance>().clearAllCaches()
-                        }
+                        GlobalContext.get().get<CacheMaintenance>().clearAllCaches()
                     } finally {
-                        finish()
+                        pendingResult.finish()
                     }
                 }
             }
@@ -30,9 +31,7 @@ class PackageChangeReceiver : BroadcastReceiver() {
     }
 }
 
-class CacheMaintenanceRepositoryAndroid(
-    private val db: CacheDatabase,
-) : CacheMaintenance {
+class CacheMaintenanceRepositoryAndroid(private val db: CacheDatabase) : CacheMaintenance {
     override suspend fun clearAllCaches() = withContext(Dispatchers.IO) {
         db.cacheDatabaseQueries.transaction {
             db.cacheDatabaseQueries.clearActivities()

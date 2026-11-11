@@ -1,28 +1,3 @@
 <?xml version="1.0" encoding="utf-8"?>
 <baseline version="1.0">
-    <file name="src/main/java/com/crackmydroid/android/PackageInventoryAccess.kt">
-        <error column="16" line="7" source="standard:trailing-comma-on-declaration-site" />
-        <error column="5" line="15" source="standard:function-signature" />
-        <error column="5" line="16" source="standard:function-signature" />
-        <error column="47" line="16" source="standard:function-signature" />
-        <error column="47" line="16" source="standard:trailing-comma-on-declaration-site" />
-        <error column="29" line="17" source="standard:function-signature" />
-    </file>
-    <file name="src/main/java/com/crackmydroid/android/SnapshotWork.kt">
-        <error column="20" line="31" source="standard:trailing-comma-on-call-site" />
-        <error column="5" line="42" source="standard:class-signature" />
-        <error column="5" line="43" source="standard:class-signature" />
-        <error column="39" line="43" source="standard:class-signature" />
-        <error column="39" line="43" source="standard:trailing-comma-on-declaration-site" />
-        <error column="5" line="44" source="standard:class-signature" />
-        <error column="12" line="59" source="standard:trailing-comma-on-declaration-site" />
-        <error column="92" line="62" source="standard:function-signature" />
-    </file>
-    <file name="src/main/java/com/crackmydroid/android/SystemMotionReduction.kt">
-        <error column="21" line="35" source="standard:trailing-comma-on-call-site" />
-    </file>
-    <file name="src/test/java/com/crackmydroid/android/SnapshotWorkTest.kt">
-        <error column="85" line="28" source="standard:trailing-comma-on-call-site" />
-        <error column="64" line="36" source="standard:trailing-comma-on-call-site" />
-    </file>
 </baseline>

@@ -4,14 +4,10 @@ enum class ActivityIntentRiskLevel {
     Low,
     Medium,
     High,
-    Critical
+    Critical,
 }
 
-data class ActivityIntentRiskFinding(
-    val level: ActivityIntentRiskLevel,
-    val title: String,
-    val detail: String,
-)
+data class ActivityIntentRiskFinding(val level: ActivityIntentRiskLevel, val title: String, val detail: String)
 
 data class ActivityIntentRiskReport(
     val entry: ActivityEntry,
@@ -75,7 +71,8 @@ object ActivityIntentRiskAnalyzer {
                     ActivityIntentRiskFinding(
                         level = ActivityIntentRiskLevel.High,
                         title = "Intent di condivisione",
-                        detail = "L'activity accetta payload da share/send: verificare input injection ed esposizione dati.",
+                        detail = "L'activity accetta payload da share/send: " +
+                            "verificare input injection ed esposizione dati.",
                     ),
                 )
 
@@ -90,7 +87,9 @@ object ActivityIntentRiskAnalyzer {
                             else -> ActivityIntentRiskLevel.High
                         },
                         title = "Entry-point deeplink/view",
-                        detail = "L'activity espone un endpoint VIEW su schema ${scheme.ifBlank { "non specificato" }}.",
+                        detail = "L'activity espone un endpoint VIEW su schema ${scheme.ifBlank {
+                            "non specificato"
+                        }}.",
                     ),
                 )
 
@@ -103,7 +102,8 @@ object ActivityIntentRiskAnalyzer {
                     ActivityIntentRiskFinding(
                         level = ActivityIntentRiskLevel.High,
                         title = "Intent orientato a input esterno",
-                        detail = "Accetta input contestuale da altre app: utile per test injection/manipolazione contenuti.",
+                        detail = "Accetta input contestuale da altre app: " +
+                            "utile per test injection/manipolazione contenuti.",
                     ),
                 )
         }
@@ -127,7 +127,8 @@ object ActivityIntentRiskAnalyzer {
                     ActivityIntentRiskFinding(
                         level = ActivityIntentRiskLevel.High,
                         title = "Intent URI annidato",
-                        detail = "Supporta intent://: verificare sanitizzazione dei parametri e chaining tra componenti.",
+                        detail = "Supporta intent://: " +
+                            "verificare sanitizzazione dei parametri e chaining tra componenti.",
                     ),
                 )
 
@@ -250,9 +251,8 @@ object ActivityIntentRiskAnalyzer {
         ActivityIntentRiskLevel.Critical -> 5
     }
 
-    private fun ActivityEntry.hasLaunchMetadata(): Boolean =
-        !launchContextHint.isNullOrBlank() ||
-            !launchIntentAction.isNullOrBlank() ||
-            !launchIntentData.isNullOrBlank() ||
-            !launchIntentMimeType.isNullOrBlank()
+    private fun ActivityEntry.hasLaunchMetadata(): Boolean = !launchContextHint.isNullOrBlank() ||
+        !launchIntentAction.isNullOrBlank() ||
+        !launchIntentData.isNullOrBlank() ||
+        !launchIntentMimeType.isNullOrBlank()
 }

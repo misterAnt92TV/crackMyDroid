@@ -10,7 +10,12 @@ sealed class ActivityListEvent : UiEvent() {
     class GuidedLaunchOpened(val entry: ActivityEntry) : ActivityListEvent()
     class GuidedLaunchDismissed : ActivityListEvent()
     class GuidedLaunchConfirmed(val action: String?, val dataUri: String?, val mimeType: String?) : ActivityListEvent()
-    class ActivityLaunchedWithIntent(val entry: ActivityEntry, val action: String?, val dataUri: String?, val mimeType: String?) : ActivityListEvent()
+    class ActivityLaunchedWithIntent(
+        val entry: ActivityEntry,
+        val action: String?,
+        val dataUri: String?,
+        val mimeType: String?,
+    ) : ActivityListEvent()
     class ErrorDismissed : ActivityListEvent()
     class FavoriteToggled(val entry: ActivityEntry) : ActivityListEvent()
     class PackageFavoriteToggled(val packageName: String) : ActivityListEvent()

@@ -63,9 +63,9 @@ import com.crackmydroid.shared.presentation.components.card.ExportDetailsCard
 import com.crackmydroid.shared.presentation.components.text.AppText
 import com.crackmydroid.shared.presentation.preview.AppPreviewEnvironment
 import com.crackmydroid.shared.presentation.preview.AppScreenPreviews
+import com.crackmydroid.shared.ui.installedapps.InstalledAppsEvent
 import com.crackmydroid.shared.ui.installedapps.InstalledAppsState
 import com.crackmydroid.shared.ui.installedapps.InstalledAppsViewModel
-import com.crackmydroid.shared.ui.installedapps.InstalledAppsEvent
 import com.crackmydroid.shared.ui.screens.screenContentPadding
 import kotlinx.coroutines.launch
 
@@ -88,9 +88,13 @@ fun InstalledAppsScreen(
         onMenu = onMenu,
         onRefresh = { viewModel.handleEvent(InstalledAppsEvent.Refresh()) },
         onShareAll = { viewModel.handleEvent(InstalledAppsEvent.AllShareRequested()) },
-        onFilterChange = { value, trackUsage -> viewModel.handleEvent(InstalledAppsEvent.FilterChanged(value, trackUsage)) },
+        onFilterChange = { value, trackUsage ->
+            viewModel.handleEvent(InstalledAppsEvent.FilterChanged(value, trackUsage))
+        },
         onToggleFavorite = { viewModel.handleEvent(InstalledAppsEvent.FavoriteToggled(it)) },
-        onShare = { packageName, bluetoothOnly -> viewModel.handleEvent(InstalledAppsEvent.ApkShareRequested(packageName, bluetoothOnly)) },
+        onShare = { packageName, bluetoothOnly ->
+            viewModel.handleEvent(InstalledAppsEvent.ApkShareRequested(packageName, bluetoothOnly))
+        },
         onExport = { viewModel.handleEvent(InstalledAppsEvent.ApkExportRequested(it)) },
         onClearError = { viewModel.handleEvent(InstalledAppsEvent.ErrorDismissed()) },
     )

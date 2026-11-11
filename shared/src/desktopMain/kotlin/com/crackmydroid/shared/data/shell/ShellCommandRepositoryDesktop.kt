@@ -15,7 +15,8 @@ class ShellCommandRepositoryDesktop(
     adbBridge: AdbBridge,
     sessionController: DeviceSessionController,
     private val cache: DesktopScanCache,
-) : DesktopAdbRepositorySupport(adbBridge, sessionController), ShellCommandRepository {
+) : DesktopAdbRepositorySupport(adbBridge, sessionController),
+    ShellCommandRepository {
     private val commands = listOf(
         ShellCommand(
             "Riavvia",
@@ -59,39 +60,39 @@ class ShellCommandRepositoryDesktop(
             if (!command.requiresRoot) return@map command
             command.copy(
                 supported = false,
-                unsupportedReason = "Il device selezionato non espone root via su, quindi questo comando non e disponibile in modalita adb-only.",
+                unsupportedReason = "Il device selezionato non espone root via su, " +
+                    "quindi questo comando non e disponibile in modalita adb-only.",
             )
         }
     }
 
-    override suspend fun execute(command: ShellCommand): ShellCommandResult =
-        withContext(Dispatchers.IO) {
-            if (!command.supported) {
-                return@withContext ShellCommandResult(
-                    success = false,
-                    stdout = "",
-                    stderr = command.unsupportedReason
-                        ?: "Comando non supportato sul device selezionato",
-                    code = 126,
-                )
-            }
-            runSuspendCatching {
-                val stdout = shell(command.command, asRoot = command.requiresRoot)
-                ShellCommandResult(
-                    success = true,
-                    stdout = stdout,
-                    stderr = "",
-                    code = 0,
-                )
-            }.getOrElse { error ->
-                ShellCommandResult(
-                    success = false,
-                    stdout = "",
-                    stderr = error.message ?: "Errore esecuzione comando",
-                    code = -1,
-                )
-            }
+    override suspend fun execute(command: ShellCommand): ShellCommandResult = withContext(Dispatchers.IO) {
+        if (!command.supported) {
+            return@withContext ShellCommandResult(
+                success = false,
+                stdout = "",
+                stderr = command.unsupportedReason
+                    ?: "Comando non supportato sul device selezionato",
+                code = 126,
+            )
         }
+        runSuspendCatching {
+            val stdout = shell(command.command, asRoot = command.requiresRoot)
+            ShellCommandResult(
+                success = true,
+                stdout = stdout,
+                stderr = "",
+                code = 0,
+            )
+        }.getOrElse { error ->
+            ShellCommandResult(
+                success = false,
+                stdout = "",
+                stderr = error.message ?: "Errore esecuzione comando",
+                code = -1,
+            )
+        }
+    }
 
     private suspend fun canUseRootShell(): Boolean {
         cache.rootShellAvailable?.let { return it }

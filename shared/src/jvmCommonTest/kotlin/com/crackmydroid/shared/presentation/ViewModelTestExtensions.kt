@@ -4,9 +4,9 @@ import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.test
 import com.crackmydroid.architecture.presentation.BaseViewModel
 import com.crackmydroid.architecture.presentation.model.UiEvent
+import kotlin.time.Duration
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlin.time.Duration
 
 /**
  * Asserts the emissions of a ViewModel's [StateFlow] after dispatching an [event] through [BaseViewModel.handleEvent].

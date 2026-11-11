@@ -105,14 +105,16 @@ fun AppAccordion(
                             overflow = textOverflow,
                         )
                     }
-                    if (actionsBelowHeader) meta?.let {
-                        AppText(
-                            it,
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.primary,
-                            maxLines = 2,
-                            overflow = textOverflow,
-                        )
+                    if (actionsBelowHeader) {
+                        meta?.let {
+                            AppText(
+                                it,
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.primary,
+                                maxLines = 2,
+                                overflow = textOverflow,
+                            )
+                        }
                     }
                 }
                 if (!actionsBelowHeader && meta != null) {
@@ -161,7 +163,8 @@ fun AppAccordion(
         } else {
             AnimatedVisibility(
                 visible = expanded,
-                enter = fadeIn(animationSpec = androidx.compose.animation.core.tween(220)) + slideInVertically { it / 8 },
+                enter =
+                    fadeIn(animationSpec = androidx.compose.animation.core.tween(220)) + slideInVertically { it / 8 },
                 exit = fadeOut(),
             ) { accordionContent() }
         }
@@ -203,5 +206,4 @@ private fun AppAccordionPreview() = ComponentPreviewContainer {
         actions = { AppText("⋮") },
         leading = { Icon(Icons.Filled.Info, contentDescription = null) },
     ) { AppText("Il dispositivo non espone backup, debug o permessi inattesi.") }
-
 }

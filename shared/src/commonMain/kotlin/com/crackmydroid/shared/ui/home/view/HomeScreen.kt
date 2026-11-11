@@ -39,9 +39,9 @@ import com.crackmydroid.shared.presentation.components.ScrollToTopButton
 import com.crackmydroid.shared.presentation.components.SectionHeader
 import com.crackmydroid.shared.presentation.components.card.AppCard
 import com.crackmydroid.shared.presentation.components.text.AppText
+import com.crackmydroid.shared.ui.home.HomeEvent
 import com.crackmydroid.shared.ui.home.HomeUiState
 import com.crackmydroid.shared.ui.home.HomeViewModel
-import com.crackmydroid.shared.ui.home.HomeEvent
 import com.crackmydroid.shared.ui.home.model.HomeUiStateMapper
 import com.crackmydroid.shared.ui.screens.screenContentPadding
 import kotlinx.coroutines.launch

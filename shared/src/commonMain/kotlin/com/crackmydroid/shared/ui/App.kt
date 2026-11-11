@@ -12,24 +12,29 @@ import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsTopHeight
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Menu
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
@@ -37,6 +42,8 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarDefaults
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationDrawerItem
+import androidx.compose.material3.NavigationRail
+import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDrawerState
@@ -157,12 +164,12 @@ fun CrackMyDroidApp(
                 scope.launch { drawerState.close() }
                 shellVm.handleEvent(AppShellEvent.ScreenSelected(target, settingsState.value.featureHintsEnabled))
             }
-            Box(modifier = Modifier.fillMaxSize()) {
+            BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+                val isWideScreen = maxWidth >= 720.dp
                 ModalNavigationDrawer(
                     drawerState = drawerState,
                     drawerContent = {
-                        ModalDrawerSheet(
-                        ) {
+                        ModalDrawerSheet {
                             Column(
                                 modifier = Modifier
                                     .fillMaxSize()
@@ -186,7 +193,7 @@ fun CrackMyDroidApp(
                                             color = MaterialTheme.colorScheme.onSurface,
                                         )
                                         AppText(
-                                            text = "Toolkit Android per test rapidi di sicurezza",
+                                            text = strings.appSubtitle,
                                             style = MaterialTheme.typography.bodySmall,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                                             maxLines = if (accessibilityPrefs.largeText) 3 else 2,
@@ -214,7 +221,7 @@ fun CrackMyDroidApp(
                                 }
                                 HorizontalDivider()
                                 AppText(
-                                    text = "Versione $androidAppVersionName",
+                                    text = strings.appVersionLabel.format(androidAppVersionName),
                                     style = MaterialTheme.typography.labelMedium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     modifier = Modifier
@@ -224,19 +231,40 @@ fun CrackMyDroidApp(
                         }
                     },
                 ) {
-                    Scaffold(
-                        modifier = Modifier.fillMaxSize(),
-                        contentWindowInsets = WindowInsets.safeDrawing,
-                        bottomBar = {
-                            NavigationBar(
-                                windowInsets = NavigationBarDefaults.windowInsets,
-                                tonalElevation = 3.dp,
+                    Row(modifier = Modifier.fillMaxSize()) {
+                        if (isWideScreen) {
+                            NavigationRail(
+                                modifier = Modifier.fillMaxHeight(),
+                                header = {
+                                    IconButton(
+                                        onClick = {
+                                            scope.launch {
+                                                if (drawerState.isOpen) drawerState.close() else drawerState.open()
+                                            }
+                                        },
+                                    ) {
+                                        Icon(Icons.Rounded.Menu, contentDescription = "Menu")
+                                    }
+                                },
                             ) {
-                                val itemIconSize = 20.dp
-                                bottomScreens.forEach { screen ->
-                                    NavigationBarItem(
+                                val itemIconSize = 22.dp
+                                val railScreens = listOf(
+                                    Screen.Home,
+                                    Screen.InstalledApps,
+                                    Screen.Pentest,
+                                    Screen.Permissions,
+                                    Screen.Activities,
+                                    Screen.Root,
+                                    Screen.Info,
+                                    Screen.Settings,
+                                )
+                                Spacer(Modifier.height(8.dp))
+                                railScreens.forEach { screen ->
+                                    NavigationRailItem(
                                         selected = shellState.selectedScreen == screen,
-                                        onClick = { shellVm.handleEvent(AppShellEvent.ScreenSelected(screen, false)) },
+                                        onClick = {
+                                            shellVm.handleEvent(AppShellEvent.ScreenSelected(screen, false))
+                                        },
                                         icon = {
                                             Icon(
                                                 screen.icon,
@@ -247,20 +275,58 @@ fun CrackMyDroidApp(
                                         label = {
                                             AppText(
                                                 screen.title(strings),
-                                                maxLines = if (accessibilityPrefs.largeText) 2 else 1,
+                                                maxLines = 1,
                                                 overflow = TextOverflow.Ellipsis,
                                             )
                                         },
-                                        alwaysShowLabel = true,
+                                        alwaysShowLabel = false,
                                     )
                                 }
                             }
-                        },
-                    ) { padding ->
+                        }
+                        Scaffold(
+                            modifier = Modifier.weight(1f),
+                            contentWindowInsets = WindowInsets.safeDrawing,
+                            bottomBar = {
+                                if (!isWideScreen) {
+                                    NavigationBar(
+                                        windowInsets = NavigationBarDefaults.windowInsets,
+                                        tonalElevation = 3.dp,
+                                    ) {
+                                        val itemIconSize = 20.dp
+                                        bottomScreens.forEach { screen ->
+                                            NavigationBarItem(
+                                                selected = shellState.selectedScreen == screen,
+                                                onClick = {
+                                                    shellVm.handleEvent(AppShellEvent.ScreenSelected(screen, false))
+                                                },
+                                                icon = {
+                                                    Icon(
+                                                        screen.icon,
+                                                        contentDescription = screen.title(strings),
+                                                        modifier = Modifier.size(itemIconSize),
+                                                    )
+                                                },
+                                                label = {
+                                                    AppText(
+                                                        screen.title(strings),
+                                                        maxLines = if (accessibilityPrefs.largeText) 2 else 1,
+                                                        overflow = TextOverflow.Ellipsis,
+                                                    )
+                                                },
+                                                alwaysShowLabel = true,
+                                            )
+                                        }
+                                    }
+                                }
+                            },
+                        ) { padding ->
                         val focusManager = LocalFocusManager.current
                         val adjustedPadding = padding
                         val openDrawer: () -> Unit = { scope.launch { drawerState.open() } }
-                        val backToHome: () -> Unit = { shellVm.handleEvent(AppShellEvent.ScreenSelected(Screen.Home, false)) }
+                        val backToHome: () -> Unit = {
+                            shellVm.handleEvent(AppShellEvent.ScreenSelected(Screen.Home, false))
+                        }
                         Column(
                             modifier = Modifier
                                 .fillMaxSize()
@@ -381,13 +447,16 @@ fun CrackMyDroidApp(
                                         padding = adjustedPadding,
                                         onHelp = onHelp,
                                         onMenu = openDrawer,
-                                        onNavigate = { target -> shellVm.handleEvent(AppShellEvent.ScreenSelected(target, false)) },
+                                        onNavigate = { target ->
+                                            shellVm.handleEvent(AppShellEvent.ScreenSelected(target, false))
+                                        },
                                     )
                                 }
                             }
                         }
                     }
                 }
+            }
                 Spacer(
                     modifier = Modifier
                         .align(Alignment.TopCenter)
@@ -404,7 +473,9 @@ fun CrackMyDroidApp(
                 title = { AppText(strings.introTitle) },
                 text = { AppText(strings.introBody) },
                 confirmButton = {
-                    androidx.compose.material3.Button(onClick = { shellVm.handleEvent(AppShellEvent.IntroDismissed()) }) {
+                    androidx.compose.material3.Button(onClick = {
+                        shellVm.handleEvent(AppShellEvent.IntroDismissed())
+                    }) {
                         AppText(strings.introAgree)
                     }
                 },
@@ -458,7 +529,9 @@ fun CrackMyDroidApp(
             androidx.compose.material3.AlertDialog(
                 onDismissRequest = { shellVm.handleEvent(AppShellEvent.HelpDismissed()) },
                 confirmButton = {
-                    androidx.compose.material3.TextButton(onClick = { shellVm.handleEvent(AppShellEvent.HelpDismissed()) }) {
+                    androidx.compose.material3.TextButton(onClick = {
+                        shellVm.handleEvent(AppShellEvent.HelpDismissed())
+                    }) {
                         AppText(strings.close)
                     }
                 },
@@ -469,14 +542,12 @@ fun CrackMyDroidApp(
     }
 }
 
-private fun sectionEntryHintText(strings: Strings, screen: Screen): String? {
-    return when (screen) {
-        Screen.Permissions -> "${strings.helpPermissions}\n\nSuggerimento: usa la ricerca per app o permesso e condividi rapidamente i risultati dalla riga dell'app."
-        Screen.InstalledApps -> "${strings.helpApk}\n\nSuggerimento: cerca per nome/package e usa le azioni rapide per estrarre o condividere APK."
-        Screen.Pentest -> "${strings.pentestIntro}\n\nWorkflow consigliato: 1) scegli target o auto-scan, 2) seleziona test, 3) controlla risultati a video, 4) condividi subito."
-        Screen.Activities -> "${strings.helpActivities}\n\nSuggerimento: filtra con cerca/chip preferiti e condividi le activity per singola app."
-        Screen.Root -> "Esegue un check rapido del root e della Play Integrity: usa RootBeer per rilevare tracce di rooting e verifica il nonce con Play Integrity."
-        Screen.Trick -> "${strings.helpTrick}\n\nSuggerimento: conferma i comandi sensibili e controlla sempre output/exit code."
-        else -> null
-    }
+private fun sectionEntryHintText(strings: Strings, screen: Screen): String? = when (screen) {
+    Screen.Permissions -> "${strings.helpPermissions}\n\nSuggerimento: usa la ricerca per app o permesso e condividi rapidamente i risultati dalla riga dell'app."
+    Screen.InstalledApps -> "${strings.helpApk}\n\nSuggerimento: cerca per nome/package e usa le azioni rapide per estrarre o condividere APK."
+    Screen.Pentest -> "${strings.pentestIntro}\n\nWorkflow consigliato: 1) scegli target o auto-scan, 2) seleziona test, 3) controlla risultati a video, 4) condividi subito."
+    Screen.Activities -> "${strings.helpActivities}\n\nSuggerimento: filtra con cerca/chip preferiti e condividi le activity per singola app."
+    Screen.Root -> "Esegue un check rapido del root e della Play Integrity: usa RootBeer per rilevare tracce di rooting e verifica il nonce con Play Integrity."
+    Screen.Trick -> "${strings.helpTrick}\n\nSuggerimento: conferma i comandi sensibili e controlla sempre output/exit code."
+    else -> null
 }

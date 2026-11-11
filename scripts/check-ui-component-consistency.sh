@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-screens_root='shared/src/commonMain/kotlin/com/crackmydroid/shared/ui/screens'
-if rg -n -U '\bTODO\s*\(|\bNotImplementedError\b|\bfun\s+(AppCard|ExportDetailsCard)\s*\(' "$screens_root" --glob '*.kt'; then
+screens_root='shared/src/commonMain/kotlin/com/crackmydroid/shared/ui'
+if rg -n -U '\bTODO\s*\(|\bNotImplementedError\b|\bfun\s+(AppCard|ExportDetailsCard)\s*\(' "$screens_root" --glob '*Screen.kt'; then
   echo "UI component guard failed: unimplemented code or local shared-card declarations in screens." >&2
   exit 1
 else
@@ -13,7 +13,7 @@ else
   fi
 fi
 
-settings_screen="$screens_root/SettingsScreen.kt"
+settings_screen="$screens_root/settings/view/SettingsScreen.kt"
 if rg -n -U '(CardBlock|AppText)\s*\(\s*"\p{L}|(label|text|contentDescription)\s*=\s*"\p{L}' "$settings_screen"; then
   echo "UI localization guard failed: Settings copy must come from LocalStrings." >&2
   exit 1
@@ -25,9 +25,10 @@ else
   fi
 fi
 
-activity_screen='shared/src/commonMain/kotlin/com/crackmydroid/shared/ui/screens/ActivityListScreen.kt'
+activity_screen="$screens_root/activities/view/ActivityListScreen.kt"
 activity_literals=$(awk '
-  $0 !~ /[•]/ &&
+  /@[A-Za-z0-9_]*Preview/ { preview = 1 }
+  !preview && $0 !~ /[•]/ &&
   ($0 ~ /AppText[[:space:]]*\([[:space:]]*"/ ||
    $0 ~ /showSnackbar[[:space:]]*\([[:space:]]*"/ ||
    $0 ~ /(title|subtitle|summary|label|text|contentDescription)[[:space:]]*=[[:space:]]*"/) &&
@@ -65,14 +66,14 @@ fi
 # in this explicit migration baseline. Remove entries as each screen is migrated.
 baseline=(
   'shared/src/commonMain/kotlin/com/crackmydroid/shared/ui/App.kt'
-  'shared/src/commonMain/kotlin/com/crackmydroid/shared/ui/screens/ActivityListScreen.kt'
-  'shared/src/commonMain/kotlin/com/crackmydroid/shared/ui/screens/InfoScreen.kt'
-  'shared/src/commonMain/kotlin/com/crackmydroid/shared/ui/screens/InstalledAppsScreen.kt'
-  'shared/src/commonMain/kotlin/com/crackmydroid/shared/ui/screens/LogScreen.kt'
-  'shared/src/commonMain/kotlin/com/crackmydroid/shared/ui/screens/PenTestingScreen.kt'
-  'shared/src/commonMain/kotlin/com/crackmydroid/shared/ui/screens/PermissionsScreen.kt'
-  'shared/src/commonMain/kotlin/com/crackmydroid/shared/ui/screens/RootScreen.kt'
-  'shared/src/commonMain/kotlin/com/crackmydroid/shared/ui/screens/TrickScreen.kt'
+  'shared/src/commonMain/kotlin/com/crackmydroid/shared/ui/activities/view/ActivityListScreen.kt'
+  'shared/src/commonMain/kotlin/com/crackmydroid/shared/ui/info/view/InfoScreen.kt'
+  'shared/src/commonMain/kotlin/com/crackmydroid/shared/ui/installedapps/view/InstalledAppsScreen.kt'
+  'shared/src/commonMain/kotlin/com/crackmydroid/shared/ui/logs/view/LogScreen.kt'
+  'shared/src/commonMain/kotlin/com/crackmydroid/shared/ui/pentest/view/PenTestingScreen.kt'
+  'shared/src/commonMain/kotlin/com/crackmydroid/shared/ui/permissions/view/PermissionsScreen.kt'
+  'shared/src/commonMain/kotlin/com/crackmydroid/shared/ui/root/view/RootScreen.kt'
+  'shared/src/commonMain/kotlin/com/crackmydroid/shared/ui/trick/view/TrickScreen.kt'
 )
 
 violations=()

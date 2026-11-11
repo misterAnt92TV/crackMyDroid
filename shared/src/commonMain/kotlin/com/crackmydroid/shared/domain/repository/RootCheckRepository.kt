@@ -1,7 +1,6 @@
 package com.crackmydroid.shared.domain.repository
 
 import com.crackmydroid.shared.domain.model.PlayIntegrityResult
-
 import com.crackmydroid.shared.domain.model.RootStatus
 import com.crackmydroid.shared.domain.model.root.RootCheckMode
 

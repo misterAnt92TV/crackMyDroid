@@ -62,10 +62,7 @@ private val DarkColorScheme = darkColorScheme(
 )
 
 @Composable
-fun CrackMyDroidTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    content: @Composable () -> Unit,
-) {
+fun CrackMyDroidTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
     MaterialTheme(
         colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme,
         content = content,

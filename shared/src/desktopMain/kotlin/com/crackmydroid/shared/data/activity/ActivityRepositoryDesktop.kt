@@ -19,7 +19,8 @@ class ActivityRepositoryDesktop(
     sessionController: DeviceSessionController,
     private val cache: DesktopScanCache,
     private val packageManager: RemotePackageManager,
-) : DesktopAdbRepositorySupport(adbBridge, sessionController), ActivityRepository {
+) : DesktopAdbRepositorySupport(adbBridge, sessionController),
+    ActivityRepository {
     override suspend fun getActivities(): List<ActivityEntry> = withContext(Dispatchers.IO) {
         cache.activities?.let { return@withContext it }
 
@@ -85,6 +86,5 @@ class ActivityRepositoryDesktop(
         }.map { Unit }
     }
 
-    private fun shellQuote(value: String): String =
-        "'${value.replace("'", "'\\''")}'"
+    private fun shellQuote(value: String): String = "'${value.replace("'", "'\\''")}'"
 }

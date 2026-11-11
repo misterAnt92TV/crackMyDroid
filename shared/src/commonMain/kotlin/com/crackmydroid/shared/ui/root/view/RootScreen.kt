@@ -63,9 +63,9 @@ import com.crackmydroid.shared.presentation.components.SectionHeader
 import com.crackmydroid.shared.presentation.components.text.AppText
 import com.crackmydroid.shared.presentation.preview.AppPreviewEnvironment
 import com.crackmydroid.shared.presentation.preview.AppScreenPreviews
+import com.crackmydroid.shared.ui.root.RootEvent
 import com.crackmydroid.shared.ui.root.RootState
 import com.crackmydroid.shared.ui.root.RootViewModel
-import com.crackmydroid.shared.ui.root.RootEvent
 import kotlinx.coroutines.launch
 
 @Composable

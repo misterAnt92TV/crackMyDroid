@@ -13,7 +13,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.runBlocking
 
 class DeviceSessionControllerDesktop(
     private val adbBridge: AdbBridge,
@@ -21,24 +20,41 @@ class DeviceSessionControllerDesktop(
     private val cache: DesktopScanCache,
     private val snapshotImporter: RemoteDeviceSnapshotImporter? = null,
 ) : DeviceSessionController {
-    private val configuredAdbPath = runBlocking { settingsRepository.getAdbPath() }
-    private val _state = MutableStateFlow(
-        DeviceSessionState(
-            adbPath = configuredAdbPath.takeIf { it.isNotBlank() }
-                ?: runBlocking { adbBridge.resolveBinary().getOrDefault("") },
-            adbPathConfigured = configuredAdbPath.isNotBlank(),
-        ),
-    )
+    private val _state = MutableStateFlow(DeviceSessionState())
 
     override val state: StateFlow<DeviceSessionState> = _state.asStateFlow()
 
+    private suspend fun resolveEffectiveAdbPath(override: String?): Pair<String, Boolean> {
+        val trimmed = override?.trim().orEmpty()
+        if (trimmed.isNotBlank()) {
+            return trimmed to true
+        }
+        val current = _state.value.adbPath
+        if (current.isNotBlank()) {
+            return current to _state.value.adbPathConfigured
+        }
+        val configured = settingsRepository.getAdbPath()
+        if (configured.isNotBlank()) {
+            return configured to true
+        }
+        val resolved = adbBridge.resolveBinary().getOrDefault("")
+        return resolved to false
+    }
+
     override suspend fun refreshDevices(adbPathOverride: String?): Result<List<ConnectedDevice>> {
-        val adbPath = adbPathOverride?.trim().orEmpty().ifBlank { _state.value.adbPath }
-        val configured = !adbPathOverride.isNullOrBlank()
-        if (configured) {
+        val (adbPath, isConfigured) = resolveEffectiveAdbPath(adbPathOverride)
+        val explicitlyOverridden = !adbPathOverride.isNullOrBlank()
+        if (explicitlyOverridden) {
             settingsRepository.setAdbPath(adbPath)
         }
-        _state.update { it.copy(loading = true, error = null, adbPath = adbPath) }
+        _state.update {
+            it.copy(
+                loading = true,
+                error = null,
+                adbPath = adbPath,
+                adbPathConfigured = isConfigured,
+            )
+        }
         return adbBridge.listDevices(adbPath)
             .onSuccess { devices ->
                 val currentSerial = _state.value.selectedDevice?.serial
@@ -46,7 +62,7 @@ class DeviceSessionControllerDesktop(
                 _state.update {
                     it.copy(
                         availableDevices = devices,
-                        adbPathConfigured = it.adbPathConfigured || configured,
+                        adbPathConfigured = it.adbPathConfigured || explicitlyOverridden,
                         selectedDevice = selected,
                         loading = false,
                         error = null,
@@ -64,14 +80,11 @@ class DeviceSessionControllerDesktop(
             }
     }
 
-    override suspend fun selectDevice(
-        device: ConnectedDevice,
-        adbPathOverride: String?,
-    ): Result<Unit> {
-        val adbPath = adbPathOverride?.trim().orEmpty().ifBlank { _state.value.adbPath }
-        val configured = !adbPathOverride.isNullOrBlank()
+    override suspend fun selectDevice(device: ConnectedDevice, adbPathOverride: String?): Result<Unit> {
+        val (adbPath, isConfigured) = resolveEffectiveAdbPath(adbPathOverride)
+        val explicitlyOverridden = !adbPathOverride.isNullOrBlank()
         return runSuspendCatching {
-            if (configured) {
+            if (explicitlyOverridden) {
                 settingsRepository.setAdbPath(adbPath)
             }
             clearCaches()
@@ -79,10 +92,16 @@ class DeviceSessionControllerDesktop(
             _state.update {
                 it.copy(
                     adbPath = adbPath,
-                    adbPathConfigured = it.adbPathConfigured || configured,
+                    adbPathConfigured = it.adbPathConfigured || explicitlyOverridden,
                     selectedDevice = device,
                     error = null,
-                    dataSource = if (snapshotOutcome?.usedSnapshot == true) DeviceSessionSource.SNAPSHOT else DeviceSessionSource.ADB,
+                    dataSource = if (snapshotOutcome?.usedSnapshot ==
+                        true
+                    ) {
+                        DeviceSessionSource.SNAPSHOT
+                    } else {
+                        DeviceSessionSource.ADB
+                    },
                     snapshotStatus = snapshotOutcome?.message,
                     snapshotMetadata = snapshotOutcome?.metadata,
                     sessionVersion = it.sessionVersion + 1,
@@ -111,7 +130,13 @@ class DeviceSessionControllerDesktop(
         _state.update {
             it.copy(
                 error = null,
-                dataSource = if (snapshotOutcome?.usedSnapshot == true) DeviceSessionSource.SNAPSHOT else DeviceSessionSource.ADB,
+                dataSource = if (snapshotOutcome?.usedSnapshot ==
+                    true
+                ) {
+                    DeviceSessionSource.SNAPSHOT
+                } else {
+                    DeviceSessionSource.ADB
+                },
                 snapshotStatus = snapshotOutcome?.message,
                 snapshotMetadata = snapshotOutcome?.metadata,
                 sessionVersion = it.sessionVersion + 1,

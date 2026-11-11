@@ -7,10 +7,10 @@ import com.crackmydroid.shared.domain.model.PermissionRiskReport
 import com.crackmydroid.shared.domain.model.app.AppPermissionEntry
 import com.crackmydroid.shared.domain.usecase.UseCaseTestDispatchers
 import com.crackmydroid.shared.i18n.usecase.UseCaseTexts
-import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import kotlinx.coroutines.test.runTest
 
 class BuildPermissionsReportUseCaseTest {
     private val dispatchers = UseCaseTestDispatchers()
@@ -94,8 +94,16 @@ class BuildPermissionsReportUseCaseTest {
                 val complete = useCase(listOf(app), listOf(report), texts).getOrThrow()
                 val single = useCase.single(app, report, texts).getOrThrow()
                 val translatedReason = texts.permissionReason(report.findings.single())
-                assertTrue(complete.startsWith(texts.label(com.crackmydroid.shared.domain.model.ReportLabel.PERMISSIONS_REPORT_TITLE)))
-                assertTrue(single.startsWith(texts.label(com.crackmydroid.shared.domain.model.ReportLabel.SINGLE_PERMISSIONS_REPORT_TITLE)))
+                assertTrue(
+                    complete.startsWith(
+                        texts.label(com.crackmydroid.shared.domain.model.ReportLabel.PERMISSIONS_REPORT_TITLE),
+                    ),
+                )
+                assertTrue(
+                    single.startsWith(
+                        texts.label(com.crackmydroid.shared.domain.model.ReportLabel.SINGLE_PERMISSIONS_REPORT_TITLE),
+                    ),
+                )
                 assertTrue(complete.contains("CAMERA"))
                 assertTrue(single.contains("CAMERA"))
                 assertTrue(complete.contains(translatedReason))

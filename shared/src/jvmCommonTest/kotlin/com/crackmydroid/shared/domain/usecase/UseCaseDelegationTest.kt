@@ -37,12 +37,12 @@ import com.crackmydroid.shared.domain.usecase.trick.ListShellCommandsUseCase
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertSame
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.test.runTest
 
 class UseCaseDelegationTest {
 

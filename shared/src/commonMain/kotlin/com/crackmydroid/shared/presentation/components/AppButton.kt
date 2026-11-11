@@ -20,7 +20,6 @@ import com.crackmydroid.shared.presentation.components.text.AppText
 import com.crackmydroid.shared.presentation.preview.AppComponentPreviews
 import com.crackmydroid.shared.presentation.preview.ComponentPreviewContainer
 
-
 @Composable
 fun AppButton(
     text: String,

@@ -27,9 +27,5 @@ interface AdbBridge {
         configuredPath: String? = null,
     ): Result<String>
 
-    suspend fun logcat(
-        serial: String,
-        configuredPath: String? = null,
-        lines: Int = 1500,
-    ): Result<List<String>>
+    suspend fun logcat(serial: String, configuredPath: String? = null, lines: Int = 1500): Result<List<String>>
 }

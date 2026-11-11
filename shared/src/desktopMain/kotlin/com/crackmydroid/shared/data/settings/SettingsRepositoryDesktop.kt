@@ -28,15 +28,13 @@ class SettingsRepositoryDesktop : SettingsRepository {
         prefs.put(LANGUAGE, language.code)
     }
 
-    private fun getSet(key: String) =
-        prefs.get(key, "").split('\n').filter(String::isNotEmpty).toSet()
+    private fun getSet(key: String) = prefs.get(key, "").split('\n').filter(String::isNotEmpty).toSet()
 
     private fun setSet(key: String, values: Set<String>) {
         prefs.put(key, values.joinToString("\n"))
     }
 
-    override suspend fun getTheme(): AppTheme =
-        prefs.get(THEME, AppTheme.SYSTEM.name).toAppTheme()
+    override suspend fun getTheme(): AppTheme = prefs.get(THEME, AppTheme.SYSTEM.name).toAppTheme()
 
     override suspend fun setTheme(theme: AppTheme) {
         prefs.put(THEME, theme.name)
@@ -79,15 +77,13 @@ class SettingsRepositoryDesktop : SettingsRepository {
         prefs.putBoolean(LARGE_TEXT, enabled)
     }
 
-    override suspend fun isSuggestionsEnabled(): Boolean =
-        prefs.getBoolean(SUGGESTIONS_ENABLED, true)
+    override suspend fun isSuggestionsEnabled(): Boolean = prefs.getBoolean(SUGGESTIONS_ENABLED, true)
 
     override suspend fun setSuggestionsEnabled(enabled: Boolean) {
         prefs.putBoolean(SUGGESTIONS_ENABLED, enabled)
     }
 
-    override suspend fun isFeatureHintsEnabled(): Boolean =
-        prefs.getBoolean(FEATURE_HINTS_ENABLED, true)
+    override suspend fun isFeatureHintsEnabled(): Boolean = prefs.getBoolean(FEATURE_HINTS_ENABLED, true)
 
     override suspend fun setFeatureHintsEnabled(enabled: Boolean) {
         prefs.putBoolean(FEATURE_HINTS_ENABLED, enabled)
@@ -100,23 +96,18 @@ class SettingsRepositoryDesktop : SettingsRepository {
     }
 
     override suspend fun getActivityFavorites() = getSet(ACTIVITY_FAVORITES)
-    override suspend fun setActivityFavorites(values: Set<String>) =
-        setSet(ACTIVITY_FAVORITES, values)
+    override suspend fun setActivityFavorites(values: Set<String>) = setSet(ACTIVITY_FAVORITES, values)
 
     override suspend fun getActivityPackageFavorites() = getSet(ACTIVITY_PACKAGE_FAVORITES)
-    override suspend fun setActivityPackageFavorites(values: Set<String>) =
-        setSet(ACTIVITY_PACKAGE_FAVORITES, values)
+    override suspend fun setActivityPackageFavorites(values: Set<String>) = setSet(ACTIVITY_PACKAGE_FAVORITES, values)
 
     override suspend fun getInstalledAppFavorites() = getSet(INSTALLED_APP_FAVORITES)
-    override suspend fun setInstalledAppFavorites(values: Set<String>) =
-        setSet(INSTALLED_APP_FAVORITES, values)
+    override suspend fun setInstalledAppFavorites(values: Set<String>) = setSet(INSTALLED_APP_FAVORITES, values)
 
     override suspend fun getPermissionFavorites() = getSet(PERMISSION_FAVORITES)
-    override suspend fun setPermissionFavorites(values: Set<String>) =
-        setSet(PERMISSION_FAVORITES, values)
+    override suspend fun setPermissionFavorites(values: Set<String>) = setSet(PERMISSION_FAVORITES, values)
 
-    private fun String.toAppTheme(): AppTheme =
-        runCatching { AppTheme.valueOf(this) }.getOrDefault(AppTheme.SYSTEM)
+    private fun String.toAppTheme(): AppTheme = runCatching { AppTheme.valueOf(this) }.getOrDefault(AppTheme.SYSTEM)
 
     private fun String.toExportFormat(): ExportFormat =
         runCatching { ExportFormat.valueOf(this) }.getOrDefault(ExportFormat.TXT)

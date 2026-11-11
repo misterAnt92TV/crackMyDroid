@@ -13,13 +13,19 @@ import com.crackmydroid.shared.domain.usecase.settings.GetActivityPackageFavorit
 import com.crackmydroid.shared.domain.usecase.settings.GetExportFormatUseCase
 import com.crackmydroid.shared.domain.usecase.settings.SetActivityFavoritesUseCase
 import com.crackmydroid.shared.domain.usecase.settings.SetActivityPackageFavoritesUseCase
-import com.crackmydroid.shared.i18n.stringsFor
 import com.crackmydroid.shared.ui.activities.ActivityListEvent
 import com.crackmydroid.shared.ui.activities.ActivityListViewModel
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import io.mockk.slot
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -30,13 +36,6 @@ import kotlinx.coroutines.test.setMain
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
-import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
-import kotlin.test.assertNull
-import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class ActivityListViewModelTest {
@@ -208,7 +207,14 @@ class ActivityListViewModelTest {
 
         vm.handleEvent(ActivityListEvent.Refresh())
         advanceUntilIdle()
-        vm.handleEvent(ActivityListEvent.ActivityLaunchedWithIntent(entry, "android.intent.action.VIEW", "demo://host/details", null))
+        vm.handleEvent(
+            ActivityListEvent.ActivityLaunchedWithIntent(
+                entry,
+                "android.intent.action.VIEW",
+                "demo://host/details",
+                null,
+            ),
+        )
         advanceUntilIdle()
 
         assertNull(vm.state.value.error)

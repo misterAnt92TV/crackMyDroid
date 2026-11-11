@@ -5,9 +5,9 @@ import com.crackmydroid.shared.domain.repository.IntegrityVerificationRepository
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
-import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlinx.coroutines.test.runTest
 
 class VerifyPlayIntegrityTokenUseCaseTest {
     @Test

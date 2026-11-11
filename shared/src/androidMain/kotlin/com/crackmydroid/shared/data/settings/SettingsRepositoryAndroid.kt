@@ -166,8 +166,7 @@ class SettingsRepositoryAndroid(private val context: Context) : SettingsReposito
         }
     }
 
-    override suspend fun getActivityFavorites() =
-        context.settingsDataStore.data.first()[activityFavoritesKey].orEmpty()
+    override suspend fun getActivityFavorites() = context.settingsDataStore.data.first()[activityFavoritesKey].orEmpty()
 
     override suspend fun setActivityFavorites(values: Set<String>) {
         context.settingsDataStore.edit { it[activityFavoritesKey] = values }

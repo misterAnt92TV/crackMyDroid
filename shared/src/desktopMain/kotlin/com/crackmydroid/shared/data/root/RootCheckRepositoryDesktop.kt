@@ -13,15 +13,16 @@ import com.crackmydroid.shared.domain.repository.AdbBridge
 import com.crackmydroid.shared.domain.repository.DeviceSessionController
 import com.crackmydroid.shared.domain.repository.RootCheckRepository
 import com.crackmydroid.shared.util.runSuspendCatching
+import java.util.Calendar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.util.Calendar
 
 class RootCheckRepositoryDesktop(
     adbBridge: AdbBridge,
     sessionController: DeviceSessionController,
     private val cache: DesktopScanCache,
-) : DesktopAdbRepositorySupport(adbBridge, sessionController), RootCheckRepository {
+) : DesktopAdbRepositorySupport(adbBridge, sessionController),
+    RootCheckRepository {
     override suspend fun checkRoot(mode: RootCheckMode): RootStatus = withContext(Dispatchers.Default) {
         if (mode == RootCheckMode.PASSIVE) cache.rootStatus?.let { return@withContext it }
         val checks = mutableListOf<RootCheck>()
@@ -42,7 +43,9 @@ class RootCheckRepositoryDesktop(
         val whichSu = shell("which su")
         val suExec = if (mode == RootCheckMode.PRIVILEGE_ACCESS) {
             runSuspendCatching { shell("id", asRoot = true, timeoutMs = 5_000L) }.getOrDefault("")
-        } else ""
+        } else {
+            ""
+        }
         val magiskTraces = listOf(
             "/sbin/.magisk",
             "/data/adb/magisk",
@@ -106,7 +109,9 @@ class RootCheckRepositoryDesktop(
                 suExec.isBlank() -> RootCheckOutcome.DENIED
                 else -> RootCheckOutcome.NOT_DETECTED
             }
-        } else RootCheckOutcome.UNAVAILABLE
+        } else {
+            RootCheckOutcome.UNAVAILABLE
+        }
         checks += RootCheck(
             RootCheckId.ROOT_ACCESS,
             suOutcome,
@@ -115,7 +120,11 @@ class RootCheckRepositoryDesktop(
         val rooted = suOutcome == RootCheckOutcome.DETECTED
         val details = buildString {
             appendLine(if (rooted) "Possibili tracce di root rilevate." else "Nessuna traccia di root evidente.")
-            appendLine("Indicatori rilevati: ${checks.count { it.outcome == RootCheckOutcome.DETECTED }}/${checks.size}")
+            appendLine(
+                "Indicatori rilevati: ${checks.count {
+                    it.outcome == RootCheckOutcome.DETECTED
+                }}/${checks.size}",
+            )
             appendLine()
             checks.forEach { check ->
                 appendLine("${check.id}: ${check.outcome} ${check.evidence}")
@@ -127,11 +136,19 @@ class RootCheckRepositoryDesktop(
                             "Enforcing",
                             true,
                         )
-                    ) "[OK]" else "[WARN]"
+                    ) {
+                        "[OK]"
+                    } else {
+                        "[WARN]"
+                    }
                 } SELinux: $selinux",
             )
-            appendLine("${if (adbEnabled) "[WARN]" else "[OK]"} ADB debugging: ${if (adbEnabled) "Attivo" else "Disattivo"}")
-            appendLine("${if (developerOptions) "[WARN]" else "[OK]"} Developer options: ${if (developerOptions) "Attive" else "Disattivate"}")
+            appendLine(
+                "${if (adbEnabled) "[WARN]" else "[OK]"} ADB debugging: ${if (adbEnabled) "Attivo" else "Disattivo"}",
+            )
+            appendLine(
+                "${if (developerOptions) "[WARN]" else "[OK]"} Developer options: ${if (developerOptions) "Attive" else "Disattivate"}",
+            )
             appendLine("${if (outdatedPatch) "[WARN]" else "[OK]"} Security patch: $securityPatch")
         }.trim()
         RootStatus(rooted, details, checks).also { result ->

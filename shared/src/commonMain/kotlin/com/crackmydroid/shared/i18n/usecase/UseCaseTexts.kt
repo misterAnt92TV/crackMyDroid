@@ -25,11 +25,17 @@ class UseCaseTexts(languageCode: String) : UseCaseReportText {
         )
 
         ReportLabel.MANUFACTURER -> t("Manufacturer", "Produttore", "Hersteller", "Fabricante", "Fabricant")
+
         ReportLabel.MODEL -> t("Model", "Modello", "Modell", "Modelo", "Modèle")
+
         ReportLabel.BRAND -> t("Brand", "Brand", "Marke", "Marca", "Marque")
+
         ReportLabel.DEVICE -> t("Device", "Dispositivo", "Gerät", "Dispositivo", "Appareil")
+
         ReportLabel.PRODUCT -> t("Product", "Prodotto", "Produkt", "Producto", "Produit")
+
         ReportLabel.ANDROID -> t("Android", "Android", "Android", "Android", "Android")
+
         ReportLabel.SECURITY_PATCH -> t(
             "Security patch",
             "Patch di sicurezza",
@@ -39,6 +45,7 @@ class UseCaseTexts(languageCode: String) : UseCaseReportText {
         )
 
         ReportLabel.BUILD_ID -> t("Build ID", "Build ID", "Build-ID", "Build ID", "ID de build")
+
         ReportLabel.BUILD_DISPLAY -> t(
             "Build display",
             "Build display",
@@ -48,16 +55,27 @@ class UseCaseTexts(languageCode: String) : UseCaseReportText {
         )
 
         ReportLabel.FINGERPRINT -> t("Fingerprint", "Fingerprint", "Fingerprint", "Fingerprint", "Fingerprint")
+
         ReportLabel.RADIO -> t("Radio", "Radio", "Funkmodul", "Radio", "Radio")
+
         ReportLabel.KERNEL -> t("Kernel", "Kernel", "Kernel", "Kernel", "Kernel")
+
         ReportLabel.HARDWARE -> t("Hardware", "Hardware", "Hardware", "Hardware", "Matériel")
+
         ReportLabel.BOOTLOADER -> t("Bootloader", "Bootloader", "Bootloader", "Bootloader", "Bootloader")
+
         ReportLabel.BATTERY -> t("Battery", "Batteria", "Akku", "Batería", "Batterie")
+
         ReportLabel.NETWORK -> t("Network", "Rete", "Netzwerk", "Red", "Réseau")
+
         ReportLabel.TOTAL_RAM -> t("Total RAM", "RAM totale", "Gesamter RAM", "RAM total", "RAM totale")
+
         ReportLabel.FREE_RAM -> t("Free RAM", "RAM libera", "Freier RAM", "RAM libre", "RAM libre")
+
         ReportLabel.SCREEN -> t("Screen", "Schermo", "Bildschirm", "Pantalla", "Écran")
+
         ReportLabel.ADB_ENABLED -> t("ADB enabled", "ADB attivo", "ADB aktiviert", "ADB habilitado", "ADB activé")
+
         ReportLabel.DEVELOPER_OPTIONS -> t(
             "Developer options",
             "Opzioni sviluppatore",
@@ -75,6 +93,7 @@ class UseCaseTexts(languageCode: String) : UseCaseReportText {
         )
 
         ReportLabel.ROOTED -> t("Rooted", "Root rilevato", "Root erkannt", "Root detectado", "Root détecté")
+
         ReportLabel.ROOT_DETAILS -> t(
             "Root details",
             "Dettagli root",
@@ -84,7 +103,9 @@ class UseCaseTexts(languageCode: String) : UseCaseReportText {
         )
 
         ReportLabel.IMEI -> t("IMEI", "IMEI", "IMEI", "IMEI", "IMEI")
+
         ReportLabel.SERIAL -> t("Serial", "Seriale", "Seriennummer", "Número de serie", "Numéro de série")
+
         ReportLabel.SYSTEM_PROPERTIES_SOURCE -> t(
             "System properties source",
             "Origine delle system properties",
@@ -118,7 +139,9 @@ class UseCaseTexts(languageCode: String) : UseCaseReportText {
         )
 
         ReportLabel.APP -> t("App", "App", "App", "App", "App")
+
         ReportLabel.PACKAGE -> t("Package", "Package", "Paket", "Paquete", "Package")
+
         ReportLabel.PERMISSIONS_ANALYZED -> t(
             "Apps analyzed",
             "App analizzate",
@@ -144,7 +167,9 @@ class UseCaseTexts(languageCode: String) : UseCaseReportText {
         )
 
         ReportLabel.RISK_COUNTS -> t("Risks", "Rischi", "Risiken", "Riesgos", "Risques")
+
         ReportLabel.SEVERITY_LEGEND -> t("Severity", "Severità", "Schweregrad", "Gravedad", "Niveau de risque")
+
         ReportLabel.CAUTION_NOTE -> t(
             "This report highlights risk indicators; it does not confirm malware.",
             "Il report evidenzia indicatori di rischio, non conferme definitive di malware.",
@@ -178,7 +203,9 @@ class UseCaseTexts(languageCode: String) : UseCaseReportText {
         )
 
         ReportLabel.SCORE -> t("Score", "Score", "Score", "Score", "Score")
+
         ReportLabel.FINDINGS -> t("Findings", "Finding", "Findings", "Findings", "Findings")
+
         ReportLabel.FINDING_DETAILS -> t(
             "Finding details",
             "Dettaglio finding",
@@ -188,8 +215,11 @@ class UseCaseTexts(languageCode: String) : UseCaseReportText {
         )
 
         ReportLabel.PERMISSIONS -> t("Permissions", "Permessi", "Berechtigungen", "Permisos", "Autorisations")
+
         ReportLabel.NO_SENSITIVE_BEHAVIOR -> noSensitiveBehavior()
+
         ReportLabel.NO_RISKY_PERMISSIONS -> noRiskyPermissions()
+
         ReportLabel.NO_PERMISSION_DECLARED -> noDeclaredPermissions()
     }
 
@@ -204,7 +234,7 @@ class UseCaseTexts(languageCode: String) : UseCaseReportText {
         PermissionFindingKind.LOCATION_ACCESS,
         PermissionFindingKind.MICROPHONE_CAMERA_ACCESS,
         PermissionFindingKind.SENSITIVE_DATA_ACCESS,
-            -> finding.key
+        -> finding.key
 
         PermissionFindingKind.OVERLAY_ACCESSIBILITY_PATTERN ->
             t(
@@ -515,11 +545,7 @@ class UseCaseTexts(languageCode: String) : UseCaseReportText {
         t("No", "No", "Nein", "No", "Non")
     }
 
-    override fun permissionOverview(
-        appCount: Int,
-        permissionCount: Int,
-        appsWithRisksCount: Int,
-    ): String {
+    override fun permissionOverview(appCount: Int, permissionCount: Int, appsWithRisksCount: Int): String {
         val analyzedApps = when (languageCode) {
             "it" -> counted(appCount, "app analizzata", "app analizzate")
             "de" -> counted(appCount, "App analysiert", "Apps analysiert")
@@ -560,35 +586,45 @@ class UseCaseTexts(languageCode: String) : UseCaseReportText {
         mediumCount: Int,
     ): String = when (languageCode) {
         "it" -> "score $score • $findingCount ${plural(findingCount, "finding", "finding")} " +
-            "(${riskLevel(PermissionRiskLevel.Critical)}: $criticalCount, ${riskLevel(PermissionRiskLevel.High)}: $highCount, ${
+            "(${riskLevel(
+                PermissionRiskLevel.Critical,
+            )}: $criticalCount, ${riskLevel(PermissionRiskLevel.High)}: $highCount, ${
                 riskLevel(
                     PermissionRiskLevel.Medium,
                 )
             }: $mediumCount)"
 
         "de" -> "Score $score • $findingCount ${plural(findingCount, "Finding", "Findings")} " +
-            "(${riskLevel(PermissionRiskLevel.Critical)}: $criticalCount, ${riskLevel(PermissionRiskLevel.High)}: $highCount, ${
+            "(${riskLevel(
+                PermissionRiskLevel.Critical,
+            )}: $criticalCount, ${riskLevel(PermissionRiskLevel.High)}: $highCount, ${
                 riskLevel(
                     PermissionRiskLevel.Medium,
                 )
             }: $mediumCount)"
 
         "es" -> "score $score • $findingCount ${plural(findingCount, "finding", "findings")} " +
-            "(${riskLevel(PermissionRiskLevel.Critical)}: $criticalCount, ${riskLevel(PermissionRiskLevel.High)}: $highCount, ${
+            "(${riskLevel(
+                PermissionRiskLevel.Critical,
+            )}: $criticalCount, ${riskLevel(PermissionRiskLevel.High)}: $highCount, ${
                 riskLevel(
                     PermissionRiskLevel.Medium,
                 )
             }: $mediumCount)"
 
         "fr" -> "score $score • $findingCount ${plural(findingCount, "finding", "findings")} " +
-            "(${riskLevel(PermissionRiskLevel.Critical)} : $criticalCount, ${riskLevel(PermissionRiskLevel.High)} : $highCount, ${
+            "(${riskLevel(
+                PermissionRiskLevel.Critical,
+            )} : $criticalCount, ${riskLevel(PermissionRiskLevel.High)} : $highCount, ${
                 riskLevel(
                     PermissionRiskLevel.Medium,
                 )
             } : $mediumCount)"
 
         else -> "score $score • $findingCount ${plural(findingCount, "finding", "findings")} " +
-            "(${riskLevel(PermissionRiskLevel.Critical)}: $criticalCount, ${riskLevel(PermissionRiskLevel.High)}: $highCount, ${
+            "(${riskLevel(
+                PermissionRiskLevel.Critical,
+            )}: $criticalCount, ${riskLevel(PermissionRiskLevel.High)}: $highCount, ${
                 riskLevel(
                     PermissionRiskLevel.Medium,
                 )
@@ -622,8 +658,7 @@ class UseCaseTexts(languageCode: String) : UseCaseReportText {
         "Aucune autorisation dangereuse ou malveillante détectée selon les règles actuelles.",
     )
 
-    override fun noDataAvailable(): String =
-        label(ReportLabel.NO_DATA_AVAILABLE)
+    override fun noDataAvailable(): String = label(ReportLabel.NO_DATA_AVAILABLE)
 
     override fun noDeclaredPermissions(): String = t(
         "No permissions declared",
@@ -637,18 +672,16 @@ class UseCaseTexts(languageCode: String) : UseCaseReportText {
 
     override fun subsectionSeparator(): String = "----------------------------------------------"
 
-    private fun riskSummary(score: Int, critical: Int, high: Int, medium: Int): String =
-        "score $score (" +
-            t("critical", "critici", "kritisch", "críticos", "critiques") + ": $critical, " +
-            t("high", "alti", "hoch", "altos", "élevés") + ": $high, " +
-            t("medium", "medi", "mittel", "medios", "moyens") + ": $medium)"
+    private fun riskSummary(score: Int, critical: Int, high: Int, medium: Int): String = "score $score (" +
+        t("critical", "critici", "kritisch", "críticos", "critiques") + ": $critical, " +
+        t("high", "alti", "hoch", "altos", "élevés") + ": $high, " +
+        t("medium", "medi", "mittel", "medios", "moyens") + ": $medium)"
 
     private fun activityListLabel(activities: List<PenTestActivityRisk>): String =
         t("intent/deeplink ", "intent/deeplink ", "Intent/Deeplink ", "intent/deeplink ", "intent/deeplink ") +
             activities.joinToString("; ") { "${it.label}=${activityRiskLevel(it.level)}" }
 
-    private fun plural(count: Int, singular: String, plural: String): String =
-        if (count == 1) singular else plural
+    private fun plural(count: Int, singular: String, plural: String): String = if (count == 1) singular else plural
 
     private fun counted(count: Int, singular: String, pluralForm: String): String =
         "$count ${plural(count, singular, pluralForm)}"

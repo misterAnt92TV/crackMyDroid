@@ -11,13 +11,16 @@ import com.crackmydroid.shared.domain.usecase.reports.ExportReportUseCase
 import com.crackmydroid.shared.domain.usecase.root.CheckPlayIntegrityUseCase
 import com.crackmydroid.shared.domain.usecase.root.CheckRootUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetExportFormatUseCase
-import com.crackmydroid.shared.i18n.stringsFor
 import com.crackmydroid.shared.ui.root.RootEvent
 import com.crackmydroid.shared.ui.root.RootViewModel
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import io.mockk.slot
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -25,10 +28,6 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
-import kotlin.test.Test
-import kotlin.test.assertEquals
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class RootViewModelTest {

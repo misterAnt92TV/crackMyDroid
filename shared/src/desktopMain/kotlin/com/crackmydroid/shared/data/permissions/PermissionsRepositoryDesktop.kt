@@ -17,28 +17,25 @@ class PermissionsRepositoryDesktop(
     sessionController: DeviceSessionController,
     private val cache: DesktopScanCache,
     private val packageManager: RemotePackageManager,
-) : DesktopAdbRepositorySupport(adbBridge, sessionController), PermissionsRepository {
-    override suspend fun listAppPermissions(): List<AppPermissionEntry> =
-        withContext(Dispatchers.IO) {
-            cache.permissions?.let { return@withContext it }
+) : DesktopAdbRepositorySupport(adbBridge, sessionController),
+    PermissionsRepository {
+    override suspend fun listAppPermissions(): List<AppPermissionEntry> = withContext(Dispatchers.IO) {
+        cache.permissions?.let { return@withContext it }
 
-            val installedApps = packageManager.listInstalledApps()
-            val fresh = installedApps.map { app ->
-                val dump = packageManager.readPackageDump(app.packageName)
-                AppPermissionEntry(
-                    appLabel = app.appLabel,
-                    packageName = app.packageName,
-                    permissions = AdbParsers.parseRequestedPermissions(dump),
-                )
-            }.sortedBy { it.appLabel.lowercase() }
-            cache.permissions = fresh
-            fresh
-        }
+        val installedApps = packageManager.listInstalledApps()
+        val fresh = installedApps.map { app ->
+            val dump = packageManager.readPackageDump(app.packageName)
+            AppPermissionEntry(
+                appLabel = app.appLabel,
+                packageName = app.packageName,
+                permissions = AdbParsers.parseRequestedPermissions(dump),
+            )
+        }.sortedBy { it.appLabel.lowercase() }
+        cache.permissions = fresh
+        fresh
+    }
 
-    override suspend fun listAppPermissionsPaginated(
-        offset: Int,
-        limit: Int,
-    ): List<AppPermissionEntry> =
+    override suspend fun listAppPermissionsPaginated(offset: Int, limit: Int): List<AppPermissionEntry> =
         withContext(Dispatchers.IO) {
             val all = listAppPermissions()
             PaginationHelper.paginate(all, offset, limit)

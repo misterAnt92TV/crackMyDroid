@@ -14,27 +14,25 @@ class RemotePackageManagerDesktop(
     adbBridge: AdbBridge,
     sessionController: DeviceSessionController,
     private val cache: DesktopScanCache,
-) : DesktopAdbRepositorySupport(adbBridge, sessionController), RemotePackageManager {
-    override suspend fun listInstalledApps(): List<InstalledAppEntry> =
-        withContext(Dispatchers.IO) {
-            cache.installedApps ?: AdbParsers.parseInstalledApps(shell("pm list packages -f -i"))
-                .also {
-                    cache.installedApps = it
-                }
-        }
-
-    override suspend fun readPackageDump(packageName: String): String =
-        withContext(Dispatchers.IO) {
-            cache.packageDumps[packageName] ?: shell("dumpsys package $packageName").also {
-                cache.packageDumps[packageName] = it
+) : DesktopAdbRepositorySupport(adbBridge, sessionController),
+    RemotePackageManager {
+    override suspend fun listInstalledApps(): List<InstalledAppEntry> = withContext(Dispatchers.IO) {
+        cache.installedApps ?: AdbParsers.parseInstalledApps(shell("pm list packages -f -i"))
+            .also {
+                cache.installedApps = it
             }
-        }
+    }
 
-    override suspend fun readPackagePaths(packageName: String): List<String> =
-        withContext(Dispatchers.IO) {
-            cache.packagePaths[packageName] ?: AdbParsers.parsePmPath(shell("pm path $packageName"))
-                .also {
-                    cache.packagePaths[packageName] = it
-                }
+    override suspend fun readPackageDump(packageName: String): String = withContext(Dispatchers.IO) {
+        cache.packageDumps[packageName] ?: shell("dumpsys package $packageName").also {
+            cache.packageDumps[packageName] = it
         }
+    }
+
+    override suspend fun readPackagePaths(packageName: String): List<String> = withContext(Dispatchers.IO) {
+        cache.packagePaths[packageName] ?: AdbParsers.parsePmPath(shell("pm path $packageName"))
+            .also {
+                cache.packagePaths[packageName] = it
+            }
+    }
 }

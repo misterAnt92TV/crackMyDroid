@@ -39,10 +39,7 @@ class IntegrityBackendClient(private val httpClient: HttpClient) {
 }
 
 @Serializable
-internal data class IntegrityVerificationRequest(
-    val integrityToken: String,
-    val requestBinding: String,
-)
+internal data class IntegrityVerificationRequest(val integrityToken: String, val requestBinding: String)
 
 @Serializable
 internal data class IntegrityVerificationResponse(

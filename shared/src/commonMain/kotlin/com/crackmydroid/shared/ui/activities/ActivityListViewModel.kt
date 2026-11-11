@@ -20,10 +20,9 @@ import com.crackmydroid.shared.domain.usecase.settings.SetActivityPackageFavorit
 import com.crackmydroid.shared.i18n.format
 import com.crackmydroid.shared.presentation.LocalizedBaseViewModel
 import com.crackmydroid.shared.presentation.operations.NoOpOperationLogRepository
-import com.crackmydroid.shared.ui.activities.view.uiLabel
 import com.crackmydroid.shared.util.runSuspendCatching
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -54,23 +53,44 @@ class ActivityListViewModel(
 
     override fun onEvent(event: ActivityListEvent) {
         when (event) {
-        is ActivityListEvent.Refresh -> refresh()
-        is ActivityListEvent.FilterChanged -> setFilter(event.value, event.trackUsage)
-        is ActivityListEvent.ActivityLaunched -> launch(event.entry)
-        is ActivityListEvent.GuidedLaunchOpened -> openGuidedLaunch(event.entry)
-        is ActivityListEvent.GuidedLaunchDismissed -> dismissGuidedLaunch()
-        is ActivityListEvent.GuidedLaunchConfirmed -> launchGuided(event.action, event.dataUri, event.mimeType)
-        is ActivityListEvent.ActivityLaunchedWithIntent -> launchWithIntent(event.entry, event.action, event.dataUri, event.mimeType)
-        is ActivityListEvent.ErrorDismissed -> clearError()
-        is ActivityListEvent.FavoriteToggled -> toggleFavorite(event.entry)
-        is ActivityListEvent.PackageFavoriteToggled -> toggleFavoritePackage(event.packageName)
-        is ActivityListEvent.GroupExpansionToggled -> toggleExpanded(event.packageName)
-        is ActivityListEvent.AllExportRequested -> exportAll()
-        is ActivityListEvent.GroupExportRequested -> exportGroup(event.packageName)
-        is ActivityListEvent.GroupClipboardCopyRequested -> copyGroupContent(event.packageName)
-        is ActivityListEvent.ReportRequested -> showReport(event.packageName)
-        is ActivityListEvent.ReportDismissed -> dismissReport()
-        is ActivityListEvent.VisualReportExportRequested -> exportVisualReportAsync(event.packageName)
+            is ActivityListEvent.Refresh -> refresh()
+
+            is ActivityListEvent.FilterChanged -> setFilter(event.value, event.trackUsage)
+
+            is ActivityListEvent.ActivityLaunched -> launch(event.entry)
+
+            is ActivityListEvent.GuidedLaunchOpened -> openGuidedLaunch(event.entry)
+
+            is ActivityListEvent.GuidedLaunchDismissed -> dismissGuidedLaunch()
+
+            is ActivityListEvent.GuidedLaunchConfirmed -> launchGuided(event.action, event.dataUri, event.mimeType)
+
+            is ActivityListEvent.ActivityLaunchedWithIntent -> launchWithIntent(
+                event.entry,
+                event.action,
+                event.dataUri,
+                event.mimeType,
+            )
+
+            is ActivityListEvent.ErrorDismissed -> clearError()
+
+            is ActivityListEvent.FavoriteToggled -> toggleFavorite(event.entry)
+
+            is ActivityListEvent.PackageFavoriteToggled -> toggleFavoritePackage(event.packageName)
+
+            is ActivityListEvent.GroupExpansionToggled -> toggleExpanded(event.packageName)
+
+            is ActivityListEvent.AllExportRequested -> exportAll()
+
+            is ActivityListEvent.GroupExportRequested -> exportGroup(event.packageName)
+
+            is ActivityListEvent.GroupClipboardCopyRequested -> copyGroupContent(event.packageName)
+
+            is ActivityListEvent.ReportRequested -> showReport(event.packageName)
+
+            is ActivityListEvent.ReportDismissed -> dismissReport()
+
+            is ActivityListEvent.VisualReportExportRequested -> exportVisualReportAsync(event.packageName)
         }
     }
 
@@ -181,7 +201,9 @@ class ActivityListViewModel(
                 operationLogs.record(
                     "Lancio ${entry.activityName}",
                     success = true,
-                    details = "${strings.activityUi.riskLabel} ${ActivityIntentRiskAnalyzer.formatLevel(risk.level)} • ${risk.summary}",
+                    details = "${strings.activityUi.riskLabel} ${ActivityIntentRiskAnalyzer.formatLevel(
+                        risk.level,
+                    )} • ${risk.summary}",
                 )
             }
         }
@@ -402,7 +424,11 @@ class ActivityListViewModel(
         val content = buildHtmlReport(report)
         return runSuspendCatching { reportExporter.share(baseName, content).getOrThrow() }
             .onSuccess { path ->
-                operationLogs.record("${strings.activityUi.activityReport} $packageName", success = true, details = path)
+                operationLogs.record(
+                    "${strings.activityUi.activityReport} $packageName",
+                    success = true,
+                    details = path,
+                )
             }.onFailure { error ->
                 _state.update { it.copy(error = error.message) }
                 operationLogs.record(
@@ -558,7 +584,9 @@ class ActivityListViewModel(
         appendLine("    <section class=\"hero\">")
         appendLine("      <div class=\"eyebrow\">CrackMyDroid desktop report</div>")
         appendLine("      <h1>${report.appLabel.htmlEscape()}</h1>")
-        appendLine("      <p>${strings.activityUi.packageAnalyzed}: <code>${report.packageName.htmlEscape()}</code></p>")
+        appendLine(
+            "      <p>${strings.activityUi.packageAnalyzed}: <code>${report.packageName.htmlEscape()}</code></p>",
+        )
         appendLine("      <p>${strings.activityUi.generatedActivityReport}</p>")
         appendLine("    </section>")
         appendLine("    <section class=\"stats\">")
@@ -571,7 +599,9 @@ class ActivityListViewModel(
         appendLine(
             "      <div class=\"stat\"><strong>${report.guidedLaunchCount}</strong><span>Guided launch</span></div>",
         )
-        appendLine("      <div class=\"stat\"><strong>${report.dumpOnlyCount}</strong><span>${strings.activityUi.activityDumpOnlyLabel}</span></div>")
+        appendLine(
+            "      <div class=\"stat\"><strong>${report.dumpOnlyCount}</strong><span>${strings.activityUi.activityDumpOnlyLabel}</span></div>",
+        )
         appendLine(
             "      <div class=\"stat\"><strong>${report.riskyActivitiesCount}</strong><span>Con rischio intent</span></div>",
         )

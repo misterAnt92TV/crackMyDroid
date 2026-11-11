@@ -43,7 +43,9 @@ fun AppListItem(
         .let { base ->
             if (onClick != null) {
                 base.clickable(role = Role.Button, onClick = onClick)
-            } else base
+            } else {
+                base
+            }
         }
 
     Row(

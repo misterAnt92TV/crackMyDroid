@@ -20,5 +20,5 @@ enum class InstallSourceClassification {
     GOOGLE_PLAY,
     OTHER,
     UNKNOWN,
-    UNAVAILABLE
+    UNAVAILABLE,
 }

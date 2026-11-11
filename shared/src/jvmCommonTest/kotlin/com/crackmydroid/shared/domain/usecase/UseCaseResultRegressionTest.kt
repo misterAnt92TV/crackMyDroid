@@ -23,16 +23,16 @@ import com.crackmydroid.shared.domain.usecase.settings.SetVerboseLogUseCase
 import com.crackmydroid.shared.i18n.usecase.UseCaseTexts
 import io.mockk.coEvery
 import io.mockk.mockk
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.async
-import kotlinx.coroutines.currentCoroutineContext
-import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.test.runTest
 
 class UseCaseResultRegressionTest {
     @Test
@@ -168,7 +168,9 @@ class UseCaseResultRegressionTest {
                 }
             }
             BuildPermissionsReportUseCase(AnalyzePermissionRisksUseCase(dispatchers), dispatchers)(
-                apps, emptyList(), UseCaseTexts("en"),
+                apps,
+                emptyList(),
+                UseCaseTexts("en"),
             )
         }
         assertFailsWith<CancellationException> { work.await() }
@@ -199,7 +201,10 @@ class UseCaseResultRegressionTest {
                 }
             }
             RunPenTestChecksUseCase(AnalyzePermissionRisksUseCase(dispatchers), dispatchers)(
-                "manifest_flags", null, null, risks,
+                "manifest_flags",
+                null,
+                null,
+                risks,
             )
         }
         assertFailsWith<CancellationException> { work.await() }

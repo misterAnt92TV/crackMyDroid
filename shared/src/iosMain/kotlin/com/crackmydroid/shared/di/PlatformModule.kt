@@ -47,4 +47,3 @@ actual fun platformModule(): Module = module {
     single<InstalledAppsRepository> { InstalledAppsRepositoryIos() }
     single<CacheMaintenance> { CacheMaintenanceRepositoryIos() }
 }
-

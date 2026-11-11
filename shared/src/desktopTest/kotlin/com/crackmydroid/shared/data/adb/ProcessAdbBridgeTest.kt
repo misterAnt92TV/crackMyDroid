@@ -1,10 +1,10 @@
 package com.crackmydroid.shared.data.adb
 
-import kotlinx.coroutines.test.runTest
 import kotlin.io.path.createTempDirectory
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import kotlinx.coroutines.test.runTest
 
 class ProcessAdbBridgeTest {
     @Test

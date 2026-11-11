@@ -67,10 +67,11 @@ import com.crackmydroid.shared.presentation.preview.AppPreviewEnvironment
 import com.crackmydroid.shared.presentation.preview.AppScreenPreviews
 import com.crackmydroid.shared.ui.activities.ActivityAppReport
 import com.crackmydroid.shared.ui.activities.ActivityGroup
-import com.crackmydroid.shared.ui.activities.ActivityListState
-import com.crackmydroid.shared.ui.activities.ActivityListEvent
 import com.crackmydroid.shared.ui.activities.ActivityListEffect
+import com.crackmydroid.shared.ui.activities.ActivityListEvent
+import com.crackmydroid.shared.ui.activities.ActivityListState
 import com.crackmydroid.shared.ui.activities.ActivityListViewModel
+import com.crackmydroid.shared.ui.activities.uiLabel
 import com.crackmydroid.shared.ui.screens.screenContentPadding
 import kotlinx.coroutines.launch
 
@@ -84,6 +85,7 @@ fun ActivityListScreen(
     onMenu: () -> Unit = {},
 ) {
     val state by viewModel.state.collectAsState()
+
     @Suppress("DEPRECATION")
     val clipboard = LocalClipboardManager.current
     LaunchedEffect(viewModel) {
@@ -94,7 +96,9 @@ fun ActivityListScreen(
     val callbacks = remember(viewModel) {
         ActivityListCallbacks(
             onRefresh = { viewModel.handleEvent(ActivityListEvent.Refresh()) },
-            onSetFilter = { value, trackUsage -> viewModel.handleEvent(ActivityListEvent.FilterChanged(value, trackUsage)) },
+            onSetFilter = { value, trackUsage ->
+                viewModel.handleEvent(ActivityListEvent.FilterChanged(value, trackUsage))
+            },
             onReportRequested = { viewModel.handleEvent(ActivityListEvent.ReportRequested(it)) },
             onReportDismissed = { viewModel.handleEvent(ActivityListEvent.ReportDismissed()) },
             onExportVisualReport = { viewModel.handleEvent(ActivityListEvent.VisualReportExportRequested(it)) },
@@ -106,7 +110,9 @@ fun ActivityListScreen(
             onLaunch = { viewModel.handleEvent(ActivityListEvent.ActivityLaunched(it)) },
             onOpenGuidedLaunch = { viewModel.handleEvent(ActivityListEvent.GuidedLaunchOpened(it)) },
             onToggleFavorite = { viewModel.handleEvent(ActivityListEvent.FavoriteToggled(it)) },
-            onLaunchGuided = { action, dataUri, mimeType -> viewModel.handleEvent(ActivityListEvent.GuidedLaunchConfirmed(action, dataUri, mimeType)) },
+            onLaunchGuided = { action, dataUri, mimeType ->
+                viewModel.handleEvent(ActivityListEvent.GuidedLaunchConfirmed(action, dataUri, mimeType))
+            },
             onDismissGuidedLaunch = { viewModel.handleEvent(ActivityListEvent.GuidedLaunchDismissed()) },
         )
     }

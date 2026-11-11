@@ -12,7 +12,8 @@ class LogRepositoryDesktop(
     adbBridge: AdbBridge,
     sessionController: DeviceSessionController,
     private val cache: DesktopScanCache,
-) : DesktopAdbRepositorySupport(adbBridge, sessionController), LogRepository {
+) : DesktopAdbRepositorySupport(adbBridge, sessionController),
+    LogRepository {
     override suspend fun fetchLog(): List<String> = withContext(Dispatchers.IO) {
         cache.logs?.let { return@withContext it }
         val device = selectedDevice()
@@ -23,5 +24,4 @@ class LogRepositoryDesktop(
             cache.logs = it
         }
     }
-
 }

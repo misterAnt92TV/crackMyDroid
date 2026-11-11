@@ -8,13 +8,13 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
 import io.ktor.serialization.kotlinx.json.json
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.test.runTest
-import kotlinx.serialization.json.Json
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertIs
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.test.runTest
+import kotlinx.serialization.json.Json
 
 class IntegrityBackendClientTest {
     @Test

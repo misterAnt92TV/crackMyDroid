@@ -14,7 +14,8 @@ class DeviceInfoRepositoryDesktop(
     adbBridge: AdbBridge,
     sessionController: DeviceSessionController,
     private val cache: DesktopScanCache,
-) : DesktopAdbRepositorySupport(adbBridge, sessionController), DeviceInfoRepository {
+) : DesktopAdbRepositorySupport(adbBridge, sessionController),
+    DeviceInfoRepository {
     override suspend fun getDeviceInfo(): DeviceInfo = withContext(Dispatchers.Default) {
         cache.deviceInfo?.let { return@withContext it }
 

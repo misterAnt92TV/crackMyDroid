@@ -15,8 +15,3 @@ interface ActivityRepository {
         mimeType: String? = null,
     ): Result<Unit>
 }
-
-
-
-
-

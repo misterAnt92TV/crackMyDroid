@@ -22,11 +22,7 @@ data class ActivityListState(
 
 data class GuidedLaunchState(val entry: ActivityEntry)
 
-data class ActivityGroup(
-    val packageName: String,
-    val label: String?,
-    val activities: List<ActivityEntry>,
-)
+data class ActivityGroup(val packageName: String, val label: String?, val activities: List<ActivityEntry>)
 
 data class ActivityAppReport(
     val packageName: String,

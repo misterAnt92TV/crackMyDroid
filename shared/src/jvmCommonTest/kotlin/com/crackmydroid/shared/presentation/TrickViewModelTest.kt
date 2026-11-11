@@ -9,6 +9,11 @@ import com.crackmydroid.shared.ui.trick.TrickViewModel
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
@@ -17,11 +22,6 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class TrickViewModelTest {

@@ -2,7 +2,6 @@ package com.crackmydroid.shared.data.snapshot
 
 import android.content.Context
 import com.crackmydroid.architecture.logging.AppLogger
-import com.crackmydroid.database.CacheDatabase
 import com.crackmydroid.shared.domain.model.PlayIntegrityResult
 import com.crackmydroid.shared.domain.model.scansnapshot.DeviceScanSnapshot
 import com.crackmydroid.shared.domain.model.scansnapshot.DeviceScanSnapshotContract
@@ -16,10 +15,11 @@ import com.crackmydroid.shared.domain.repository.RootCheckRepository
 import com.crackmydroid.shared.domain.repository.log.LogRepository
 import java.io.File
 import java.util.concurrent.atomic.AtomicBoolean
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.json.encodeToStream
 
 class AndroidDeviceSnapshotCoordinator(
     private val context: Context,
-    private val db: CacheDatabase,
     private val activityRepository: ActivityRepository,
     private val deviceInfoRepository: DeviceInfoRepository,
     private val rootCheckRepository: RootCheckRepository,
@@ -43,8 +43,6 @@ class AndroidDeviceSnapshotCoordinator(
     }
 
     private suspend fun writeSnapshot() {
-        clearRepositoryCaches()
-
         val deviceInfoSection = captureSection { deviceInfoRepository.getDeviceInfo() }
         val installedAppsSection = captureSection { installedAppsRepository.listInstalled() }
         val permissionsSection = captureSection { permissionsRepository.listAppPermissions() }
@@ -83,26 +81,20 @@ class AndroidDeviceSnapshotCoordinator(
         AppLogger.logger.i { "Snapshot Android scritto in ${targetFile().absolutePath}" }
     }
 
-    private fun clearRepositoryCaches() {
-        db.cacheDatabaseQueries.transaction {
-            db.cacheDatabaseQueries.clearActivities()
-            db.cacheDatabaseQueries.clearPermissions()
-            db.cacheDatabaseQueries.clearInstalled()
-            db.cacheDatabaseQueries.clearDeviceInfo()
-        }
-    }
-
     private suspend inline fun <T> captureSection(crossinline loader: suspend () -> T): SnapshotSection<T> = try {
         SnapshotSection.ready(loader())
     } catch (error: Throwable) {
         SnapshotSection.failed(error.message ?: "Errore sconosciuto")
     }
 
+    @OptIn(ExperimentalSerializationApi::class)
     private fun writeAtomically(snapshot: DeviceScanSnapshot) {
         val target = targetFile()
         target.parentFile?.mkdirs()
         val temp = File(target.parentFile, "${target.name}.tmp")
-        temp.writeText(DeviceScanSnapshotJson.format.encodeToString(snapshot))
+        temp.outputStream().buffered().use { outputStream ->
+            DeviceScanSnapshotJson.format.encodeToStream(snapshot, outputStream)
+        }
         if (target.exists() && !target.delete()) {
             error("Impossibile sostituire snapshot esistente")
         }

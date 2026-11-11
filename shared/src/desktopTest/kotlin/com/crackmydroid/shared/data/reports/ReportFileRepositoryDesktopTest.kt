@@ -3,13 +3,13 @@ package com.crackmydroid.shared.data.reports
 import com.crackmydroid.shared.domain.model.ExportDocument
 import com.crackmydroid.shared.domain.model.ExportFormat
 import com.crackmydroid.shared.util.TextPdfWriter
-import kotlinx.coroutines.test.runTest
-import org.apache.pdfbox.Loader
-import org.apache.pdfbox.text.PDFTextStripper
 import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import kotlinx.coroutines.test.runTest
+import org.apache.pdfbox.Loader
+import org.apache.pdfbox.text.PDFTextStripper
 
 class ReportFileRepositoryDesktopTest {
     @Test

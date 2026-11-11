@@ -55,18 +55,13 @@ enum class SnapshotSectionState {
     FAILED,
 
     @SerialName("skipped")
-    SKIPPED
+    SKIPPED,
 }
 
 @Serializable
-data class SnapshotSection<T>(
-    val state: SnapshotSectionState,
-    val data: T? = null,
-    val error: String? = null,
-) {
+data class SnapshotSection<T>(val state: SnapshotSectionState, val data: T? = null, val error: String? = null) {
     companion object {
-        fun <T> ready(data: T): SnapshotSection<T> =
-            SnapshotSection(state = SnapshotSectionState.READY, data = data)
+        fun <T> ready(data: T): SnapshotSection<T> = SnapshotSection(state = SnapshotSectionState.READY, data = data)
 
         fun <T> failed(error: String): SnapshotSection<T> =
             SnapshotSection(state = SnapshotSectionState.FAILED, error = error)

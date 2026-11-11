@@ -34,6 +34,8 @@ fun AppDialog(
                     fullWidth = false,
                 )
             }
-        } else null,
+        } else {
+            null
+        },
     )
 }

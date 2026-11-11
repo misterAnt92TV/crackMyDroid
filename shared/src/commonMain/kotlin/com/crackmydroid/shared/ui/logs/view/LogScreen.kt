@@ -59,9 +59,9 @@ import com.crackmydroid.shared.presentation.components.SectionHeader
 import com.crackmydroid.shared.presentation.components.text.AppText
 import com.crackmydroid.shared.presentation.preview.AppPreviewEnvironment
 import com.crackmydroid.shared.presentation.preview.AppScreenPreviews
+import com.crackmydroid.shared.ui.logs.LogEvent
 import com.crackmydroid.shared.ui.logs.LogState
 import com.crackmydroid.shared.ui.logs.LogViewModel
-import com.crackmydroid.shared.ui.logs.LogEvent
 import kotlinx.coroutines.launch
 
 @Composable

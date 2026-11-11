@@ -10,7 +10,6 @@ import com.crackmydroid.shared.util.runSuspendCatching
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 
 class InfoViewModel(
     private val getInfo: GetDeviceInfoUseCase,

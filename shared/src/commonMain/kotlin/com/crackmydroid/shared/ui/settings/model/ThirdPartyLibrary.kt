@@ -1,10 +1,7 @@
 package com.crackmydroid.shared.ui.settings.model
 
 /** Public project information shown in Settings; versions remain owned by the Gradle catalog. */
-data class ThirdPartyLibrary(
-    val name: String,
-    val url: String,
-)
+data class ThirdPartyLibrary(val name: String, val url: String)
 
 object ThirdPartyLibraries {
     val catalog: List<ThirdPartyLibrary> = listOf(

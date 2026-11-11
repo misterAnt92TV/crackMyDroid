@@ -17,6 +17,12 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import io.mockk.slot
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -26,12 +32,6 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromJsonElement
-import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
-import kotlin.test.assertNull
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class InstalledAppsViewModelTest {

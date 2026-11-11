@@ -12,10 +12,7 @@ import com.crackmydroid.shared.domain.repository.AdbBridge
 import com.crackmydroid.shared.util.DesktopPaths
 import java.io.File
 
-class RemoteDeviceSnapshotImporter(
-    private val adbBridge: AdbBridge,
-    private val cache: DesktopScanCache,
-) {
+class RemoteDeviceSnapshotImporter(private val adbBridge: AdbBridge, private val cache: DesktopScanCache) {
     suspend fun import(device: ConnectedDevice, adbPath: String?): SnapshotImportOutcome {
         cache.snapshotLoadAttempted = true
 
@@ -49,7 +46,9 @@ class RemoteDeviceSnapshotImporter(
             )
         }
 
-        if (snapshot.schemaVersion !in DeviceScanSnapshot.MIN_SUPPORTED_SCHEMA_VERSION..DeviceScanSnapshot.SCHEMA_VERSION) {
+        if (snapshot.schemaVersion !in
+            DeviceScanSnapshot.MIN_SUPPORTED_SCHEMA_VERSION..DeviceScanSnapshot.SCHEMA_VERSION
+        ) {
             return SnapshotImportOutcome(
                 usedSnapshot = false,
                 message = "Snapshot incompatibile: schema ${snapshot.schemaVersion}",

@@ -7,11 +7,11 @@ import com.crackmydroid.shared.domain.model.app.AppLanguage
 import com.crackmydroid.shared.domain.model.app.AppTheme
 import com.crackmydroid.shared.domain.repository.AdbBridge
 import com.crackmydroid.shared.domain.repository.SettingsRepository
-import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import kotlinx.coroutines.test.runTest
 
 class DeviceSessionControllerDesktopTest {
     @Test
@@ -64,14 +64,11 @@ class DeviceSessionControllerDesktopTest {
     }
 }
 
-private class FakeAdbBridge(
-    val devices: List<ConnectedDevice>,
-) : AdbBridge {
+private class FakeAdbBridge(val devices: List<ConnectedDevice>) : AdbBridge {
     override suspend fun resolveBinary(configuredPath: String?): Result<String> =
         Result.success(configuredPath ?: "/usr/bin/adb")
 
-    override suspend fun listDevices(configuredPath: String?): Result<List<ConnectedDevice>> =
-        Result.success(devices)
+    override suspend fun listDevices(configuredPath: String?): Result<List<ConnectedDevice>> = Result.success(devices)
 
     override suspend fun shell(
         serial: String,
@@ -87,11 +84,8 @@ private class FakeAdbBridge(
         configuredPath: String?,
     ): Result<String> = Result.success(localPath)
 
-    override suspend fun logcat(
-        serial: String,
-        configuredPath: String?,
-        lines: Int,
-    ): Result<List<String>> = Result.success(emptyList())
+    override suspend fun logcat(serial: String, configuredPath: String?, lines: Int): Result<List<String>> =
+        Result.success(emptyList())
 }
 
 private class FakeSettingsRepository : SettingsRepository {

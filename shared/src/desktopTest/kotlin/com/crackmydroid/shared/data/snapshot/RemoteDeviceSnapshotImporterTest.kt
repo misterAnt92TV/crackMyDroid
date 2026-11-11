@@ -12,13 +12,13 @@ import com.crackmydroid.shared.domain.model.scansnapshot.DeviceScanSnapshot
 import com.crackmydroid.shared.domain.model.scansnapshot.DeviceScanSnapshotJson
 import com.crackmydroid.shared.domain.model.scansnapshot.SnapshotSection
 import com.crackmydroid.shared.domain.repository.AdbBridge
-import kotlinx.coroutines.test.runTest
 import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
+import kotlinx.coroutines.test.runTest
 
 class RemoteDeviceSnapshotImporterTest {
     @Test
@@ -137,9 +137,7 @@ class RemoteDeviceSnapshotImporterTest {
     }
 }
 
-private class FakeSnapshotAdbBridge(
-    private val snapshotText: String? = null,
-) : AdbBridge {
+private class FakeSnapshotAdbBridge(private val snapshotText: String? = null) : AdbBridge {
     override suspend fun resolveBinary(configuredPath: String?): Result<String> =
         Result.success(configuredPath ?: "/usr/bin/adb")
 
@@ -166,9 +164,6 @@ private class FakeSnapshotAdbBridge(
         localPath
     }
 
-    override suspend fun logcat(
-        serial: String,
-        configuredPath: String?,
-        lines: Int,
-    ): Result<List<String>> = Result.success(emptyList())
+    override suspend fun logcat(serial: String, configuredPath: String?, lines: Int): Result<List<String>> =
+        Result.success(emptyList())
 }

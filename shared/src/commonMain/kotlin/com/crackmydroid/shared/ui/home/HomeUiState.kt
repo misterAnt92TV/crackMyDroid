@@ -11,7 +11,7 @@ data class LastOperationItem(
 
 enum class OperationOutcome {
     Success,
-    Failure
+    Failure,
 }
 
 data class HomeUiState(

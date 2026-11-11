@@ -13,24 +13,20 @@ import com.crackmydroid.shared.domain.repository.RootCheckRepository
 import com.crackmydroid.shared.i18n.platformLanguage
 import com.crackmydroid.shared.i18n.stringsFor
 import com.scottyab.rootbeer.RootBeer
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.Calendar
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withContext
 
 class RootCheckRepositoryAndroid(
     private val context: Context,
     private val integrityVerificationRepository: IntegrityVerificationRepository,
 ) : RootCheckRepository {
-    private data class RootSignal(
-        val label: String,
-        val detected: Boolean,
-        val detail: String,
-    )
+    private data class RootSignal(val label: String, val detected: Boolean, val detail: String)
 
     private data class ShellCommandOutput(
         val success: Boolean,
@@ -107,7 +103,9 @@ class RootCheckRepositoryAndroid(
         val sudo = runShellCommand("command -v sudo")
         val sudoProbe = if (sudo.success && sudo.stdout.isNotBlank()) {
             runShellCommand("sudo -n id", timeoutMs = 700L)
-        } else null
+        } else {
+            null
+        }
         checks += RootCheck(
             RootCheckId.SUDO,
             when {
@@ -141,7 +139,11 @@ class RootCheckRepositoryAndroid(
         hardeningSignals += RootSignal(
             label = "Dangerous props",
             detected = dangerousProps,
-            detail = if (dangerousProps) "Proprieta sistema sospette rilevate." else "Nessuna proprieta sospetta rilevata.",
+            detail = if (dangerousProps) {
+                "Proprieta sistema sospette rilevate."
+            } else {
+                "Nessuna proprieta sospetta rilevata."
+            },
         )
 
         val rwPaths = runCatching { rootBeer.checkForRWPaths() }.getOrDefault(false)
@@ -259,12 +261,11 @@ class RootCheckRepositoryAndroid(
         }.getOrDefault(false)
     }
 
-    private fun readFirstLine(path: String): String? =
-        runCatching {
-            val file = File(path)
-            if (!file.exists() || !file.canRead()) return@runCatching null
-            file.bufferedReader().use { reader -> reader.readLine()?.trim() }
-        }.getOrNull()
+    private fun readFirstLine(path: String): String? = runCatching {
+        val file = File(path)
+        if (!file.exists() || !file.canRead()) return@runCatching null
+        file.bufferedReader().use { reader -> reader.readLine()?.trim() }
+    }.getOrNull()
 
     private fun runShellCommand(command: String, timeoutMs: Long = 450L): ShellCommandOutput {
         return runCatching {

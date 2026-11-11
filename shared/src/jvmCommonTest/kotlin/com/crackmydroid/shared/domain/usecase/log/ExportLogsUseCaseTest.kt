@@ -8,9 +8,9 @@ import com.crackmydroid.shared.domain.usecase.settings.GetExportFormatUseCase
 import io.mockk.coEvery
 import io.mockk.mockk
 import io.mockk.slot
-import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlinx.coroutines.test.runTest
 
 class ExportLogsUseCaseTest {
     @Test

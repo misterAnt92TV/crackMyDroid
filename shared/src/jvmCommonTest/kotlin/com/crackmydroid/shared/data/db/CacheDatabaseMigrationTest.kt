@@ -125,7 +125,9 @@ class CacheDatabaseMigrationTest {
             val callbacks = mutableListOf<Long>()
             CacheDatabase(driver).transaction {
                 CacheDatabaseSchema.migrate(
-                    driver, 1, 3,
+                    driver,
+                    1,
+                    3,
                     AfterVersion(1) {
                         assertTrue("installSourceClassification" in columns(it, "installed_apps_cache"))
                         callbacks += 1
@@ -206,7 +208,8 @@ class CacheDatabaseMigrationTest {
                 "SELECT value FROM device_info_cache WHERE key='device_info'",
             )) {
                 val plan = driver.executeQuery(
-                    null, "EXPLAIN QUERY PLAN $query",
+                    null,
+                    "EXPLAIN QUERY PLAN $query",
                     { cursor ->
                         val details = mutableListOf<String>()
                         while (cursor.next().value) details += checkNotNull(cursor.getString(3))
@@ -221,10 +224,14 @@ class CacheDatabaseMigrationTest {
     }
 
     private fun legacySchema(driver: SqlDriver, manifest: Boolean, activityFlags: Boolean, version: Long) {
-        val manifestColumns = if (manifest) """
+        val manifestColumns = if (manifest) {
+            """
             , debuggable INTEGER NOT NULL DEFAULT 0, allowBackup INTEGER NOT NULL DEFAULT 0,
             testOnly INTEGER NOT NULL DEFAULT 0, targetSdkVersion INTEGER, minSdkVersion INTEGER
-        """ else ""
+        """
+        } else {
+            ""
+        }
         val activityColumns = if (activityFlags) ", exported INTEGER NOT NULL DEFAULT 0, permission TEXT" else ""
         driver.execute(
             null,
@@ -233,7 +240,7 @@ class CacheDatabaseMigrationTest {
                 packageName TEXT NOT NULL PRIMARY KEY, appLabel TEXT NOT NULL, sourcePath TEXT NOT NULL
                 $manifestColumns
             )
-        """.trimIndent(),
+            """.trimIndent(),
             0,
         )
         driver.execute(
@@ -243,7 +250,7 @@ class CacheDatabaseMigrationTest {
                 packageName TEXT NOT NULL, appLabel TEXT NOT NULL, activityName TEXT NOT NULL,
                 label TEXT NOT NULL $activityColumns, PRIMARY KEY(packageName, activityName)
             )
-        """.trimIndent(),
+            """.trimIndent(),
             0,
         )
         driver.execute(
@@ -253,7 +260,7 @@ class CacheDatabaseMigrationTest {
                 packageName TEXT NOT NULL, appLabel TEXT NOT NULL, permission TEXT NOT NULL,
                 PRIMARY KEY(packageName, permission)
             )
-        """.trimIndent(),
+            """.trimIndent(),
             0,
         )
         driver.execute(null, "CREATE TABLE device_info_cache (key TEXT NOT NULL PRIMARY KEY, value TEXT NOT NULL)", 0)
@@ -325,31 +332,33 @@ class CacheDatabaseMigrationTest {
         )
     }
 
-    private fun scalar(driver: SqlDriver, sql: String): Long =
-        driver.executeQuery(
-            null, sql,
-            { cursor ->
-                check(cursor.next().value)
-                QueryResult.Value(checkNotNull(cursor.getLong(0)))
-            },
-            0,
-        ).value
+    private fun scalar(driver: SqlDriver, sql: String): Long = driver.executeQuery(
+        null,
+        sql,
+        { cursor ->
+            check(cursor.next().value)
+            QueryResult.Value(checkNotNull(cursor.getLong(0)))
+        },
+        0,
+    ).value
 
-    private fun columns(driver: SqlDriver, table: String): Map<String, List<String?>> =
-        driver.executeQuery(
-            null, "PRAGMA table_info($table)",
-            { cursor ->
-                val result = mutableMapOf<String, List<String?>>()
-                while (cursor.next().value) {
-                    result[checkNotNull(cursor.getString(1))] = listOf(
-                        cursor.getString(2), cursor.getLong(3).toString(),
-                        cursor.getString(4), cursor.getLong(5).toString(),
-                    )
-                }
-                QueryResult.Value(result)
-            },
-            0,
-        ).value
+    private fun columns(driver: SqlDriver, table: String): Map<String, List<String?>> = driver.executeQuery(
+        null,
+        "PRAGMA table_info($table)",
+        { cursor ->
+            val result = mutableMapOf<String, List<String?>>()
+            while (cursor.next().value) {
+                result[checkNotNull(cursor.getString(1))] = listOf(
+                    cursor.getString(2),
+                    cursor.getLong(3).toString(),
+                    cursor.getString(4),
+                    cursor.getLong(5).toString(),
+                )
+            }
+            QueryResult.Value(result)
+        },
+        0,
+    ).value
 
     private val tables = listOf("installed_apps_cache", "activities_cache", "permissions_cache", "device_info_cache")
 }
