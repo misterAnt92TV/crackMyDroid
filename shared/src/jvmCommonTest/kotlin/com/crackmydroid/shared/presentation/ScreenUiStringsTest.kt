@@ -16,6 +16,10 @@ class ScreenUiStringsTest {
             assertTrue(strings.confirmCommand.isNotBlank())
             assertTrue(strings.riskScanTitle.isNotBlank())
             assertTrue(strings.logTrimmed.isNotBlank())
+            assertTrue(strings.exitConfirmTitle.isNotBlank())
+            assertTrue(strings.exitConfirmMessage.isNotBlank())
+            assertTrue(strings.exitConfirmButton.isNotBlank())
+            assertTrue(strings.exitCancelButton.isNotBlank())
         }
     }
 

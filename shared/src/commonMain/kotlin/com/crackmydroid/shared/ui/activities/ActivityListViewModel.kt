@@ -20,6 +20,8 @@ import com.crackmydroid.shared.domain.usecase.settings.SetActivityPackageFavorit
 import com.crackmydroid.shared.i18n.format
 import com.crackmydroid.shared.presentation.LocalizedBaseViewModel
 import com.crackmydroid.shared.presentation.operations.NoOpOperationLogRepository
+import com.crackmydroid.shared.ui.activities.model.ActivityListEffect
+import com.crackmydroid.shared.ui.activities.model.uiLabel
 import com.crackmydroid.shared.util.runSuspendCatching
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow

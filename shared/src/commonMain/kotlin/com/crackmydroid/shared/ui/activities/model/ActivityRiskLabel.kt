@@ -1,4 +1,4 @@
-package com.crackmydroid.shared.ui.activities
+package com.crackmydroid.shared.ui.activities.model
 
 import com.crackmydroid.shared.domain.model.activity.ActivityIntentRiskLevel
 import com.crackmydroid.shared.i18n.ActivityUiStrings

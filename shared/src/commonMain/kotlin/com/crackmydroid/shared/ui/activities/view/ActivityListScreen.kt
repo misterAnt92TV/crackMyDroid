@@ -70,11 +70,11 @@ import com.crackmydroid.shared.presentation.preview.AppPreviewEnvironment
 import com.crackmydroid.shared.presentation.preview.AppScreenPreviews
 import com.crackmydroid.shared.ui.activities.ActivityAppReport
 import com.crackmydroid.shared.ui.activities.ActivityGroup
-import com.crackmydroid.shared.ui.activities.ActivityListEffect
+import com.crackmydroid.shared.ui.activities.model.ActivityListEffect
 import com.crackmydroid.shared.ui.activities.ActivityListEvent
 import com.crackmydroid.shared.ui.activities.ActivityListState
 import com.crackmydroid.shared.ui.activities.ActivityListViewModel
-import com.crackmydroid.shared.ui.activities.uiLabel
+import com.crackmydroid.shared.ui.activities.model.uiLabel
 import com.crackmydroid.shared.ui.screens.screenContentPadding
 import kotlinx.coroutines.launch
 

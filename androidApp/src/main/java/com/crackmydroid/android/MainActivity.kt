@@ -45,6 +45,7 @@ class MainActivity : ComponentActivity() {
                         CrackMyDroidApp(
                             dependencies = presentationDependencies,
                             systemMotionReductionEnabled = rememberSystemMotionReduction(),
+                            onExitApp = ::finish,
                         )
                         var showDisclosure by remember { mutableStateOf(!disclosureSeen) }
                         if (showDisclosure) {

@@ -10,6 +10,8 @@ import com.crackmydroid.shared.domain.usecase.reports.ExportReportUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetPermissionFavoritesUseCase
 import com.crackmydroid.shared.domain.usecase.settings.SetPermissionFavoritesUseCase
 import com.crackmydroid.shared.presentation.LocalizedBaseViewModel
+import com.crackmydroid.shared.ui.permissions.model.PermissionsEffect
+import com.crackmydroid.shared.ui.permissions.model.toUi
 import com.crackmydroid.shared.util.runSuspendCatching
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay

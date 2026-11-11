@@ -84,8 +84,8 @@ import com.crackmydroid.shared.presentation.components.card.ExportDetailsCard
 import com.crackmydroid.shared.presentation.components.text.AppText
 import com.crackmydroid.shared.presentation.preview.AppPreviewEnvironment
 import com.crackmydroid.shared.presentation.preview.AppScreenPreviews
-import com.crackmydroid.shared.ui.permissions.PermissionFindingUi
-import com.crackmydroid.shared.ui.permissions.PermissionsEffect
+import com.crackmydroid.shared.ui.permissions.model.PermissionFindingUi
+import com.crackmydroid.shared.ui.permissions.model.PermissionsEffect
 import com.crackmydroid.shared.ui.permissions.PermissionsEvent
 import com.crackmydroid.shared.ui.permissions.PermissionsState
 import com.crackmydroid.shared.ui.permissions.PermissionsViewModel

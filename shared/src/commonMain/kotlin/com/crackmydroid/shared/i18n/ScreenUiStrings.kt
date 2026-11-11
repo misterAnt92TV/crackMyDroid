@@ -478,6 +478,38 @@ class ScreenUiStrings(private val language: String) {
         "No se pudo guardar el ajuste",
         "Impossible d’enregistrer le réglage",
     )
+    val exitConfirmTitle
+        get() = text(
+            "Uscita dall'app",
+            "Exit app",
+            "App beenden",
+            "Salir de la aplicación",
+            "Quitter l'application",
+        )
+    val exitConfirmMessage
+        get() = text(
+            "Sei sicuro di voler uscire da CrackMyDroid?",
+            "Are you sure you want to exit CrackMyDroid?",
+            "Möchten Sie CrackMyDroid wirklich beenden?",
+            "¿Seguro que deseas salir de CrackMyDroid?",
+            "Voulez-vous vraiment quitter CrackMyDroid ?",
+        )
+    val exitConfirmButton
+        get() = text(
+            "Esci",
+            "Exit",
+            "Beenden",
+            "Salir",
+            "Quitter",
+        )
+    val exitCancelButton
+        get() = text(
+            "Annulla",
+            "Cancel",
+            "Abbrechen",
+            "Cancelar",
+            "Annuler",
+        )
 
     companion object {
         fun from(strings: Strings): ScreenUiStrings = ScreenUiStrings(strings.activityUi.languageCode)

@@ -66,12 +66,15 @@ import androidx.compose.ui.unit.dp
 import com.crackmydroid.shared.domain.model.app.AppLanguage
 import com.crackmydroid.shared.domain.model.app.AppTheme
 import com.crackmydroid.shared.i18n.LocalStrings
+import com.crackmydroid.shared.i18n.ScreenUiStrings
 import com.crackmydroid.shared.i18n.Strings
 import com.crackmydroid.shared.i18n.format
 import com.crackmydroid.shared.i18n.platformLanguage
 import com.crackmydroid.shared.i18n.resolveLanguageCode
 import com.crackmydroid.shared.i18n.stringsFor
 import com.crackmydroid.shared.presentation.components.AccessibilityPrefs
+import com.crackmydroid.shared.presentation.components.AppBackHandler
+import com.crackmydroid.shared.presentation.components.AppDialog
 import com.crackmydroid.shared.presentation.components.LocalAccessibilityPrefs
 import com.crackmydroid.shared.presentation.components.PackageIcon
 import com.crackmydroid.shared.presentation.components.effectiveReduceMotion
@@ -102,10 +105,12 @@ fun CrackMyDroidApp(
     dependencies: AppPresentationDependencies,
     onLanguageChanged: (AppLanguage) -> Unit = {},
     systemMotionReductionEnabled: Boolean = false,
+    onExitApp: (() -> Unit)? = null,
 ) {
     val drawerState: DrawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val androidAppVersionName = appVersionName()
+    var showExitConfirmDialog by remember { mutableStateOf(false) }
 
     val activityVm = dependencies.activity
     val rootVm = dependencies.root
@@ -121,7 +126,28 @@ fun CrackMyDroidApp(
     val shellState by shellVm.state.collectAsState()
     val settingsState = settingsVm.state.collectAsState()
     val languageCode = resolveLanguageCode(settingsState.value.language, platformLanguage())
+
+    AppBackHandler(enabled = true) {
+        when {
+            showExitConfirmDialog -> {
+                showExitConfirmDialog = false
+            }
+
+            drawerState.isOpen -> {
+                scope.launch { drawerState.close() }
+            }
+
+            shellState.selectedScreen != Screen.Home -> {
+                shellVm.handleEvent(AppShellEvent.ScreenSelected(Screen.Home, false))
+            }
+
+            onExitApp != null -> {
+                showExitConfirmDialog = true
+            }
+        }
+    }
     val strings = stringsFor(languageCode)
+    val screenUi = remember(languageCode) { ScreenUiStrings(languageCode) }
     val accessibilityPrefs = AccessibilityPrefs(
         highContrast = settingsState.value.highContrast,
         reduceMotion = effectiveReduceMotion(
@@ -464,6 +490,22 @@ fun CrackMyDroidApp(
                         .windowInsetsTopHeight(WindowInsets.statusBars)
                         .background(MaterialTheme.colorScheme.background),
                 )
+            }
+
+            if (showExitConfirmDialog) {
+                AppDialog(
+                    title = screenUi.exitConfirmTitle,
+                    confirmLabel = screenUi.exitConfirmButton,
+                    dismissLabel = screenUi.exitCancelButton,
+                    onConfirm = {
+                        showExitConfirmDialog = false
+                        onExitApp?.invoke()
+                    },
+                    onDismiss = { showExitConfirmDialog = false },
+                    onDismissAction = { showExitConfirmDialog = false },
+                ) {
+                    AppText(screenUi.exitConfirmMessage)
+                }
             }
         }
 

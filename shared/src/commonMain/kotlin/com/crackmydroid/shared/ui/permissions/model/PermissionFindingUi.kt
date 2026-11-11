@@ -1,4 +1,4 @@
-package com.crackmydroid.shared.ui.permissions
+package com.crackmydroid.shared.ui.permissions.model
 
 import com.crackmydroid.shared.domain.model.PermissionRiskFinding
 import com.crackmydroid.shared.domain.model.PermissionRiskLevel
