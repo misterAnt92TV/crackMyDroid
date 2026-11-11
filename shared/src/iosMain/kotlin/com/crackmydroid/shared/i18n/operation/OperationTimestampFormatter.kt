@@ -5,6 +5,8 @@ import platform.Foundation.NSDateFormatter
 import platform.Foundation.NSDateFormatterShortStyle
 import platform.Foundation.NSLocale
 
+private const val SECONDS_BETWEEN_1970_AND_2001 = 978307200.0
+
 actual fun formatOperationTimestamp(timestamp: Long, languageCode: String): String {
     if (timestamp <= 0L) return "—"
     val formatter = NSDateFormatter().apply {
@@ -12,5 +14,6 @@ actual fun formatOperationTimestamp(timestamp: Long, languageCode: String): Stri
         dateStyle = NSDateFormatterShortStyle
         timeStyle = NSDateFormatterShortStyle
     }
-    return formatter.stringFromDate(NSDate(timeIntervalSince1970 = timestamp / 1000.0)) ?: "—"
+    val date = NSDate(timeIntervalSinceReferenceDate = (timestamp / 1000.0) - SECONDS_BETWEEN_1970_AND_2001)
+    return formatter.stringFromDate(date)
 }

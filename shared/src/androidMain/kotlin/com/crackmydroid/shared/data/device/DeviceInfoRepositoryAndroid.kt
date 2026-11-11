@@ -181,7 +181,7 @@ class DeviceInfoRepositoryAndroid(private val context: Context, private val db: 
         return runCatching { Build.getSerial() }.getOrNull()
     }
 
-    @Suppress("MissingPermission")
+    @Suppress("DEPRECATION", "MissingPermission")
     private fun readImei(): String? {
         val tm =
             context.getSystemService(Context.TELEPHONY_SERVICE) as? TelephonyManager ?: return null
@@ -189,7 +189,6 @@ class DeviceInfoRepositoryAndroid(private val context: Context, private val db: 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 tm.imei ?: tm.meid
             } else {
-                @Suppress("DEPRECATION")
                 tm.deviceId
             }
         }.getOrNull()

@@ -1,6 +1,7 @@
 package com.crackmydroid.shared.data.root
 
 import android.content.Context
+import android.content.pm.PackageManager
 import android.os.Build
 import android.provider.Settings
 import com.crackmydroid.shared.domain.model.RootStatus
@@ -253,13 +254,18 @@ class RootCheckRepositoryAndroid(
             }
         }
 
-    private fun isPackageInstalled(packageName: String): Boolean {
-        @Suppress("DEPRECATION")
-        return runCatching {
+    private fun isPackageInstalled(packageName: String): Boolean = runCatching {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            context.packageManager.getPackageInfo(
+                packageName,
+                PackageManager.PackageInfoFlags.of(0),
+            )
+        } else {
+            @Suppress("DEPRECATION")
             context.packageManager.getPackageInfo(packageName, 0)
-            true
-        }.getOrDefault(false)
-    }
+        }
+        true
+    }.getOrDefault(false)
 
     private fun readFirstLine(path: String): String? = runCatching {
         val file = File(path)
