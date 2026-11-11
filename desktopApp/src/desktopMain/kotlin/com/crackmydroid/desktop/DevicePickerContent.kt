@@ -1,4 +1,5 @@
 package com.crackmydroid.desktop
+import com.crackmydroid.ui.icons.AppIcons
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -12,9 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -23,12 +21,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.crackmydroid.shared.domain.model.ConnectedDevice
 import com.crackmydroid.shared.i18n.LocalStrings
-import com.crackmydroid.shared.presentation.components.AppButton
-import com.crackmydroid.shared.presentation.components.AppProgressIndicator
-import com.crackmydroid.shared.presentation.components.AppTextField
-import com.crackmydroid.shared.presentation.components.ButtonVariant
-import com.crackmydroid.shared.presentation.components.card.AppCard
-import com.crackmydroid.shared.presentation.components.text.AppText
+import com.crackmydroid.ui.components.button.AppButton
+import com.crackmydroid.ui.components.AppProgressIndicator
+import com.crackmydroid.ui.components.text.AppTextField
+import com.crackmydroid.ui.components.button.ButtonVariant
+import com.crackmydroid.ui.components.card.AppCard
+import com.crackmydroid.ui.components.text.AppText
 
 @Composable
 internal fun DevicePickerContent(
@@ -90,14 +88,14 @@ internal fun DevicePickerContent(
                 AppButton(
                     text = strings.desktopDetectDevices,
                     onClick = onRefresh,
-                    leadingIcon = Icons.Filled.Refresh,
+                    leadingIcon = AppIcons.Filled.Refresh,
                     fullWidth = false,
                 )
                 AppButton(
                     text = strings.desktopAdbSettings,
                     onClick = onOpenAdbSettings,
                     variant = ButtonVariant.Tonal,
-                    leadingIcon = Icons.Filled.Settings,
+                    leadingIcon = AppIcons.Filled.Settings,
                     fullWidth = false,
                 )
                 if (loading) {

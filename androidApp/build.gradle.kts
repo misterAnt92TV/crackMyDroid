@@ -56,6 +56,7 @@ kotlin {
 
 dependencies {
     implementation(project(":architectureModule"))
+    implementation(project(":uiModule"))
     implementation(project(":shared"))
     implementation(libs.compose.ui)
     implementation(libs.compose.material3)

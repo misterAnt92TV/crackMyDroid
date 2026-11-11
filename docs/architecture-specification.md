@@ -22,15 +22,20 @@ I principi guida sono:
 | Modulo/source set        | Responsabilità                                                                                |
 |--------------------------|-----------------------------------------------------------------------------------------------|
 | `:architectureModule`    | Fondamenta KMP riusabili: coroutine, logging, base UseCase/ViewModel e contratti UDF          |
-| `:shared`                | Logica condivisa, dominio, UI Compose, contratti, DI e implementazioni platform-specific      |
+| `:uiModule`              | Design system Compose multipiattaforma: tema, componenti generici, icone, tipografia e preview |
+| `:shared`                | Logica condivisa, dominio, UI di feature, contratti, DI e implementazioni platform-specific   |
 | `:androidApp`            | Entry point Android, lifecycle applicativo, Activity e integrazioni Android app-specific      |
 | `:desktopApp`            | Entry point JVM Desktop e composizione della finestra Desktop                                 |
 | `iosApp`                 | Wrapper SwiftUI che ospita la UI condivisa                                                    |
-| `shared/src/commonMain`  | Modelli e feature CrackMyDroid, repository contract, use case, UI e API comuni                |
+| `shared/src/commonMain`  | Modelli e feature CrackMyDroid, repository contract, use case, UI di feature e API comuni      |
 | `architectureModule/src/commonMain` | Base models UDF, dispatcher, logging e lifecycle comuni, senza feature o localizzazione |
 | `shared/src/androidMain` | Repository Android, RootBeer, DataStore, Play Integrity, SQLDelight Android e adapter Android |
 | `shared/src/desktopMain` | ADB, processi JVM, import snapshot, filesystem e repository Desktop                           |
 | `shared/src/iosMain`     | Adapter iOS, database driver e implementazioni `actual`                                       |
+
+`:uiModule` non dipende da `:shared`: i componenti generici ricevono `UiStrings` e preferenze tramite
+CompositionLocal. `:shared` adatta il proprio catalogo `Strings` a `UiStrings`; ricerca con storico e
+componenti PenTest restano invece nella feature che li coordina.
 
 La struttura di test segue la stessa separazione: `commonTest` per logica portabile, `jvmCommonTest`
 per i test JVM condivisi, `desktopTest` per gli adapter Desktop e `androidApp/src/test`/
@@ -40,7 +45,8 @@ per i test JVM condivisi, `desktopTest` per gli adapter Desktop e `androidApp/sr
 
 ### 3.1 Presentation
 
-Si trova principalmente in `com.crackmydroid.shared.ui` e `com.crackmydroid.shared.presentation`.
+Il design system vive in `com.crackmydroid.ui`; schermate e orchestrazione delle feature vivono
+principalmente in `com.crackmydroid.shared.ui` e `com.crackmydroid.shared.presentation`.
 
 Comprende:
 

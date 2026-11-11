@@ -17,6 +17,7 @@ dependencyResolutionManagement {
 rootProject.name = "CrackMyDroid"
 include(":androidApp")
 include(":architectureModule")
+include(":uiModule")
 include(":shared")
 include(":iosApp")
 include(":desktopApp")

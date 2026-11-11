@@ -23,9 +23,9 @@ import com.crackmydroid.shared.i18n.LocalStrings
 import com.crackmydroid.shared.i18n.platformLanguage
 import com.crackmydroid.shared.i18n.resolveLanguageCode
 import com.crackmydroid.shared.i18n.stringsFor
-import com.crackmydroid.shared.presentation.theme.CrackMyDroidTheme
 import com.crackmydroid.shared.ui.AppPresentationDependencies
 import com.crackmydroid.shared.ui.CrackMyDroidApp
+import com.crackmydroid.ui.theme.CrackMyDroidTheme
 import kotlinx.coroutines.launch
 import org.koin.mp.KoinPlatform
 

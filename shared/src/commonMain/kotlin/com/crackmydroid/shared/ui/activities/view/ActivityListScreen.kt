@@ -1,4 +1,5 @@
 package com.crackmydroid.shared.ui.activities.view
+import com.crackmydroid.ui.icons.AppIcons
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,14 +16,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Description
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.filled.StarBorder
-import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
@@ -55,27 +48,27 @@ import com.crackmydroid.shared.domain.model.activity.favoriteKey
 import com.crackmydroid.shared.i18n.LocalStrings
 import com.crackmydroid.shared.i18n.ScreenUiStrings
 import com.crackmydroid.shared.i18n.format
-import com.crackmydroid.shared.presentation.components.AppAccordion
-import com.crackmydroid.shared.presentation.components.AppButton
-import com.crackmydroid.shared.presentation.components.ButtonVariant
-import com.crackmydroid.shared.presentation.components.ErrorDialogComponent
-import com.crackmydroid.shared.presentation.components.PackageIcon
-import com.crackmydroid.shared.presentation.components.ScrollToTopButton
 import com.crackmydroid.shared.presentation.components.SearchFieldWithHistoryComponent
-import com.crackmydroid.shared.presentation.components.SectionHeader
-import com.crackmydroid.shared.presentation.components.card.AppCard
-import com.crackmydroid.shared.presentation.components.card.ExportDetailsCard
-import com.crackmydroid.shared.presentation.components.text.AppText
 import com.crackmydroid.shared.presentation.preview.AppPreviewEnvironment
 import com.crackmydroid.shared.presentation.preview.AppScreenPreviews
 import com.crackmydroid.shared.ui.activities.ActivityAppReport
 import com.crackmydroid.shared.ui.activities.ActivityGroup
-import com.crackmydroid.shared.ui.activities.model.ActivityListEffect
 import com.crackmydroid.shared.ui.activities.ActivityListEvent
 import com.crackmydroid.shared.ui.activities.ActivityListState
 import com.crackmydroid.shared.ui.activities.ActivityListViewModel
+import com.crackmydroid.shared.ui.activities.model.ActivityListEffect
 import com.crackmydroid.shared.ui.activities.model.uiLabel
 import com.crackmydroid.shared.ui.screens.screenContentPadding
+import com.crackmydroid.ui.components.AppAccordion
+import com.crackmydroid.ui.components.button.AppButton
+import com.crackmydroid.ui.components.button.ButtonVariant
+import com.crackmydroid.ui.components.dialog.ErrorDialogComponent
+import com.crackmydroid.ui.components.PackageIcon
+import com.crackmydroid.ui.components.button.ScrollToTopButton
+import com.crackmydroid.ui.components.SectionHeader
+import com.crackmydroid.ui.components.card.AppCard
+import com.crackmydroid.ui.components.card.ExportDetailsCard
+import com.crackmydroid.ui.components.text.AppText
 import kotlinx.coroutines.launch
 
 @Composable
@@ -191,7 +184,7 @@ private fun ActivityListContent(
                     beforeHelpAction = {
                         IconButton(onClick = callbacks.onRefresh) {
                             Icon(
-                                imageVector = Icons.Filled.Refresh,
+                                imageVector = AppIcons.Filled.Refresh,
                                 contentDescription = strings.refreshActivitiesContentDescription,
                                 tint = MaterialTheme.colorScheme.primary,
                             )
@@ -368,7 +361,7 @@ private fun ActivityListContent(
                             },
                         ) {
                             Icon(
-                                imageVector = Icons.Filled.Description,
+                                imageVector = AppIcons.Filled.Description,
                                 contentDescription = strings.reportActivitiesContentDescription,
                                 tint = if (state.selectedReport?.packageName == group.packageName) {
                                     MaterialTheme.colorScheme.primary
@@ -384,14 +377,14 @@ private fun ActivityListContent(
                             },
                         ) {
                             Icon(
-                                imageVector = Icons.Filled.Share,
+                                imageVector = AppIcons.Filled.Share,
                                 contentDescription = strings.shareActivitiesContentDescription,
                                 tint = MaterialTheme.colorScheme.primary,
                             )
                         }
                         IconButton(onClick = { callbacks.onToggleFavoritePackage(group.packageName) }) {
                             Icon(
-                                imageVector = if (favPkg) Icons.Filled.Star else Icons.Filled.StarBorder,
+                                imageVector = if (favPkg) AppIcons.Filled.Star else AppIcons.Filled.StarBorder,
                                 contentDescription = strings.favoriteContentDescription,
                                 tint = if (favPkg) {
                                     MaterialTheme.colorScheme.primary
@@ -433,7 +426,7 @@ private fun ActivityListContent(
                             actions = {
                                 if (!activity.launchableViaShell) {
                                     Icon(
-                                        imageVector = Icons.Filled.Warning,
+                                        imageVector = AppIcons.Filled.Warning,
                                         contentDescription = strings.shellUnavailableContentDescription,
                                         tint = MaterialTheme.colorScheme.error,
                                         modifier = Modifier.size(20.dp).padding(end = 2.dp),
@@ -450,7 +443,7 @@ private fun ActivityListContent(
                                     modifier = Modifier.size(36.dp),
                                 ) {
                                     Icon(
-                                        imageVector = Icons.Filled.PlayArrow,
+                                        imageVector = AppIcons.Filled.PlayArrow,
                                         contentDescription = strings.activityUi.launch,
                                         tint = MaterialTheme.colorScheme.primary,
                                     )
@@ -460,7 +453,7 @@ private fun ActivityListContent(
                                     modifier = Modifier.size(36.dp),
                                 ) {
                                     Icon(
-                                        imageVector = if (isFav) Icons.Filled.Star else Icons.Filled.StarBorder,
+                                        imageVector = if (isFav) AppIcons.Filled.Star else AppIcons.Filled.StarBorder,
                                         contentDescription = strings.favoriteContentDescription,
                                         tint = if (isFav) {
                                             MaterialTheme.colorScheme.primary

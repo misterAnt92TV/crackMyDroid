@@ -2,7 +2,6 @@ package com.crackmydroid.shared.presentation.preview
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -13,24 +12,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.crackmydroid.shared.i18n.LocalStrings
 import com.crackmydroid.shared.i18n.stringsFor
-import com.crackmydroid.shared.presentation.components.AccessibilityPrefs
-import com.crackmydroid.shared.presentation.components.LocalAccessibilityPrefs
-import com.crackmydroid.shared.presentation.theme.CrackMyDroidTheme
-
-@Composable
-internal fun ComponentPreviewContainer(
-    accessibilityPrefs: AccessibilityPrefs = AccessibilityPrefs(),
-    content: @Composable () -> Unit,
-) {
-    AppPreviewEnvironment(accessibilityPrefs = accessibilityPrefs, wrapInSurface = false) {
-        Surface(
-            color = MaterialTheme.colorScheme.background,
-            shape = RoundedCornerShape(20.dp),
-        ) {
-            Column(modifier = Modifier.padding(16.dp), content = { content() })
-        }
-    }
-}
+import com.crackmydroid.shared.i18n.toUiStrings
+import com.crackmydroid.ui.components.AccessibilityPrefs
+import com.crackmydroid.ui.components.LocalAccessibilityPrefs
+import com.crackmydroid.ui.strings.LocalUiStrings
+import com.crackmydroid.ui.theme.CrackMyDroidTheme
 
 @Composable
 internal fun AppPreviewEnvironment(
@@ -39,9 +25,11 @@ internal fun AppPreviewEnvironment(
     wrapInSurface: Boolean = true,
     content: @Composable () -> Unit,
 ) {
+    val strings = stringsFor(languageCode)
     CrackMyDroidTheme {
         CompositionLocalProvider(
-            LocalStrings provides stringsFor(languageCode),
+            LocalStrings provides strings,
+            LocalUiStrings provides strings.toUiStrings(),
             LocalAccessibilityPrefs provides accessibilityPrefs,
         ) {
             if (wrapInSurface) {
@@ -66,7 +54,6 @@ internal fun PreviewSurface(
     ) {
         Column(
             modifier = Modifier
-                .fillMaxWidth()
                 .padding(16.dp),
             content = { content() },
         )

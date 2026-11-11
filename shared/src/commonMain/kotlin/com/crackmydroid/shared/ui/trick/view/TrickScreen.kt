@@ -1,4 +1,6 @@
 package com.crackmydroid.shared.ui.trick.view
+import com.crackmydroid.ui.typography.AppTypography
+import com.crackmydroid.ui.icons.AppIcons
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -16,12 +18,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Bolt
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Code
-import androidx.compose.material.icons.filled.Error
-import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -43,7 +39,6 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -52,18 +47,18 @@ import com.crackmydroid.shared.domain.model.shell.ShellCommandResult
 import com.crackmydroid.shared.i18n.LocalStrings
 import com.crackmydroid.shared.i18n.ScreenUiStrings
 import com.crackmydroid.shared.i18n.format
-import com.crackmydroid.shared.presentation.components.AppButton
-import com.crackmydroid.shared.presentation.components.ButtonVariant
-import com.crackmydroid.shared.presentation.components.ErrorDialogComponent
-import com.crackmydroid.shared.presentation.components.ScrollToTopButton
-import com.crackmydroid.shared.presentation.components.SectionHeader
-import com.crackmydroid.shared.presentation.components.text.AppText
 import com.crackmydroid.shared.presentation.preview.AppPreviewEnvironment
 import com.crackmydroid.shared.presentation.preview.AppScreenPreviews
 import com.crackmydroid.shared.ui.screens.screenContentPadding
 import com.crackmydroid.shared.ui.trick.TrickEvent
 import com.crackmydroid.shared.ui.trick.TrickState
 import com.crackmydroid.shared.ui.trick.TrickViewModel
+import com.crackmydroid.ui.components.button.AppButton
+import com.crackmydroid.ui.components.button.ButtonVariant
+import com.crackmydroid.ui.components.dialog.ErrorDialogComponent
+import com.crackmydroid.ui.components.button.ScrollToTopButton
+import com.crackmydroid.ui.components.SectionHeader
+import com.crackmydroid.ui.components.text.AppText
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -160,7 +155,7 @@ private fun TrickScreenContent(
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             Icon(
-                                imageVector = Icons.Filled.Schedule,
+                                imageVector = AppIcons.Filled.Schedule,
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.onSecondaryContainer,
                             )
@@ -337,7 +332,7 @@ private fun TrickCommandCard(command: ShellCommand, running: Boolean, runningThi
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                val icon = if (command.requiresRoot) Icons.Filled.Bolt else Icons.Filled.Code
+                val icon = if (command.requiresRoot) AppIcons.Filled.Bolt else AppIcons.Filled.Code
                 Box(
                     modifier = Modifier
                         .size(34.dp)
@@ -421,7 +416,7 @@ private fun TrickCommandCard(command: ShellCommand, running: Boolean, runningThi
             ) {
                 AppText(
                     text = command.command,
-                    style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
+                    style = MaterialTheme.typography.bodySmall.copy(fontFamily = AppTypography.monospace),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 3,
                     overflow = TextOverflow.Ellipsis,
@@ -486,7 +481,7 @@ private fun TrickInlineResultSummary(commandTitle: String?, result: ShellCommand
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(
-                imageVector = if (result.success) Icons.Filled.CheckCircle else Icons.Filled.Error,
+                imageVector = if (result.success) AppIcons.Filled.CheckCircle else AppIcons.Filled.Error,
                 contentDescription = null,
                 tint = if (result.success) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
             )
@@ -568,7 +563,7 @@ private fun TrickResultDialogBody(
             items(packageLines) { pkg ->
                 TrickResultLine(
                     text = pkg,
-                    icon = Icons.Filled.Code,
+                    icon = AppIcons.Filled.Code,
                     tint = MaterialTheme.colorScheme.primary,
                 )
             }
@@ -583,7 +578,7 @@ private fun TrickResultDialogBody(
             items(stdoutLines) { line ->
                 TrickResultLine(
                     text = line,
-                    icon = Icons.Filled.CheckCircle,
+                    icon = AppIcons.Filled.CheckCircle,
                     tint = MaterialTheme.colorScheme.primary,
                 )
             }
@@ -601,7 +596,7 @@ private fun TrickResultDialogBody(
             items(stderrLines) { line ->
                 TrickResultLine(
                     text = line,
-                    icon = Icons.Filled.Error,
+                    icon = AppIcons.Filled.Error,
                     tint = MaterialTheme.colorScheme.error,
                 )
             }
@@ -611,7 +606,7 @@ private fun TrickResultDialogBody(
             item {
                 TrickResultLine(
                     text = screenStrings.noTextOutput,
-                    icon = Icons.Filled.Schedule,
+                    icon = AppIcons.Filled.Schedule,
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }

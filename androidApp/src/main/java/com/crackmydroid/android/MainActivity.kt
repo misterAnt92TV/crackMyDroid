@@ -15,10 +15,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
 import androidx.core.content.edit
-import com.crackmydroid.shared.presentation.components.AppDialog
-import com.crackmydroid.shared.presentation.components.text.AppText
 import com.crackmydroid.shared.ui.AppPresentationDependencies
 import com.crackmydroid.shared.ui.CrackMyDroidApp
+import com.crackmydroid.ui.components.dialog.AppDialog
+import com.crackmydroid.ui.components.text.AppText
 import org.koin.mp.KoinPlatform
 
 class MainActivity : ComponentActivity() {

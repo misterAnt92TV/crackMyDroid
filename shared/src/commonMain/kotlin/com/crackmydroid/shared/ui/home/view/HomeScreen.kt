@@ -33,17 +33,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.crackmydroid.shared.i18n.LocalStrings
 import com.crackmydroid.shared.i18n.format
-import com.crackmydroid.shared.presentation.components.AppAccordion
-import com.crackmydroid.shared.presentation.components.PackageIcon
-import com.crackmydroid.shared.presentation.components.ScrollToTopButton
-import com.crackmydroid.shared.presentation.components.SectionHeader
-import com.crackmydroid.shared.presentation.components.card.AppCard
-import com.crackmydroid.shared.presentation.components.text.AppText
 import com.crackmydroid.shared.ui.home.HomeEvent
 import com.crackmydroid.shared.ui.home.HomeUiState
 import com.crackmydroid.shared.ui.home.HomeViewModel
 import com.crackmydroid.shared.ui.home.model.HomeUiStateMapper
 import com.crackmydroid.shared.ui.screens.screenContentPadding
+import com.crackmydroid.ui.components.AppAccordion
+import com.crackmydroid.ui.components.PackageIcon
+import com.crackmydroid.ui.components.button.ScrollToTopButton
+import com.crackmydroid.ui.components.SectionHeader
+import com.crackmydroid.ui.components.card.AppCard
+import com.crackmydroid.ui.components.text.AppText
 import kotlinx.coroutines.launch
 
 @Composable

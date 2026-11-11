@@ -15,6 +15,7 @@ kotlin {
     sourceSets {
         val desktopMain by getting {
             dependencies {
+                implementation(project(":uiModule"))
                 implementation(project(":shared"))
                 implementation(compose.desktop.currentOs)
                 implementation(libs.compose.material3)

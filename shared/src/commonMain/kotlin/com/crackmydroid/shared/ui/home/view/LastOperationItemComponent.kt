@@ -1,4 +1,5 @@
 package com.crackmydroid.shared.ui.home.view
+import com.crackmydroid.ui.icons.AppIcons
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -10,10 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Error
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -25,12 +22,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.crackmydroid.shared.i18n.LocalStrings
 import com.crackmydroid.shared.i18n.format
-import com.crackmydroid.shared.presentation.components.card.AppCard
-import com.crackmydroid.shared.presentation.components.text.AppText
-import com.crackmydroid.shared.presentation.preview.AppComponentPreviews
-import com.crackmydroid.shared.presentation.preview.ComponentPreviewContainer
 import com.crackmydroid.shared.ui.home.LastOperationItem
 import com.crackmydroid.shared.ui.home.OperationOutcome
+import com.crackmydroid.ui.components.card.AppCard
+import com.crackmydroid.ui.components.text.AppText
+import com.crackmydroid.ui.preview.AppComponentPreviews
+import com.crackmydroid.ui.preview.ComponentPreviewContainer
 
 @Composable
 fun LastOperationItemComponent(
@@ -56,9 +53,9 @@ fun LastOperationItemComponent(
             ) {
                 Icon(
                     imageVector = if (item.outcome == OperationOutcome.Success) {
-                        Icons.Filled.CheckCircle
+                        AppIcons.Filled.CheckCircle
                     } else {
-                        Icons.Filled.Error
+                        AppIcons.Filled.Error
                     },
                     contentDescription = null,
                     tint = statusColor,
@@ -93,7 +90,7 @@ fun LastOperationItemComponent(
             }
             IconButton(onClick = { onAction(item.operationId) }, modifier = Modifier.size(48.dp)) {
                 Icon(
-                    imageVector = Icons.Filled.Close,
+                    imageVector = AppIcons.Filled.Close,
                     contentDescription = actionContentDescription.format(item.description),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.size(16.dp),

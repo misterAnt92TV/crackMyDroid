@@ -205,6 +205,13 @@ orchestration. Keep only strictly visual calculations in composables.
 
 ## Compose UI and previews
 
+- Put reusable Compose design-system code in `:uiModule` under `com.crackmydroid.ui` (theme,
+  generic components, icons, typography, accessibility helpers and component previews). `uiModule`
+  must never depend on `:shared`, domain models, ViewModels, Koin or application catalogs.
+- Keep feature screens, feature-specific components, `SearchFieldWithHistoryComponent` and PenTest
+  components in `:shared`. Adapt application `Strings` to `UiStrings` at the composition root; generic
+  components must consume only `LocalUiStrings` and UI-level CompositionLocals.
+
 - For every new screen or material visual component, create deterministic preview data with no DI,
   real ViewModel, network, database, ADB, or filesystem dependency.
 - Use `CrackMyDroidTheme`, `LocalStrings`, and the existing `@AppScreenPreviews` annotation whenever

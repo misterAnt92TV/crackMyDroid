@@ -1,4 +1,5 @@
 package com.crackmydroid.shared.ui
+import com.crackmydroid.ui.icons.AppIcons
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -26,8 +27,6 @@ import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsTopHeight
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Menu
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
@@ -72,17 +71,10 @@ import com.crackmydroid.shared.i18n.format
 import com.crackmydroid.shared.i18n.platformLanguage
 import com.crackmydroid.shared.i18n.resolveLanguageCode
 import com.crackmydroid.shared.i18n.stringsFor
-import com.crackmydroid.shared.presentation.components.AccessibilityPrefs
-import com.crackmydroid.shared.presentation.components.AppBackHandler
-import com.crackmydroid.shared.presentation.components.AppDialog
-import com.crackmydroid.shared.presentation.components.LocalAccessibilityPrefs
-import com.crackmydroid.shared.presentation.components.PackageIcon
-import com.crackmydroid.shared.presentation.components.effectiveReduceMotion
-import com.crackmydroid.shared.presentation.components.text.AppText
+import com.crackmydroid.shared.i18n.toUiStrings
 import com.crackmydroid.shared.presentation.navigation.Screen
 import com.crackmydroid.shared.presentation.navigation.bottomScreens
 import com.crackmydroid.shared.presentation.navigation.drawerScreens
-import com.crackmydroid.shared.presentation.theme.CrackMyDroidTheme
 import com.crackmydroid.shared.ui.activities.view.ActivityListScreen
 import com.crackmydroid.shared.ui.appshell.AppShellEvent
 import com.crackmydroid.shared.ui.help.HelpScreen
@@ -97,6 +89,15 @@ import com.crackmydroid.shared.ui.settings.view.SettingsScreen
 import com.crackmydroid.shared.ui.trick.view.TrickScreen
 import com.crackmydroid.shared.util.appPackageName
 import com.crackmydroid.shared.util.appVersionName
+import com.crackmydroid.ui.components.AccessibilityPrefs
+import com.crackmydroid.ui.components.AppBackHandler
+import com.crackmydroid.ui.components.dialog.AppDialog
+import com.crackmydroid.ui.components.LocalAccessibilityPrefs
+import com.crackmydroid.ui.components.PackageIcon
+import com.crackmydroid.ui.components.effectiveReduceMotion
+import com.crackmydroid.ui.components.text.AppText
+import com.crackmydroid.ui.strings.LocalUiStrings
+import com.crackmydroid.ui.theme.CrackMyDroidTheme
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
@@ -181,6 +182,7 @@ fun CrackMyDroidApp(
     CrackMyDroidTheme(darkTheme = darkTheme) {
         CompositionLocalProvider(
             LocalStrings provides strings,
+            LocalUiStrings provides strings.toUiStrings(),
             LocalAccessibilityPrefs provides accessibilityPrefs,
         ) {
             val onHelp: (String) -> Unit = { message ->
@@ -269,7 +271,7 @@ fun CrackMyDroidApp(
                                             }
                                         },
                                     ) {
-                                        Icon(Icons.Rounded.Menu, contentDescription = "Menu")
+                                    Icon(AppIcons.Filled.Menu, contentDescription = "Menu")
                                     }
                                 },
                             ) {

@@ -1,4 +1,5 @@
 package com.crackmydroid.shared.ui.root.view
+import com.crackmydroid.ui.icons.AppIcons
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
@@ -24,11 +25,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
@@ -53,19 +49,19 @@ import com.crackmydroid.shared.domain.model.RootStatus
 import com.crackmydroid.shared.i18n.LocalStrings
 import com.crackmydroid.shared.i18n.ScreenUiStrings
 import com.crackmydroid.shared.i18n.format
-import com.crackmydroid.shared.presentation.components.AppButton
-import com.crackmydroid.shared.presentation.components.AppProgressIndicator
-import com.crackmydroid.shared.presentation.components.AppTextField
-import com.crackmydroid.shared.presentation.components.ErrorDialogComponent
-import com.crackmydroid.shared.presentation.components.LocalAccessibilityPrefs
-import com.crackmydroid.shared.presentation.components.ScrollToTopButton
-import com.crackmydroid.shared.presentation.components.SectionHeader
-import com.crackmydroid.shared.presentation.components.text.AppText
 import com.crackmydroid.shared.presentation.preview.AppPreviewEnvironment
 import com.crackmydroid.shared.presentation.preview.AppScreenPreviews
 import com.crackmydroid.shared.ui.root.RootEvent
 import com.crackmydroid.shared.ui.root.RootState
 import com.crackmydroid.shared.ui.root.RootViewModel
+import com.crackmydroid.ui.components.button.AppButton
+import com.crackmydroid.ui.components.AppProgressIndicator
+import com.crackmydroid.ui.components.text.AppTextField
+import com.crackmydroid.ui.components.dialog.ErrorDialogComponent
+import com.crackmydroid.ui.components.LocalAccessibilityPrefs
+import com.crackmydroid.ui.components.button.ScrollToTopButton
+import com.crackmydroid.ui.components.SectionHeader
+import com.crackmydroid.ui.components.text.AppText
 import kotlinx.coroutines.launch
 
 @Composable
@@ -166,7 +162,7 @@ private fun RootScreenContent(
                         )
                         IconButton(onClick = onVerify, enabled = !state.loading) {
                             Icon(
-                                Icons.Filled.Refresh,
+                                AppIcons.Filled.Refresh,
                                 contentDescription = strings.verifyRoot,
                                 tint = MaterialTheme.colorScheme.primary,
                             )
@@ -260,9 +256,9 @@ private fun RootScreenContent(
                                         ) {
                                             Icon(
                                                 imageVector = if (rooted) {
-                                                    Icons.Filled.Warning
+                                                    AppIcons.Filled.Warning
                                                 } else {
-                                                    Icons.Filled.CheckCircle
+                                                    AppIcons.Filled.CheckCircle
                                                 },
                                                 contentDescription = null,
                                                 tint = onBg,
@@ -287,7 +283,7 @@ private fun RootScreenContent(
                                     }
                                     IconButton(onClick = onShareReport) {
                                         Icon(
-                                            imageVector = Icons.Filled.Share,
+                                            imageVector = AppIcons.Filled.Share,
                                             contentDescription = strings.pentestShare,
                                             tint = onBg,
                                         )
@@ -348,7 +344,7 @@ private fun RootScreenContent(
                                     )
                                     IconButton(onClick = onShareReport) {
                                         Icon(
-                                            imageVector = Icons.Filled.Share,
+                                            imageVector = AppIcons.Filled.Share,
                                             contentDescription = strings.pentestShare,
                                             tint = MaterialTheme.colorScheme.primary,
                                         )

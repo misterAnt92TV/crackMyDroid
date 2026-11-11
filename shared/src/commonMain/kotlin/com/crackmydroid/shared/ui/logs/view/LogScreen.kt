@@ -1,4 +1,6 @@
 package com.crackmydroid.shared.ui.logs.view
+import com.crackmydroid.ui.typography.AppTypography
+import com.crackmydroid.ui.icons.AppIcons
 
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -21,9 +23,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
@@ -45,23 +44,22 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.crackmydroid.shared.i18n.LocalStrings
 import com.crackmydroid.shared.i18n.ScreenUiStrings
-import com.crackmydroid.shared.presentation.components.AppAccordion
-import com.crackmydroid.shared.presentation.components.AppButton
-import com.crackmydroid.shared.presentation.components.ErrorDialogComponent
-import com.crackmydroid.shared.presentation.components.ScrollToTopButton
 import com.crackmydroid.shared.presentation.components.SearchFieldWithHistoryComponent
-import com.crackmydroid.shared.presentation.components.SectionHeader
-import com.crackmydroid.shared.presentation.components.text.AppText
 import com.crackmydroid.shared.presentation.preview.AppPreviewEnvironment
 import com.crackmydroid.shared.presentation.preview.AppScreenPreviews
 import com.crackmydroid.shared.ui.logs.LogEvent
 import com.crackmydroid.shared.ui.logs.LogState
 import com.crackmydroid.shared.ui.logs.LogViewModel
+import com.crackmydroid.ui.components.AppAccordion
+import com.crackmydroid.ui.components.button.AppButton
+import com.crackmydroid.ui.components.dialog.ErrorDialogComponent
+import com.crackmydroid.ui.components.button.ScrollToTopButton
+import com.crackmydroid.ui.components.SectionHeader
+import com.crackmydroid.ui.components.text.AppText
 import kotlinx.coroutines.launch
 
 @Composable
@@ -188,13 +186,13 @@ private fun LogScreenContent(
                     ) {
                         AppButton(
                             text = strings.refreshLog,
-                            leadingIcon = Icons.Filled.Refresh,
+                            leadingIcon = AppIcons.Filled.Refresh,
                             onClick = onRefresh,
                             modifier = Modifier.weight(1f),
                         )
                         IconButton(onClick = onExport) {
                             Icon(
-                                imageVector = Icons.Filled.Share,
+                                imageVector = AppIcons.Filled.Share,
                                 contentDescription = strings.exportLog,
                                 tint = MaterialTheme.colorScheme.primary,
                             )
@@ -300,7 +298,7 @@ private fun LogScreenContent(
                             Text(
                                 line,
                                 style = MaterialTheme.typography.bodySmall.copy(
-                                    fontFamily = FontFamily.Monospace,
+                                    fontFamily = AppTypography.monospace,
                                     fontSize = fontSize.value.sp,
                                 ),
                                 softWrap = wrap.value,

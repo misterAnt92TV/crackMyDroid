@@ -15,10 +15,14 @@ test unitari.
 | Infrastructure  | DI, serializzazione, logging, dispatcher e database        | logica di feature non riutilizzabile                 |
 
 Le fondamenta KMP riusabili (`BaseUseCase`, `BaseViewModel`, contratti UDF, dispatcher e logger)
-vivono in `:architectureModule`. `:shared` ospita `LocalizedBaseViewModel`, che aggiunge i cataloghi
+vivono in `:architectureModule`. `:uiModule` ospita il design system Compose multipiattaforma
+(tema, componenti generici, icone, tipografia e preview) e non può dipendere da `:shared`.
+`:shared` ospita `LocalizedBaseViewModel`, che aggiunge i cataloghi
 di localizzazione specifici di CrackMyDroid al lifecycle comune.
 
-La regola pratica è: il codice più vicino al dominio deve conoscere meno dettagli esterni.
+La regola pratica è: il codice più vicino al dominio deve conoscere meno dettagli esterni. Le
+feature UI possono usare `:uiModule`; il design system non conosce modelli, ViewModel o localizzazione
+applicativa di `:shared`.
 
 ### Localizzazione dei componenti
 

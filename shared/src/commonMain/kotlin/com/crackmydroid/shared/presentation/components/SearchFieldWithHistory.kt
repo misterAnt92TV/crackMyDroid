@@ -14,9 +14,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.History
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
@@ -40,9 +37,11 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import com.crackmydroid.shared.i18n.LocalStrings
 import com.crackmydroid.shared.i18n.format
-import com.crackmydroid.shared.presentation.components.text.AppText
-import com.crackmydroid.shared.presentation.preview.AppComponentPreviews
-import com.crackmydroid.shared.presentation.preview.ComponentPreviewContainer
+import com.crackmydroid.ui.components.text.AppText
+import com.crackmydroid.ui.components.LocalAccessibilityPrefs
+import com.crackmydroid.ui.icons.AppIcons
+import com.crackmydroid.ui.preview.AppComponentPreviews
+import com.crackmydroid.ui.preview.ComponentPreviewContainer
 import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -122,7 +121,7 @@ fun SearchFieldWithHistoryComponent(
                         },
                     ) {
                         Icon(
-                            imageVector = Icons.Filled.Close,
+                            imageVector = AppIcons.Filled.Close,
                             contentDescription = strings.clearSearchContentDescription,
                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -177,7 +176,7 @@ fun SearchFieldWithHistoryComponent(
                             label = { AppText(suggestion) },
                             leadingIcon = {
                                 Icon(
-                                    imageVector = Icons.Filled.History,
+                                    imageVector = AppIcons.Filled.History,
                                     contentDescription = null,
                                     tint = MaterialTheme.colorScheme.primary,
                                 )

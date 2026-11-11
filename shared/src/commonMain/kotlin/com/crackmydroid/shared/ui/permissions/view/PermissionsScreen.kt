@@ -5,6 +5,8 @@
 
 package com.crackmydroid.shared.ui.permissions.view
 
+import com.crackmydroid.ui.icons.AppIcons
+
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,27 +21,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Bluetooth
-import androidx.compose.material.icons.filled.CalendarToday
-import androidx.compose.material.icons.filled.CameraAlt
-import androidx.compose.material.icons.filled.Cloud
-import androidx.compose.material.icons.filled.Contacts
-import androidx.compose.material.icons.filled.Fingerprint
-import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Mic
-import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Phone
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.SdStorage
-import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.filled.Sms
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.filled.StarBorder
-import androidx.compose.material.icons.filled.Stop
-import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
@@ -71,25 +52,25 @@ import com.crackmydroid.shared.domain.model.app.AppPermissionEntry
 import com.crackmydroid.shared.i18n.LocalStrings
 import com.crackmydroid.shared.i18n.ScreenUiStrings
 import com.crackmydroid.shared.i18n.format
-import com.crackmydroid.shared.presentation.components.AppAccordion
-import com.crackmydroid.shared.presentation.components.AppButton
-import com.crackmydroid.shared.presentation.components.ButtonVariant
-import com.crackmydroid.shared.presentation.components.ErrorDialogComponent
-import com.crackmydroid.shared.presentation.components.PackageIcon
-import com.crackmydroid.shared.presentation.components.ScrollToTopButton
 import com.crackmydroid.shared.presentation.components.SearchFieldWithHistoryComponent
-import com.crackmydroid.shared.presentation.components.SectionHeader
-import com.crackmydroid.shared.presentation.components.card.AppCard
-import com.crackmydroid.shared.presentation.components.card.ExportDetailsCard
-import com.crackmydroid.shared.presentation.components.text.AppText
 import com.crackmydroid.shared.presentation.preview.AppPreviewEnvironment
 import com.crackmydroid.shared.presentation.preview.AppScreenPreviews
-import com.crackmydroid.shared.ui.permissions.model.PermissionFindingUi
-import com.crackmydroid.shared.ui.permissions.model.PermissionsEffect
 import com.crackmydroid.shared.ui.permissions.PermissionsEvent
 import com.crackmydroid.shared.ui.permissions.PermissionsState
 import com.crackmydroid.shared.ui.permissions.PermissionsViewModel
+import com.crackmydroid.shared.ui.permissions.model.PermissionFindingUi
+import com.crackmydroid.shared.ui.permissions.model.PermissionsEffect
 import com.crackmydroid.shared.ui.screens.screenContentPadding
+import com.crackmydroid.ui.components.AppAccordion
+import com.crackmydroid.ui.components.button.AppButton
+import com.crackmydroid.ui.components.button.ButtonVariant
+import com.crackmydroid.ui.components.dialog.ErrorDialogComponent
+import com.crackmydroid.ui.components.PackageIcon
+import com.crackmydroid.ui.components.button.ScrollToTopButton
+import com.crackmydroid.ui.components.SectionHeader
+import com.crackmydroid.ui.components.card.AppCard
+import com.crackmydroid.ui.components.card.ExportDetailsCard
+import com.crackmydroid.ui.components.text.AppText
 import kotlinx.coroutines.launch
 
 @Composable
@@ -199,7 +180,7 @@ private fun PermissionsScreenContent(
                     beforeHelpAction = {
                         IconButton(onClick = onRefresh) {
                             Icon(
-                                imageVector = Icons.Filled.Refresh,
+                                imageVector = AppIcons.Filled.Refresh,
                                 contentDescription = strings.refreshPermissionsContentDescription,
                                 tint = MaterialTheme.colorScheme.primary,
                             )
@@ -241,7 +222,7 @@ private fun PermissionsScreenContent(
                             variant = ButtonVariant.Tonal,
                             modifier = Modifier.fillMaxWidth(),
                             fullWidth = true,
-                            leadingIcon = Icons.Filled.Warning,
+                            leadingIcon = AppIcons.Filled.Warning,
                         )
                         AppButton(
                             text = screenStrings.stopScan,
@@ -250,7 +231,7 @@ private fun PermissionsScreenContent(
                             variant = ButtonVariant.Secondary,
                             modifier = Modifier.fillMaxWidth(),
                             fullWidth = true,
-                            leadingIcon = Icons.Filled.Stop,
+                            leadingIcon = AppIcons.Filled.Stop,
                         )
                     }
 
@@ -505,14 +486,14 @@ private fun PermissionsScreenContent(
                             },
                         ) {
                             Icon(
-                                imageVector = Icons.Filled.Share,
+                                imageVector = AppIcons.Filled.Share,
                                 contentDescription = strings.sharePermissionsContentDescription,
                                 tint = MaterialTheme.colorScheme.primary,
                             )
                         }
                         IconButton(onClick = { onToggleFavorite(app.packageName) }) {
                             Icon(
-                                imageVector = if (isFavorite) Icons.Filled.Star else Icons.Filled.StarBorder,
+                                imageVector = if (isFavorite) AppIcons.Filled.Star else AppIcons.Filled.StarBorder,
                                 contentDescription = strings.favoriteContentDescription,
                                 tint = if (isFavorite) {
                                     MaterialTheme.colorScheme.primary
@@ -687,20 +668,20 @@ private fun PermissionRow(permission: String, finding: PermissionFindingUi? = nu
 private fun permissionIconFor(permission: String): ImageVector {
     val key = permission.uppercase()
     return when {
-        "CAMERA" in key -> Icons.Filled.CameraAlt
-        "AUDIO" in key || "MIC" in key -> Icons.Filled.Mic
-        "LOCATION" in key -> Icons.Filled.LocationOn
-        "NOTIFICATION" in key -> Icons.Filled.Notifications
-        "BLUETOOTH" in key -> Icons.Filled.Bluetooth
-        "PHONE" in key || "CALL" in key -> Icons.Filled.Phone
-        "CONTACT" in key -> Icons.Filled.Contacts
-        "SMS" in key || "MMS" in key -> Icons.Filled.Sms
-        "WIFI" in key || "NETWORK" in key -> Icons.Filled.Wifi
-        "STORAGE" in key || "READ_MEDIA" in key || "FILES" in key -> Icons.Filled.SdStorage
-        "CALENDAR" in key -> Icons.Filled.CalendarToday
-        "FINGERPRINT" in key || "BIOMETRIC" in key -> Icons.Filled.Fingerprint
-        "INTERNET" in key -> Icons.Filled.Cloud
-        else -> Icons.Filled.Lock
+        "CAMERA" in key -> AppIcons.Filled.CameraAlt
+        "AUDIO" in key || "MIC" in key -> AppIcons.Filled.Mic
+        "LOCATION" in key -> AppIcons.Filled.LocationOn
+        "NOTIFICATION" in key -> AppIcons.Filled.Notifications
+        "BLUETOOTH" in key -> AppIcons.Filled.Bluetooth
+        "PHONE" in key || "CALL" in key -> AppIcons.Filled.Phone
+        "CONTACT" in key -> AppIcons.Filled.Contacts
+        "SMS" in key || "MMS" in key -> AppIcons.Filled.Sms
+        "WIFI" in key || "NETWORK" in key -> AppIcons.Filled.Wifi
+        "STORAGE" in key || "READ_MEDIA" in key || "FILES" in key -> AppIcons.Filled.SdStorage
+        "CALENDAR" in key -> AppIcons.Filled.CalendarToday
+        "FINGERPRINT" in key || "BIOMETRIC" in key -> AppIcons.Filled.Fingerprint
+        "INTERNET" in key -> AppIcons.Filled.Cloud
+        else -> AppIcons.Filled.Lock
     }
 }
 

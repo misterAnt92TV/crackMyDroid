@@ -5,6 +5,9 @@
 
 package com.crackmydroid.shared.ui.info.view
 
+import com.crackmydroid.ui.icons.AppIcons
+import com.crackmydroid.ui.typography.AppTypography
+
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -23,12 +26,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Memory
-import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.filled.Smartphone
-import androidx.compose.material.icons.filled.Storage
-import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -45,21 +42,20 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.crackmydroid.shared.domain.model.DeviceInfo
 import com.crackmydroid.shared.i18n.LocalStrings
-import com.crackmydroid.shared.presentation.components.ScrollToTopButton
-import com.crackmydroid.shared.presentation.components.SectionHeader
-import com.crackmydroid.shared.presentation.components.card.AppCard
-import com.crackmydroid.shared.presentation.components.text.AppText
 import com.crackmydroid.shared.presentation.preview.AppPreviewEnvironment
 import com.crackmydroid.shared.presentation.preview.AppScreenPreviews
 import com.crackmydroid.shared.ui.info.InfoEvent
 import com.crackmydroid.shared.ui.info.InfoState
 import com.crackmydroid.shared.ui.info.InfoViewModel
+import com.crackmydroid.ui.components.button.ScrollToTopButton
+import com.crackmydroid.ui.components.SectionHeader
+import com.crackmydroid.ui.components.card.AppCard
+import com.crackmydroid.ui.components.text.AppText
 import kotlinx.coroutines.launch
 
 @Composable
@@ -133,7 +129,7 @@ private fun InfoScreenContent(
                                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                             ) {
                                 Icon(
-                                    Icons.Filled.Smartphone,
+                                    AppIcons.Filled.Smartphone,
                                     contentDescription = null,
                                     tint = MaterialTheme.colorScheme.primary,
                                     modifier = Modifier.size(18.dp),
@@ -154,7 +150,7 @@ private fun InfoScreenContent(
                                 },
                             ) {
                                 Icon(
-                                    Icons.Filled.Share,
+                                    AppIcons.Filled.Share,
                                     contentDescription = strings.shareDeviceInfoContentDescription,
                                     tint = MaterialTheme.colorScheme.primary,
                                 )
@@ -177,7 +173,7 @@ private fun InfoScreenContent(
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
                             Icon(
-                                Icons.Filled.Memory,
+                                AppIcons.Filled.Memory,
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(18.dp),
@@ -204,7 +200,7 @@ private fun InfoScreenContent(
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
                             Icon(
-                                Icons.Filled.Wifi,
+                                AppIcons.Filled.Wifi,
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(18.dp),
@@ -237,7 +233,7 @@ private fun InfoScreenContent(
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
                             Icon(
-                                Icons.Filled.Storage,
+                                AppIcons.Filled.Storage,
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(18.dp),
@@ -285,7 +281,7 @@ private fun InfoScreenContent(
                                     AppText(
                                         text = dump,
                                         style = MaterialTheme.typography.bodySmall.copy(
-                                            fontFamily = FontFamily.Monospace,
+                                            fontFamily = AppTypography.monospace,
                                         ),
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     )
