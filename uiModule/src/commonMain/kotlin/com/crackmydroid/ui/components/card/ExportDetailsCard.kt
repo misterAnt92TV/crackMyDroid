@@ -4,6 +4,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import com.crackmydroid.ui.strings.LocalUiStrings
 import com.crackmydroid.ui.components.text.AppText
@@ -28,11 +30,12 @@ fun ExportDetailsCard(
     }
 
     val strings = LocalUiStrings.current
-    AppCard(modifier = modifier.fillMaxWidth()) {
+    AppCard(modifier = modifier.fillMaxWidth().semantics(mergeDescendants = true) {}) {
         AppText(
             text = title ?: strings.exportDetailsTitle,
             style = MaterialTheme.typography.titleSmall,
             fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.semantics { heading() },
         )
         summary?.takeIf { it.isNotBlank() }?.let {
             AppText(

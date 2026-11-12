@@ -1,4 +1,5 @@
 package com.crackmydroid.ui.components.button
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import com.crackmydroid.ui.icons.AppIcons
@@ -51,7 +52,7 @@ fun AppButton(
     val buttonModifier = modifier
         .then(widthModifier)
         .padding(vertical = 4.dp)
-        .defaultMinSize(minHeight = if (prefs.largeText) 58.dp else 0.dp)
+        .defaultMinSize(minHeight = if (prefs.largeText) 58.dp else 48.dp)
     when (variant) {
         ButtonVariant.Primary -> Button(
             onClick = onClick,
@@ -67,6 +68,11 @@ fun AppButton(
             onClick = onClick,
             enabled = enabled,
             modifier = buttonModifier,
+            border = if (prefs.highContrast) {
+                BorderStroke(1.5.dp, MaterialTheme.colorScheme.onBackground)
+            } else {
+                null
+            },
             contentPadding = PaddingValues(
                 horizontal = 18.dp,
                 vertical = if (prefs.largeText) 16.dp else 14.dp,
@@ -77,6 +83,11 @@ fun AppButton(
             onClick = onClick,
             enabled = enabled,
             modifier = buttonModifier,
+            border = if (prefs.highContrast) {
+                BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
+            } else {
+                null
+            },
             contentPadding = PaddingValues(
                 horizontal = 18.dp,
                 vertical = if (prefs.largeText) 16.dp else 14.dp,

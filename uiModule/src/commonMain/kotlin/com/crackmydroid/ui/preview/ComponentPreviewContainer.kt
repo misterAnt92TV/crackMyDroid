@@ -1,8 +1,8 @@
 package com.crackmydroid.ui.preview
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -16,14 +16,19 @@ import com.crackmydroid.ui.theme.CrackMyDroidTheme
 
 @Composable
 fun ComponentPreviewContainer(
+    darkTheme: Boolean = isSystemInDarkTheme(),
     accessibilityPrefs: AccessibilityPrefs = AccessibilityPrefs(),
     content: @Composable () -> Unit,
 ) {
-    CrackMyDroidTheme {
-        CompositionLocalProvider(LocalAccessibilityPrefs provides accessibilityPrefs) {
-            Surface(color = MaterialTheme.colorScheme.background, shape = RoundedCornerShape(20.dp)) {
+    CompositionLocalProvider(LocalAccessibilityPrefs provides accessibilityPrefs) {
+        CrackMyDroidTheme(darkTheme = darkTheme) {
+            Surface(
+                color = MaterialTheme.colorScheme.background,
+                shape = MaterialTheme.shapes.large,
+            ) {
                 Column(modifier = Modifier.padding(16.dp), content = { content() })
             }
         }
     }
 }
+

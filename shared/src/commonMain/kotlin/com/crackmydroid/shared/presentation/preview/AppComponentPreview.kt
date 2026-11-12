@@ -21,17 +21,18 @@ import com.crackmydroid.ui.theme.CrackMyDroidTheme
 @Composable
 internal fun AppPreviewEnvironment(
     languageCode: String = "it",
+    darkTheme: Boolean = androidx.compose.foundation.isSystemInDarkTheme(),
     accessibilityPrefs: AccessibilityPrefs = AccessibilityPrefs(),
     wrapInSurface: Boolean = true,
     content: @Composable () -> Unit,
 ) {
     val strings = stringsFor(languageCode)
-    CrackMyDroidTheme {
-        CompositionLocalProvider(
-            LocalStrings provides strings,
-            LocalUiStrings provides strings.toUiStrings(),
-            LocalAccessibilityPrefs provides accessibilityPrefs,
-        ) {
+    CompositionLocalProvider(
+        LocalStrings provides strings,
+        LocalUiStrings provides strings.toUiStrings(),
+        LocalAccessibilityPrefs provides accessibilityPrefs,
+    ) {
+        CrackMyDroidTheme(darkTheme = darkTheme) {
             if (wrapInSurface) {
                 PreviewSurface(content = content)
             } else {
@@ -48,7 +49,7 @@ internal fun PreviewSurface(
 ) {
     Surface(
         modifier = modifier.fillMaxSize(),
-        shape = RoundedCornerShape(24.dp),
+        shape = MaterialTheme.shapes.extraLarge,
         color = MaterialTheme.colorScheme.background,
         tonalElevation = 2.dp,
     ) {

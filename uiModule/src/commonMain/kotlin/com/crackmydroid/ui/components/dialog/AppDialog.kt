@@ -3,6 +3,8 @@ package com.crackmydroid.ui.components.dialog
 import androidx.compose.material3.AlertDialog
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import com.crackmydroid.ui.components.button.AppButton
 import com.crackmydroid.ui.components.button.ButtonVariant
@@ -26,7 +28,13 @@ fun AppDialog(
     AlertDialog(
         modifier = modifier,
         onDismissRequest = onDismiss,
-        title = { AppText(title, fontWeight = FontWeight.SemiBold) },
+        title = {
+            AppText(
+                title,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.semantics { heading() },
+            )
+        },
         text = content,
         confirmButton = {
             AppButton(confirmLabel, onConfirm, enabled = confirmEnabled, fullWidth = false)

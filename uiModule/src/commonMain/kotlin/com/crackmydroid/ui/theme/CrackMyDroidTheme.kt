@@ -1,37 +1,67 @@
 package com.crackmydroid.ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.lightColorScheme
+import androidx.compose.material3.Shapes
+import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.staticCompositionLocalOf
+import com.crackmydroid.ui.components.LocalAccessibilityPrefs
 
-private val LightColorScheme = lightColorScheme(
-    primary = Color(0xFF1A73E8), onPrimary = Color.White, primaryContainer = Color(0xFFD2E3FC),
-    onPrimaryContainer = Color(0xFF0B3C74), secondary = Color(0xFF188038), onSecondary = Color.White,
-    secondaryContainer = Color(0xFFCEEAD6), onSecondaryContainer = Color(0xFF0F3A1B),
-    tertiary = Color(0xFFF9AB00), onTertiary = Color(0xFF2F1F00), tertiaryContainer = Color(0xFFFEEFC3),
-    onTertiaryContainer = Color(0xFF4A3300), error = Color(0xFFD93025), onError = Color.White,
-    errorContainer = Color(0xFFFDE8E7), onErrorContainer = Color(0xFF5C0A05), background = Color(0xFFF7F9FC),
-    onBackground = Color(0xFF1C1F26), surface = Color.White, onSurface = Color(0xFF1C1F26),
-    surfaceVariant = Color(0xFFE9EDF4), onSurfaceVariant = Color(0xFF444A56), outline = Color(0xFF737A88),
-    outlineVariant = Color(0xFFC2C8D3),
-)
+val LocalLogLevelColors = staticCompositionLocalOf { LogLevelColors() }
 
-private val DarkColorScheme = darkColorScheme(
-    primary = Color(0xFFA8C7FA), onPrimary = Color(0xFF053062), primaryContainer = Color(0xFF174EA6),
-    onPrimaryContainer = Color(0xFFD8E2FF), secondary = Color(0xFF81C995), onSecondary = Color(0xFF0B3819),
-    secondaryContainer = Color(0xFF0F5223), onSecondaryContainer = Color(0xFFB7F1C3),
-    tertiary = Color(0xFFFDD663), onTertiary = Color(0xFF443100), tertiaryContainer = Color(0xFF604600),
-    onTertiaryContainer = Color(0xFFFFE59A), error = Color(0xFFF28B82), onError = Color(0xFF690005),
-    errorContainer = Color(0xFF8C1D18), onErrorContainer = Color(0xFFFFDAD6), background = Color(0xFF101418),
-    onBackground = Color(0xFFE3E8F0), surface = Color(0xFF101418), onSurface = Color(0xFFE3E8F0),
-    surfaceVariant = Color(0xFF3F4652), onSurfaceVariant = Color(0xFFC0C7D2), outline = Color(0xFF8A92A1),
-    outlineVariant = Color(0xFF3F4652),
-)
+/**
+ * Accessor object for CrackMyDroid theme tokens.
+ */
+object CrackMyDroidTheme {
+    val colorScheme: ColorScheme
+        @Composable
+        @ReadOnlyComposable
+        get() = MaterialTheme.colorScheme
+
+    val typography: Typography
+        @Composable
+        @ReadOnlyComposable
+        get() = MaterialTheme.typography
+
+    val shapes: Shapes
+        @Composable
+        @ReadOnlyComposable
+        get() = MaterialTheme.shapes
+
+    val logColors: LogLevelColors
+        @Composable
+        @ReadOnlyComposable
+        get() = LocalLogLevelColors.current
+}
 
 @Composable
-fun CrackMyDroidTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
-    MaterialTheme(colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme, content = content)
+fun CrackMyDroidTheme(
+    darkTheme: Boolean = isSystemInDarkTheme(),
+    highContrast: Boolean = LocalAccessibilityPrefs.current.highContrast,
+    content: @Composable () -> Unit,
+) {
+    val colorScheme = when {
+        highContrast && darkTheme -> CrackMyDroidHighContrastDarkColorScheme
+        highContrast && !darkTheme -> CrackMyDroidHighContrastLightColorScheme
+        darkTheme -> CrackMyDroidDarkColorScheme
+        else -> CrackMyDroidLightColorScheme
+    }
+    val logColors = remember(darkTheme) { LogLevelColors() }
+
+    CompositionLocalProvider(
+        LocalLogLevelColors provides logColors,
+    ) {
+        MaterialTheme(
+            colorScheme = colorScheme,
+            typography = CrackMyDroidTypography,
+            shapes = CrackMyDroidShapes,
+            content = content,
+        )
+    }
 }
+

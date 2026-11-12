@@ -10,6 +10,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.isSpecified
 import com.crackmydroid.ui.components.AccessibilityPrefs
 import com.crackmydroid.ui.components.LocalAccessibilityPrefs
 import com.crackmydroid.ui.preview.AppComponentPreviews
@@ -27,8 +28,17 @@ fun AppText(
 ) {
     val prefs = LocalAccessibilityPrefs.current
     val withWeight = if (fontWeight != null) style.copy(fontWeight = fontWeight) else style
-    val sized =
-        if (prefs.largeText) withWeight.copy(fontSize = withWeight.fontSize * 1.1f) else withWeight
+    val sized = if (prefs.largeText) {
+        val scaledFontSize = withWeight.fontSize * 1.15f
+        val scaledLineHeight = if (withWeight.lineHeight.isSpecified) {
+            withWeight.lineHeight * 1.15f
+        } else {
+            withWeight.lineHeight
+        }
+        withWeight.copy(fontSize = scaledFontSize, lineHeight = scaledLineHeight)
+    } else {
+        withWeight
+    }
     val finalColor = color
         ?: if (prefs.highContrast) MaterialTheme.colorScheme.onBackground else androidx.compose.material3.LocalContentColor.current
     Text(

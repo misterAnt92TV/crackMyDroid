@@ -60,6 +60,7 @@ import com.crackmydroid.ui.components.button.AppButton
 import com.crackmydroid.ui.components.dialog.ErrorDialogComponent
 import com.crackmydroid.ui.components.button.ScrollToTopButton
 import com.crackmydroid.ui.components.text.AppText
+import com.crackmydroid.ui.theme.CrackMyDroidTheme
 import kotlinx.coroutines.launch
 
 @Composable
@@ -345,11 +346,5 @@ private fun extractLevel(line: String): Char? {
 }
 
 @Composable
-private fun levelColor(level: Char?): Color = when (level) {
-    'E' -> Color(0xFFFF6B6B)
-    'W' -> Color(0xFFF4A261)
-    'I' -> Color(0xFF2A9D8F)
-    'D' -> Color(0xFF4D6DE3)
-    'V' -> Color(0xFF9AA0A6)
-    else -> MaterialTheme.colorScheme.onBackground
-}
+private fun levelColor(level: Char?): Color =
+    CrackMyDroidTheme.logColors.colorFor(level, MaterialTheme.colorScheme.onBackground)

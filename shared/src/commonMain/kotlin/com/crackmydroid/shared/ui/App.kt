@@ -198,11 +198,14 @@ fun CrackMyDroidApp(
         AppTheme.SYSTEM -> isSystemInDarkTheme()
     }
 
-    CrackMyDroidTheme(darkTheme = darkTheme) {
-        CompositionLocalProvider(
-            LocalStrings provides strings,
-            LocalUiStrings provides strings.toUiStrings(),
-            LocalAccessibilityPrefs provides accessibilityPrefs,
+    CompositionLocalProvider(
+        LocalStrings provides strings,
+        LocalUiStrings provides strings.toUiStrings(),
+        LocalAccessibilityPrefs provides accessibilityPrefs,
+    ) {
+        CrackMyDroidTheme(
+            darkTheme = darkTheme,
+            highContrast = accessibilityPrefs.highContrast,
         ) {
             val navigateFromDrawer: (Screen) -> Unit = { target ->
                 scope.launch { drawerState.close() }
