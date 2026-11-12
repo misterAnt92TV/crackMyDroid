@@ -19,7 +19,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -60,6 +59,7 @@ import com.crackmydroid.shared.ui.activities.model.ActivityListEffect
 import com.crackmydroid.shared.ui.activities.model.uiLabel
 import com.crackmydroid.shared.ui.screens.screenContentPadding
 import com.crackmydroid.ui.components.AppAccordion
+import com.crackmydroid.ui.components.AppIcon
 import com.crackmydroid.ui.components.button.AppButton
 import com.crackmydroid.ui.components.button.ButtonVariant
 import com.crackmydroid.ui.components.dialog.ErrorDialogComponent
@@ -339,7 +339,7 @@ private fun ActivityListContent(
                                 }
                             },
                         ) {
-                            Icon(
+                            AppIcon(
                                 imageVector = AppIcons.Filled.Description,
                                 contentDescription = strings.reportActivitiesContentDescription,
                                 tint = if (state.selectedReport?.packageName == group.packageName) {
@@ -355,14 +355,14 @@ private fun ActivityListContent(
                                 callbacks.onExportGroup(group.packageName)
                             },
                         ) {
-                            Icon(
+                            AppIcon(
                                 imageVector = AppIcons.Filled.Share,
                                 contentDescription = strings.shareActivitiesContentDescription,
                                 tint = MaterialTheme.colorScheme.primary,
                             )
                         }
                         IconButton(onClick = { callbacks.onToggleFavoritePackage(group.packageName) }) {
-                            Icon(
+                            AppIcon(
                                 imageVector = if (favPkg) AppIcons.Filled.Star else AppIcons.Filled.StarBorder,
                                 contentDescription = strings.favoriteContentDescription,
                                 tint = if (favPkg) {
@@ -404,7 +404,7 @@ private fun ActivityListContent(
                             actionsBelowHeader = false,
                             actions = {
                                 if (!activity.launchableViaShell) {
-                                    Icon(
+                                    AppIcon(
                                         imageVector = AppIcons.Filled.Warning,
                                         contentDescription = strings.shellUnavailableContentDescription,
                                         tint = MaterialTheme.colorScheme.error,
@@ -421,7 +421,7 @@ private fun ActivityListContent(
                                     },
                                     modifier = Modifier.size(36.dp),
                                 ) {
-                                    Icon(
+                                    AppIcon(
                                         imageVector = AppIcons.Filled.PlayArrow,
                                         contentDescription = strings.activityUi.launch,
                                         tint = MaterialTheme.colorScheme.primary,
@@ -431,7 +431,7 @@ private fun ActivityListContent(
                                     onClick = { callbacks.onToggleFavorite(activity) },
                                     modifier = Modifier.size(36.dp),
                                 ) {
-                                    Icon(
+                                    AppIcon(
                                         imageVector = if (isFav) AppIcons.Filled.Star else AppIcons.Filled.StarBorder,
                                         contentDescription = strings.favoriteContentDescription,
                                         tint = if (isFav) {

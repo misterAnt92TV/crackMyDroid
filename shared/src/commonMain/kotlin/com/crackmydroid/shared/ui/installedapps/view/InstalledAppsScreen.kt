@@ -19,7 +19,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -55,6 +54,7 @@ import com.crackmydroid.shared.ui.installedapps.InstalledAppsState
 import com.crackmydroid.shared.ui.installedapps.InstalledAppsViewModel
 import com.crackmydroid.shared.ui.screens.screenContentPadding
 import com.crackmydroid.ui.components.AppAccordion
+import com.crackmydroid.ui.components.AppIcon
 import com.crackmydroid.ui.components.button.AppButton
 import com.crackmydroid.ui.components.button.ButtonVariant
 import com.crackmydroid.ui.components.dialog.ErrorDialogComponent
@@ -307,14 +307,14 @@ private fun InstalledAppsScreenContent(
                     actionsBelowHeader = true,
                     actions = {
                         IconButton(onClick = { onShare(app.packageName) }) {
-                            Icon(
+                            AppIcon(
                                 imageVector = AppIcons.Filled.Share,
                                 contentDescription = strings.shareApkContentDescription,
                                 tint = MaterialTheme.colorScheme.primary,
                             )
                         }
                         IconButton(onClick = { onToggleFavorite(app.packageName) }) {
-                            Icon(
+                            AppIcon(
                                 imageVector = if (isFavorite) AppIcons.Filled.Star else AppIcons.Filled.StarBorder,
                                 contentDescription = strings.favoriteContentDescription,
                                 tint = if (isFavorite) {

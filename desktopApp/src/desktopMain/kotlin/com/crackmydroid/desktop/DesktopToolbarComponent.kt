@@ -18,6 +18,7 @@ import com.crackmydroid.shared.domain.model.scansnapshot.SnapshotMetadata
 import com.crackmydroid.shared.i18n.LocalStrings
 import com.crackmydroid.shared.i18n.Strings
 import com.crackmydroid.shared.i18n.format
+import com.crackmydroid.ui.components.AppIcon
 import com.crackmydroid.ui.components.button.AppButton
 import com.crackmydroid.ui.components.button.ButtonVariant
 import com.crackmydroid.ui.components.card.AppCard
@@ -50,7 +51,7 @@ internal fun DesktopToolbarComponent(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                androidx.compose.material3.Icon(
+                AppIcon(
                     imageVector = AppIcons.Filled.Devices,
                     contentDescription = null,
                 )

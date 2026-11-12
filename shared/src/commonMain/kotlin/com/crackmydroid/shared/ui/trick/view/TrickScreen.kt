@@ -22,7 +22,6 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.surfaceColorAtElevation
@@ -53,6 +52,7 @@ import com.crackmydroid.shared.ui.screens.screenContentPadding
 import com.crackmydroid.shared.ui.trick.TrickEvent
 import com.crackmydroid.shared.ui.trick.TrickState
 import com.crackmydroid.shared.ui.trick.TrickViewModel
+import com.crackmydroid.ui.components.AppIcon
 import com.crackmydroid.ui.components.button.AppButton
 import com.crackmydroid.ui.components.button.ButtonVariant
 import com.crackmydroid.ui.components.dialog.ErrorDialogComponent
@@ -132,7 +132,7 @@ private fun TrickScreenContent(
                             modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
-                            Icon(
+                            AppIcon(
                                 imageVector = AppIcons.Filled.Schedule,
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.onSecondaryContainer,
@@ -320,7 +320,7 @@ private fun TrickCommandCard(command: ShellCommand, running: Boolean, runningThi
                         ),
                     contentAlignment = Alignment.Center,
                 ) {
-                    Icon(
+                    AppIcon(
                         imageVector = icon,
                         contentDescription = null,
                         tint = if (command.requiresRoot) {
@@ -454,7 +454,7 @@ private fun TrickInlineResultSummary(commandTitle: String?, result: ShellCommand
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Icon(
+            AppIcon(
                 imageVector = if (result.success) AppIcons.Filled.CheckCircle else AppIcons.Filled.Error,
                 contentDescription = null,
                 tint = if (result.success) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
@@ -598,7 +598,7 @@ private fun TrickResultLine(text: String, icon: ImageVector, tint: Color) {
             .padding(horizontal = 10.dp, vertical = 8.dp),
         verticalAlignment = Alignment.Top,
     ) {
-        Icon(
+        AppIcon(
             imageVector = icon,
             contentDescription = null,
             tint = tint,

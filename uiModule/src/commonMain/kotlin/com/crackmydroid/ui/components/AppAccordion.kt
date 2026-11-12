@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -131,7 +130,7 @@ fun AppAccordion(
                         actions()
                     }
                 }
-                Icon(
+                AppIcon(
                     imageVector = if (expanded) AppIcons.Filled.ExpandLess else AppIcons.Filled.ExpandMore,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.primary,
@@ -185,7 +184,7 @@ private fun AppAccordionPreview() = ComponentPreviewContainer {
             headerMinHeight = 88.dp,
             actionsBelowHeader = true,
             actions = { AppText("⋮") },
-            leading = { Icon(AppIcons.Filled.Info, contentDescription = null) },
+            leading = { AppIcon(AppIcons.Filled.Info, contentDescription = null) },
         ) { AppText("Contenuto non visibile") }
     }
     AppAccordion(
@@ -201,6 +200,6 @@ private fun AppAccordionPreview() = ComponentPreviewContainer {
         headerMinHeight = 88.dp,
         actionsBelowHeader = true,
         actions = { AppText("⋮") },
-        leading = { Icon(AppIcons.Filled.Info, contentDescription = null) },
+        leading = { AppIcon(AppIcons.Filled.Info, contentDescription = null) },
     ) { AppText("Il dispositivo non espone backup, debug o permessi inattesi.") }
 }

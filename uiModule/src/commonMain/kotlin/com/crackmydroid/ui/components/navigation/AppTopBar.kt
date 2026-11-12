@@ -9,7 +9,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -19,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.crackmydroid.ui.components.AppIcon
 import com.crackmydroid.ui.components.LocalAccessibilityPrefs
 import com.crackmydroid.ui.components.AccessibilityPrefs
 import com.crackmydroid.ui.components.text.AppText
@@ -69,11 +69,11 @@ fun AppTopBar(
         navigationIcon = {
             when (navigationAction) {
                 AppTopBarNavigationAction.Menu -> TopBarIconButton(onNavigationClick, iconContainer) {
-                    Icon(AppIcons.Filled.Menu, contentDescription = uiStrings.menu)
+                    AppIcon(AppIcons.Filled.Menu, contentDescription = uiStrings.menu)
                 }
 
                 AppTopBarNavigationAction.Back -> TopBarIconButton(onNavigationClick, iconContainer) {
-                    Icon(AppIcons.AutoMirrored.Filled.ArrowBack, contentDescription = uiStrings.back)
+                    AppIcon(AppIcons.AutoMirrored.Filled.ArrowBack, contentDescription = uiStrings.back)
                 }
 
                 AppTopBarNavigationAction.None -> Unit
@@ -83,12 +83,12 @@ fun AppTopBar(
             additionalActions?.invoke(this)
             if (showSearch) {
                 TopBarIconButton(onSearchClick, iconContainer) {
-                    Icon(AppIcons.Filled.Search, contentDescription = uiStrings.search)
+                    AppIcon(AppIcons.Filled.Search, contentDescription = uiStrings.search)
                 }
             }
             if (showHelp) {
                 TopBarIconButton(onHelpClick, iconContainer) {
-                    Icon(AppIcons.AutoMirrored.Filled.HelpOutline, contentDescription = uiStrings.help)
+                    AppIcon(AppIcons.AutoMirrored.Filled.HelpOutline, contentDescription = uiStrings.help)
                 }
             }
         },

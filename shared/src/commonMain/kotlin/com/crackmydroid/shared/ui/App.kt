@@ -29,7 +29,6 @@ import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
@@ -88,6 +87,7 @@ import com.crackmydroid.shared.util.appSdkInfo
 import com.crackmydroid.shared.util.appVersionName
 import com.crackmydroid.ui.components.AccessibilityPrefs
 import com.crackmydroid.ui.components.AppBackHandler
+import com.crackmydroid.ui.components.AppIcon
 import com.crackmydroid.ui.components.dialog.AppDialog
 import com.crackmydroid.ui.components.LocalAccessibilityPrefs
 import com.crackmydroid.ui.components.PackageIcon
@@ -259,7 +259,7 @@ fun CrackMyDroidApp(
                                 ) {
                                     drawerScreens.forEach { screen ->
                                         NavigationDrawerItem(
-                                            icon = { Icon(screen.icon, contentDescription = null) },
+                                            icon = { AppIcon(screen.icon, contentDescription = null) },
                                             label = { AppText(screen.title(strings)) },
                                             selected = navigationState.selectedScreen == screen,
                                             onClick = { navigateFromDrawer(screen) },
@@ -293,7 +293,7 @@ fun CrackMyDroidApp(
                                             }
                                         },
                                     ) {
-                                    Icon(AppIcons.Filled.Menu, contentDescription = "Menu")
+                                    AppIcon(AppIcons.Filled.Menu, contentDescription = "Menu")
                                     }
                                 },
                             ) {
@@ -322,7 +322,7 @@ fun CrackMyDroidApp(
                                             )
                                         },
                                         icon = {
-                                            Icon(
+                                            AppIcon(
                                                 screen.icon,
                                                 contentDescription = screen.title(strings),
                                                 modifier = Modifier.size(itemIconSize),

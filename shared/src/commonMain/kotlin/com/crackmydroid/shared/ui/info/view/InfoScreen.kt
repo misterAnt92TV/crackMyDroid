@@ -27,7 +27,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -52,6 +51,7 @@ import com.crackmydroid.shared.presentation.preview.AppScreenPreviews
 import com.crackmydroid.shared.ui.info.InfoEvent
 import com.crackmydroid.shared.ui.info.InfoState
 import com.crackmydroid.shared.ui.info.InfoViewModel
+import com.crackmydroid.ui.components.AppIcon
 import com.crackmydroid.ui.components.AppProgressIndicator
 import com.crackmydroid.ui.components.button.ScrollToTopButton
 import com.crackmydroid.ui.components.card.AppCard
@@ -113,7 +113,7 @@ private fun InfoScreenContent(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                             ) {
-                                Icon(
+                                AppIcon(
                                     AppIcons.Filled.Smartphone,
                                     contentDescription = null,
                                     tint = MaterialTheme.colorScheme.primary,
@@ -134,7 +134,7 @@ private fun InfoScreenContent(
                                     }
                                 },
                             ) {
-                                Icon(
+                                AppIcon(
                                     AppIcons.Filled.Share,
                                     contentDescription = strings.shareDeviceInfoContentDescription,
                                     tint = MaterialTheme.colorScheme.primary,
@@ -157,7 +157,7 @@ private fun InfoScreenContent(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
-                            Icon(
+                            AppIcon(
                                 AppIcons.Filled.Memory,
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.primary,
@@ -184,7 +184,7 @@ private fun InfoScreenContent(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
-                            Icon(
+                            AppIcon(
                                 AppIcons.Filled.Wifi,
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.primary,
@@ -217,7 +217,7 @@ private fun InfoScreenContent(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
-                            Icon(
+                            AppIcon(
                                 AppIcons.Filled.Storage,
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.primary,

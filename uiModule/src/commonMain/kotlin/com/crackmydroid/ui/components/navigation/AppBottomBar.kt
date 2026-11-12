@@ -1,7 +1,6 @@
 package com.crackmydroid.ui.components.navigation
 
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarDefaults
 import androidx.compose.material3.NavigationBarItem
@@ -10,6 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.crackmydroid.ui.components.AppIcon
 import com.crackmydroid.ui.components.LocalAccessibilityPrefs
 import com.crackmydroid.ui.components.AccessibilityPrefs
 import com.crackmydroid.ui.components.text.AppText
@@ -41,7 +41,7 @@ fun AppBottomBar(
                 selected = item.selected,
                 onClick = { onItemClick(item.id) },
                 icon = {
-                    Icon(
+                    AppIcon(
                         item.icon,
                         contentDescription = item.label,
                         modifier = Modifier.size(20.dp),

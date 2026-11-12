@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilledTonalButton
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.runtime.Composable
@@ -17,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.crackmydroid.ui.components.AppIcon
 import com.crackmydroid.ui.components.LocalAccessibilityPrefs
 import com.crackmydroid.ui.components.text.AppText
 import com.crackmydroid.ui.preview.AppComponentPreviews
@@ -38,7 +38,7 @@ fun AppButton(
         if (prefs.largeText) baseStyle.copy(fontSize = baseStyle.fontSize * 1.1f) else baseStyle
     val content = @Composable {
         if (leadingIcon != null) {
-            Icon(leadingIcon, contentDescription = null, modifier = Modifier.padding(end = 6.dp))
+            AppIcon(leadingIcon, contentDescription = null, modifier = Modifier.padding(end = 6.dp))
         }
         AppText(
             text,

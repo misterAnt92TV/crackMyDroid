@@ -16,7 +16,6 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.TextField
@@ -39,6 +38,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import com.crackmydroid.shared.i18n.LocalStrings
 import com.crackmydroid.shared.i18n.format
+import com.crackmydroid.ui.components.AppIcon
 import com.crackmydroid.ui.components.text.AppText
 import com.crackmydroid.ui.components.LocalAccessibilityPrefs
 import com.crackmydroid.ui.icons.AppIcons
@@ -129,7 +129,7 @@ fun SearchFieldWithHistoryComponent(
                             showSuggestions = hasFocus
                         },
                     ) {
-                        Icon(
+                        AppIcon(
                             imageVector = AppIcons.Filled.Close,
                             contentDescription = strings.clearSearchContentDescription,
                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -184,7 +184,7 @@ fun SearchFieldWithHistoryComponent(
                             ),
                             label = { AppText(suggestion) },
                             leadingIcon = {
-                                Icon(
+                                AppIcon(
                                     imageVector = AppIcons.Filled.History,
                                     contentDescription = null,
                                     tint = MaterialTheme.colorScheme.primary,

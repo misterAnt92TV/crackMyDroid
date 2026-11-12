@@ -12,7 +12,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -89,7 +88,7 @@ fun SectionHeader(
                     .background(iconContainer),
                 colors = IconButtonDefaults.iconButtonColors(contentColor = MaterialTheme.colorScheme.primary),
             ) {
-                Icon(icon, contentDescription = LocalUiStrings.current.help)
+                AppIcon(icon, contentDescription = LocalUiStrings.current.help)
             }
         },
         navigationIcon = {
@@ -102,7 +101,7 @@ fun SectionHeader(
                         .background(iconContainer),
                     colors = IconButtonDefaults.iconButtonColors(contentColor = MaterialTheme.colorScheme.primary),
                 ) {
-                    Icon(
+                    AppIcon(
                         AppIcons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = LocalUiStrings.current.back,
                     )
@@ -116,7 +115,7 @@ fun SectionHeader(
                         .background(iconContainer),
                     colors = IconButtonDefaults.iconButtonColors(contentColor = MaterialTheme.colorScheme.primary),
                 ) {
-                    Icon(AppIcons.Filled.Menu, contentDescription = LocalUiStrings.current.menu)
+                    AppIcon(AppIcons.Filled.Menu, contentDescription = LocalUiStrings.current.menu)
                 }
             }
         },

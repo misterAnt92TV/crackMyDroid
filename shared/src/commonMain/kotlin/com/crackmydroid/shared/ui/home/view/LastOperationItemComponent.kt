@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -24,6 +23,7 @@ import com.crackmydroid.shared.i18n.LocalStrings
 import com.crackmydroid.shared.i18n.format
 import com.crackmydroid.shared.ui.home.LastOperationItem
 import com.crackmydroid.shared.ui.home.OperationOutcome
+import com.crackmydroid.ui.components.AppIcon
 import com.crackmydroid.ui.components.card.AppCard
 import com.crackmydroid.ui.components.text.AppText
 import com.crackmydroid.ui.preview.AppComponentPreviews
@@ -51,7 +51,7 @@ fun LastOperationItemComponent(
                     .background(statusColor.copy(alpha = 0.16f)),
                 contentAlignment = Alignment.Center,
             ) {
-                Icon(
+                AppIcon(
                     imageVector = if (item.outcome == OperationOutcome.Success) {
                         AppIcons.Filled.CheckCircle
                     } else {
@@ -89,7 +89,7 @@ fun LastOperationItemComponent(
                 )
             }
             IconButton(onClick = { onAction(item.operationId) }, modifier = Modifier.size(48.dp)) {
-                Icon(
+                AppIcon(
                     imageVector = AppIcons.Filled.Close,
                     contentDescription = actionContentDescription.format(item.description),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,

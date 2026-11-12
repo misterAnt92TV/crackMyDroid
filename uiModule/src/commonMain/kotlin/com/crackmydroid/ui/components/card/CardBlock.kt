@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -16,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.crackmydroid.ui.components.AppIcon
 import com.crackmydroid.ui.components.text.AppText
 import com.crackmydroid.ui.preview.AppComponentPreviews
 import com.crackmydroid.ui.preview.ComponentPreviewContainer
@@ -35,7 +35,7 @@ fun CardBlock(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             leadingIcon?.let {
-                Icon(
+                AppIcon(
                     imageVector = it,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.primary,

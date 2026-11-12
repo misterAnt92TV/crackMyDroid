@@ -23,7 +23,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -62,6 +61,7 @@ import com.crackmydroid.shared.ui.permissions.model.PermissionFindingUi
 import com.crackmydroid.shared.ui.permissions.model.PermissionsEffect
 import com.crackmydroid.shared.ui.screens.screenContentPadding
 import com.crackmydroid.ui.components.AppAccordion
+import com.crackmydroid.ui.components.AppIcon
 import com.crackmydroid.ui.components.button.AppButton
 import com.crackmydroid.ui.components.button.ButtonVariant
 import com.crackmydroid.ui.components.dialog.ErrorDialogComponent
@@ -464,14 +464,14 @@ private fun PermissionsScreenContent(
                                 onRequestReportPreview(app.packageName)
                             },
                         ) {
-                            Icon(
+                            AppIcon(
                                 imageVector = AppIcons.Filled.Share,
                                 contentDescription = strings.sharePermissionsContentDescription,
                                 tint = MaterialTheme.colorScheme.primary,
                             )
                         }
                         IconButton(onClick = { onToggleFavorite(app.packageName) }) {
-                            Icon(
+                            AppIcon(
                                 imageVector = if (isFavorite) AppIcons.Filled.Star else AppIcons.Filled.StarBorder,
                                 contentDescription = strings.favoriteContentDescription,
                                 tint = if (isFavorite) {
@@ -615,7 +615,7 @@ private fun PermissionRow(permission: String, finding: PermissionFindingUi? = nu
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        Icon(
+        AppIcon(
             imageVector = permissionIconFor(permission),
             contentDescription = permission,
             tint = finding?.let { riskLevelColor(it.level) } ?: permissionColor(permission),

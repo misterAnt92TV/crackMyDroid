@@ -27,7 +27,6 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -54,6 +53,7 @@ import com.crackmydroid.shared.presentation.preview.AppScreenPreviews
 import com.crackmydroid.shared.ui.root.RootEvent
 import com.crackmydroid.shared.ui.root.RootState
 import com.crackmydroid.shared.ui.root.RootViewModel
+import com.crackmydroid.ui.components.AppIcon
 import com.crackmydroid.ui.components.button.AppButton
 import com.crackmydroid.ui.components.AppProgressIndicator
 import com.crackmydroid.ui.components.text.AppTextField
@@ -140,7 +140,7 @@ private fun RootScreenContent(
                             fontWeight = FontWeight.SemiBold,
                         )
                         IconButton(onClick = onVerify, enabled = !state.loading) {
-                            Icon(
+                            AppIcon(
                                 AppIcons.Filled.Refresh,
                                 contentDescription = strings.verifyRoot,
                                 tint = MaterialTheme.colorScheme.primary,
@@ -233,7 +233,7 @@ private fun RootScreenContent(
                                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                                             verticalAlignment = Alignment.CenterVertically,
                                         ) {
-                                            Icon(
+                                            AppIcon(
                                                 imageVector = if (rooted) {
                                                     AppIcons.Filled.Warning
                                                 } else {
@@ -261,7 +261,7 @@ private fun RootScreenContent(
                                         ) { statusContent(it) }
                                     }
                                     IconButton(onClick = onShareReport) {
-                                        Icon(
+                                        AppIcon(
                                             imageVector = AppIcons.Filled.Share,
                                             contentDescription = strings.pentestShare,
                                             tint = onBg,
@@ -322,7 +322,7 @@ private fun RootScreenContent(
                                         fontWeight = FontWeight.SemiBold,
                                     )
                                     IconButton(onClick = onShareReport) {
-                                        Icon(
+                                        AppIcon(
                                             imageVector = AppIcons.Filled.Share,
                                             contentDescription = strings.pentestShare,
                                             tint = MaterialTheme.colorScheme.primary,

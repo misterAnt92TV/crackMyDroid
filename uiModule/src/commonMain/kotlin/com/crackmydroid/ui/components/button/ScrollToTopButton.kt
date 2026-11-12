@@ -6,10 +6,10 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import com.crackmydroid.ui.components.AppIcon
 import com.crackmydroid.ui.components.LocalAccessibilityPrefs
 import com.crackmydroid.ui.strings.LocalUiStrings
 import com.crackmydroid.ui.preview.AppComponentPreviews
@@ -35,7 +35,7 @@ fun ScrollToTopButton(
             containerColor = MaterialTheme.colorScheme.primary,
             contentColor = MaterialTheme.colorScheme.onPrimary,
         ) {
-            Icon(
+            AppIcon(
                 imageVector = AppIcons.Filled.KeyboardArrowUp,
                 contentDescription = contentDescription ?: strings.scrollToTop,
             )

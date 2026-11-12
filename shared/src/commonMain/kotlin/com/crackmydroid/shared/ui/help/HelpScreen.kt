@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
@@ -33,6 +32,7 @@ import com.crackmydroid.shared.ui.screens.screenContentPadding
 import com.crackmydroid.ui.components.button.ScrollToTopButton
 import com.crackmydroid.ui.components.card.AppCard
 import com.crackmydroid.ui.components.text.AppText
+import com.crackmydroid.ui.components.AppIcon
 import kotlinx.coroutines.launch
 
 @Composable
@@ -105,7 +105,7 @@ private fun HelpNavigationItem(title: String, summary: String, icon: ImageVector
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalAlignment = Alignment.Top,
         ) {
-            Icon(
+            AppIcon(
                 imageVector = icon,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.primary,
@@ -129,7 +129,7 @@ private fun HelpNavigationItem(title: String, summary: String, icon: ImageVector
                     overflow = TextOverflow.Ellipsis,
                 )
             }
-            Icon(
+            AppIcon(
                 imageVector = AppIcons.AutoMirrored.Filled.ArrowForward,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.primary,

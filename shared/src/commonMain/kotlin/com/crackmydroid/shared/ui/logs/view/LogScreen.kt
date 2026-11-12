@@ -26,7 +26,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
@@ -56,6 +55,7 @@ import com.crackmydroid.shared.ui.logs.LogEvent
 import com.crackmydroid.shared.ui.logs.LogState
 import com.crackmydroid.shared.ui.logs.LogViewModel
 import com.crackmydroid.ui.components.AppAccordion
+import com.crackmydroid.ui.components.AppIcon
 import com.crackmydroid.ui.components.button.AppButton
 import com.crackmydroid.ui.components.dialog.ErrorDialogComponent
 import com.crackmydroid.ui.components.button.ScrollToTopButton
@@ -179,7 +179,7 @@ private fun LogScreenContent(
                             modifier = Modifier.weight(1f),
                         )
                         IconButton(onClick = onExport) {
-                            Icon(
+                            AppIcon(
                                 imageVector = AppIcons.Filled.Share,
                                 contentDescription = strings.exportLog,
                                 tint = MaterialTheme.colorScheme.primary,
