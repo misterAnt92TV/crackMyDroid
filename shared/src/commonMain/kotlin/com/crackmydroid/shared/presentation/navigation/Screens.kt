@@ -4,18 +4,18 @@ import com.crackmydroid.ui.icons.AppIcons
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.crackmydroid.shared.i18n.Strings
 
-sealed class Screen(val title: (Strings) -> String, val icon: ImageVector) {
-    object Home : Screen({ it.navHome }, AppIcons.Rounded.Home)
-    object Activities : Screen({ it.navActivities }, AppIcons.AutoMirrored.Rounded.List)
-    object Root : Screen({ it.navRoot }, AppIcons.Rounded.VerifiedUser)
-    object Info : Screen({ it.navInfo }, AppIcons.Rounded.Info)
-    object Trick : Screen({ it.navTrick }, AppIcons.Rounded.Build)
-    object Settings : Screen({ it.navSettings }, AppIcons.Rounded.Settings)
-    object Log : Screen({ it.navLog }, AppIcons.AutoMirrored.Rounded.ReceiptLong)
-    object Permissions : Screen({ it.navPermissions }, AppIcons.Rounded.PrivacyTip)
-    object InstalledApps : Screen({ it.navApk }, AppIcons.Rounded.Apps)
-    object Pentest : Screen({ it.navPentest }, AppIcons.Rounded.Security)
-    object Help : Screen({ it.navHelp }, AppIcons.AutoMirrored.Rounded.HelpOutline)
+sealed class Screen(val id: String, val title: (Strings) -> String, val icon: ImageVector) {
+    object Home : Screen("home", { it.navHome }, AppIcons.Rounded.Home)
+    object Activities : Screen("activities", { it.navActivities }, AppIcons.AutoMirrored.Rounded.List)
+    object Root : Screen("root", { it.navRoot }, AppIcons.Rounded.VerifiedUser)
+    object Info : Screen("info", { it.navInfo }, AppIcons.Rounded.Info)
+    object Trick : Screen("trick", { it.navTrick }, AppIcons.Rounded.Build)
+    object Settings : Screen("settings", { it.navSettings }, AppIcons.Rounded.Settings)
+    object Log : Screen("log", { it.navLog }, AppIcons.AutoMirrored.Rounded.ReceiptLong)
+    object Permissions : Screen("permissions", { it.navPermissions }, AppIcons.Rounded.PrivacyTip)
+    object InstalledApps : Screen("installed_apps", { it.navApk }, AppIcons.Rounded.Apps)
+    object Pentest : Screen("pentest", { it.navPentest }, AppIcons.Rounded.Security)
+    object Help : Screen("help", { it.navHelp }, AppIcons.AutoMirrored.Rounded.HelpOutline)
 }
 
 val bottomScreens = listOf(

@@ -39,16 +39,11 @@ import com.crackmydroid.shared.ui.settings.SettingsState
 import com.crackmydroid.shared.ui.settings.SettingsViewModel
 import com.crackmydroid.shared.ui.settings.model.SettingsActions
 import com.crackmydroid.shared.ui.settings.model.SettingsAppInfo
-import com.crackmydroid.shared.util.appPackageName
-import com.crackmydroid.shared.util.appRequestedPermissions
-import com.crackmydroid.shared.util.appSdkInfo
-import com.crackmydroid.shared.util.appVersionName
 import com.crackmydroid.ui.components.button.AppButton
 import com.crackmydroid.ui.components.button.ButtonVariant
 import com.crackmydroid.ui.components.dialog.ErrorDialogComponent
 import com.crackmydroid.ui.components.LocalAccessibilityPrefs
 import com.crackmydroid.ui.components.button.ScrollToTopButton
-import com.crackmydroid.ui.components.SectionHeader
 import com.crackmydroid.ui.components.card.CardBlock
 import com.crackmydroid.ui.components.text.AppText
 import kotlinx.coroutines.launch
@@ -57,24 +52,14 @@ import kotlinx.coroutines.launch
 fun SettingsScreen(
     viewModel: SettingsViewModel,
     padding: PaddingValues,
-    headerHelp: String,
-    onHelp: (String) -> Unit,
-    onMenu: () -> Unit = {},
+    appInfo: SettingsAppInfo,
 ) {
     val state by viewModel.state.collectAsState()
     val uriHandler = LocalUriHandler.current
-    val sdkInfo = appSdkInfo()
     SettingsContent(
         state = state,
         padding = padding,
-        headerHelp = headerHelp,
-        appInfo = SettingsAppInfo(
-            versionName = appVersionName(),
-            packageName = appPackageName(),
-            minSdk = sdkInfo?.minSdk,
-            targetSdk = sdkInfo?.targetSdk,
-            requestedPermissions = appRequestedPermissions(),
-        ),
+        appInfo = appInfo,
         actions = SettingsActions(
             onSelectTheme = { viewModel.handleEvent(SettingsEvent.ThemeSelected(it)) },
             onSelectLanguage = { viewModel.handleEvent(SettingsEvent.LanguageSelected(it)) },
@@ -88,8 +73,6 @@ fun SettingsScreen(
             onSetReduceMotion = { viewModel.handleEvent(SettingsEvent.ReduceMotionChanged(it)) },
             onSetLargeText = { viewModel.handleEvent(SettingsEvent.LargeTextChanged(it)) },
             onOpenUri = uriHandler::openUri,
-            onHelp = onHelp,
-            onMenu = onMenu,
             onClearError = { viewModel.handleEvent(SettingsEvent.ErrorDismissed()) },
         ),
     )
@@ -99,7 +82,6 @@ fun SettingsScreen(
 internal fun SettingsContent(
     state: SettingsState,
     padding: PaddingValues,
-    headerHelp: String,
     appInfo: SettingsAppInfo,
     actions: SettingsActions,
 ) {
@@ -124,12 +106,6 @@ internal fun SettingsContent(
                 .verticalScroll(scrollState),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            SectionHeader(
-                title = strings.navSettings,
-                help = headerHelp,
-                onHelp = actions.onHelp,
-                onMenu = actions.onMenu,
-            )
             CardBlock(strings.themeTitle, leadingIcon = AppIcons.Filled.ColorLens) {
                 ThemeRow(strings.light, AppTheme.LIGHT, state.theme) {
                     actions.onSelectTheme(

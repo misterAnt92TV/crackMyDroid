@@ -1,7 +1,7 @@
 package com.crackmydroid.shared.ui
 
 import com.crackmydroid.shared.ui.activities.ActivityListViewModel
-import com.crackmydroid.shared.ui.appshell.AppShellViewModel
+import com.crackmydroid.shared.ui.navigation.AppNavigationViewModel
 import com.crackmydroid.shared.ui.home.HomeViewModel
 import com.crackmydroid.shared.ui.info.InfoViewModel
 import com.crackmydroid.shared.ui.installedapps.InstalledAppsViewModel
@@ -13,7 +13,7 @@ import com.crackmydroid.shared.ui.settings.SettingsViewModel
 import com.crackmydroid.shared.ui.trick.TrickViewModel
 
 data class AppPresentationDependencies(
-    val shell: AppShellViewModel,
+    val navigation: AppNavigationViewModel,
     val activity: ActivityListViewModel,
     val home: HomeViewModel,
     val root: RootViewModel,

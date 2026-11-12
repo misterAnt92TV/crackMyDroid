@@ -26,7 +26,10 @@ import com.crackmydroid.shared.i18n.usecase.UseCaseTexts
 import com.crackmydroid.shared.presentation.navigation.Screen
 import com.crackmydroid.shared.presentation.operations.NoOpOperationLogRepository
 import com.crackmydroid.shared.ui.AppPresentationDependencies
-import com.crackmydroid.shared.ui.appshell.AppShellEvent
+import com.crackmydroid.shared.ui.navigation.AppNavigationEvent
+import com.crackmydroid.shared.ui.navigation.NavigationSource
+import com.crackmydroid.shared.ui.pentest.PenTestingEvent
+import com.crackmydroid.shared.ui.pentest.model.PenTestWizardStep
 import com.crackmydroid.shared.ui.settings.SettingsEvent
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -140,7 +143,7 @@ class AppPresentationDependenciesTest {
         coEvery { settingsRepository.getLanguage() } returns AppLanguage.FRENCH
         coEvery { settingsRepository.setLanguage(AppLanguage.GERMAN) } returns Unit
         val graph = resolveGraph()
-        graph.shell.handleEvent(AppShellEvent.Initialize())
+        graph.navigation.handleEvent(AppNavigationEvent.Initialize())
         advanceUntilIdle()
         assertTrue(
             graph.info.state.value.reportContent.orEmpty()
@@ -161,11 +164,11 @@ class AppPresentationDependenciesTest {
     fun failedVerboseBootstrapDoesNotBlockFeatureInitialization() = runTest(dispatcher) {
         coEvery { settingsRepository.isVerboseLog() } throws IllegalStateException("diagnostics unavailable")
         val graph = resolveGraph()
-        graph.shell.handleEvent(AppShellEvent.Initialize())
+        graph.navigation.handleEvent(AppNavigationEvent.Initialize())
         advanceUntilIdle()
 
         assertFalse(AppLogger.isVerbose())
-        assertTrue(graph.shell.state.value.initialized)
+        assertTrue(graph.navigation.state.value.initialized)
         assertEquals(apps, graph.installedApps.state.value.apps)
         assertEquals("diagnostics unavailable", graph.settings.state.value.error)
     }
@@ -174,7 +177,7 @@ class AppPresentationDependenciesTest {
     fun initialize_populatesTheViewModelsExposedToScreens_onlyOnce() = runTest(dispatcher) {
         val graph = resolveGraph()
 
-        graph.shell.handleEvent(AppShellEvent.Initialize())
+        graph.navigation.handleEvent(AppNavigationEvent.Initialize())
         advanceUntilIdle()
 
         assertEquals(device, graph.info.state.value.info)
@@ -192,11 +195,11 @@ class AppPresentationDependenciesTest {
         assertEquals(setOf("test.app"), graph.permissions.state.value.favorites)
         assertEquals(apps, graph.installedApps.state.value.apps)
         assertEquals(apps, graph.penTesting.state.value.apps)
-        assertTrue(graph.shell.state.value.initialized)
+        assertTrue(graph.navigation.state.value.initialized)
         assertTrue(AppLogger.isVerbose())
-        assertTrue(graph.shell.state.value.showIntro)
+        assertTrue(graph.navigation.state.value.showIntro)
 
-        graph.shell.handleEvent(AppShellEvent.Initialize())
+        graph.navigation.handleEvent(AppNavigationEvent.Initialize())
         advanceUntilIdle()
 
         coVerify(exactly = 1) { deviceRepository.getDeviceInfo() }
@@ -208,13 +211,13 @@ class AppPresentationDependenciesTest {
         coVerify(exactly = 1) { permissionsRepository.listAppPermissions() }
         coVerify(exactly = 2) { installedRepository.listInstalled() }
 
-        graph.shell.handleEvent(AppShellEvent.HintConfirmed(disableHints = true, target = Screen.Permissions))
-        graph.shell.handleEvent(AppShellEvent.IntroDismissed())
+        graph.navigation.handleEvent(AppNavigationEvent.HintConfirmed(disableHints = true, target = Screen.Permissions))
+        graph.navigation.handleEvent(AppNavigationEvent.IntroDismissed())
         advanceUntilIdle()
 
         assertFalse(graph.settings.state.value.featureHintsEnabled)
-        assertFalse(graph.shell.state.value.showIntro)
-        assertEquals(Screen.Permissions, graph.shell.state.value.selectedScreen)
+        assertFalse(graph.navigation.state.value.showIntro)
+        assertEquals(Screen.Permissions, graph.navigation.state.value.selectedScreen)
         coVerify(exactly = 1) { settingsRepository.setFeatureHintsEnabled(false) }
         coVerify(exactly = 1) { settingsRepository.setIntroSeen(true) }
     }
@@ -227,18 +230,76 @@ class AppPresentationDependenciesTest {
         viewModels(first).zip(viewModels(second)).forEach { (left, right) ->
             assertNotSame(left, right)
         }
-        first.shell.handleEvent(AppShellEvent.Initialize())
+        first.navigation.handleEvent(AppNavigationEvent.Initialize())
         advanceUntilIdle()
 
         assertEquals(device, first.info.state.value.info)
         assertNull(second.info.state.value.info)
-        assertFalse(second.shell.state.value.initialized)
+        assertFalse(second.navigation.state.value.initialized)
+    }
+
+    @Test
+    fun navigationChrome_preservesSearchTokenAndNormalizesHistory() = runTest(dispatcher) {
+        val graph = resolveGraph()
+        graph.navigation.handleEvent(AppNavigationEvent.Initialize())
+        advanceUntilIdle()
+
+        assertEquals("Home", graph.navigation.state.value.topBar.title)
+        assertEquals(listOf("Home", "Info device", "Impostazioni"), graph.navigation.state.value.bottomBarItems.map { it.label })
+
+        graph.navigation.handleEvent(
+            AppNavigationEvent.ScreenSelected(Screen.Permissions, NavigationSource.Drawer, hintsEnabled = false),
+        )
+        assertEquals(Screen.Permissions, graph.navigation.state.value.selectedScreen)
+        assertEquals(listOf(Screen.Home), graph.navigation.state.value.navigationHistory)
+        assertTrue(graph.navigation.state.value.topBar.showSearch)
+
+        val requestId = graph.navigation.state.value.topBar.searchRequestId
+        graph.navigation.handleEvent(AppNavigationEvent.TopBarSearchRequested())
+        assertEquals(requestId + 1, graph.navigation.state.value.topBar.searchRequestId)
+
+        graph.navigation.handleEvent(AppNavigationEvent.BackRequested())
+        assertEquals(Screen.Home, graph.navigation.state.value.selectedScreen)
+        assertTrue(graph.navigation.state.value.navigationHistory.isEmpty())
+
+        graph.navigation.handleEvent(
+            AppNavigationEvent.ScreenSelected(Screen.Pentest, NavigationSource.Drawer, hintsEnabled = false),
+        )
+        graph.penTesting.handleEvent(PenTestingEvent.StepSelected(PenTestWizardStep.SelectChecks))
+        advanceUntilIdle()
+        assertFalse(graph.navigation.state.value.topBar.showSearch)
+
+        graph.navigation.handleEvent(
+            AppNavigationEvent.ScreenSelected(Screen.Settings, NavigationSource.BottomBar, hintsEnabled = false),
+        )
+        assertTrue(graph.navigation.state.value.navigationHistory.isEmpty())
+        assertTrue(graph.navigation.state.value.bottomBarItems.single { it.screen == Screen.Settings }.selected)
+        assertEquals(requestId + 1, graph.navigation.state.value.topBar.searchRequestId)
+
+        val selectedSettings = graph.navigation.state.value
+        graph.navigation.handleEvent(
+            AppNavigationEvent.ScreenSelected(Screen.Settings, NavigationSource.BottomBar, hintsEnabled = false),
+        )
+        assertEquals(selectedSettings, graph.navigation.state.value)
+
+        graph.navigation.handleEvent(
+            AppNavigationEvent.ScreenSelected(Screen.Permissions, NavigationSource.Drawer, hintsEnabled = false),
+        )
+        graph.navigation.handleEvent(
+            AppNavigationEvent.ScreenSelected(Screen.Root, NavigationSource.Drawer, hintsEnabled = false),
+        )
+        assertEquals(listOf(Screen.Settings, Screen.Permissions), graph.navigation.state.value.navigationHistory)
+
+        graph.navigation.handleEvent(
+            AppNavigationEvent.ScreenSelected(Screen.Root, NavigationSource.Drawer, hintsEnabled = false),
+        )
+        assertEquals(listOf(Screen.Settings, Screen.Permissions), graph.navigation.state.value.navigationHistory)
     }
 
     private fun resolveGraph(): AppPresentationDependencies =
         application.koin.get<AppPresentationDependencies>().also { graphs += it }
 
     private fun viewModels(graph: AppPresentationDependencies): List<LocalizedBaseViewModel<*, *>> = with(graph) {
-        listOf(shell, activity, home, root, info, trick, settings, logs, permissions, installedApps, penTesting)
+        listOf(navigation, activity, home, root, info, trick, settings, logs, permissions, installedApps, penTesting)
     }
 }

@@ -69,7 +69,6 @@ private fun SettingsLocalePreview(
                 error = error,
             ),
             padding = PaddingValues(),
-            headerHelp = strings.helpSettings,
             appInfo = appInfo,
             actions = SettingsActions(),
         )

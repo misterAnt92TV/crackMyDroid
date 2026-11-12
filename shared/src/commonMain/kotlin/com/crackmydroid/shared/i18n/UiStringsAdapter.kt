@@ -10,6 +10,7 @@ fun Strings.toUiStrings(): UiStrings = UiStrings(
     help = helpContentDescription,
     back = backContentDescription,
     menu = menuContentDescription,
+    search = searchContentDescription,
     exportDetailsTitle = exportDetailsTitle,
     exportFile = { exportFile.format(it) },
     exportFormat = { exportFormat.format(it) },

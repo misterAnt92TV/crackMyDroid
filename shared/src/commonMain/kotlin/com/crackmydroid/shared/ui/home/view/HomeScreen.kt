@@ -24,6 +24,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -41,7 +42,6 @@ import com.crackmydroid.shared.ui.screens.screenContentPadding
 import com.crackmydroid.ui.components.AppAccordion
 import com.crackmydroid.ui.components.PackageIcon
 import com.crackmydroid.ui.components.button.ScrollToTopButton
-import com.crackmydroid.ui.components.SectionHeader
 import com.crackmydroid.ui.components.card.AppCard
 import com.crackmydroid.ui.components.text.AppText
 import kotlinx.coroutines.launch
@@ -50,9 +50,6 @@ import kotlinx.coroutines.launch
 fun HomeScreen(
     viewModel: HomeViewModel,
     padding: PaddingValues,
-    headerHelp: String,
-    onHelp: (String) -> Unit,
-    onMenu: () -> Unit = {},
     languageCode: String = "en",
 ) {
     val state = viewModel.state.collectAsState()
@@ -63,9 +60,6 @@ fun HomeScreen(
     HomeContent(
         state = uiState,
         padding = padding,
-        headerHelp = headerHelp,
-        onHelp = onHelp,
-        onMenu = onMenu,
         onHideRecent = { viewModel.handleEvent(HomeEvent.HideFromRecent(it)) },
         onRemove = { viewModel.handleEvent(HomeEvent.Remove(it)) },
     )
@@ -75,15 +69,12 @@ fun HomeScreen(
 internal fun HomeContent(
     state: HomeUiState,
     padding: PaddingValues,
-    headerHelp: String,
-    onHelp: (String) -> Unit,
-    onMenu: () -> Unit = {},
     onHideRecent: (String) -> Unit = {},
     onRemove: (String) -> Unit = {},
     initiallyExpandedHistory: Boolean = false,
 ) {
     val strings = LocalStrings.current
-    val historyExpanded = remember { mutableStateOf(initiallyExpandedHistory) }
+    val historyExpanded = rememberSaveable { mutableStateOf(initiallyExpandedHistory) }
     val uniqueHistory = state.operationHistory
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
@@ -98,14 +89,6 @@ internal fun HomeContent(
             contentPadding = screenContentPadding(padding),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            item {
-                SectionHeader(
-                    title = strings.navHome,
-                    help = headerHelp,
-                    onHelp = onHelp,
-                    onMenu = onMenu,
-                )
-            }
             item {
                 AppCard(modifier = Modifier.fillMaxWidth()) {
                     Row(
@@ -200,9 +183,12 @@ internal fun HomeContent(
                     modifier = Modifier.padding(top = 12.dp),
                 )
             }
-            items(strings.faqItems) { faq ->
+            items(
+                items = strings.faqItems,
+                key = { (question, _) -> question },
+            ) { faq ->
                 val (q, a) = faq
-                val expanded = remember { mutableStateOf(false) }
+                val expanded = rememberSaveable(q) { mutableStateOf(false) }
                 AppAccordion(
                     title = q,
                     expanded = expanded.value,

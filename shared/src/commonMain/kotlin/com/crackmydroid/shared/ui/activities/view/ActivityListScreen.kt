@@ -65,7 +65,6 @@ import com.crackmydroid.ui.components.button.ButtonVariant
 import com.crackmydroid.ui.components.dialog.ErrorDialogComponent
 import com.crackmydroid.ui.components.PackageIcon
 import com.crackmydroid.ui.components.button.ScrollToTopButton
-import com.crackmydroid.ui.components.SectionHeader
 import com.crackmydroid.ui.components.card.AppCard
 import com.crackmydroid.ui.components.card.ExportDetailsCard
 import com.crackmydroid.ui.components.text.AppText
@@ -75,10 +74,7 @@ import kotlinx.coroutines.launch
 fun ActivityListScreen(
     viewModel: ActivityListViewModel,
     padding: PaddingValues,
-    headerHelp: String,
-    onHelp: (String) -> Unit,
-    onBack: (() -> Unit)? = null,
-    onMenu: () -> Unit = {},
+    searchRequestId: Long = 0,
 ) {
     val state by viewModel.state.collectAsState()
 
@@ -116,10 +112,7 @@ fun ActivityListScreen(
     ActivityListContent(
         state = state,
         padding = padding,
-        headerHelp = headerHelp,
-        onHelp = onHelp,
-        onBack = onBack,
-        onMenu = onMenu,
+        searchRequestId = searchRequestId,
         callbacks = callbacks,
     )
 }
@@ -146,10 +139,7 @@ private data class ActivityListCallbacks(
 private fun ActivityListContent(
     state: ActivityListState,
     padding: PaddingValues,
-    headerHelp: String,
-    onHelp: (String) -> Unit,
-    onBack: (() -> Unit)?,
-    onMenu: () -> Unit,
+    searchRequestId: Long,
     callbacks: ActivityListCallbacks,
 ) {
     val strings = LocalStrings.current
@@ -163,6 +153,12 @@ private fun ActivityListContent(
     val favoriteQueries = state.favoriteQueries
     val listState = rememberLazyListState()
     var searchToolsExpanded by remember { mutableStateOf(true) }
+    LaunchedEffect(searchRequestId) {
+        if (searchRequestId > 0) {
+            searchToolsExpanded = true
+            listState.animateScrollToItem(0)
+        }
+    }
     val showScrollTop by remember {
         derivedStateOf { listState.firstVisibleItemIndex > 1 || listState.firstVisibleItemScrollOffset > 240 }
     }
@@ -176,24 +172,6 @@ private fun ActivityListContent(
             verticalArrangement = Arrangement.spacedBy(10.dp),
             contentPadding = screenContentPadding(padding, horizontal = 16.dp, vertical = 10.dp),
         ) {
-            item {
-                SectionHeader(
-                    title = strings.navActivities,
-                    help = headerHelp,
-                    onHelp = onHelp,
-                    beforeHelpAction = {
-                        IconButton(onClick = callbacks.onRefresh) {
-                            Icon(
-                                imageVector = AppIcons.Filled.Refresh,
-                                contentDescription = strings.refreshActivitiesContentDescription,
-                                tint = MaterialTheme.colorScheme.primary,
-                            )
-                        }
-                    },
-                    onBack = onBack,
-                    onMenu = onMenu,
-                )
-            }
             item {
                 AppAccordion(
                     title = strings.filterActivities,
@@ -216,6 +194,7 @@ private fun ActivityListContent(
                                 callbacks.onSetFilter("", false)
                                 scope.launch { snackbarHostState.showSnackbar(strings.activityUi.suggestionsCleared) }
                             },
+                            focusRequestId = searchRequestId,
                         )
                         state.topQuery?.let { top ->
                             AppText(
@@ -894,10 +873,7 @@ private fun ActivityListScreenPreview() {
                 favoriteQueries = listOf(packageName, "MainActivity"),
             ),
             padding = PaddingValues(),
-            headerHelp = "Ricerca e avvio delle activity installate.",
-            onHelp = {},
-            onBack = {},
-            onMenu = {},
+            searchRequestId = 0,
             callbacks = callbacks,
         )
     }

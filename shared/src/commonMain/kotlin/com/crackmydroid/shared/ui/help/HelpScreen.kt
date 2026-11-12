@@ -31,7 +31,6 @@ import com.crackmydroid.shared.i18n.Strings
 import com.crackmydroid.shared.presentation.navigation.Screen
 import com.crackmydroid.shared.ui.screens.screenContentPadding
 import com.crackmydroid.ui.components.button.ScrollToTopButton
-import com.crackmydroid.ui.components.SectionHeader
 import com.crackmydroid.ui.components.card.AppCard
 import com.crackmydroid.ui.components.text.AppText
 import kotlinx.coroutines.launch
@@ -39,14 +38,10 @@ import kotlinx.coroutines.launch
 @Composable
 fun HelpScreen(
     padding: PaddingValues,
-    onHelp: (String) -> Unit,
-    onMenu: () -> Unit = {},
     onNavigate: (Screen) -> Unit,
 ) {
     HelpContent(
         padding = padding,
-        onHelp = onHelp,
-        onMenu = onMenu,
         onNavigate = onNavigate,
     )
 }
@@ -54,8 +49,6 @@ fun HelpScreen(
 @Composable
 internal fun HelpContent(
     padding: PaddingValues,
-    onHelp: (String) -> Unit,
-    onMenu: () -> Unit = {},
     onNavigate: (Screen) -> Unit,
 ) {
     val strings = LocalStrings.current
@@ -72,14 +65,6 @@ internal fun HelpContent(
             contentPadding = screenContentPadding(padding),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            item {
-                SectionHeader(
-                    title = strings.navHelp,
-                    help = strings.helpOverview,
-                    onHelp = onHelp,
-                    onMenu = onMenu,
-                )
-            }
             item {
                 AppText(
                     text = strings.helpOverview,

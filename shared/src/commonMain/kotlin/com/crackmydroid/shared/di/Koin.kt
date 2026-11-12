@@ -53,7 +53,7 @@ import com.crackmydroid.shared.domain.usecase.trick.ExecuteShellCommandUseCase
 import com.crackmydroid.shared.domain.usecase.trick.ListShellCommandsUseCase
 import com.crackmydroid.shared.ui.AppPresentationDependencies
 import com.crackmydroid.shared.ui.activities.ActivityListViewModel
-import com.crackmydroid.shared.ui.appshell.AppShellViewModel
+import com.crackmydroid.shared.ui.navigation.AppNavigationViewModel
 import com.crackmydroid.shared.ui.home.HomeViewModel
 import com.crackmydroid.shared.ui.info.InfoViewModel
 import com.crackmydroid.shared.ui.installedapps.InstalledAppsViewModel
@@ -142,7 +142,7 @@ fun presentationModule() = module {
         val installedApps = get<InstalledAppsViewModel>()
         val penTesting = get<PenTestingViewModel>()
         AppPresentationDependencies(
-            shell = AppShellViewModel(
+            navigation = AppNavigationViewModel(
                 getIntroSeenUseCase = get(),
                 setIntroSeenUseCase = get(),
                 activity = activity,

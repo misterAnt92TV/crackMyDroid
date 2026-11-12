@@ -67,7 +67,6 @@ import com.crackmydroid.ui.components.button.ButtonVariant
 import com.crackmydroid.ui.components.dialog.ErrorDialogComponent
 import com.crackmydroid.ui.components.PackageIcon
 import com.crackmydroid.ui.components.button.ScrollToTopButton
-import com.crackmydroid.ui.components.SectionHeader
 import com.crackmydroid.ui.components.card.AppCard
 import com.crackmydroid.ui.components.card.ExportDetailsCard
 import com.crackmydroid.ui.components.text.AppText
@@ -77,10 +76,7 @@ import kotlinx.coroutines.launch
 fun PermissionsScreen(
     viewModel: PermissionsViewModel,
     padding: PaddingValues,
-    headerHelp: String,
-    onHelp: (String) -> Unit,
-    onBack: (() -> Unit)? = null,
-    onMenu: () -> Unit = {},
+    searchRequestId: Long = 0,
 ) {
     val state by viewModel.state.collectAsState()
 
@@ -104,10 +100,7 @@ fun PermissionsScreen(
     PermissionsScreenContent(
         state = state,
         padding = padding,
-        headerHelp = headerHelp,
-        onHelp = onHelp,
-        onBack = onBack,
-        onMenu = onMenu,
+        searchRequestId = searchRequestId,
         onRefresh = { viewModel.handleEvent(PermissionsEvent.Refresh()) },
         onStartAutoRiskScan = { viewModel.handleEvent(PermissionsEvent.AutoRiskScanStarted()) },
         onCancelAutoRiskScan = { viewModel.handleEvent(PermissionsEvent.AutoRiskScanCancelled()) },
@@ -126,10 +119,7 @@ fun PermissionsScreen(
 private fun PermissionsScreenContent(
     state: PermissionsState,
     padding: PaddingValues,
-    headerHelp: String,
-    onHelp: (String) -> Unit,
-    onBack: (() -> Unit)?,
-    onMenu: () -> Unit,
+    searchRequestId: Long,
     onRefresh: () -> Unit,
     onStartAutoRiskScan: () -> Unit,
     onCancelAutoRiskScan: () -> Unit,
@@ -154,6 +144,12 @@ private fun PermissionsScreenContent(
     val scope = rememberCoroutineScope()
     val listState = rememberLazyListState()
     var searchToolsExpanded by remember { mutableStateOf(true) }
+    LaunchedEffect(searchRequestId) {
+        if (searchRequestId > 0) {
+            searchToolsExpanded = true
+            listState.animateScrollToItem(0)
+        }
+    }
     val showScrollTop by remember {
         derivedStateOf { listState.firstVisibleItemIndex > 1 || listState.firstVisibleItemScrollOffset > 240 }
     }
@@ -172,24 +168,6 @@ private fun PermissionsScreenContent(
             verticalArrangement = Arrangement.spacedBy(10.dp),
             contentPadding = screenContentPadding(padding, horizontal = 16.dp, vertical = 10.dp),
         ) {
-            item {
-                SectionHeader(
-                    title = strings.navPermissions,
-                    help = headerHelp,
-                    onHelp = onHelp,
-                    beforeHelpAction = {
-                        IconButton(onClick = onRefresh) {
-                            Icon(
-                                imageVector = AppIcons.Filled.Refresh,
-                                contentDescription = strings.refreshPermissionsContentDescription,
-                                tint = MaterialTheme.colorScheme.primary,
-                            )
-                        }
-                    },
-                    onBack = onBack,
-                    onMenu = onMenu,
-                )
-            }
             item {
                 AppText(
                     strings.helpPermissions,
@@ -298,6 +276,7 @@ private fun PermissionsScreenContent(
                         onCleared = {
                             onFilterChange("", false)
                         },
+                        focusRequestId = searchRequestId,
                     )
                     state.topQuery?.let { top ->
                         AppText(
@@ -592,10 +571,7 @@ private fun PermissionsScreenPreview() {
                 favoriteQueries = listOf("camera"),
             ),
             padding = PaddingValues(),
-            headerHelp = "Esamina i permessi e i rischi delle app.",
-            onHelp = {},
-            onBack = {},
-            onMenu = {},
+            searchRequestId = 0,
             onRefresh = {},
             onStartAutoRiskScan = {},
             onCancelAutoRiskScan = {},

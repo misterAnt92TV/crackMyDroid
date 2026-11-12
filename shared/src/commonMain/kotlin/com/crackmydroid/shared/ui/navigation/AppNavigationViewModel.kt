@@ -1,4 +1,4 @@
-package com.crackmydroid.shared.ui.appshell
+package com.crackmydroid.shared.ui.navigation
 
 import com.crackmydroid.architecture.coroutines.AppDispatchers
 import com.crackmydroid.architecture.logging.AppLogger
@@ -20,6 +20,7 @@ import com.crackmydroid.shared.ui.logs.LogEvent
 import com.crackmydroid.shared.ui.logs.LogViewModel
 import com.crackmydroid.shared.ui.pentest.PenTestingEvent
 import com.crackmydroid.shared.ui.pentest.PenTestingViewModel
+import com.crackmydroid.shared.ui.pentest.model.PenTestWizardStep
 import com.crackmydroid.shared.ui.permissions.PermissionsEvent
 import com.crackmydroid.shared.ui.permissions.PermissionsViewModel
 import com.crackmydroid.shared.ui.root.RootViewModel
@@ -30,7 +31,7 @@ import com.crackmydroid.shared.ui.trick.TrickViewModel
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 
-class AppShellViewModel(
+class AppNavigationViewModel(
     private val getIntroSeenUseCase: GetIntroSeenUseCase,
     private val setIntroSeenUseCase: SetIntroSeenUseCase,
     private val activity: ActivityListViewModel,
@@ -45,17 +46,19 @@ class AppShellViewModel(
     private val penTesting: PenTestingViewModel,
     private val getVerboseLogUseCase: GetVerboseLogUseCase,
     dispatchers: AppDispatchers,
-) : LocalizedBaseViewModel<AppShellEvent, AppShellState>(AppShellState(), dispatchers) {
+) : LocalizedBaseViewModel<AppNavigationEvent, AppNavigationState>(AppNavigationState(), dispatchers) {
     private var initializing = false
 
-    override fun onEvent(event: AppShellEvent) = when (event) {
-        is AppShellEvent.Initialize -> initialize()
-        is AppShellEvent.ScreenSelected -> navigate(event.screen, event.hintsEnabled)
-        is AppShellEvent.HintConfirmed -> confirmHint(event.disableHints, event.target)
-        is AppShellEvent.HintDismissed -> dismissHint()
-        is AppShellEvent.HelpDismissed -> dismissHelp()
-        is AppShellEvent.HelpRequested -> showHelp(event.message)
-        is AppShellEvent.IntroDismissed -> dismissIntro()
+    override fun onEvent(event: AppNavigationEvent) = when (event) {
+        is AppNavigationEvent.Initialize -> initialize()
+        is AppNavigationEvent.ScreenSelected -> navigate(event.screen, event.origin, event.hintsEnabled)
+        is AppNavigationEvent.BackRequested -> navigateBack()
+        is AppNavigationEvent.TopBarSearchRequested -> requestTopBarSearch()
+        is AppNavigationEvent.TopBarHelpRequested -> showHelp(currentState.topBar.helpMessage)
+        is AppNavigationEvent.HintConfirmed -> confirmHint(event.disableHints, event.target)
+        is AppNavigationEvent.HintDismissed -> dismissHint()
+        is AppNavigationEvent.HelpDismissed -> dismissHelp()
+        is AppNavigationEvent.IntroDismissed -> dismissIntro()
     }
 
     private fun initialize() {
@@ -75,6 +78,12 @@ class AppShellViewModel(
                 permissions.handleEvent(PermissionsEvent.Refresh())
                 installedApps.handleEvent(InstalledAppsEvent.Refresh())
                 penTesting.handleEvent(PenTestingEvent.Refresh())
+                launchTask {
+                    penTesting.state
+                        .map { it.currentStep }
+                        .distinctUntilChanged()
+                        .collect { refreshChrome(penTestStep = it) }
+                }
                 settings.state.map { it.language }.distinctUntilChanged().collect { language ->
                     updateLanguage(resolveLanguageCode(language, platformLanguage()))
                 }
@@ -96,9 +105,11 @@ class AppShellViewModel(
         settings.updateLanguage(languageCode)
         logs.updateLanguage(languageCode)
         installedApps.updateLanguage(languageCode)
+        refreshChrome()
     }
 
-    private fun navigate(screen: Screen, hintsEnabled: Boolean) {
+    private fun navigate(screen: Screen, origin: NavigationSource, hintsEnabled: Boolean) {
+        if (screen == currentState.selectedScreen) return
         if (hintsEnabled && screen in setOf(
                 Screen.Permissions,
                 Screen.InstalledApps,
@@ -108,18 +119,95 @@ class AppShellViewModel(
                 Screen.Trick,
             )
         ) {
-            updateState { it.copy(pendingHintScreen = screen) }
+            updateState { it.copy(pendingHintScreen = screen, pendingNavigationSource = origin) }
         } else {
-            updateState { it.copy(selectedScreen = screen) }
+            navigateTo(screen, origin)
         }
     }
 
     private fun confirmHint(disableHints: Boolean, target: Screen) {
         if (disableHints) settings.handleEvent(SettingsEvent.FeatureHintsEnabledChanged(false))
-        updateState { it.copy(selectedScreen = target, pendingHintScreen = null) }
+        navigateTo(target, currentState.pendingNavigationSource ?: NavigationSource.Drawer)
     }
 
-    private fun dismissHint() = updateState { it.copy(pendingHintScreen = null) }
+    private fun navigateTo(screen: Screen, origin: NavigationSource) {
+        val state = currentState
+        val history = when {
+            origin == NavigationSource.BottomBar -> emptyList()
+            state.navigationHistory.lastOrNull() == state.selectedScreen -> state.navigationHistory
+            else -> state.navigationHistory + state.selectedScreen
+        }
+        updateNavigationState(
+            selectedScreen = screen,
+            navigationHistory = history,
+            pendingHintScreen = null,
+            pendingNavigationSource = null,
+        )
+    }
+
+    private fun navigateBack() {
+        val state = currentState
+        when {
+            state.navigationHistory.isNotEmpty() -> {
+                val target = state.navigationHistory.last()
+                updateNavigationState(
+                    selectedScreen = target,
+                    navigationHistory = state.navigationHistory.dropLast(1),
+                )
+            }
+
+            state.selectedScreen != Screen.Home -> navigateTo(Screen.Home, NavigationSource.BottomBar)
+            else -> Unit
+        }
+    }
+
+    private fun requestTopBarSearch() {
+        if (!currentState.topBar.showSearch) return
+        updateState { state -> state.copy(topBar = state.topBar.copy(searchRequestId = state.topBar.searchRequestId + 1)) }
+    }
+
+    private fun refreshChrome(penTestStep: PenTestWizardStep = penTesting.state.value.currentStep) = updateState { state ->
+        stateWithChrome(state, penTestStep = penTestStep)
+    }
+
+    private fun updateNavigationState(
+        selectedScreen: Screen,
+        navigationHistory: List<Screen>,
+        pendingHintScreen: Screen? = currentState.pendingHintScreen,
+        pendingNavigationSource: NavigationSource? = currentState.pendingNavigationSource,
+    ) = updateState { state ->
+        stateWithChrome(
+            state = state,
+            selectedScreen = selectedScreen,
+            navigationHistory = navigationHistory,
+            pendingHintScreen = pendingHintScreen,
+            pendingNavigationSource = pendingNavigationSource,
+        )
+    }
+
+    private fun stateWithChrome(
+        state: AppNavigationState,
+        selectedScreen: Screen = state.selectedScreen,
+        navigationHistory: List<Screen> = state.navigationHistory,
+        pendingHintScreen: Screen? = state.pendingHintScreen,
+        pendingNavigationSource: NavigationSource? = state.pendingNavigationSource,
+        penTestStep: PenTestWizardStep = penTesting.state.value.currentStep,
+    ): AppNavigationState = state.copy(
+        selectedScreen = selectedScreen,
+        navigationHistory = navigationHistory,
+        pendingHintScreen = pendingHintScreen,
+        pendingNavigationSource = pendingNavigationSource,
+        topBar = NavigationChromeMapper.topBar(
+            screen = selectedScreen,
+            canNavigateBack = navigationHistory.isNotEmpty(),
+            strings = strings,
+            penTestStep = penTestStep,
+            searchRequestId = state.topBar.searchRequestId,
+        ),
+        bottomBarItems = NavigationChromeMapper.bottomItems(selectedScreen, strings),
+    )
+
+    private fun dismissHint() = updateState { it.copy(pendingHintScreen = null, pendingNavigationSource = null) }
     private fun dismissHelp() = updateState { it.copy(helpDialog = null) }
     private fun showHelp(message: String) = updateState { it.copy(helpDialog = message) }
     private fun dismissIntro() {

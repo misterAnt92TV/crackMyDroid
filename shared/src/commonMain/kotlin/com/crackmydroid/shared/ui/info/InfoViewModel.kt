@@ -27,6 +27,7 @@ class InfoViewModel(
     }
 
     private fun load() {
+        if (currentState.info != null && !currentState.loading) return
         launchTask {
             updateState { it.copy(loading = true, error = null) }
             runSuspendCatching {
@@ -44,7 +45,8 @@ class InfoViewModel(
         val info = currentState.info ?: return
         val root = currentState.root
         val reportText = useCaseTexts
-        updateState { it.copy(reportContent = null, reportLoading = true) }
+        val initialReportLoading = currentState.reportContent == null
+        updateState { it.copy(reportLoading = initialReportLoading) }
         launchLatest("info-report") {
             val result = buildReportUseCase(info, root, reportText)
             if (!isCurrent()) return@launchLatest

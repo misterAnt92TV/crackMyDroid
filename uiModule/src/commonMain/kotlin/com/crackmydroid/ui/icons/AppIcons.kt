@@ -44,6 +44,7 @@ import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SdStorage
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Settings
@@ -106,6 +107,7 @@ object AppIcons {
         val PlayArrow get() = Icons.Filled.PlayArrow
         val Refresh get() = Icons.Filled.Refresh
         val Schedule get() = Icons.Filled.Schedule
+        val Search get() = Icons.Filled.Search
         val SdStorage get() = Icons.Filled.SdStorage
         val Security get() = Icons.Filled.Security
         val Settings get() = Icons.Filled.Settings

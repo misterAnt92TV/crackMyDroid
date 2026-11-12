@@ -57,7 +57,6 @@ import com.crackmydroid.ui.components.button.AppButton
 import com.crackmydroid.ui.components.button.ButtonVariant
 import com.crackmydroid.ui.components.dialog.ErrorDialogComponent
 import com.crackmydroid.ui.components.button.ScrollToTopButton
-import com.crackmydroid.ui.components.SectionHeader
 import com.crackmydroid.ui.components.text.AppText
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -66,19 +65,11 @@ import kotlinx.coroutines.launch
 fun TrickScreen(
     viewModel: TrickViewModel,
     padding: PaddingValues,
-    headerHelp: String,
-    onHelp: (String) -> Unit,
-    onBack: (() -> Unit)? = null,
-    onMenu: () -> Unit = {},
 ) {
     val state by viewModel.state.collectAsState()
     TrickScreenContent(
         state = state,
         padding = padding,
-        headerHelp = headerHelp,
-        onHelp = onHelp,
-        onBack = onBack,
-        onMenu = onMenu,
         onCommandTap = { command ->
             when {
                 state.running -> viewModel.handleEvent(TrickEvent.BusyInteractionNotified(command))
@@ -98,10 +89,6 @@ fun TrickScreen(
 private fun TrickScreenContent(
     state: TrickState,
     padding: PaddingValues,
-    headerHelp: String,
-    onHelp: (String) -> Unit,
-    onBack: (() -> Unit)?,
-    onMenu: () -> Unit,
     onCommandTap: (ShellCommand) -> Unit,
     onClearInteractionHint: () -> Unit,
     onConfirmPending: () -> Unit,
@@ -133,15 +120,6 @@ private fun TrickScreenContent(
             verticalArrangement = Arrangement.spacedBy(10.dp),
             contentPadding = screenContentPadding(padding, horizontal = 16.dp, vertical = 10.dp),
         ) {
-            item {
-                SectionHeader(
-                    title = strings.navTrick,
-                    help = headerHelp,
-                    onHelp = onHelp,
-                    onBack = onBack,
-                    onMenu = onMenu,
-                )
-            }
             state.interactionHint?.let { hint ->
                 item {
                     ElevatedCard(
@@ -285,10 +263,6 @@ private fun TrickScreenPreview() {
         TrickScreenContent(
             state = TrickState(commands = listOf(demoCommand)),
             padding = PaddingValues(),
-            headerHelp = "Esegui comandi diagnostici sul dispositivo.",
-            onHelp = {},
-            onBack = {},
-            onMenu = {},
             onCommandTap = {},
             onClearInteractionHint = {},
             onConfirmPending = {},

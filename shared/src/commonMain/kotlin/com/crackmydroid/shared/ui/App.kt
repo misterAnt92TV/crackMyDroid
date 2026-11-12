@@ -1,18 +1,15 @@
 package com.crackmydroid.shared.ui
 import com.crackmydroid.ui.icons.AppIcons
 
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -37,9 +34,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarDefaults
-import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.NavigationRail
 import androidx.compose.material3.NavigationRailItem
@@ -54,6 +48,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -73,10 +68,9 @@ import com.crackmydroid.shared.i18n.resolveLanguageCode
 import com.crackmydroid.shared.i18n.stringsFor
 import com.crackmydroid.shared.i18n.toUiStrings
 import com.crackmydroid.shared.presentation.navigation.Screen
-import com.crackmydroid.shared.presentation.navigation.bottomScreens
 import com.crackmydroid.shared.presentation.navigation.drawerScreens
 import com.crackmydroid.shared.ui.activities.view.ActivityListScreen
-import com.crackmydroid.shared.ui.appshell.AppShellEvent
+import com.crackmydroid.shared.ui.navigation.AppNavigationEvent
 import com.crackmydroid.shared.ui.help.HelpScreen
 import com.crackmydroid.shared.ui.home.view.HomeScreen
 import com.crackmydroid.shared.ui.info.view.InfoScreen
@@ -85,9 +79,12 @@ import com.crackmydroid.shared.ui.logs.view.LogScreen
 import com.crackmydroid.shared.ui.pentest.view.PenTestingScreen
 import com.crackmydroid.shared.ui.permissions.view.PermissionsScreen
 import com.crackmydroid.shared.ui.root.view.RootScreen
+import com.crackmydroid.shared.ui.settings.model.SettingsAppInfo
 import com.crackmydroid.shared.ui.settings.view.SettingsScreen
 import com.crackmydroid.shared.ui.trick.view.TrickScreen
 import com.crackmydroid.shared.util.appPackageName
+import com.crackmydroid.shared.util.appRequestedPermissions
+import com.crackmydroid.shared.util.appSdkInfo
 import com.crackmydroid.shared.util.appVersionName
 import com.crackmydroid.ui.components.AccessibilityPrefs
 import com.crackmydroid.ui.components.AppBackHandler
@@ -96,11 +93,15 @@ import com.crackmydroid.ui.components.LocalAccessibilityPrefs
 import com.crackmydroid.ui.components.PackageIcon
 import com.crackmydroid.ui.components.effectiveReduceMotion
 import com.crackmydroid.ui.components.text.AppText
+import com.crackmydroid.ui.components.navigation.AppBottomBar
+import com.crackmydroid.ui.components.navigation.AppBottomBarItem
+import com.crackmydroid.ui.components.navigation.AppTopBar
+import com.crackmydroid.ui.components.navigation.AppTopBarNavigationAction
 import com.crackmydroid.ui.strings.LocalUiStrings
 import com.crackmydroid.ui.theme.CrackMyDroidTheme
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CrackMyDroidApp(
     dependencies: AppPresentationDependencies,
@@ -111,6 +112,24 @@ fun CrackMyDroidApp(
     val drawerState: DrawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val androidAppVersionName = appVersionName()
+    val runtimePackageName = appPackageName()
+    val sdkInfo = appSdkInfo()
+    val requestedPermissions = appRequestedPermissions()
+    val settingsAppInfo = remember(
+        androidAppVersionName,
+        runtimePackageName,
+        sdkInfo,
+        requestedPermissions,
+    ) {
+        SettingsAppInfo(
+            versionName = androidAppVersionName,
+            packageName = runtimePackageName,
+            minSdk = sdkInfo?.minSdk,
+            targetSdk = sdkInfo?.targetSdk,
+            requestedPermissions = requestedPermissions,
+        )
+    }
+    val screenStateHolder = rememberSaveableStateHolder()
     var showExitConfirmDialog by remember { mutableStateOf(false) }
 
     val activityVm = dependencies.activity
@@ -123,8 +142,8 @@ fun CrackMyDroidApp(
     val installedAppsVm = dependencies.installedApps
     val penTestingVm = dependencies.penTesting
     val homeVm = dependencies.home
-    val shellVm = dependencies.shell
-    val shellState by shellVm.state.collectAsState()
+    val navigationVm = dependencies.navigation
+    val navigationState by navigationVm.state.collectAsState()
     val settingsState = settingsVm.state.collectAsState()
     val languageCode = resolveLanguageCode(settingsState.value.language, platformLanguage())
 
@@ -138,8 +157,8 @@ fun CrackMyDroidApp(
                 scope.launch { drawerState.close() }
             }
 
-            shellState.selectedScreen != Screen.Home -> {
-                shellVm.handleEvent(AppShellEvent.ScreenSelected(Screen.Home, false))
+            navigationState.selectedScreen != Screen.Home || navigationState.navigationHistory.isNotEmpty() -> {
+                navigationVm.handleEvent(AppNavigationEvent.BackRequested())
             }
 
             onExitApp != null -> {
@@ -158,19 +177,19 @@ fun CrackMyDroidApp(
         largeText = settingsState.value.largeText,
     )
 
-    LaunchedEffect(Unit) { shellVm.handleEvent(AppShellEvent.Initialize()) }
+    LaunchedEffect(Unit) { navigationVm.handleEvent(AppNavigationEvent.Initialize()) }
 
     LaunchedEffect(settingsState.value.featureHintsEnabled) {
         if (!settingsState.value.featureHintsEnabled) {
-            shellVm.handleEvent(AppShellEvent.HintDismissed())
+            navigationVm.handleEvent(AppNavigationEvent.HintDismissed())
         }
     }
 
     LaunchedEffect(settingsState.value.language) {
         onLanguageChanged(settingsState.value.language)
     }
-    LaunchedEffect(languageCode, shellState.initialized) {
-        if (shellState.initialized) shellVm.updateLanguage(languageCode)
+    LaunchedEffect(languageCode, navigationState.initialized) {
+        if (navigationState.initialized) navigationVm.updateLanguage(languageCode)
     }
 
     val darkTheme = when (settingsState.value.theme) {
@@ -185,12 +204,15 @@ fun CrackMyDroidApp(
             LocalUiStrings provides strings.toUiStrings(),
             LocalAccessibilityPrefs provides accessibilityPrefs,
         ) {
-            val onHelp: (String) -> Unit = { message ->
-                shellVm.handleEvent(AppShellEvent.HelpRequested(message))
-            }
             val navigateFromDrawer: (Screen) -> Unit = { target ->
                 scope.launch { drawerState.close() }
-                shellVm.handleEvent(AppShellEvent.ScreenSelected(target, settingsState.value.featureHintsEnabled))
+                navigationVm.handleEvent(
+                    AppNavigationEvent.ScreenSelected(
+                        screen = target,
+                        origin = com.crackmydroid.shared.ui.navigation.NavigationSource.Drawer,
+                        hintsEnabled = settingsState.value.featureHintsEnabled,
+                    ),
+                )
             }
             BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
                 val isWideScreen = maxWidth >= 720.dp
@@ -210,7 +232,7 @@ fun CrackMyDroidApp(
                                     verticalAlignment = Alignment.CenterVertically,
                                 ) {
                                     PackageIcon(
-                                        packageName = appPackageName(),
+                                        packageName = runtimePackageName,
                                         size = 40.dp,
                                         contentPadding = 0.dp,
                                     )
@@ -239,7 +261,7 @@ fun CrackMyDroidApp(
                                         NavigationDrawerItem(
                                             icon = { Icon(screen.icon, contentDescription = null) },
                                             label = { AppText(screen.title(strings)) },
-                                            selected = shellState.selectedScreen == screen,
+                                            selected = navigationState.selectedScreen == screen,
                                             onClick = { navigateFromDrawer(screen) },
                                             modifier = Modifier
                                                 .fillMaxWidth()
@@ -289,9 +311,15 @@ fun CrackMyDroidApp(
                                 Spacer(Modifier.height(8.dp))
                                 railScreens.forEach { screen ->
                                     NavigationRailItem(
-                                        selected = shellState.selectedScreen == screen,
+                                        selected = navigationState.selectedScreen == screen,
                                         onClick = {
-                                            shellVm.handleEvent(AppShellEvent.ScreenSelected(screen, false))
+                                            navigationVm.handleEvent(
+                                                AppNavigationEvent.ScreenSelected(
+                                                    screen,
+                                                    com.crackmydroid.shared.ui.navigation.NavigationSource.Rail,
+                                                    false,
+                                                ),
+                                            )
                                         },
                                         icon = {
                                             Icon(
@@ -315,46 +343,57 @@ fun CrackMyDroidApp(
                         Scaffold(
                             modifier = Modifier.weight(1f),
                             contentWindowInsets = WindowInsets.safeDrawing,
+                            topBar = {
+                                AppTopBar(
+                                    title = navigationState.topBar.title,
+                                    navigationAction = navigationState.topBar.navigationAction,
+                                    onNavigationClick = {
+                                        when (navigationState.topBar.navigationAction) {
+                                            AppTopBarNavigationAction.Menu -> scope.launch { drawerState.open() }
+                                            AppTopBarNavigationAction.Back -> navigationVm.handleEvent(AppNavigationEvent.BackRequested())
+                                            AppTopBarNavigationAction.None -> Unit
+                                        }
+                                    },
+                                    showSearch = navigationState.topBar.showSearch,
+                                    onSearchClick = { navigationVm.handleEvent(AppNavigationEvent.TopBarSearchRequested()) },
+                                    showHelp = navigationState.topBar.showHelp,
+                                    onHelpClick = { navigationVm.handleEvent(AppNavigationEvent.TopBarHelpRequested()) },
+                                )
+                            },
                             bottomBar = {
                                 if (!isWideScreen) {
-                                    NavigationBar(
-                                        windowInsets = NavigationBarDefaults.windowInsets,
-                                        tonalElevation = 3.dp,
-                                    ) {
-                                        val itemIconSize = 20.dp
-                                        bottomScreens.forEach { screen ->
-                                            NavigationBarItem(
-                                                selected = shellState.selectedScreen == screen,
-                                                onClick = {
-                                                    shellVm.handleEvent(AppShellEvent.ScreenSelected(screen, false))
-                                                },
-                                                icon = {
-                                                    Icon(
-                                                        screen.icon,
-                                                        contentDescription = screen.title(strings),
-                                                        modifier = Modifier.size(itemIconSize),
-                                                    )
-                                                },
-                                                label = {
-                                                    AppText(
-                                                        screen.title(strings),
-                                                        maxLines = if (accessibilityPrefs.largeText) 2 else 1,
-                                                        overflow = TextOverflow.Ellipsis,
-                                                    )
-                                                },
-                                                alwaysShowLabel = true,
+                                    val bottomBarItems = remember(navigationState.bottomBarItems) {
+                                        navigationState.bottomBarItems.map { item ->
+                                            AppBottomBarItem(
+                                                id = item.screen.id,
+                                                label = item.label,
+                                                icon = item.icon,
+                                                selected = item.selected,
                                             )
                                         }
                                     }
+                                    AppBottomBar(
+                                        items = bottomBarItems,
+                                        onItemClick = { id ->
+                                            navigationState.bottomBarItems
+                                                .firstOrNull { it.screen.id == id }
+                                                ?.screen
+                                                ?.let { screen ->
+                                                    navigationVm.handleEvent(
+                                                        AppNavigationEvent.ScreenSelected(
+                                                            screen,
+                                                            com.crackmydroid.shared.ui.navigation.NavigationSource.BottomBar,
+                                                            false,
+                                                        ),
+                                                    )
+                                                }
+                                        },
+                                    )
                                 }
                             },
                         ) { padding ->
                         val focusManager = LocalFocusManager.current
                         val adjustedPadding = padding
-                        val openDrawer: () -> Unit = { scope.launch { drawerState.open() } }
-                        val backToHome: () -> Unit = {
-                            shellVm.handleEvent(AppShellEvent.ScreenSelected(Screen.Home, false))
-                        }
                         Column(
                             modifier = Modifier
                                 .fillMaxSize()
@@ -370,120 +409,90 @@ fun CrackMyDroidApp(
                                 }
                                 .background(MaterialTheme.colorScheme.background),
                         ) {
-                            val reduceMotion = accessibilityPrefs.reduceMotion
-                            AnimatedContent(
-                                targetState = shellState.selectedScreen,
-                                transitionSpec = {
-                                    if (reduceMotion) {
-                                        fadeIn(tween(1)) togetherWith fadeOut(tween(1))
-                                    } else {
-                                        fadeIn(tween(250)) togetherWith fadeOut(tween(200))
-                                    }
-                                },
-                                modifier = Modifier.weight(1f),
-                            ) { screen ->
-                                when (screen) {
+                            Box(modifier = Modifier.weight(1f)) {
+                                Crossfade(
+                                    targetState = navigationState.selectedScreen,
+                                    animationSpec = if (accessibilityPrefs.reduceMotion) tween(0) else tween(150),
+                                    label = "ScreenCrossfade",
+                                ) { targetScreen ->
+                                    screenStateHolder.SaveableStateProvider(targetScreen.id) {
+                                        when (targetScreen) {
                                     Screen.Home -> HomeScreen(
                                         viewModel = homeVm,
                                         padding = adjustedPadding,
-                                        headerHelp = strings.helpHome,
-                                        onHelp = onHelp,
-                                        onMenu = openDrawer,
                                         languageCode = languageCode,
                                     )
 
                                     Screen.Activities -> ActivityListScreen(
                                         viewModel = activityVm,
                                         padding = adjustedPadding,
-                                        headerHelp = strings.helpActivities,
-                                        onHelp = onHelp,
-                                        onBack = backToHome,
-                                        onMenu = openDrawer,
+                                        searchRequestId = navigationState.topBar.searchRequestId,
                                     )
 
                                     Screen.Root -> RootScreen(
                                         rootVm,
                                         adjustedPadding,
-                                        headerHelp = strings.helpRoot,
-                                        onHelp = onHelp,
-                                        onBack = backToHome,
-                                        onMenu = openDrawer,
                                     )
 
                                     Screen.Info -> InfoScreen(
                                         infoVm,
                                         adjustedPadding,
-                                        headerHelp = strings.helpInfo,
-                                        onHelp = onHelp,
-                                        onMenu = openDrawer,
                                     )
 
                                     Screen.Trick -> TrickScreen(
                                         trickVm,
                                         adjustedPadding,
-                                        headerHelp = strings.helpTrick,
-                                        onHelp = onHelp,
-                                        onBack = backToHome,
-                                        onMenu = openDrawer,
                                     )
 
                                     Screen.Pentest -> PenTestingScreen(
                                         penTestingVm,
                                         adjustedPadding,
-                                        headerHelp = strings.helpPentest,
-                                        onHelp = onHelp,
-                                        onBack = backToHome,
-                                        onMenu = openDrawer,
+                                        searchRequestId = navigationState.topBar.searchRequestId,
                                     )
 
                                     Screen.InstalledApps -> InstalledAppsScreen(
                                         installedAppsVm,
                                         adjustedPadding,
-                                        headerHelp = strings.helpApk,
-                                        onHelp = onHelp,
-                                        onBack = backToHome,
-                                        onMenu = openDrawer,
+                                        searchRequestId = navigationState.topBar.searchRequestId,
                                     )
 
                                     Screen.Permissions -> PermissionsScreen(
                                         permissionsVm,
                                         adjustedPadding,
-                                        headerHelp = strings.helpPermissions,
-                                        onHelp = onHelp,
-                                        onBack = backToHome,
-                                        onMenu = openDrawer,
+                                        searchRequestId = navigationState.topBar.searchRequestId,
                                     )
 
                                     Screen.Log -> LogScreen(
                                         logVm,
                                         adjustedPadding,
-                                        headerHelp = strings.helpLog,
-                                        onHelp = onHelp,
-                                        onBack = backToHome,
-                                        onMenu = openDrawer,
+                                        searchRequestId = navigationState.topBar.searchRequestId,
                                     )
 
                                     Screen.Settings -> SettingsScreen(
                                         settingsVm,
                                         adjustedPadding,
-                                        headerHelp = strings.helpSettings,
-                                        onHelp = onHelp,
-                                        onMenu = openDrawer,
+                                        settingsAppInfo,
                                     )
 
                                     Screen.Help -> HelpScreen(
                                         padding = adjustedPadding,
-                                        onHelp = onHelp,
-                                        onMenu = openDrawer,
                                         onNavigate = { target ->
-                                            shellVm.handleEvent(AppShellEvent.ScreenSelected(target, false))
+                                            navigationVm.handleEvent(
+                                                AppNavigationEvent.ScreenSelected(
+                                                    target,
+                                                    com.crackmydroid.shared.ui.navigation.NavigationSource.InContent,
+                                                    false,
+                                                ),
+                                            )
                                         },
                                     )
                                 }
                             }
+                                }
                         }
                     }
                 }
+            }
             }
                 Spacer(
                     modifier = Modifier
@@ -511,14 +520,14 @@ fun CrackMyDroidApp(
             }
         }
 
-        if (shellState.showIntro) {
+        if (navigationState.showIntro) {
             androidx.compose.material3.AlertDialog(
-                onDismissRequest = { shellVm.handleEvent(AppShellEvent.IntroDismissed()) },
+                onDismissRequest = { navigationVm.handleEvent(AppNavigationEvent.IntroDismissed()) },
                 title = { AppText(strings.introTitle) },
                 text = { AppText(strings.introBody) },
                 confirmButton = {
                     androidx.compose.material3.Button(onClick = {
-                        shellVm.handleEvent(AppShellEvent.IntroDismissed())
+                        navigationVm.handleEvent(AppNavigationEvent.IntroDismissed())
                     }) {
                         AppText(strings.introAgree)
                     }
@@ -526,7 +535,7 @@ fun CrackMyDroidApp(
             )
         }
 
-        shellState.pendingHintScreen?.let { target ->
+        navigationState.pendingHintScreen?.let { target ->
             sectionEntryHintText(strings, target)?.let { hint ->
                 var disableHintsForever by remember(target) { mutableStateOf(false) }
                 androidx.compose.material3.AlertDialog(
@@ -550,7 +559,7 @@ fun CrackMyDroidApp(
                     confirmButton = {
                         androidx.compose.material3.Button(
                             onClick = {
-                                shellVm.handleEvent(AppShellEvent.HintConfirmed(disableHintsForever, target))
+                                navigationVm.handleEvent(AppNavigationEvent.HintConfirmed(disableHintsForever, target))
                             },
                         ) {
                             AppText(strings.sectionHintConfirm)
@@ -559,7 +568,7 @@ fun CrackMyDroidApp(
                     dismissButton = {
                         TextButton(
                             onClick = {
-                                shellVm.handleEvent(AppShellEvent.HintDismissed())
+                                navigationVm.handleEvent(AppNavigationEvent.HintDismissed())
                             },
                         ) {
                             AppText(strings.close)
@@ -569,12 +578,12 @@ fun CrackMyDroidApp(
             }
         }
 
-        shellState.helpDialog?.let { msg ->
+        navigationState.helpDialog?.let { msg ->
             androidx.compose.material3.AlertDialog(
-                onDismissRequest = { shellVm.handleEvent(AppShellEvent.HelpDismissed()) },
+                onDismissRequest = { navigationVm.handleEvent(AppNavigationEvent.HelpDismissed()) },
                 confirmButton = {
                     androidx.compose.material3.TextButton(onClick = {
-                        shellVm.handleEvent(AppShellEvent.HelpDismissed())
+                        navigationVm.handleEvent(AppNavigationEvent.HelpDismissed())
                     }) {
                         AppText(strings.close)
                     }

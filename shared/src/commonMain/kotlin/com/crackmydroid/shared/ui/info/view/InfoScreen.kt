@@ -52,8 +52,8 @@ import com.crackmydroid.shared.presentation.preview.AppScreenPreviews
 import com.crackmydroid.shared.ui.info.InfoEvent
 import com.crackmydroid.shared.ui.info.InfoState
 import com.crackmydroid.shared.ui.info.InfoViewModel
+import com.crackmydroid.ui.components.AppProgressIndicator
 import com.crackmydroid.ui.components.button.ScrollToTopButton
-import com.crackmydroid.ui.components.SectionHeader
 import com.crackmydroid.ui.components.card.AppCard
 import com.crackmydroid.ui.components.text.AppText
 import kotlinx.coroutines.launch
@@ -62,17 +62,11 @@ import kotlinx.coroutines.launch
 fun InfoScreen(
     viewModel: InfoViewModel,
     padding: PaddingValues,
-    headerHelp: String,
-    onHelp: (String) -> Unit,
-    onMenu: () -> Unit = {},
 ) {
     val state by viewModel.state.collectAsState()
     InfoScreenContent(
         state = state,
         padding = padding,
-        headerHelp = headerHelp,
-        onHelp = onHelp,
-        onMenu = onMenu,
         onShare = { content -> viewModel.handleEvent(InfoEvent.Share(content)) },
     )
 }
@@ -81,9 +75,6 @@ fun InfoScreen(
 private fun InfoScreenContent(
     state: InfoState,
     padding: PaddingValues,
-    headerHelp: String,
-    onHelp: (String) -> Unit,
-    onMenu: () -> Unit,
     onShare: (String) -> Unit,
 ) {
     val strings = LocalStrings.current
@@ -108,12 +99,6 @@ private fun InfoScreenContent(
                 .verticalScroll(scrollState),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            SectionHeader(
-                title = strings.navInfo,
-                help = headerHelp,
-                onHelp = onHelp,
-                onMenu = onMenu,
-            )
             state.info?.let { info ->
                 AppCard(modifier = Modifier.fillMaxWidth()) {
                     Column(
@@ -156,7 +141,7 @@ private fun InfoScreenContent(
                                 )
                             }
                         }
-                        if (state.reportLoading) {
+                        if (state.reportLoading && state.reportContent == null) {
                             LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
                         }
                         InfoRow(strings.manufacturer, info.manufacturer ?: strings.notAvailable)
@@ -300,6 +285,19 @@ private fun InfoScreenContent(
                 }
             }
 
+            if (state.loading && state.info == null) {
+                AppCard(modifier = Modifier.fillMaxWidth()) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 32.dp),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        AppProgressIndicator(label = strings.infoDeviceSection)
+                    }
+                }
+            }
+
             state.error?.let { err ->
                 AppText(err)
             }
@@ -341,9 +339,6 @@ private fun InfoScreenPreview() {
                 reportContent = "Device information report",
             ),
             padding = PaddingValues(),
-            headerHelp = "Informazioni tecniche sul dispositivo.",
-            onHelp = {},
-            onMenu = {},
             onShare = {},
         )
     }

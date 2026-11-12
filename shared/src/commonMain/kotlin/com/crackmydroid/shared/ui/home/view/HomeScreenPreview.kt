@@ -26,8 +26,6 @@ private fun HomeScreenPreview() {
                 "it",
             ),
             padding = PaddingValues(),
-            headerHelp = "Panoramica delle funzioni principali.",
-            onHelp = {},
             onRemove = {},
         )
     }
@@ -41,8 +39,6 @@ private fun HomeScreenEmptyHistoryPreview() {
         HomeContent(
             state = HomeUiStateMapper().map(HomeState(), strings, "it"),
             padding = PaddingValues(),
-            headerHelp = "Panoramica delle funzioni principali.",
-            onHelp = {},
             onRemove = {},
             initiallyExpandedHistory = true,
         )

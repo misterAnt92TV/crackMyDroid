@@ -85,6 +85,18 @@ SDK, API native, Koin o coroutine applicative, né eseguire filtering, sorting, 
 gestione errori o navigazione condizionale. Sono ammessi solo calcoli locali strettamente visuali,
 come layout, animazioni, dimensioni, colori, accessibilità e stato transitorio di un controllo.
 
+### Chrome di navigazione
+
+`AppNavigationState` è la fonte di verità per la chrome applicativa: espone `TopBarUiState`,
+`BottomBarItemUiState`, schermata selezionata e cronologia immutabile. `AppNavigationViewModel` risolve
+titoli, label, icone, Help e disponibilità della ricerca dalla lingua e dalla schermata attiva; la
+shell Compose si limita a renderizzare `AppTopBar` e `AppBottomBar` e a inoltrare eventi tipizzati.
+Le feature non costruiscono barre di navigazione né ricevono callback per menu, back o Help.
+I cambi tra destinazioni primarie della bottom bar sono immediati e non animati; la shell conserva
+separatamente lo stato visuale salvabile di ciascuna schermata. Un tap sulla destinazione già attiva
+non modifica stato o cronologia. Un cambio effettivo dalla bottom bar azzera la cronologia, mentre
+drawer e navigazione interna aggiungono la schermata precedente senza duplicati consecutivi.
+
 Le liste con righe o card strutturate attraversano un confine esplicito di presentazione:
 `FeatureState → XxxUiStateMapper → XxxUiState → XxxContent`. I mapper puri ricevono la
 localizzazione
@@ -240,7 +252,7 @@ Un ViewModel non deve creare repository o avviare Koin autonomamente.
 
 Ogni risoluzione di `AppPresentationDependencies` crea un grafo di presentazione indipendente.
 La factory risolve una sola volta i ViewModel delle schermate e passa le stesse istanze ad
-`AppShellViewModel`: i caricamenti della shell aggiornano quindi lo stato osservato dalla UI.
+`AppNavigationViewModel`: i caricamenti della navigazione aggiornano quindi lo stato osservato dalla UI.
 Non risolvere nuovamente questi ViewModel per costruire la shell e non convertirli in singleton
 globali: contenitori distinti devono mantenere stato indipendente.
 

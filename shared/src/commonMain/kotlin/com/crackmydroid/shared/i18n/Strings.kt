@@ -236,6 +236,7 @@ data class Strings(
     val shellUnavailableContentDescription: String = "Cannot be launched via shell",
     val shareDeviceInfoContentDescription: String = "Share device information",
     val clearSearchContentDescription: String = "Clear search",
+    val searchContentDescription: String = "Search",
     val removeSearchHistoryContentDescription: String = "Remove %s from search history",
     val clearSearchHistoryContentDescription: String = "Clear search suggestions",
     val scrollToTopContentDescription: String = "Scroll to top",

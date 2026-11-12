@@ -56,6 +56,10 @@ applicativa di `:shared`.
 - Il ViewModel non istanzia repository: riceve le dipendenze dal composition root.
 - Il ViewModel coordina la presentazione; non duplica regole di business già appartenenti al
   UseCase.
+- La chrome applicativa (top bar, bottom bar e cronologia) appartiene a `AppNavigationState` e viene
+  gestita esclusivamente da `AppNavigationViewModel`; le feature ricevono solo i dati necessari al loro
+  rendering. Le richieste di focus o scroll originate dalla top bar sono token UI effimeri e non
+  modificano filtri o dati di dominio.
 
 ## 3. UseCase e dominio
 

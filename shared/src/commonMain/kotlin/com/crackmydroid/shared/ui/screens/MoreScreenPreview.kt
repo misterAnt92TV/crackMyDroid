@@ -12,8 +12,6 @@ private fun MoreScreenPreview() {
         MoreScreen(
             padding = PaddingValues(),
             onNavigate = {},
-            headerHelp = "Apri rapidamente gli strumenti secondari.",
-            onHelp = {},
         )
     }
 }

@@ -60,7 +60,6 @@ import com.crackmydroid.ui.components.text.AppTextField
 import com.crackmydroid.ui.components.dialog.ErrorDialogComponent
 import com.crackmydroid.ui.components.LocalAccessibilityPrefs
 import com.crackmydroid.ui.components.button.ScrollToTopButton
-import com.crackmydroid.ui.components.SectionHeader
 import com.crackmydroid.ui.components.text.AppText
 import kotlinx.coroutines.launch
 
@@ -69,19 +68,11 @@ import kotlinx.coroutines.launch
 fun RootScreen(
     viewModel: RootViewModel,
     padding: PaddingValues,
-    headerHelp: String,
-    onHelp: (String) -> Unit,
-    onBack: (() -> Unit)? = null,
-    onMenu: () -> Unit = {},
 ) {
     val state by viewModel.state.collectAsState()
     RootScreenContent(
         state = state,
         padding = padding,
-        headerHelp = headerHelp,
-        onHelp = onHelp,
-        onBack = onBack,
-        onMenu = onMenu,
         onVerify = { viewModel.handleEvent(RootEvent.Verify()) },
         onVerifyRootAccess = { viewModel.handleEvent(RootEvent.VerifyRootAccess()) },
         onPlayIntegrityNonceChange = { viewModel.handleEvent(RootEvent.PlayIntegrityNonceChanged(it)) },
@@ -97,10 +88,6 @@ fun RootScreen(
 private fun RootScreenContent(
     state: RootState,
     padding: PaddingValues,
-    headerHelp: String,
-    onHelp: (String) -> Unit,
-    onBack: (() -> Unit)?,
-    onMenu: () -> Unit,
     onVerify: () -> Unit,
     onVerifyRootAccess: () -> Unit,
     onPlayIntegrityNonceChange: (String) -> Unit,
@@ -132,14 +119,6 @@ private fun RootScreenContent(
                 .verticalScroll(scrollState),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            SectionHeader(
-                title = strings.navRoot,
-                help = headerHelp,
-                onHelp = onHelp,
-                onBack = onBack,
-                onMenu = onMenu,
-            )
-
             ElevatedCard(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
@@ -411,10 +390,6 @@ private fun RootScreenPreview() {
                 ),
             ),
             padding = PaddingValues(),
-            headerHelp = "Verifica lo stato root e Play Integrity.",
-            onHelp = {},
-            onBack = {},
-            onMenu = {},
             onVerify = {},
             onVerifyRootAccess = {},
             onPlayIntegrityNonceChange = {},

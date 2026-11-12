@@ -34,6 +34,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -58,7 +59,6 @@ import com.crackmydroid.ui.components.AppAccordion
 import com.crackmydroid.ui.components.button.AppButton
 import com.crackmydroid.ui.components.dialog.ErrorDialogComponent
 import com.crackmydroid.ui.components.button.ScrollToTopButton
-import com.crackmydroid.ui.components.SectionHeader
 import com.crackmydroid.ui.components.text.AppText
 import kotlinx.coroutines.launch
 
@@ -66,19 +66,13 @@ import kotlinx.coroutines.launch
 fun LogScreen(
     viewModel: LogViewModel,
     padding: PaddingValues,
-    headerHelp: String,
-    onHelp: (String) -> Unit,
-    onBack: (() -> Unit)? = null,
-    onMenu: () -> Unit = {},
+    searchRequestId: Long = 0,
 ) {
     val state by viewModel.state.collectAsState()
     LogScreenContent(
         state = state,
         padding = padding,
-        headerHelp = headerHelp,
-        onHelp = onHelp,
-        onBack = onBack,
-        onMenu = onMenu,
+        searchRequestId = searchRequestId,
         onFilterChange = { viewModel.handleEvent(LogEvent.FilterChanged(it)) },
         onLevelToggle = { viewModel.handleEvent(LogEvent.LevelToggled(it)) },
         onRefresh = { viewModel.handleEvent(LogEvent.Refresh()) },
@@ -92,10 +86,7 @@ fun LogScreen(
 private fun LogScreenContent(
     state: LogState,
     padding: PaddingValues,
-    headerHelp: String,
-    onHelp: (String) -> Unit,
-    onBack: (() -> Unit)?,
-    onMenu: () -> Unit,
+    searchRequestId: Long,
     onFilterChange: (String) -> Unit,
     onLevelToggle: (Char) -> Unit,
     onRefresh: () -> Unit,
@@ -109,6 +100,9 @@ private fun LogScreenContent(
     val wrap = remember { mutableStateOf(true) }
     var optionsExpanded by remember { mutableStateOf(true) }
     val logListState = rememberLazyListState()
+    LaunchedEffect(searchRequestId) {
+        if (searchRequestId > 0) optionsExpanded = true
+    }
     val scope = rememberCoroutineScope()
     val showScrollTop by remember {
         derivedStateOf { logListState.firstVisibleItemIndex > 8 || logListState.firstVisibleItemScrollOffset > 400 }
@@ -123,13 +117,6 @@ private fun LogScreenContent(
         Column(
             modifier = Modifier.fillMaxSize(),
         ) {
-            SectionHeader(
-                title = strings.navLog,
-                help = headerHelp,
-                onHelp = onHelp,
-                onBack = onBack,
-                onMenu = onMenu,
-            )
             AppAccordion(
                 title = screenStrings.searchFilters,
                 subtitle = strings.searchLog,
@@ -151,6 +138,7 @@ private fun LogScreenContent(
                         onCleared = {
                             onFilterChange("")
                         },
+                        focusRequestId = searchRequestId,
                     )
                     val levels = listOf('E', 'W', 'I', 'D', 'V')
                     LazyRow(
@@ -340,10 +328,7 @@ private fun LogScreenPreview() {
                 visibleLogs = lines,
             ),
             padding = PaddingValues(),
-            headerHelp = "Visualizza e filtra i log del dispositivo.",
-            onHelp = {},
-            onBack = {},
-            onMenu = {},
+            searchRequestId = 0,
             onFilterChange = {},
             onLevelToggle = {},
             onRefresh = {},

@@ -11,7 +11,6 @@ private fun HelpScreenPreview() {
     AppPreviewEnvironment {
         HelpScreen(
             padding = PaddingValues(),
-            onHelp = {},
             onNavigate = {},
         )
     }

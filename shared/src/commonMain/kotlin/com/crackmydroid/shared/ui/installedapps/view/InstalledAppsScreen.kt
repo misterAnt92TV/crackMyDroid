@@ -27,6 +27,7 @@ import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -59,7 +60,6 @@ import com.crackmydroid.ui.components.button.ButtonVariant
 import com.crackmydroid.ui.components.dialog.ErrorDialogComponent
 import com.crackmydroid.ui.components.PackageIcon
 import com.crackmydroid.ui.components.button.ScrollToTopButton
-import com.crackmydroid.ui.components.SectionHeader
 import com.crackmydroid.ui.components.card.AppCard
 import com.crackmydroid.ui.components.card.ExportDetailsCard
 import com.crackmydroid.ui.components.text.AppText
@@ -69,19 +69,13 @@ import kotlinx.coroutines.launch
 fun InstalledAppsScreen(
     viewModel: InstalledAppsViewModel,
     padding: PaddingValues,
-    headerHelp: String,
-    onHelp: (String) -> Unit,
-    onBack: (() -> Unit)? = null,
-    onMenu: () -> Unit = {},
+    searchRequestId: Long = 0,
 ) {
     val state by viewModel.state.collectAsState()
     InstalledAppsScreenContent(
         state = state,
         padding = padding,
-        headerHelp = headerHelp,
-        onHelp = onHelp,
-        onBack = onBack,
-        onMenu = onMenu,
+        searchRequestId = searchRequestId,
         onRefresh = { viewModel.handleEvent(InstalledAppsEvent.Refresh()) },
         onShareAll = { viewModel.handleEvent(InstalledAppsEvent.AllShareRequested()) },
         onFilterChange = { value, trackUsage ->
@@ -98,10 +92,7 @@ fun InstalledAppsScreen(
 private fun InstalledAppsScreenContent(
     state: InstalledAppsState,
     padding: PaddingValues,
-    headerHelp: String,
-    onHelp: (String) -> Unit,
-    onBack: (() -> Unit)?,
-    onMenu: () -> Unit,
+    searchRequestId: Long,
     onRefresh: () -> Unit,
     onShareAll: (String) -> Unit,
     onFilterChange: (String, Boolean) -> Unit,
@@ -119,6 +110,12 @@ private fun InstalledAppsScreenContent(
     val filteredApps = state.visibleApps
     val listState = rememberLazyListState()
     var searchToolsExpanded by remember { mutableStateOf(true) }
+    LaunchedEffect(searchRequestId) {
+        if (searchRequestId > 0) {
+            searchToolsExpanded = true
+            listState.animateScrollToItem(0)
+        }
+    }
     val showScrollTop by remember {
         derivedStateOf { listState.firstVisibleItemIndex > 1 || listState.firstVisibleItemScrollOffset > 240 }
     }
@@ -132,41 +129,6 @@ private fun InstalledAppsScreenContent(
             verticalArrangement = Arrangement.spacedBy(10.dp),
             contentPadding = screenContentPadding(padding, horizontal = 16.dp, vertical = 10.dp),
         ) {
-            item {
-                SectionHeader(
-                    title = strings.navApk,
-                    help = headerHelp,
-                    onHelp = onHelp,
-                    beforeHelpAction = {
-                        IconButton(
-                            onClick = onRefresh,
-                            modifier = Modifier.size(36.dp),
-                            colors = IconButtonDefaults.iconButtonColors(
-                                contentColor = MaterialTheme.colorScheme.primary,
-                            ),
-                        ) {
-                            Icon(
-                                imageVector = AppIcons.Filled.Refresh,
-                                contentDescription = strings.refreshAppsContentDescription,
-                            )
-                        }
-                        IconButton(
-                            onClick = { onShareAll(state.topQuery ?: "apps") },
-                            modifier = Modifier.size(36.dp),
-                            colors = IconButtonDefaults.iconButtonColors(
-                                contentColor = MaterialTheme.colorScheme.primary,
-                            ),
-                        ) {
-                            Icon(
-                                imageVector = AppIcons.Filled.Share,
-                                contentDescription = strings.shareAppsContentDescription,
-                            )
-                        }
-                    },
-                    onBack = onBack,
-                    onMenu = onMenu,
-                )
-            }
             item {
                 AppText(
                     strings.helpApk,
@@ -195,6 +157,7 @@ private fun InstalledAppsScreenContent(
                             onFilterChange("", false)
                             scope.launch { snackbarHostState.showSnackbar(screenStrings.suggestionsCleared) }
                         },
+                        focusRequestId = searchRequestId,
                     )
                     state.topQuery?.let { top ->
                         AppText(
@@ -482,10 +445,7 @@ private fun InstalledAppsScreenPreview() {
                 favoriteQueries = listOf("com.crackmydroid"),
             ),
             padding = PaddingValues(),
-            headerHelp = "Esplora ed esporta le app installate.",
-            onHelp = {},
-            onBack = {},
-            onMenu = {},
+            searchRequestId = 0,
             onRefresh = {},
             onShareAll = {},
             onFilterChange = { _, _ -> },

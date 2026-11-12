@@ -29,6 +29,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
@@ -56,16 +58,22 @@ fun SearchFieldWithHistoryComponent(
     shape: androidx.compose.ui.graphics.Shape = RoundedCornerShape(14.dp),
     showClearAction: Boolean = false,
     onCleared: (() -> Unit)? = null,
+    focusRequestId: Long = 0,
 ) {
     var historyVersion by remember { mutableStateOf(0) }
     var hasFocus by remember { mutableStateOf(false) }
     var showSuggestions by remember { mutableStateOf(false) }
     val focusManager = LocalFocusManager.current
+    val focusRequester = remember { FocusRequester() }
     val strings = LocalStrings.current
     val suggestions = remember(value, historyKey, historyVersion) {
         SearchHistoryStore.suggestions(historyKey, value)
     }
     val suggestionsVisible = showSuggestions && suggestions.isNotEmpty()
+
+    LaunchedEffect(focusRequestId) {
+        if (focusRequestId > 0) focusRequester.requestFocus()
+    }
 
     LaunchedEffect(hasFocus) {
         if (hasFocus) {
@@ -101,6 +109,7 @@ fun SearchFieldWithHistoryComponent(
             },
             modifier = Modifier
                 .fillMaxWidth()
+                .focusRequester(focusRequester)
                 .onFocusChanged { state ->
                     hasFocus = state.isFocused
                 },
