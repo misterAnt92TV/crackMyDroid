@@ -29,6 +29,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.encodeToJsonElement
+import kotlinx.coroutines.withContext
 
 class ActivityListViewModel(
     private val getActivitiesUseCase: GetActivitiesUseCase,
@@ -514,7 +515,11 @@ class ActivityListViewModel(
 
     private fun recomputeAsync(state: ActivityListState) {
         setState(state)
-        setState(recompute(state))
+        launchLatest("activities-recompute") {
+            val recomputed = withContext(dispatchers.default) { recompute(state) }
+            ensureCurrent()
+            setState(recomputed)
+        }
     }
 
     private fun normalizeQuery(value: String): String = value

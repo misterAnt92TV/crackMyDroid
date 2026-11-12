@@ -15,6 +15,7 @@ data class AppNavigationState(
         penTestStep = PenTestWizardStep.SelectApp,
         searchRequestId = 0,
     ),
+    val searchVisibilityByScreen: Map<Screen, Boolean> = emptyMap(),
     val bottomBarItems: List<BottomBarItemUiState> = NavigationChromeMapper.bottomItems(
         selectedScreen = Screen.Home,
         strings = stringsFor("en"),

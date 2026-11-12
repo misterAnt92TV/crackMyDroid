@@ -17,6 +17,7 @@ import com.crackmydroid.shared.util.runSuspendCatching
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.encodeToJsonElement
+import kotlinx.coroutines.withContext
 
 class InstalledAppsViewModel(
     private val listInstalledAppsUseCase: ListInstalledAppsUseCase,
@@ -196,12 +197,16 @@ class InstalledAppsViewModel(
     }
 
     private fun updatePresentation(transform: (InstalledAppsState) -> InstalledAppsState) {
-        updateState { current ->
-            val updated = transform(current)
-            updated.copy(
-                visibleApps = visibleApps(updated),
-                favoriteQueries = updated.favorites.sorted(),
-            )
+        val transformed = transform(currentState)
+        val updated = transformed.copy(favoriteQueries = transformed.favorites.sorted())
+        if (updated == currentState) return
+        setState(updated)
+        launchLatest("installed-apps-recompute") {
+            val recomputed = withContext(dispatchers.default) {
+                updated.copy(visibleApps = visibleApps(updated))
+            }
+            ensureCurrent()
+            setState(recomputed)
         }
     }
 

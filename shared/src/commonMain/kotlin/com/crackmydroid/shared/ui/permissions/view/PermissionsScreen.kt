@@ -51,7 +51,7 @@ import com.crackmydroid.shared.domain.model.app.AppPermissionEntry
 import com.crackmydroid.shared.i18n.LocalStrings
 import com.crackmydroid.shared.i18n.ScreenUiStrings
 import com.crackmydroid.shared.i18n.format
-import com.crackmydroid.shared.presentation.components.SearchFieldWithHistoryComponent
+import com.crackmydroid.shared.presentation.components.SearchPanelComponent
 import com.crackmydroid.shared.presentation.preview.AppPreviewEnvironment
 import com.crackmydroid.shared.presentation.preview.AppScreenPreviews
 import com.crackmydroid.shared.ui.permissions.PermissionsEvent
@@ -77,6 +77,8 @@ fun PermissionsScreen(
     viewModel: PermissionsViewModel,
     padding: PaddingValues,
     searchRequestId: Long = 0,
+    searchVisible: Boolean = true,
+    onSearchVisibilityChanged: (Boolean) -> Unit = {},
 ) {
     val state by viewModel.state.collectAsState()
 
@@ -101,6 +103,8 @@ fun PermissionsScreen(
         state = state,
         padding = padding,
         searchRequestId = searchRequestId,
+        searchVisible = searchVisible,
+        onSearchVisibilityChanged = onSearchVisibilityChanged,
         onRefresh = { viewModel.handleEvent(PermissionsEvent.Refresh()) },
         onStartAutoRiskScan = { viewModel.handleEvent(PermissionsEvent.AutoRiskScanStarted()) },
         onCancelAutoRiskScan = { viewModel.handleEvent(PermissionsEvent.AutoRiskScanCancelled()) },
@@ -120,6 +124,8 @@ private fun PermissionsScreenContent(
     state: PermissionsState,
     padding: PaddingValues,
     searchRequestId: Long,
+    searchVisible: Boolean = true,
+    onSearchVisibilityChanged: (Boolean) -> Unit = {},
     onRefresh: () -> Unit,
     onStartAutoRiskScan: () -> Unit,
     onCancelAutoRiskScan: () -> Unit,
@@ -143,10 +149,8 @@ private fun PermissionsScreenContent(
     val mediumTotal = state.riskReports.sumOf { it.mediumCount }
     val scope = rememberCoroutineScope()
     val listState = rememberLazyListState()
-    var searchToolsExpanded by remember { mutableStateOf(true) }
     LaunchedEffect(searchRequestId) {
         if (searchRequestId > 0) {
-            searchToolsExpanded = true
             listState.animateScrollToItem(0)
         }
     }
@@ -251,7 +255,7 @@ private fun PermissionsScreenContent(
                 }
             }
             item {
-                AppAccordion(
+                SearchPanelComponent(
                     title = strings.permissionsSearch,
                     subtitle = screenStrings.searchFilters,
                     meta = buildString {
@@ -261,23 +265,18 @@ private fun PermissionsScreenContent(
                             append(favoriteQueries.size)
                         }
                     }.ifBlank { null },
-                    expanded = searchToolsExpanded,
-                    onToggle = { searchToolsExpanded = !searchToolsExpanded },
+                    expanded = searchVisible,
+                    onExpandedChange = onSearchVisibilityChanged,
+                    query = state.filter,
+                    onQueryChange = { onFilterChange(it, false) },
+                    onSubmit = { onFilterChange(it, true) },
+                    label = strings.permissionsSearch,
+                    historyKey = "permissions",
+                    focusRequestId = searchRequestId,
+                    showClearAction = true,
+                    onCleared = { onFilterChange("", false) },
                     modifier = Modifier.fillMaxWidth(),
                 ) {
-                    SearchFieldWithHistoryComponent(
-                        value = state.filter,
-                        onValueChange = { onFilterChange(it, false) },
-                        onSubmit = { onFilterChange(it, true) },
-                        label = strings.permissionsSearch,
-                        historyKey = "permissions",
-                        modifier = Modifier.fillMaxWidth(),
-                        showClearAction = true,
-                        onCleared = {
-                            onFilterChange("", false)
-                        },
-                        focusRequestId = searchRequestId,
-                    )
                     state.topQuery?.let { top ->
                         AppText(
                             screenStrings.frequentSearch.format(top),

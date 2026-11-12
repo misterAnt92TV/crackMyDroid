@@ -256,6 +256,10 @@ class AppPresentationDependenciesTest {
 
         val requestId = graph.navigation.state.value.topBar.searchRequestId
         graph.navigation.handleEvent(AppNavigationEvent.TopBarSearchRequested())
+        assertFalse(graph.navigation.state.value.topBar.searchVisible)
+        assertEquals(requestId, graph.navigation.state.value.topBar.searchRequestId)
+        graph.navigation.handleEvent(AppNavigationEvent.TopBarSearchRequested())
+        assertTrue(graph.navigation.state.value.topBar.searchVisible)
         assertEquals(requestId + 1, graph.navigation.state.value.topBar.searchRequestId)
 
         graph.navigation.handleEvent(AppNavigationEvent.BackRequested())

@@ -12,6 +12,7 @@ sealed class AppNavigationEvent : UiEvent() {
     ) : AppNavigationEvent()
     class BackRequested : AppNavigationEvent()
     class TopBarSearchRequested : AppNavigationEvent()
+    class SearchPanelVisibilityChanged(val visible: Boolean) : AppNavigationEvent()
     class TopBarHelpRequested : AppNavigationEvent()
     class HintConfirmed(val disableHints: Boolean, val target: Screen) : AppNavigationEvent()
     class HintDismissed : AppNavigationEvent()

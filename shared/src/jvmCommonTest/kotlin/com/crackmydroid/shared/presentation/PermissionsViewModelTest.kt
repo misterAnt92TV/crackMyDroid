@@ -539,6 +539,7 @@ class PermissionsViewModelTest {
         assertEquals(apps.size, vm.state.value.autoScanScannedApps)
         val findings = vm.state.value.findingsByPackage
         vm.handleEvent(PermissionsEvent.FilterChanged("SYSTEM_ALERT_WINDOW"))
+        advanceUntilIdle()
         assertEquals(60, vm.state.value.visibleApps.size)
         assertSame(findings, vm.state.value.findingsByPackage)
         vm.onCleared()

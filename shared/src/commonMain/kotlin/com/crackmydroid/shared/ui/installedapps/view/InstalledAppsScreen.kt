@@ -46,7 +46,7 @@ import com.crackmydroid.shared.i18n.LocalStrings
 import com.crackmydroid.shared.i18n.ScreenUiStrings
 import com.crackmydroid.shared.i18n.Strings
 import com.crackmydroid.shared.i18n.format
-import com.crackmydroid.shared.presentation.components.SearchFieldWithHistoryComponent
+import com.crackmydroid.shared.presentation.components.SearchPanelComponent
 import com.crackmydroid.shared.presentation.preview.AppPreviewEnvironment
 import com.crackmydroid.shared.presentation.preview.AppScreenPreviews
 import com.crackmydroid.shared.ui.installedapps.InstalledAppsEvent
@@ -70,12 +70,16 @@ fun InstalledAppsScreen(
     viewModel: InstalledAppsViewModel,
     padding: PaddingValues,
     searchRequestId: Long = 0,
+    searchVisible: Boolean = true,
+    onSearchVisibilityChanged: (Boolean) -> Unit = {},
 ) {
     val state by viewModel.state.collectAsState()
     InstalledAppsScreenContent(
         state = state,
         padding = padding,
         searchRequestId = searchRequestId,
+        searchVisible = searchVisible,
+        onSearchVisibilityChanged = onSearchVisibilityChanged,
         onRefresh = { viewModel.handleEvent(InstalledAppsEvent.Refresh()) },
         onShareAll = { viewModel.handleEvent(InstalledAppsEvent.AllShareRequested()) },
         onFilterChange = { value, trackUsage ->
@@ -93,6 +97,8 @@ private fun InstalledAppsScreenContent(
     state: InstalledAppsState,
     padding: PaddingValues,
     searchRequestId: Long,
+    searchVisible: Boolean = true,
+    onSearchVisibilityChanged: (Boolean) -> Unit = {},
     onRefresh: () -> Unit,
     onShareAll: (String) -> Unit,
     onFilterChange: (String, Boolean) -> Unit,
@@ -109,10 +115,8 @@ private fun InstalledAppsScreenContent(
     val favoriteQueries = state.favoriteQueries
     val filteredApps = state.visibleApps
     val listState = rememberLazyListState()
-    var searchToolsExpanded by remember { mutableStateOf(true) }
     LaunchedEffect(searchRequestId) {
         if (searchRequestId > 0) {
-            searchToolsExpanded = true
             listState.animateScrollToItem(0)
         }
     }
@@ -137,28 +141,25 @@ private fun InstalledAppsScreenContent(
                 )
             }
             item {
-                AppAccordion(
+                SearchPanelComponent(
                     title = strings.apkSearch,
                     subtitle = screenStrings.searchFilters,
                     meta = favoriteQueries.takeIf { it.isNotEmpty() }?.size?.toString(),
-                    expanded = searchToolsExpanded,
-                    onToggle = { searchToolsExpanded = !searchToolsExpanded },
+                    expanded = searchVisible,
+                    onExpandedChange = onSearchVisibilityChanged,
+                    query = state.filter,
+                    onQueryChange = { onFilterChange(it, false) },
+                    onSubmit = { onFilterChange(it, true) },
+                    label = strings.apkSearch,
+                    historyKey = "installed_apps",
+                    focusRequestId = searchRequestId,
+                    showClearAction = true,
+                    onCleared = {
+                        onFilterChange("", false)
+                        scope.launch { snackbarHostState.showSnackbar(screenStrings.suggestionsCleared) }
+                    },
                     modifier = Modifier.fillMaxWidth(),
                 ) {
-                    SearchFieldWithHistoryComponent(
-                        value = state.filter,
-                        onValueChange = { onFilterChange(it, false) },
-                        onSubmit = { onFilterChange(it, true) },
-                        label = strings.apkSearch,
-                        historyKey = "installed_apps",
-                        modifier = Modifier.fillMaxWidth(),
-                        showClearAction = true,
-                        onCleared = {
-                            onFilterChange("", false)
-                            scope.launch { snackbarHostState.showSnackbar(screenStrings.suggestionsCleared) }
-                        },
-                        focusRequestId = searchRequestId,
-                    )
                     state.topQuery?.let { top ->
                         AppText(
                             screenStrings.frequentSearch.format(top),

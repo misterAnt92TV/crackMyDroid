@@ -430,6 +430,10 @@ fun CrackMyDroidApp(
                                         viewModel = activityVm,
                                         padding = adjustedPadding,
                                         searchRequestId = navigationState.topBar.searchRequestId,
+                                        searchVisible = navigationState.topBar.searchVisible,
+                                        onSearchVisibilityChanged = { visible ->
+                                            navigationVm.handleEvent(AppNavigationEvent.SearchPanelVisibilityChanged(visible))
+                                        },
                                     )
 
                                     Screen.Root -> RootScreen(
@@ -451,24 +455,40 @@ fun CrackMyDroidApp(
                                         penTestingVm,
                                         adjustedPadding,
                                         searchRequestId = navigationState.topBar.searchRequestId,
+                                        searchVisible = navigationState.topBar.searchVisible,
+                                        onSearchVisibilityChanged = { visible ->
+                                            navigationVm.handleEvent(AppNavigationEvent.SearchPanelVisibilityChanged(visible))
+                                        },
                                     )
 
                                     Screen.InstalledApps -> InstalledAppsScreen(
                                         installedAppsVm,
                                         adjustedPadding,
                                         searchRequestId = navigationState.topBar.searchRequestId,
+                                        searchVisible = navigationState.topBar.searchVisible,
+                                        onSearchVisibilityChanged = { visible ->
+                                            navigationVm.handleEvent(AppNavigationEvent.SearchPanelVisibilityChanged(visible))
+                                        },
                                     )
 
                                     Screen.Permissions -> PermissionsScreen(
                                         permissionsVm,
                                         adjustedPadding,
                                         searchRequestId = navigationState.topBar.searchRequestId,
+                                        searchVisible = navigationState.topBar.searchVisible,
+                                        onSearchVisibilityChanged = { visible ->
+                                            navigationVm.handleEvent(AppNavigationEvent.SearchPanelVisibilityChanged(visible))
+                                        },
                                     )
 
                                     Screen.Log -> LogScreen(
                                         logVm,
                                         adjustedPadding,
                                         searchRequestId = navigationState.topBar.searchRequestId,
+                                        searchVisible = navigationState.topBar.searchVisible,
+                                        onSearchVisibilityChanged = { visible ->
+                                            navigationVm.handleEvent(AppNavigationEvent.SearchPanelVisibilityChanged(visible))
+                                        },
                                     )
 
                                     Screen.Settings -> SettingsScreen(

@@ -114,16 +114,22 @@ class PermissionsViewModel(
     }
 
     private fun setFilter(value: String, trackUsage: Boolean = false) {
+        var topQuery = currentState.topQuery
         if (trackUsage) {
             val normalized = normalizeQuery(value)
             if (normalized.length >= 2) {
                 val count = (queryCount[normalized] ?: 0) + 1
                 queryCount[normalized] = count
             }
-            val top = queryCount.maxByOrNull { it.value }?.key
-            updateState { it.copy(topQuery = top) }
+            topQuery = queryCount.maxByOrNull { it.value }?.key
         }
-        updatePresentation { it.copy(filter = value) }
+        val requested = currentState.copy(filter = value, topQuery = topQuery)
+        setState(requested)
+        launchLatest("permissions-recompute") {
+            val visible = withContext(dispatchers.default) { visibleApps(requested) }
+            ensureCurrent()
+            setState(requested.copy(visibleApps = visible))
+        }
     }
 
     private fun setShowOnlyRisky(enabled: Boolean) {

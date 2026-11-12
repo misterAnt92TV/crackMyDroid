@@ -14,6 +14,7 @@ data class TopBarUiState(
     val showHelp: Boolean = true,
     val helpMessage: String,
     val searchRequestId: Long = 0,
+    val searchVisible: Boolean = true,
 )
 
 data class BottomBarItemUiState(
@@ -30,6 +31,7 @@ internal object NavigationChromeMapper {
         strings: Strings,
         penTestStep: PenTestWizardStep,
         searchRequestId: Long,
+        searchVisible: Boolean = true,
     ) = TopBarUiState(
         title = screen.title(strings),
         navigationAction = if (canNavigateBack) AppTopBarNavigationAction.Back else AppTopBarNavigationAction.Menu,
@@ -37,6 +39,7 @@ internal object NavigationChromeMapper {
         showHelp = true,
         helpMessage = screen.helpMessage(strings),
         searchRequestId = searchRequestId,
+        searchVisible = searchVisible,
     )
 
     fun bottomItems(selectedScreen: Screen, strings: Strings): List<BottomBarItemUiState> = bottomScreens.map { screen ->

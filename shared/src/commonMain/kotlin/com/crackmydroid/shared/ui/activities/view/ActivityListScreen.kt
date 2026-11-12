@@ -47,7 +47,7 @@ import com.crackmydroid.shared.domain.model.activity.favoriteKey
 import com.crackmydroid.shared.i18n.LocalStrings
 import com.crackmydroid.shared.i18n.ScreenUiStrings
 import com.crackmydroid.shared.i18n.format
-import com.crackmydroid.shared.presentation.components.SearchFieldWithHistoryComponent
+import com.crackmydroid.shared.presentation.components.SearchPanelComponent
 import com.crackmydroid.shared.presentation.preview.AppPreviewEnvironment
 import com.crackmydroid.shared.presentation.preview.AppScreenPreviews
 import com.crackmydroid.shared.ui.activities.ActivityAppReport
@@ -75,6 +75,8 @@ fun ActivityListScreen(
     viewModel: ActivityListViewModel,
     padding: PaddingValues,
     searchRequestId: Long = 0,
+    searchVisible: Boolean = true,
+    onSearchVisibilityChanged: (Boolean) -> Unit = {},
 ) {
     val state by viewModel.state.collectAsState()
 
@@ -113,6 +115,8 @@ fun ActivityListScreen(
         state = state,
         padding = padding,
         searchRequestId = searchRequestId,
+        searchVisible = searchVisible,
+        onSearchVisibilityChanged = onSearchVisibilityChanged,
         callbacks = callbacks,
     )
 }
@@ -140,6 +144,8 @@ private fun ActivityListContent(
     state: ActivityListState,
     padding: PaddingValues,
     searchRequestId: Long,
+    searchVisible: Boolean = true,
+    onSearchVisibilityChanged: (Boolean) -> Unit = {},
     callbacks: ActivityListCallbacks,
 ) {
     val strings = LocalStrings.current
@@ -152,10 +158,8 @@ private fun ActivityListContent(
     val groups = state.groups
     val favoriteQueries = state.favoriteQueries
     val listState = rememberLazyListState()
-    var searchToolsExpanded by remember { mutableStateOf(true) }
     LaunchedEffect(searchRequestId) {
         if (searchRequestId > 0) {
-            searchToolsExpanded = true
             listState.animateScrollToItem(0)
         }
     }
@@ -173,29 +177,25 @@ private fun ActivityListContent(
             contentPadding = screenContentPadding(padding, horizontal = 16.dp, vertical = 10.dp),
         ) {
             item {
-                AppAccordion(
+                SearchPanelComponent(
                     title = strings.filterActivities,
                     subtitle = strings.activityUi.searchToolsSubtitle,
                     meta = favoriteQueries.takeIf { it.isNotEmpty() }?.size?.toString(),
-                    expanded = searchToolsExpanded,
-                    onToggle = { searchToolsExpanded = !searchToolsExpanded },
+                    expanded = searchVisible,
+                    onExpandedChange = onSearchVisibilityChanged,
+                    query = state.filter,
+                    onQueryChange = { callbacks.onSetFilter(it, false) },
+                    onSubmit = { callbacks.onSetFilter(it, true) },
+                    label = strings.filterActivities,
+                    historyKey = "activities",
+                    focusRequestId = searchRequestId,
+                    showClearAction = true,
+                    onCleared = {
+                        callbacks.onSetFilter("", false)
+                        scope.launch { snackbarHostState.showSnackbar(strings.activityUi.suggestionsCleared) }
+                    },
                     modifier = Modifier.fillMaxWidth(),
                 ) {
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        SearchFieldWithHistoryComponent(
-                            value = state.filter,
-                            onValueChange = { callbacks.onSetFilter(it, false) },
-                            onSubmit = { callbacks.onSetFilter(it, true) },
-                            label = strings.filterActivities,
-                            historyKey = "activities",
-                            modifier = Modifier.fillMaxWidth(),
-                            showClearAction = true,
-                            onCleared = {
-                                callbacks.onSetFilter("", false)
-                                scope.launch { snackbarHostState.showSnackbar(strings.activityUi.suggestionsCleared) }
-                            },
-                            focusRequestId = searchRequestId,
-                        )
                         state.topQuery?.let { top ->
                             AppText(
                                 strings.activityUi.frequentSearch.format(top),
@@ -220,7 +220,6 @@ private fun ActivityListContent(
                                 }
                             }
                         }
-                    }
                 }
             }
             if (state.loading) {

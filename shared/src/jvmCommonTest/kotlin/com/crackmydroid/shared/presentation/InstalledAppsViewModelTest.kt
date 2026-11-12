@@ -86,6 +86,8 @@ class InstalledAppsViewModelTest {
             val loadedState = awaitItem()
             assertEquals(1, loadedState.apps.size)
             assertNull(loadedState.error)
+            val recomputedState = awaitItem()
+            assertEquals(1, recomputedState.visibleApps.size)
         }
 
         coVerify { list() }
@@ -196,6 +198,7 @@ class InstalledAppsViewModelTest {
         vm.handleEvent(InstalledAppsEvent.FilterChanged("beta", trackUsage = true))
         vm.handleEvent(InstalledAppsEvent.FilterChanged("app", trackUsage = true))
         vm.handleEvent(InstalledAppsEvent.FavoriteToggled("pkg.beta"))
+        advanceUntilIdle()
 
         val filtered = vm.state.value.visibleApps
 

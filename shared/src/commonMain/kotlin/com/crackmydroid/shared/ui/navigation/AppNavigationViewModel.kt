@@ -54,6 +54,7 @@ class AppNavigationViewModel(
         is AppNavigationEvent.ScreenSelected -> navigate(event.screen, event.origin, event.hintsEnabled)
         is AppNavigationEvent.BackRequested -> navigateBack()
         is AppNavigationEvent.TopBarSearchRequested -> requestTopBarSearch()
+        is AppNavigationEvent.SearchPanelVisibilityChanged -> setSearchPanelVisibility(event.visible)
         is AppNavigationEvent.TopBarHelpRequested -> showHelp(currentState.topBar.helpMessage)
         is AppNavigationEvent.HintConfirmed -> confirmHint(event.disableHints, event.target)
         is AppNavigationEvent.HintDismissed -> dismissHint()
@@ -163,7 +164,29 @@ class AppNavigationViewModel(
 
     private fun requestTopBarSearch() {
         if (!currentState.topBar.showSearch) return
-        updateState { state -> state.copy(topBar = state.topBar.copy(searchRequestId = state.topBar.searchRequestId + 1)) }
+        updateState { state ->
+            val visible = !state.topBar.searchVisible
+            state.copy(
+                searchVisibilityByScreen = state.searchVisibilityByScreen + (state.selectedScreen to visible),
+                topBar = state.topBar.copy(
+                    searchVisible = visible,
+                    searchRequestId = if (visible) state.topBar.searchRequestId + 1 else state.topBar.searchRequestId,
+                ),
+            )
+        }
+    }
+
+    private fun setSearchPanelVisibility(visible: Boolean) {
+        if (!currentState.topBar.showSearch) return
+        updateState { state ->
+            state.copy(
+                searchVisibilityByScreen = state.searchVisibilityByScreen + (state.selectedScreen to visible),
+                topBar = state.topBar.copy(
+                    searchVisible = visible,
+                    searchRequestId = if (visible) state.topBar.searchRequestId + 1 else state.topBar.searchRequestId,
+                ),
+            )
+        }
     }
 
     private fun refreshChrome(penTestStep: PenTestWizardStep = penTesting.state.value.currentStep) = updateState { state ->
@@ -203,6 +226,7 @@ class AppNavigationViewModel(
             strings = strings,
             penTestStep = penTestStep,
             searchRequestId = state.topBar.searchRequestId,
+            searchVisible = state.searchVisibilityByScreen[selectedScreen] ?: true,
         ),
         bottomBarItems = NavigationChromeMapper.bottomItems(selectedScreen, strings),
     )

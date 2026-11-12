@@ -48,7 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.crackmydroid.shared.i18n.LocalStrings
 import com.crackmydroid.shared.i18n.ScreenUiStrings
-import com.crackmydroid.shared.presentation.components.SearchFieldWithHistoryComponent
+import com.crackmydroid.shared.presentation.components.SearchPanelComponent
 import com.crackmydroid.shared.presentation.preview.AppPreviewEnvironment
 import com.crackmydroid.shared.presentation.preview.AppScreenPreviews
 import com.crackmydroid.shared.ui.logs.LogEvent
@@ -68,12 +68,16 @@ fun LogScreen(
     viewModel: LogViewModel,
     padding: PaddingValues,
     searchRequestId: Long = 0,
+    searchVisible: Boolean = true,
+    onSearchVisibilityChanged: (Boolean) -> Unit = {},
 ) {
     val state by viewModel.state.collectAsState()
     LogScreenContent(
         state = state,
         padding = padding,
         searchRequestId = searchRequestId,
+        searchVisible = searchVisible,
+        onSearchVisibilityChanged = onSearchVisibilityChanged,
         onFilterChange = { viewModel.handleEvent(LogEvent.FilterChanged(it)) },
         onLevelToggle = { viewModel.handleEvent(LogEvent.LevelToggled(it)) },
         onRefresh = { viewModel.handleEvent(LogEvent.Refresh()) },
@@ -88,6 +92,8 @@ private fun LogScreenContent(
     state: LogState,
     padding: PaddingValues,
     searchRequestId: Long,
+    searchVisible: Boolean = true,
+    onSearchVisibilityChanged: (Boolean) -> Unit = {},
     onFilterChange: (String) -> Unit,
     onLevelToggle: (Char) -> Unit,
     onRefresh: () -> Unit,
@@ -99,11 +105,8 @@ private fun LogScreenContent(
     val screenStrings = ScreenUiStrings.from(strings)
     val fontSize = remember { mutableStateOf(13f) }
     val wrap = remember { mutableStateOf(true) }
-    var optionsExpanded by remember { mutableStateOf(true) }
     val logListState = rememberLazyListState()
-    LaunchedEffect(searchRequestId) {
-        if (searchRequestId > 0) optionsExpanded = true
-    }
+    LaunchedEffect(searchRequestId) { if (searchRequestId > 0) logListState.animateScrollToItem(0) }
     val scope = rememberCoroutineScope()
     val showScrollTop by remember {
         derivedStateOf { logListState.firstVisibleItemIndex > 8 || logListState.firstVisibleItemScrollOffset > 400 }
@@ -118,29 +121,23 @@ private fun LogScreenContent(
         Column(
             modifier = Modifier.fillMaxSize(),
         ) {
-            AppAccordion(
+            SearchPanelComponent(
                 title = screenStrings.searchFilters,
                 subtitle = strings.searchLog,
-                expanded = optionsExpanded,
-                onToggle = { optionsExpanded = !optionsExpanded },
+                expanded = searchVisible,
+                onExpandedChange = onSearchVisibilityChanged,
+                query = state.filter,
+                onQueryChange = onFilterChange,
+                onSubmit = onFilterChange,
+                label = strings.searchLog,
+                historyKey = "logs",
+                focusRequestId = searchRequestId,
+                showClearAction = true,
+                onCleared = { onFilterChange("") },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 8.dp),
             ) {
-                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    SearchFieldWithHistoryComponent(
-                        value = state.filter,
-                        onValueChange = onFilterChange,
-                        onSubmit = onFilterChange,
-                        label = strings.searchLog,
-                        historyKey = "logs",
-                        modifier = Modifier.fillMaxWidth(),
-                        showClearAction = true,
-                        onCleared = {
-                            onFilterChange("")
-                        },
-                        focusRequestId = searchRequestId,
-                    )
                     val levels = listOf('E', 'W', 'I', 'D', 'V')
                     LazyRow(
                         modifier = Modifier
@@ -226,7 +223,6 @@ private fun LogScreenContent(
                             style = MaterialTheme.typography.labelSmall,
                         )
                     }
-                }
             }
 
             if (state.loading) {
