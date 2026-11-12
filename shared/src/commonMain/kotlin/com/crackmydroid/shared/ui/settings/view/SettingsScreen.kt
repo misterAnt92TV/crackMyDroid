@@ -139,7 +139,8 @@ internal fun SettingsContent(
                         text = if (state.language == language) screenStrings.selected.format(label) else label,
                         onClick = { actions.onSelectLanguage(language) },
                         modifier = Modifier.padding(vertical = 4.dp),
-                        variant = ButtonVariant.Tonal,
+                        variant = if (state.language == language) ButtonVariant.Primary else ButtonVariant.Secondary,
+                        fullWidth = false,
                     )
                 }
             }

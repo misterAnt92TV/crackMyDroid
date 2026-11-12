@@ -30,7 +30,7 @@ fun CardBlock(
     content: @Composable () -> Unit,
 ) {
     AppCard(
-        modifier = modifier.padding(vertical = 12.dp),
+        modifier = modifier.padding(vertical = 8.dp),
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,

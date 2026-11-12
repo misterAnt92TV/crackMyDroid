@@ -45,8 +45,8 @@ fun SectionHeader(
     titleContent: (@Composable () -> Unit)? = null,
 ) {
     val prefs = LocalAccessibilityPrefs.current
-    val containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f)
-    val iconContainer = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.56f)
+    val containerColor = MaterialTheme.colorScheme.surface
+    val iconContainer = MaterialTheme.colorScheme.surfaceVariant
     CenterAlignedTopAppBar(
         modifier = modifier
             .fillMaxWidth()

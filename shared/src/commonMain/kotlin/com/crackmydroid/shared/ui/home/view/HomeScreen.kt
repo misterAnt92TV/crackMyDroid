@@ -28,8 +28,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.crackmydroid.shared.i18n.LocalStrings
@@ -44,6 +42,7 @@ import com.crackmydroid.ui.components.PackageIcon
 import com.crackmydroid.ui.components.button.ScrollToTopButton
 import com.crackmydroid.ui.components.card.AppCard
 import com.crackmydroid.ui.components.text.AppText
+import com.crackmydroid.ui.theme.CrackMyDroidTheme
 import kotlinx.coroutines.launch
 
 @Composable
@@ -90,7 +89,11 @@ internal fun HomeContent(
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             item {
-                AppCard(modifier = Modifier.fillMaxWidth()) {
+                AppCard(
+                    modifier = Modifier.fillMaxWidth(),
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    borderColor = MaterialTheme.colorScheme.primaryContainer,
+                ) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(14.dp),
@@ -100,20 +103,13 @@ internal fun HomeContent(
                             modifier = Modifier
                                 .size(68.dp)
                                 .clip(CircleShape)
-                                .background(
-                                    brush = Brush.linearGradient(
-                                        listOf(
-                                            MaterialTheme.colorScheme.primaryContainer,
-                                            MaterialTheme.colorScheme.secondaryContainer,
-                                        ),
-                                    ),
-                                ),
+                                .background(CrackMyDroidTheme.statusColors.successContainer),
                             contentAlignment = Alignment.Center,
                         ) {
                             PackageIcon(
                                 packageName = "com.crackmydroid.android",
                                 size = 42.dp,
-                                backgroundColor = Color.Transparent,
+                                backgroundColor = CrackMyDroidTheme.statusColors.successContainer,
                                 contentPadding = 0.dp,
                             )
                         }
@@ -125,11 +121,12 @@ internal fun HomeContent(
                                 "CrackMyDroid",
                                 style = MaterialTheme.typography.titleLarge,
                                 fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer,
                             )
                             AppText(
                                 strings.homeDescription,
                                 style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer,
                             )
                         }
                     }

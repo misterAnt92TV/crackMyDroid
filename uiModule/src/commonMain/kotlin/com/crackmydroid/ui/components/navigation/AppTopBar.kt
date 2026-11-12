@@ -49,8 +49,8 @@ fun AppTopBar(
 ) {
     val prefs = LocalAccessibilityPrefs.current
     val uiStrings = LocalUiStrings.current
-    val iconContainer = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.56f)
-    val containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f)
+    val iconContainer = MaterialTheme.colorScheme.surfaceVariant
+    val containerColor = MaterialTheme.colorScheme.surface
     CenterAlignedTopAppBar(
         modifier = modifier
             .fillMaxWidth()

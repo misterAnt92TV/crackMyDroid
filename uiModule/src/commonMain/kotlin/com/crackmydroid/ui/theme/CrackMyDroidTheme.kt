@@ -13,6 +13,7 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import com.crackmydroid.ui.components.LocalAccessibilityPrefs
 
 val LocalLogLevelColors = staticCompositionLocalOf { LogLevelColors() }
+val LocalStatusColors = staticCompositionLocalOf { CrackMyDroidLightStatusColors }
 
 /**
  * Accessor object for CrackMyDroid theme tokens.
@@ -37,6 +38,11 @@ object CrackMyDroidTheme {
         @Composable
         @ReadOnlyComposable
         get() = LocalLogLevelColors.current
+
+    val statusColors: StatusColors
+        @Composable
+        @ReadOnlyComposable
+        get() = LocalStatusColors.current
 }
 
 @Composable
@@ -52,9 +58,11 @@ fun CrackMyDroidTheme(
         else -> CrackMyDroidLightColorScheme
     }
     val logColors = remember(darkTheme) { LogLevelColors() }
+    val statusColors = if (darkTheme) CrackMyDroidDarkStatusColors else CrackMyDroidLightStatusColors
 
     CompositionLocalProvider(
         LocalLogLevelColors provides logColors,
+        LocalStatusColors provides statusColors,
     ) {
         MaterialTheme(
             colorScheme = colorScheme,

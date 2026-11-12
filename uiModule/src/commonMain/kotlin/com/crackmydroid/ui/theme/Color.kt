@@ -61,6 +61,52 @@ internal object AppColorTokens {
     val OutlineVariantDark = Color(0xFF3F4652)
 }
 
+/** Semantic status colors keep product feedback consistent without local alpha overlays. */
+data class StatusColors(
+    val success: Color,
+    val onSuccess: Color,
+    val successContainer: Color,
+    val onSuccessContainer: Color,
+    val warning: Color,
+    val onWarning: Color,
+    val warningContainer: Color,
+    val onWarningContainer: Color,
+    val info: Color,
+    val onInfo: Color,
+    val infoContainer: Color,
+    val onInfoContainer: Color,
+)
+
+val CrackMyDroidLightStatusColors = StatusColors(
+    success = AppColorTokens.GreenSecondary,
+    onSuccess = Color.White,
+    successContainer = AppColorTokens.GreenSecondaryContainerLight,
+    onSuccessContainer = AppColorTokens.GreenOnSecondaryContainerLight,
+    warning = AppColorTokens.AmberTertiary,
+    onWarning = AppColorTokens.AmberOnTertiaryLight,
+    warningContainer = AppColorTokens.AmberTertiaryContainerLight,
+    onWarningContainer = AppColorTokens.AmberOnTertiaryContainerLight,
+    info = AppColorTokens.BluePrimary,
+    onInfo = Color.White,
+    infoContainer = AppColorTokens.BluePrimaryContainerLight,
+    onInfoContainer = AppColorTokens.BlueOnPrimaryContainerLight,
+)
+
+val CrackMyDroidDarkStatusColors = StatusColors(
+    success = AppColorTokens.GreenSecondaryDark,
+    onSuccess = AppColorTokens.GreenOnSecondaryDark,
+    successContainer = AppColorTokens.GreenSecondaryContainerDark,
+    onSuccessContainer = AppColorTokens.GreenOnSecondaryContainerDark,
+    warning = AppColorTokens.AmberTertiaryDark,
+    onWarning = AppColorTokens.AmberOnTertiaryDark,
+    warningContainer = AppColorTokens.AmberTertiaryContainerDark,
+    onWarningContainer = AppColorTokens.AmberOnTertiaryContainerDark,
+    info = AppColorTokens.BluePrimaryDark,
+    onInfo = AppColorTokens.BlueOnPrimaryDark,
+    infoContainer = AppColorTokens.BluePrimaryContainerDark,
+    onInfoContainer = AppColorTokens.BlueOnPrimaryContainerDark,
+)
+
 val CrackMyDroidLightColorScheme: ColorScheme = lightColorScheme(
     primary = AppColorTokens.BluePrimary,
     onPrimary = Color.White,

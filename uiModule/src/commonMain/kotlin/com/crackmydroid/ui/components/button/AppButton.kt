@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -62,17 +63,21 @@ fun AppButton(
                 horizontal = 18.dp,
                 vertical = if (prefs.largeText) 16.dp else 14.dp,
             ),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+            ),
         ) { content() }
 
         ButtonVariant.Secondary -> OutlinedButton(
             onClick = onClick,
             enabled = enabled,
             modifier = buttonModifier,
-            border = if (prefs.highContrast) {
-                BorderStroke(1.5.dp, MaterialTheme.colorScheme.onBackground)
-            } else {
-                null
-            },
+            border = BorderStroke(
+                if (prefs.highContrast) 1.5.dp else 1.dp,
+                if (prefs.highContrast) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.outline,
+            ),
+            colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.primary),
             contentPadding = PaddingValues(
                 horizontal = 18.dp,
                 vertical = if (prefs.largeText) 16.dp else 14.dp,
@@ -83,11 +88,11 @@ fun AppButton(
             onClick = onClick,
             enabled = enabled,
             modifier = buttonModifier,
-            border = if (prefs.highContrast) {
-                BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
-            } else {
-                null
-            },
+            border = if (prefs.highContrast) BorderStroke(1.dp, MaterialTheme.colorScheme.outline) else null,
+            colors = ButtonDefaults.filledTonalButtonColors(
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+            ),
             contentPadding = PaddingValues(
                 horizontal = 18.dp,
                 vertical = if (prefs.largeText) 16.dp else 14.dp,

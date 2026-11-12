@@ -28,6 +28,7 @@ import com.crackmydroid.ui.components.card.AppCard
 import com.crackmydroid.ui.components.text.AppText
 import com.crackmydroid.ui.preview.AppComponentPreviews
 import com.crackmydroid.ui.preview.ComponentPreviewContainer
+import com.crackmydroid.ui.theme.CrackMyDroidTheme
 
 @Composable
 fun LastOperationItemComponent(
@@ -36,19 +37,27 @@ fun LastOperationItemComponent(
     onAction: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val status = CrackMyDroidTheme.statusColors
     val statusColor = when (item.outcome) {
-        OperationOutcome.Success -> MaterialTheme.colorScheme.secondary
+        OperationOutcome.Success -> status.success
         OperationOutcome.Failure -> MaterialTheme.colorScheme.error
     }
-    AppCard(modifier = modifier.fillMaxWidth()) {
+    val statusContainer = when (item.outcome) {
+        OperationOutcome.Success -> status.successContainer
+        OperationOutcome.Failure -> MaterialTheme.colorScheme.errorContainer
+    }
+    AppCard(
+        modifier = modifier.fillMaxWidth(),
+        containerColor = statusContainer,
+        borderColor = statusContainer,
+    ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.Top,
         ) {
             Box(
-                modifier = Modifier.size(36.dp).clip(CircleShape)
-                    .background(statusColor.copy(alpha = 0.16f)),
+                modifier = Modifier.size(36.dp).clip(CircleShape).background(MaterialTheme.colorScheme.surface),
                 contentAlignment = Alignment.Center,
             ) {
                 AppIcon(

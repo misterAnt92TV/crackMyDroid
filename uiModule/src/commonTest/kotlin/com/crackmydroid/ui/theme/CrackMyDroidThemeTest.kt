@@ -36,6 +36,15 @@ class CrackMyDroidThemeTest {
     }
 
     @Test
+    fun testSemanticStatusColorsAreThemeSpecificAndLegible() {
+        assertNotEquals(CrackMyDroidLightStatusColors.info, CrackMyDroidDarkStatusColors.info)
+        assertNotEquals(CrackMyDroidLightStatusColors.successContainer, CrackMyDroidDarkStatusColors.successContainer)
+        assertNotEquals(CrackMyDroidLightStatusColors.warningContainer, CrackMyDroidDarkStatusColors.warningContainer)
+        assertNotEquals(CrackMyDroidLightStatusColors.infoContainer, CrackMyDroidLightStatusColors.info)
+        assertNotEquals(CrackMyDroidDarkStatusColors.successContainer, CrackMyDroidDarkStatusColors.success)
+    }
+
+    @Test
     fun testTypographyHierarchy() {
         val typography = CrackMyDroidTypography
 
