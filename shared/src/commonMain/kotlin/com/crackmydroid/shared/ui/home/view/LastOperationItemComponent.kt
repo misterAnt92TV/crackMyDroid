@@ -21,8 +21,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.crackmydroid.shared.i18n.LocalStrings
 import com.crackmydroid.shared.i18n.format
-import com.crackmydroid.shared.ui.home.LastOperationItem
-import com.crackmydroid.shared.ui.home.OperationOutcome
+import com.crackmydroid.shared.ui.home.model.LastOperationItem
+import com.crackmydroid.shared.ui.home.model.OperationOutcome
 import com.crackmydroid.ui.components.AppIcon
 import com.crackmydroid.ui.components.card.AppCard
 import com.crackmydroid.ui.components.text.AppText

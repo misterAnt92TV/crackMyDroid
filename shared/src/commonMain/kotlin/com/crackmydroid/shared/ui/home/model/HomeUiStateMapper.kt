@@ -5,8 +5,8 @@ import com.crackmydroid.shared.i18n.Strings
 import com.crackmydroid.shared.i18n.operation.formatOperationTimestamp
 import com.crackmydroid.shared.i18n.operation.renderOperation
 import com.crackmydroid.shared.ui.home.HomeUiState
-import com.crackmydroid.shared.ui.home.LastOperationItem
-import com.crackmydroid.shared.ui.home.OperationOutcome
+import com.crackmydroid.shared.ui.home.model.OperationOutcome
+import com.crackmydroid.shared.ui.home.model.LastOperationItem
 
 class HomeUiStateMapper {
     fun map(state: HomeState, strings: Strings, languageCode: String): HomeUiState {
