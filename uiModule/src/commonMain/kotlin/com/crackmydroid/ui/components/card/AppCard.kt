@@ -19,6 +19,7 @@ import com.crackmydroid.ui.components.LocalAccessibilityPrefs
 import com.crackmydroid.ui.components.text.AppText
 import com.crackmydroid.ui.preview.AppComponentPreviews
 import com.crackmydroid.ui.preview.ComponentPreviewContainer
+import com.crackmydroid.ui.theme.CrackMyDroidTheme
 
 @Composable
 fun AppCard(
@@ -27,7 +28,7 @@ fun AppCard(
     enabled: Boolean = true,
     containerColor: Color = MaterialTheme.colorScheme.surface,
     borderColor: Color = MaterialTheme.colorScheme.outlineVariant,
-    contentPadding: PaddingValues = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
+    contentPadding: PaddingValues = CrackMyDroidTheme.spacing.cardContentPadding,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val prefs = LocalAccessibilityPrefs.current

@@ -1,9 +1,5 @@
 package com.crackmydroid.shared.ui.logs.view
 
-import com.crackmydroid.architecture.presentation.model.UiLoadState
-import com.crackmydroid.ui.typography.AppTypography
-import com.crackmydroid.ui.icons.AppIcons
-
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -48,6 +44,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.crackmydroid.architecture.presentation.model.UiLoadState
 import com.crackmydroid.shared.i18n.LocalStrings
 import com.crackmydroid.shared.i18n.ScreenUiStrings
 import com.crackmydroid.shared.presentation.components.SearchPanelComponent
@@ -60,11 +57,13 @@ import com.crackmydroid.ui.components.AppAccordion
 import com.crackmydroid.ui.components.AppIcon
 import com.crackmydroid.ui.components.AppListSkeleton
 import com.crackmydroid.ui.components.button.AppButton
+import com.crackmydroid.ui.components.button.ScrollToTopButton
 import com.crackmydroid.ui.components.dialog.ErrorDialogComponent
 import com.crackmydroid.ui.components.progress.AppProgressBar
-import com.crackmydroid.ui.components.button.ScrollToTopButton
 import com.crackmydroid.ui.components.text.AppText
+import com.crackmydroid.ui.icons.AppIcons
 import com.crackmydroid.ui.theme.CrackMyDroidTheme
+import com.crackmydroid.ui.typography.AppTypography
 import kotlinx.coroutines.launch
 
 @Composable
@@ -120,7 +119,10 @@ private fun LogScreenContent(
         modifier = Modifier
             .fillMaxSize()
             .padding(padding)
-            .padding(16.dp),
+            .padding(
+                horizontal = CrackMyDroidTheme.spacing.screenHorizontal,
+                vertical = CrackMyDroidTheme.spacing.screenVertical,
+            ),
     ) {
         Column(
             modifier = Modifier.fillMaxSize(),
@@ -142,91 +144,91 @@ private fun LogScreenContent(
                     .fillMaxWidth()
                     .padding(bottom = 8.dp),
             ) {
-                    val levels = listOf('E', 'W', 'I', 'D', 'V')
-                    LazyRow(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 4.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        items(levels) { lv ->
-                            val lvlColor = levelColor(lv)
-                            val chipColors = FilterChipDefaults.filterChipColors(
-                                containerColor = lvlColor.copy(alpha = 0.18f),
-                                selectedContainerColor = lvlColor.copy(alpha = 0.32f),
-                                selectedLabelColor = lvlColor,
-                                labelColor = lvlColor,
-                                disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                            )
-                            FilterChip(
-                                selected = state.levels.contains(lv),
-                                onClick = { onLevelToggle(lv) },
-                                label = { AppText(lv.toString()) },
-                                colors = chipColors,
-                                shape = CircleShape,
-                            )
-                        }
-                    }
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 4.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        AppButton(
-                            text = strings.refreshLog,
-                            leadingIcon = AppIcons.Filled.Refresh,
-                            onClick = onRefresh,
-                            modifier = Modifier.weight(1f),
+                val levels = listOf('E', 'W', 'I', 'D', 'V')
+                LazyRow(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    items(levels) { lv ->
+                        val lvlColor = levelColor(lv)
+                        val chipColors = FilterChipDefaults.filterChipColors(
+                            containerColor = lvlColor.copy(alpha = 0.18f),
+                            selectedContainerColor = lvlColor.copy(alpha = 0.32f),
+                            selectedLabelColor = lvlColor,
+                            labelColor = lvlColor,
+                            disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
                         )
-                        IconButton(onClick = onExport) {
-                            AppIcon(
-                                imageVector = AppIcons.Filled.Share,
-                                contentDescription = strings.exportLog,
-                                tint = MaterialTheme.colorScheme.primary,
-                            )
-                        }
-                    }
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        AppText(screenStrings.logWrapLines, style = MaterialTheme.typography.bodySmall)
-                        Switch(checked = wrap.value, onCheckedChange = { wrap.value = it })
-                    }
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        AppText(screenStrings.logColorByLevel, style = MaterialTheme.typography.bodySmall)
-                        Switch(
-                            checked = state.colorByLevel,
-                            onCheckedChange = onColorByLevelChange,
+                        FilterChip(
+                            selected = state.levels.contains(lv),
+                            onClick = { onLevelToggle(lv) },
+                            label = { AppText(lv.toString()) },
+                            colors = chipColors,
+                            shape = CircleShape,
                         )
                     }
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        AppText(screenStrings.logTextSize, style = MaterialTheme.typography.bodySmall)
-                        Slider(
-                            value = fontSize.value,
-                            onValueChange = { fontSize.value = it },
-                            valueRange = 10f..18f,
-                            modifier = Modifier.weight(1f),
-                        )
-                        AppText(
-                            "${fontSize.value.toInt()}sp",
-                            style = MaterialTheme.typography.labelSmall,
+                }
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    AppButton(
+                        text = strings.refreshLog,
+                        leadingIcon = AppIcons.Filled.Refresh,
+                        onClick = onRefresh,
+                        modifier = Modifier.weight(1f),
+                    )
+                    IconButton(onClick = onExport) {
+                        AppIcon(
+                            imageVector = AppIcons.Filled.Share,
+                            contentDescription = strings.exportLog,
+                            tint = MaterialTheme.colorScheme.primary,
                         )
                     }
+                }
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    AppText(screenStrings.logWrapLines, style = MaterialTheme.typography.bodySmall)
+                    Switch(checked = wrap.value, onCheckedChange = { wrap.value = it })
+                }
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    AppText(screenStrings.logColorByLevel, style = MaterialTheme.typography.bodySmall)
+                    Switch(
+                        checked = state.colorByLevel,
+                        onCheckedChange = onColorByLevelChange,
+                    )
+                }
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    AppText(screenStrings.logTextSize, style = MaterialTheme.typography.bodySmall)
+                    Slider(
+                        value = fontSize.value,
+                        onValueChange = { fontSize.value = it },
+                        valueRange = 10f..18f,
+                        modifier = Modifier.weight(1f),
+                    )
+                    AppText(
+                        "${fontSize.value.toInt()}sp",
+                        style = MaterialTheme.typography.labelSmall,
+                    )
+                }
             }
 
             if (state.loadState is UiLoadState.Loading && state.logs.isEmpty()) {

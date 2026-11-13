@@ -5,10 +5,6 @@
 
 package com.crackmydroid.shared.ui.info.view
 
-import com.crackmydroid.architecture.presentation.model.UiLoadState
-import com.crackmydroid.ui.icons.AppIcons
-import com.crackmydroid.ui.typography.AppTypography
-
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -44,6 +40,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.crackmydroid.architecture.presentation.model.UiLoadState
 import com.crackmydroid.shared.domain.model.DeviceInfo
 import com.crackmydroid.shared.i18n.LocalStrings
 import com.crackmydroid.shared.presentation.preview.AppPreviewEnvironment
@@ -52,18 +49,18 @@ import com.crackmydroid.shared.ui.info.InfoEvent
 import com.crackmydroid.shared.ui.info.InfoState
 import com.crackmydroid.shared.ui.info.InfoViewModel
 import com.crackmydroid.ui.components.AppIcon
-import com.crackmydroid.ui.components.progress.AppProgressIndicator
 import com.crackmydroid.ui.components.button.ScrollToTopButton
 import com.crackmydroid.ui.components.card.AppCard
 import com.crackmydroid.ui.components.progress.AppProgressBar
+import com.crackmydroid.ui.components.progress.AppProgressIndicator
 import com.crackmydroid.ui.components.text.AppText
+import com.crackmydroid.ui.icons.AppIcons
+import com.crackmydroid.ui.theme.CrackMyDroidTheme
+import com.crackmydroid.ui.typography.AppTypography
 import kotlinx.coroutines.launch
 
 @Composable
-fun InfoScreen(
-    viewModel: InfoViewModel,
-    padding: PaddingValues,
-) {
+fun InfoScreen(viewModel: InfoViewModel, padding: PaddingValues) {
     val state by viewModel.state.collectAsState()
     InfoScreenContent(
         state = state,
@@ -73,11 +70,7 @@ fun InfoScreen(
 }
 
 @Composable
-private fun InfoScreenContent(
-    state: InfoState,
-    padding: PaddingValues,
-    onShare: (String) -> Unit,
-) {
+private fun InfoScreenContent(state: InfoState, padding: PaddingValues, onShare: (String) -> Unit) {
     val strings = LocalStrings.current
     val root = state.root
 
@@ -96,9 +89,12 @@ private fun InfoScreenContent(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp)
+                .padding(
+                    horizontal = CrackMyDroidTheme.spacing.screenHorizontal,
+                    vertical = CrackMyDroidTheme.spacing.screenVertical,
+                )
                 .verticalScroll(scrollState),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(CrackMyDroidTheme.spacing.itemSpacing),
         ) {
             state.info?.let { info ->
                 AppCard(modifier = Modifier.fillMaxWidth()) {
@@ -127,7 +123,8 @@ private fun InfoScreenContent(
                                 )
                             }
                             IconButton(
-                                enabled = state.reportContent != null && !(state.reportLoadState is UiLoadState.Loading),
+                                enabled = state.reportContent != null &&
+                                    state.reportLoadState !is UiLoadState.Loading,
                                 onClick = {
                                     state.reportContent?.let { content ->
                                         clipboard.setText(AnnotatedString(content))

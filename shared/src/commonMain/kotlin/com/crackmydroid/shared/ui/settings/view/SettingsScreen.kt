@@ -1,6 +1,4 @@
 package com.crackmydroid.shared.ui.settings.view
-import com.crackmydroid.ui.icons.AppIcons
-
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -39,21 +37,19 @@ import com.crackmydroid.shared.ui.settings.SettingsState
 import com.crackmydroid.shared.ui.settings.SettingsViewModel
 import com.crackmydroid.shared.ui.settings.model.SettingsActions
 import com.crackmydroid.shared.ui.settings.model.SettingsAppInfo
+import com.crackmydroid.ui.components.LocalAccessibilityPrefs
 import com.crackmydroid.ui.components.button.AppButton
 import com.crackmydroid.ui.components.button.ButtonVariant
-import com.crackmydroid.ui.components.dialog.ErrorDialogComponent
-import com.crackmydroid.ui.components.LocalAccessibilityPrefs
 import com.crackmydroid.ui.components.button.ScrollToTopButton
 import com.crackmydroid.ui.components.card.CardBlock
+import com.crackmydroid.ui.components.dialog.ErrorDialogComponent
 import com.crackmydroid.ui.components.text.AppText
+import com.crackmydroid.ui.icons.AppIcons
+import com.crackmydroid.ui.theme.CrackMyDroidTheme
 import kotlinx.coroutines.launch
 
 @Composable
-fun SettingsScreen(
-    viewModel: SettingsViewModel,
-    padding: PaddingValues,
-    appInfo: SettingsAppInfo,
-) {
+fun SettingsScreen(viewModel: SettingsViewModel, padding: PaddingValues, appInfo: SettingsAppInfo) {
     val state by viewModel.state.collectAsState()
     val uriHandler = LocalUriHandler.current
     SettingsContent(
@@ -102,9 +98,12 @@ internal fun SettingsContent(
                 .fillMaxSize()
                 .align(Alignment.TopCenter)
                 .widthIn(max = 840.dp)
-                .padding(16.dp)
+                .padding(
+                    horizontal = CrackMyDroidTheme.spacing.screenHorizontal,
+                    vertical = CrackMyDroidTheme.spacing.screenVertical,
+                )
                 .verticalScroll(scrollState),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(CrackMyDroidTheme.spacing.itemSpacing),
         ) {
             CardBlock(strings.themeTitle, leadingIcon = AppIcons.Filled.ColorLens) {
                 ThemeRow(strings.light, AppTheme.LIGHT, state.theme) {

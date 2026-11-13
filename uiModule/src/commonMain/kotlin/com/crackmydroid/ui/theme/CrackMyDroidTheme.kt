@@ -43,12 +43,18 @@ object CrackMyDroidTheme {
         @Composable
         @ReadOnlyComposable
         get() = LocalStatusColors.current
+
+    val spacing: AppSpacing
+        @Composable
+        @ReadOnlyComposable
+        get() = LocalAppSpacing.current
 }
 
 @Composable
 fun CrackMyDroidTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     highContrast: Boolean = LocalAccessibilityPrefs.current.highContrast,
+    spacing: AppSpacing = AppSpacing(),
     content: @Composable () -> Unit,
 ) {
     val colorScheme = when {
@@ -63,6 +69,7 @@ fun CrackMyDroidTheme(
     CompositionLocalProvider(
         LocalLogLevelColors provides logColors,
         LocalStatusColors provides statusColors,
+        LocalAppSpacing provides spacing,
     ) {
         MaterialTheme(
             colorScheme = colorScheme,
@@ -72,4 +79,3 @@ fun CrackMyDroidTheme(
         )
     }
 }
-

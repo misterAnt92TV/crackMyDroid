@@ -1,6 +1,4 @@
 package com.crackmydroid.desktop
-import com.crackmydroid.ui.icons.AppIcons
-
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -22,11 +20,13 @@ import androidx.compose.ui.unit.dp
 import com.crackmydroid.shared.domain.model.ConnectedDevice
 import com.crackmydroid.shared.i18n.LocalStrings
 import com.crackmydroid.ui.components.button.AppButton
-import com.crackmydroid.ui.components.progress.AppProgressIndicator
-import com.crackmydroid.ui.components.text.AppTextField
 import com.crackmydroid.ui.components.button.ButtonVariant
 import com.crackmydroid.ui.components.card.AppCard
+import com.crackmydroid.ui.components.progress.AppProgressIndicator
 import com.crackmydroid.ui.components.text.AppText
+import com.crackmydroid.ui.components.text.AppTextField
+import com.crackmydroid.ui.icons.AppIcons
+import com.crackmydroid.ui.theme.CrackMyDroidTheme
 
 @Composable
 internal fun DevicePickerContent(
@@ -41,18 +41,19 @@ internal fun DevicePickerContent(
     onSelect: (ConnectedDevice) -> Unit,
 ) {
     val strings = LocalStrings.current
+    val spacing = CrackMyDroidTheme.spacing
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            .padding(24.dp),
+            .padding(spacing.large),
     ) {
         Column(
             modifier = Modifier
                 .align(Alignment.Center)
                 .fillMaxWidth()
-                .padding(horizontal = 48.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+                .padding(horizontal = spacing.huge),
+            verticalArrangement = Arrangement.spacedBy(spacing.default),
         ) {
             AppText(
                 text = strings.desktopAdbPickerTitle,
@@ -81,8 +82,8 @@ internal fun DevicePickerContent(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 4.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    .padding(vertical = spacing.extraSmall),
+                horizontalArrangement = Arrangement.spacedBy(spacing.medium),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 AppButton(
@@ -116,7 +117,7 @@ internal fun DevicePickerContent(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(24.dp),
+                            .padding(spacing.large),
                         contentAlignment = Alignment.Center,
                     ) {
                         AppText(
@@ -127,8 +128,8 @@ internal fun DevicePickerContent(
                 } else {
                     LazyColumn(
                         modifier = Modifier.fillMaxWidth(),
-                        contentPadding = PaddingValues(12.dp),
-                        verticalArrangement = Arrangement.spacedBy(10.dp),
+                        contentPadding = PaddingValues(spacing.medium),
+                        verticalArrangement = Arrangement.spacedBy(spacing.small),
                     ) {
                         items(devices) { device ->
                             val selectable = device.state == "device"
@@ -140,8 +141,8 @@ internal fun DevicePickerContent(
                                 Column(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(16.dp),
-                                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                                        .padding(spacing.default),
+                                    verticalArrangement = Arrangement.spacedBy(spacing.extraSmall),
                                 ) {
                                     AppText(
                                         text = device.model ?: device.serial,

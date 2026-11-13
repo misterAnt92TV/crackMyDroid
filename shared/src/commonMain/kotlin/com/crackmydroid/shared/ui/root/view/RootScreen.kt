@@ -1,8 +1,5 @@
 package com.crackmydroid.shared.ui.root.view
 
-import com.crackmydroid.architecture.presentation.model.UiLoadState
-import com.crackmydroid.ui.icons.AppIcons
-
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterTransition
@@ -46,6 +43,7 @@ import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.crackmydroid.architecture.presentation.model.UiLoadState
 import com.crackmydroid.shared.domain.model.RootStatus
 import com.crackmydroid.shared.i18n.LocalStrings
 import com.crackmydroid.shared.i18n.ScreenUiStrings
@@ -56,21 +54,20 @@ import com.crackmydroid.shared.ui.root.RootEvent
 import com.crackmydroid.shared.ui.root.RootState
 import com.crackmydroid.shared.ui.root.RootViewModel
 import com.crackmydroid.ui.components.AppIcon
-import com.crackmydroid.ui.components.button.AppButton
-import com.crackmydroid.ui.components.progress.AppProgressIndicator
-import com.crackmydroid.ui.components.text.AppTextField
-import com.crackmydroid.ui.components.dialog.ErrorDialogComponent
 import com.crackmydroid.ui.components.LocalAccessibilityPrefs
+import com.crackmydroid.ui.components.button.AppButton
 import com.crackmydroid.ui.components.button.ScrollToTopButton
+import com.crackmydroid.ui.components.dialog.ErrorDialogComponent
+import com.crackmydroid.ui.components.progress.AppProgressIndicator
 import com.crackmydroid.ui.components.text.AppText
+import com.crackmydroid.ui.components.text.AppTextField
+import com.crackmydroid.ui.icons.AppIcons
+import com.crackmydroid.ui.theme.CrackMyDroidTheme
 import kotlinx.coroutines.launch
 
 @Composable
 @OptIn(ExperimentalFoundationApi::class)
-fun RootScreen(
-    viewModel: RootViewModel,
-    padding: PaddingValues,
-) {
+fun RootScreen(viewModel: RootViewModel, padding: PaddingValues) {
     val state by viewModel.state.collectAsState()
     RootScreenContent(
         state = state,
@@ -117,9 +114,12 @@ private fun RootScreenContent(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp)
+                .padding(
+                    horizontal = CrackMyDroidTheme.spacing.screenHorizontal,
+                    vertical = CrackMyDroidTheme.spacing.screenVertical,
+                )
                 .verticalScroll(scrollState),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(CrackMyDroidTheme.spacing.itemSpacing),
         ) {
             ElevatedCard(
                 modifier = Modifier.fillMaxWidth(),

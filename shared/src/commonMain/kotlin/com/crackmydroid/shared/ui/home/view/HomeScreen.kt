@@ -46,11 +46,7 @@ import com.crackmydroid.ui.theme.CrackMyDroidTheme
 import kotlinx.coroutines.launch
 
 @Composable
-fun HomeScreen(
-    viewModel: HomeViewModel,
-    padding: PaddingValues,
-    languageCode: String = "en",
-) {
+fun HomeScreen(viewModel: HomeViewModel, padding: PaddingValues, languageCode: String = "en") {
     val state = viewModel.state.collectAsState()
     val strings = LocalStrings.current
     val uiState = remember(state.value, strings, languageCode) {
@@ -86,7 +82,7 @@ internal fun HomeContent(
             state = listState,
             modifier = Modifier.fillMaxSize(),
             contentPadding = screenContentPadding(padding),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(CrackMyDroidTheme.spacing.itemSpacing),
         ) {
             item {
                 AppCard(

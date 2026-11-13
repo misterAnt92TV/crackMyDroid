@@ -1,6 +1,4 @@
 package com.crackmydroid.desktop
-import com.crackmydroid.ui.icons.AppIcons
-
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -23,6 +21,8 @@ import com.crackmydroid.ui.components.button.AppButton
 import com.crackmydroid.ui.components.button.ButtonVariant
 import com.crackmydroid.ui.components.card.AppCard
 import com.crackmydroid.ui.components.text.AppText
+import com.crackmydroid.ui.icons.AppIcons
+import com.crackmydroid.ui.theme.CrackMyDroidTheme
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -38,17 +38,18 @@ internal fun DesktopToolbarComponent(
     onRescan: () -> Unit,
 ) {
     val strings = LocalStrings.current
+    val spacing = CrackMyDroidTheme.spacing
     AppCard(modifier = Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 12.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
+                .padding(horizontal = spacing.screenHorizontal, vertical = spacing.medium),
+            horizontalArrangement = Arrangement.spacedBy(spacing.default),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Row(
                 modifier = Modifier.weight(1f),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                horizontalArrangement = Arrangement.spacedBy(spacing.medium),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 AppIcon(
@@ -81,8 +82,8 @@ internal fun DesktopToolbarComponent(
                 }
             }
             Row(
-                modifier = Modifier.padding(start = 4.dp),
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                modifier = Modifier.padding(start = spacing.extraSmall),
+                horizontalArrangement = Arrangement.spacedBy(spacing.small),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 AppButton(
