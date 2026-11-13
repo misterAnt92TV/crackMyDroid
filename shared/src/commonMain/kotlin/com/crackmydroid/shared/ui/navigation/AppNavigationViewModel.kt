@@ -11,6 +11,8 @@ import com.crackmydroid.shared.presentation.LocalizedBaseViewModel
 import com.crackmydroid.shared.presentation.navigation.Screen
 import com.crackmydroid.shared.ui.activities.ActivityListEvent
 import com.crackmydroid.shared.ui.activities.ActivityListViewModel
+import com.crackmydroid.shared.ui.apkcontent.AnalyzeApkContentEvent
+import com.crackmydroid.shared.ui.apkcontent.AnalyzeApkContentViewModel
 import com.crackmydroid.shared.ui.home.HomeViewModel
 import com.crackmydroid.shared.ui.info.InfoEvent
 import com.crackmydroid.shared.ui.info.InfoViewModel
@@ -44,6 +46,7 @@ class AppNavigationViewModel(
     private val permissions: PermissionsViewModel,
     private val installedApps: InstalledAppsViewModel,
     private val penTesting: PenTestingViewModel,
+    private val apkContent: AnalyzeApkContentViewModel,
     private val getVerboseLogUseCase: GetVerboseLogUseCase,
     dispatchers: AppDispatchers,
 ) : LocalizedBaseViewModel<AppNavigationEvent, AppNavigationState>(AppNavigationState(), dispatchers) {
@@ -89,6 +92,12 @@ class AppNavigationViewModel(
                         .distinctUntilChanged()
                         .collect { refreshChrome(penTestStep = it) }
                 }
+                launchTask {
+                    apkContent.state
+                        .map { it.step }
+                        .distinctUntilChanged()
+                        .collect { refreshChrome(apkContentStep = it) }
+                }
                 settings.state.map { it.language }.distinctUntilChanged().collect { language ->
                     updateLanguage(resolveLanguageCode(language, platformLanguage()))
                 }
@@ -103,6 +112,7 @@ class AppNavigationViewModel(
         info.updateLanguage(languageCode)
         permissions.updateLanguage(languageCode)
         penTesting.updateLanguage(languageCode)
+        apkContent.updateLanguage(languageCode)
         activity.updateLanguage(languageCode)
         home.updateLanguage(languageCode)
         root.updateLanguage(languageCode)
@@ -119,6 +129,7 @@ class AppNavigationViewModel(
                 Screen.Permissions,
                 Screen.InstalledApps,
                 Screen.Pentest,
+                Screen.AnalyzeApkContent,
                 Screen.Activities,
                 Screen.Root,
                 Screen.Trick,
@@ -148,6 +159,7 @@ class AppNavigationViewModel(
             pendingHintScreen = null,
             pendingNavigationSource = null,
         )
+        if (screen == Screen.AnalyzeApkContent) apkContent.emitEvent(AnalyzeApkContentEvent.Refresh())
     }
 
     private fun navigateBack() {
@@ -162,6 +174,7 @@ class AppNavigationViewModel(
             }
 
             state.selectedScreen != Screen.Home -> navigateTo(Screen.Home, NavigationSource.BottomBar)
+
             else -> Unit
         }
     }
@@ -193,8 +206,11 @@ class AppNavigationViewModel(
         }
     }
 
-    private fun refreshChrome(penTestStep: PenTestWizardStep = penTesting.state.value.currentStep) = updateState { state ->
-        stateWithChrome(state, penTestStep = penTestStep)
+    private fun refreshChrome(
+        penTestStep: PenTestWizardStep = penTesting.state.value.currentStep,
+        apkContentStep: Int = apkContent.state.value.step,
+    ) = updateState { state ->
+        stateWithChrome(state, penTestStep = penTestStep, apkContentStep = apkContentStep)
     }
 
     private fun updateNavigationState(
@@ -219,6 +235,7 @@ class AppNavigationViewModel(
         pendingHintScreen: Screen? = state.pendingHintScreen,
         pendingNavigationSource: NavigationSource? = state.pendingNavigationSource,
         penTestStep: PenTestWizardStep = penTesting.state.value.currentStep,
+        apkContentStep: Int = apkContent.state.value.step,
     ): AppNavigationState = state.copy(
         selectedScreen = selectedScreen,
         navigationHistory = navigationHistory,
@@ -229,6 +246,7 @@ class AppNavigationViewModel(
             canNavigateBack = navigationHistory.isNotEmpty(),
             strings = strings,
             penTestStep = penTestStep,
+            apkContentStep = apkContentStep,
             searchRequestId = state.topBar.searchRequestId,
             searchVisible = state.searchVisibilityByScreen[selectedScreen] ?: true,
         ),

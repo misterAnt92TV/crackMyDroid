@@ -17,12 +17,7 @@ data class TopBarUiState(
     val searchVisible: Boolean = true,
 )
 
-data class BottomBarItemUiState(
-    val screen: Screen,
-    val label: String,
-    val icon: ImageVector,
-    val selected: Boolean,
-)
+data class BottomBarItemUiState(val screen: Screen, val label: String, val icon: ImageVector, val selected: Boolean)
 
 internal object NavigationChromeMapper {
     fun topBar(
@@ -30,33 +25,40 @@ internal object NavigationChromeMapper {
         canNavigateBack: Boolean,
         strings: Strings,
         penTestStep: PenTestWizardStep,
+        apkContentStep: Int = 1,
         searchRequestId: Long,
         searchVisible: Boolean = true,
     ) = TopBarUiState(
         title = screen.title(strings),
         navigationAction = if (canNavigateBack) AppTopBarNavigationAction.Back else AppTopBarNavigationAction.Menu,
-        showSearch = screen.supportsSearch(penTestStep),
+        showSearch = screen.supportsSearch(penTestStep, apkContentStep),
         showHelp = true,
         helpMessage = screen.helpMessage(strings),
         searchRequestId = searchRequestId,
         searchVisible = searchVisible,
     )
 
-    fun bottomItems(selectedScreen: Screen, strings: Strings): List<BottomBarItemUiState> = bottomScreens.map { screen ->
-        BottomBarItemUiState(
-            screen = screen,
-            label = screen.title(strings),
-            icon = screen.icon,
-            selected = screen == selectedScreen,
-        )
-    }
+    fun bottomItems(selectedScreen: Screen, strings: Strings): List<BottomBarItemUiState> =
+        bottomScreens.map { screen ->
+            BottomBarItemUiState(
+                screen = screen,
+                label = screen.title(strings),
+                icon = screen.icon,
+                selected = screen == selectedScreen,
+            )
+        }
 
-    private fun Screen.supportsSearch(penTestStep: PenTestWizardStep): Boolean = when (this) {
+    private fun Screen.supportsSearch(penTestStep: PenTestWizardStep, apkContentStep: Int): Boolean = when (this) {
         Screen.Activities,
         Screen.InstalledApps,
         Screen.Permissions,
-        Screen.Log -> true
+        Screen.Log,
+        -> true
+
         Screen.Pentest -> penTestStep == PenTestWizardStep.SelectApp
+
+        Screen.AnalyzeApkContent -> apkContentStep == 1
+
         else -> false
     }
 
@@ -71,6 +73,7 @@ internal object NavigationChromeMapper {
         Screen.Permissions -> strings.helpPermissions
         Screen.InstalledApps -> strings.helpApk
         Screen.Pentest -> strings.helpPentest
+        Screen.AnalyzeApkContent -> strings.helpAnalyzeApkContent
         Screen.Help -> strings.helpOverview
     }
 }

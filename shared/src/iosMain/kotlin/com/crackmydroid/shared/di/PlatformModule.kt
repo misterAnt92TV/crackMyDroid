@@ -1,6 +1,7 @@
 package com.crackmydroid.shared.di
 
 import com.crackmydroid.shared.data.ActivityRepositoryIos
+import com.crackmydroid.shared.data.ApkContentRepositoryIos
 import com.crackmydroid.shared.data.CacheMaintenanceRepositoryIos
 import com.crackmydroid.shared.data.DeviceInfoRepositoryIos
 import com.crackmydroid.shared.data.InstalledAppsRepositoryIos
@@ -13,6 +14,7 @@ import com.crackmydroid.shared.data.ShellCommandRepositoryIos
 import com.crackmydroid.shared.data.network.createIosHttpClient
 import com.crackmydroid.shared.data.reports.ReportFileRepositoryIos
 import com.crackmydroid.shared.domain.repository.ActivityRepository
+import com.crackmydroid.shared.domain.repository.ApkContentRepository
 import com.crackmydroid.shared.domain.repository.CacheMaintenance
 import com.crackmydroid.shared.domain.repository.DeviceInfoRepository
 import com.crackmydroid.shared.domain.repository.InstalledAppsRepository
@@ -45,5 +47,6 @@ actual fun platformModule(): Module = module {
     single<LogRepository> { LogRepositoryIos() }
     single<PermissionsRepository> { PermissionsRepositoryIos() }
     single<InstalledAppsRepository> { InstalledAppsRepositoryIos() }
+    single<ApkContentRepository> { ApkContentRepositoryIos() }
     single<CacheMaintenance> { CacheMaintenanceRepositoryIos() }
 }

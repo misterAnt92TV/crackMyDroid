@@ -60,6 +60,7 @@ import androidx.compose.material.icons.filled.TipsAndUpdates
 import androidx.compose.material.icons.filled.VerifiedUser
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.filled.Wifi
+import androidx.compose.material.icons.rounded.Analytics
 import androidx.compose.material.icons.rounded.Apps
 import androidx.compose.material.icons.rounded.Build
 import androidx.compose.material.icons.rounded.Home
@@ -144,6 +145,7 @@ object AppIcons {
         val Info get() = Icons.Rounded.Info
         val PrivacyTip get() = Icons.Rounded.PrivacyTip
         val Security get() = Icons.Rounded.Security
+        val Analyze get() = Icons.Rounded.Analytics
         val Settings get() = Icons.Rounded.Settings
         val VerifiedUser get() = Icons.Rounded.VerifiedUser
     }

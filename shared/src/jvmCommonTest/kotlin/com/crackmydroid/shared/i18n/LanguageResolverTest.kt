@@ -147,6 +147,52 @@ class LanguageResolverTest {
     }
 
     @Test
+    fun analyzeApkContentStrings_areLocalizedForEverySupportedLanguage() {
+        listOf("it", "en", "de", "es", "fr").forEach { languageCode ->
+            val strings = stringsFor(languageCode)
+            val screenStrings = ScreenUiStrings(languageCode)
+
+            assertTrue(strings.navAnalyzeApkContent.isNotBlank(), "$languageCode navAnalyzeApkContent is blank")
+            assertTrue(strings.helpAnalyzeApkContent.isNotBlank(), "$languageCode helpAnalyzeApkContent is blank")
+
+            listOf(
+                screenStrings.apkContentStep1Title,
+                screenStrings.apkContentStep1Desc,
+                screenStrings.apkContentStep2Title,
+                screenStrings.apkContentStep2Desc,
+                screenStrings.apkContentStep3Title,
+                screenStrings.apkContentStep3Desc,
+                screenStrings.apkContentSelect,
+                screenStrings.apkContentAnalyzingProgress,
+                screenStrings.apkContentChangeApp,
+                screenStrings.apkContentAnalyze,
+                screenStrings.apkContentAnalyzing,
+                screenStrings.apkContentExportReport,
+                screenStrings.apkContentShareReport,
+                screenStrings.apkContentAnalyzeAnother,
+                screenStrings.apkContentReportTitle,
+                screenStrings.apkContentMetricsTitle,
+                screenStrings.apkContentMetricArchiveSize,
+                screenStrings.apkContentMetricUncompressed,
+                screenStrings.apkContentMetricTotalEntries,
+                screenStrings.apkContentMetricDexFiles,
+                screenStrings.apkContentMetricNativeLibs,
+                screenStrings.apkContentMetricCerts,
+                screenStrings.apkContentChecksumSha256,
+                screenStrings.apkContentNoLibraries,
+                screenStrings.apkContentNoFindings,
+                screenStrings.apkContentDisclaimer,
+            ).forEach { value -> assertTrue(value.isNotBlank(), "$languageCode has blank APK content text") }
+
+            assertTrue(screenStrings.apkContentRiskBadge.contains("%s"), languageCode)
+            assertTrue(screenStrings.apkContentLibrariesTitle.contains("%d"), languageCode)
+            assertTrue(screenStrings.apkContentFindingsTitle.contains("%d"), languageCode)
+            assertTrue(screenStrings.apkContentRemediationPrefix.contains("%s"), languageCode)
+            assertTrue(screenStrings.apkContentExportedTo.contains("%s"), languageCode)
+        }
+    }
+
+    @Test
     fun activityUiStrings_areLocalizedForEverySupportedLanguage() {
         listOf("it", "en", "de", "es", "fr").forEach { languageCode ->
             val ui = stringsFor(languageCode).activityUi

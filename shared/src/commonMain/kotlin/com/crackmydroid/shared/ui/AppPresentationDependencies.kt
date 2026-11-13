@@ -1,6 +1,7 @@
 package com.crackmydroid.shared.ui
 
 import com.crackmydroid.shared.ui.activities.ActivityListViewModel
+import com.crackmydroid.shared.ui.apkcontent.AnalyzeApkContentViewModel
 import com.crackmydroid.shared.ui.navigation.AppNavigationViewModel
 import com.crackmydroid.shared.ui.home.HomeViewModel
 import com.crackmydroid.shared.ui.info.InfoViewModel
@@ -24,4 +25,5 @@ data class AppPresentationDependencies(
     val permissions: PermissionsViewModel,
     val installedApps: InstalledAppsViewModel,
     val penTesting: PenTestingViewModel,
+    val apkContent: AnalyzeApkContentViewModel,
 )

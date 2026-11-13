@@ -69,6 +69,7 @@ import com.crackmydroid.shared.i18n.toUiStrings
 import com.crackmydroid.shared.presentation.navigation.Screen
 import com.crackmydroid.shared.presentation.navigation.drawerScreens
 import com.crackmydroid.shared.ui.activities.view.ActivityListScreen
+import com.crackmydroid.shared.ui.apkcontent.view.AnalyzeApkContentScreen
 import com.crackmydroid.shared.ui.navigation.AppNavigationEvent
 import com.crackmydroid.shared.ui.help.HelpScreen
 import com.crackmydroid.shared.ui.home.view.HomeScreen
@@ -141,6 +142,7 @@ fun CrackMyDroidApp(
     val permissionsVm = dependencies.permissions
     val installedAppsVm = dependencies.installedApps
     val penTestingVm = dependencies.penTesting
+    val apkContentVm = dependencies.apkContent
     val homeVm = dependencies.home
     val navigationVm = dependencies.navigation
     val navigationState by navigationVm.state.collectAsState()
@@ -305,6 +307,7 @@ fun CrackMyDroidApp(
                                     Screen.Home,
                                     Screen.InstalledApps,
                                     Screen.Pentest,
+                                    Screen.AnalyzeApkContent,
                                     Screen.Permissions,
                                     Screen.Activities,
                                     Screen.Root,
@@ -453,6 +456,16 @@ fun CrackMyDroidApp(
 
                                     Screen.Pentest -> PenTestingScreen(
                                         penTestingVm,
+                                        adjustedPadding,
+                                        searchRequestId = navigationState.topBar.searchRequestId,
+                                        searchVisible = navigationState.topBar.searchVisible,
+                                        onSearchVisibilityChanged = { visible ->
+                                            navigationVm.emitEvent(AppNavigationEvent.SearchPanelVisibilityChanged(visible))
+                                        },
+                                    )
+
+                                    Screen.AnalyzeApkContent -> AnalyzeApkContentScreen(
+                                        apkContentVm,
                                         adjustedPadding,
                                         searchRequestId = navigationState.topBar.searchRequestId,
                                         searchVisible = navigationState.topBar.searchVisible,
@@ -622,6 +635,7 @@ private fun sectionEntryHintText(strings: Strings, screen: Screen): String? = wh
     Screen.Permissions -> "${strings.helpPermissions}\n\nSuggerimento: usa la ricerca per app o permesso e condividi rapidamente i risultati dalla riga dell'app."
     Screen.InstalledApps -> "${strings.helpApk}\n\nSuggerimento: cerca per nome/package e usa le azioni rapide per estrarre o condividere APK."
     Screen.Pentest -> "${strings.pentestIntro}\n\nWorkflow consigliato: 1) scegli target o auto-scan, 2) seleziona test, 3) controlla risultati a video, 4) condividi subito."
+    Screen.AnalyzeApkContent -> "Select an installed app, inspect its APK locally, then export the static-analysis report."
     Screen.Activities -> "${strings.helpActivities}\n\nSuggerimento: filtra con cerca/chip preferiti e condividi le activity per singola app."
     Screen.Root -> "Esegue un check rapido del root e della Play Integrity: usa RootBeer per rilevare tracce di rooting e verifica il nonce con Play Integrity."
     Screen.Trick -> "${strings.helpTrick}\n\nSuggerimento: conferma i comandi sensibili e controlla sempre output/exit code."

@@ -1,5 +1,4 @@
 package com.crackmydroid.shared.ui.help
-import com.crackmydroid.ui.icons.AppIcons
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -29,17 +28,15 @@ import com.crackmydroid.shared.i18n.LocalStrings
 import com.crackmydroid.shared.i18n.Strings
 import com.crackmydroid.shared.presentation.navigation.Screen
 import com.crackmydroid.shared.ui.screens.screenContentPadding
+import com.crackmydroid.ui.components.AppIcon
 import com.crackmydroid.ui.components.button.ScrollToTopButton
 import com.crackmydroid.ui.components.card.AppCard
 import com.crackmydroid.ui.components.text.AppText
-import com.crackmydroid.ui.components.AppIcon
+import com.crackmydroid.ui.icons.AppIcons
 import kotlinx.coroutines.launch
 
 @Composable
-fun HelpScreen(
-    padding: PaddingValues,
-    onNavigate: (Screen) -> Unit,
-) {
+fun HelpScreen(padding: PaddingValues, onNavigate: (Screen) -> Unit) {
     HelpContent(
         padding = padding,
         onNavigate = onNavigate,
@@ -47,10 +44,7 @@ fun HelpScreen(
 }
 
 @Composable
-internal fun HelpContent(
-    padding: PaddingValues,
-    onNavigate: (Screen) -> Unit,
-) {
+internal fun HelpContent(padding: PaddingValues, onNavigate: (Screen) -> Unit) {
     val strings = LocalStrings.current
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
@@ -143,6 +137,7 @@ private val helpScreens = listOf(
     Screen.Home,
     Screen.InstalledApps,
     Screen.Pentest,
+    Screen.AnalyzeApkContent,
     Screen.Permissions,
     Screen.Activities,
     Screen.Root,
@@ -156,6 +151,7 @@ private fun sectionSummary(strings: Strings, screen: Screen): String = when (scr
     Screen.Home -> strings.helpHome
     Screen.InstalledApps -> strings.helpApk
     Screen.Pentest -> strings.helpPentest
+    Screen.AnalyzeApkContent -> strings.helpAnalyzeApkContent
     Screen.Permissions -> strings.helpPermissions
     Screen.Activities -> strings.helpActivities
     Screen.Root -> strings.helpRoot

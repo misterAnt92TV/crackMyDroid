@@ -250,6 +250,12 @@ data class Strings(
     val appSubtitle: String = "Android security analysis and testing toolkit",
     val appVersionLabel: String = "Version %s",
 ) {
+    val navAnalyzeApkContent: String
+        get() = ScreenUiStrings(activityUi.languageCode).navAnalyzeApkContent
+
+    val helpAnalyzeApkContent: String
+        get() = ScreenUiStrings(activityUi.languageCode).helpAnalyzeApkContent
+
     val app: AppStrings
         get() = toAppStrings()
 }

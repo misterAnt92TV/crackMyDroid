@@ -511,6 +511,271 @@ class ScreenUiStrings(private val language: String) {
             "Annuler",
         )
 
+    val apkContentStep1Title
+        get() = text(
+            "Fase 1 di 3 — Seleziona un'app installata",
+            "Phase 1 of 3 — Select an installed app",
+            "Phase 1 von 3 — Installierte App auswählen",
+            "Fase 1 de 3 — Selecciona una app instalada",
+            "Phase 1 sur 3 — Sélectionner une application installée",
+        )
+    val apkContentStep1Desc
+        get() = text(
+            "Scegli un'applicazione dal dispositivo per ispezionare l'archivio APK e le librerie.",
+            "Choose an application from the device to inspect its APK archive and libraries.",
+            "Wähle eine App vom Gerät, um das APK-Archiv und die Bibliotheken zu prüfen.",
+            "Elige una aplicación del dispositivo para inspeccionar su archivo APK y librerías.",
+            "Choisissez une application de l'appareil pour inspecter son archive APK et ses bibliothèques.",
+        )
+    val apkContentStep2Title
+        get() = text(
+            "Fase 2 di 3 — Conferma APK e ispezione archivio ZIP",
+            "Phase 2 of 3 — Confirm APK and inspect ZIP contents",
+            "Phase 2 von 3 — APK bestätigen und ZIP-Inhalt prüfen",
+            "Fase 2 de 3 — Confirmar APK e inspeccionar contenido ZIP",
+            "Phase 2 sur 3 — Confirmer l'APK et inspecter le contenu ZIP",
+        )
+    val apkContentStep2Desc
+        get() = text(
+            "Pronto a estrarre struttura APK, binari nativi ed elementi dei certificati.",
+            "Ready to extract APK structure, native binaries, and certificate entries.",
+            "Bereit zur Extraktion von APK-Struktur, nativen Binärdateien und Zertifikaten.",
+            "Listo para extraer la estructura del APK, binarios nativos y certificados.",
+            "Prêt à extraire la structure de l'APK, les binaires natifs et les certificats.",
+        )
+    val apkContentStep3Title
+        get() = text(
+            "Fase 3 di 3 — Report di analisi statica offline",
+            "Phase 3 of 3 — Offline static-analysis report",
+            "Phase 3 von 3 — Offline-Bericht zur statischen Analyse",
+            "Fase 3 de 3 — Informe de análisis estático offline",
+            "Phase 3 sur 3 — Rapport d'analyse statique hors ligne",
+        )
+    val apkContentStep3Desc
+        get() = text(
+            "Evidenze euristiche, librerie rilevate e riepilogo integrità dell'archivio.",
+            "Heuristic findings, detected libraries, and archive integrity summary.",
+            "Heuristische Befunde, erkannte Bibliotheken und Archiv-Integritätsübersicht.",
+            "Hallazgos heurísticos, librerías detectadas y resumen de integridad del archivo.",
+            "Résultats heuristiques, bibliothèques détectées et résumé de l'intégrité de l'archive.",
+        )
+    val apkContentSelect
+        get() = text(
+            "Seleziona",
+            "Select",
+            "Auswählen",
+            "Seleccionar",
+            "Sélectionner",
+        )
+    val apkContentAnalyzingProgress
+        get() = text(
+            "Analisi dell'archivio APK, dei file DEX e delle librerie native in corso…",
+            "Analyzing APK archive, DEX files, and native libraries…",
+            "APK-Archiv, DEX-Dateien und native Bibliotheken werden analysiert…",
+            "Analizando archivo APK, archivos DEX y librerías nativas…",
+            "Analyse de l'archive APK, des fichiers DEX et des bibliothèques natives en cours…",
+        )
+    val apkContentChangeApp
+        get() = text(
+            "Cambia app",
+            "Change app",
+            "App wechseln",
+            "Cambiar app",
+            "Changer d'application",
+        )
+    val apkContentAnalyze
+        get() = text(
+            "Analizza contenuto",
+            "Analyze content",
+            "Inhalt analysieren",
+            "Analizar contenido",
+            "Analyser le contenu",
+        )
+    val apkContentAnalyzing
+        get() = text(
+            "Analisi in corso…",
+            "Analyzing…",
+            "Analyse läuft…",
+            "Analizando…",
+            "Analyse en cours…",
+        )
+    val apkContentExportReport
+        get() = text(
+            "Esporta report",
+            "Export report",
+            "Bericht exportieren",
+            "Exportar informe",
+            "Exporter le rapport",
+        )
+    val apkContentShareReport
+        get() = text(
+            "Condividi report",
+            "Share report",
+            "Bericht teilen",
+            "Compartir informe",
+            "Partager le rapport",
+        )
+    val apkContentAnalyzeAnother
+        get() = text(
+            "Analizza un'altra app",
+            "Analyze another app",
+            "Andere App analysieren",
+            "Analizar otra app",
+            "Analyser une autre application",
+        )
+    val apkContentReportTitle
+        get() = text(
+            "Report di analisi statica",
+            "Static Analysis Report",
+            "Bericht zur statischen Analyse",
+            "Informe de análisis estático",
+            "Rapport d'analyse statique",
+        )
+    val apkContentRiskBadge
+        get() = text(
+            "RISCHIO %s",
+            "%s RISK",
+            "%s-RISIKO",
+            "RIESGO %s",
+            "RISQUE %s",
+        )
+    val apkContentMetricsTitle
+        get() = text(
+            "Metriche archivio",
+            "Archive Metrics",
+            "Archiv-Metriken",
+            "Métricas del archivo",
+            "Métriques de l'archive",
+        )
+    val apkContentMetricArchiveSize
+        get() = text(
+            "Dimensione archivio",
+            "Archive size",
+            "Archivgröße",
+            "Tamaño del archivo",
+            "Taille de l'archive",
+        )
+    val apkContentMetricUncompressed
+        get() = text(
+            "Non compresso",
+            "Uncompressed",
+            "Unkomprimiert",
+            "Descomprimido",
+            "Non compressé",
+        )
+    val apkContentMetricTotalEntries
+        get() = text(
+            "Voci totali",
+            "Total entries",
+            "Einträge gesamt",
+            "Entradas totales",
+            "Entrées totales",
+        )
+    val apkContentMetricDexFiles
+        get() = text(
+            "File DEX",
+            "DEX files",
+            "DEX-Dateien",
+            "Archivos DEX",
+            "Fichiers DEX",
+        )
+    val apkContentMetricNativeLibs
+        get() = text(
+            "Librerie native",
+            "Native libraries",
+            "Native Bibliotheken",
+            "Librerías nativas",
+            "Bibliothèques natives",
+        )
+    val apkContentMetricCerts
+        get() = text(
+            "Certificati",
+            "Certificates",
+            "Zertifikate",
+            "Certificados",
+            "Certificats",
+        )
+    val apkContentChecksumSha256
+        get() = text(
+            "Checksum SHA-256",
+            "SHA-256 Checksum",
+            "SHA-256-Prüfsumme",
+            "Suma de comprobación SHA-256",
+            "Somme de contrôle SHA-256",
+        )
+    val apkContentLibrariesTitle
+        get() = text(
+            "Librerie rilevate (%d)",
+            "Detected Libraries (%d)",
+            "Erkannte Bibliotheken (%d)",
+            "Librerías detectadas (%d)",
+            "Bibliothèques détectées (%d)",
+        )
+    val apkContentNoLibraries
+        get() = text(
+            "Nessuna libreria di terze parti nota rilevata.",
+            "No known third-party libraries detected.",
+            "Keine bekannten Drittanbieter-Bibliotheken erkannt.",
+            "No se detectaron librerías de terceros conocidas.",
+            "Aucune bibliothèque tierce connue détectée.",
+        )
+    val apkContentFindingsTitle
+        get() = text(
+            "Riscontri di sicurezza e integrità (%d)",
+            "Security & Integrity Findings (%d)",
+            "Sicherheits- & Integritätsbefunde (%d)",
+            "Hallazgos de seguridad e integridad (%d)",
+            "Résultats de sécurité et d'intégrité (%d)",
+        )
+    val apkContentNoFindings
+        get() = text(
+            "Nessun problema di integrità o sicurezza rilevato.",
+            "No integrity or security issues detected.",
+            "Keine Integritäts- oder Sicherheitsprobleme erkannt.",
+            "No se detectaron problemas de integridad o seguridad.",
+            "Aucun problème d'intégrité ou de sécurité détecté.",
+        )
+    val apkContentRemediationPrefix
+        get() = text(
+            "Rimedio: %s",
+            "Remediation: %s",
+            "Behebung: %s",
+            "Solución: %s",
+            "Remédiation : %s",
+        )
+    val apkContentDisclaimer
+        get() = text(
+            "L'analisi statica offline fornisce indicatori euristici, non un verdetto antivirus.",
+            "Offline static analysis provides heuristic indicators, not an antivirus verdict.",
+            "Die statische Offline-Analyse liefert heuristische Indikatoren, kein Antivirus-Urteil.",
+            "El análisis estático offline proporciona indicadores heurísticos, no un veredicto antivirus.",
+            "L'analyse statique hors ligne fournit des indicateurs heuristiques, pas un verdict antivirus.",
+        )
+    val apkContentExportedTo
+        get() = text(
+            "Report esportato in: %s",
+            "Report exported to: %s",
+            "Bericht exportiert nach: %s",
+            "Informe exportado a: %s",
+            "Rapport exporté vers : %s",
+        )
+    val navAnalyzeApkContent
+        get() = text(
+            "Analisi APK",
+            "Analyze APK Content",
+            "APK-Inhalt analysieren",
+            "Analizar contenido APK",
+            "Analyser le contenu APK",
+        )
+    val helpAnalyzeApkContent
+        get() = text(
+            "Analisi offline dell'archivio APK, librerie e indicatori euristici.",
+            "Offline APK archive, library and heuristic analysis.",
+            "Offline-Analyse des APK-Archivs, der Bibliotheken und Heuristiken.",
+            "Análisis offline de archivos APK, bibliotecas e indicadores heurísticos.",
+            "Analyse hors ligne de l'archive APK, des bibliothèques et des indicateurs heuristiques.",
+        )
+
     companion object {
         fun from(strings: Strings): ScreenUiStrings = ScreenUiStrings(strings.activityUi.languageCode)
     }

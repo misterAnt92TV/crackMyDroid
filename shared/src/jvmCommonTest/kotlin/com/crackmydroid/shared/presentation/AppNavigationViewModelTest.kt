@@ -9,6 +9,7 @@ import com.crackmydroid.shared.domain.usecase.settings.SetIntroSeenUseCase
 import com.crackmydroid.shared.presentation.navigation.Screen
 import com.crackmydroid.shared.ui.activities.ActivityListEvent
 import com.crackmydroid.shared.ui.activities.ActivityListViewModel
+import com.crackmydroid.shared.ui.apkcontent.AnalyzeApkContentViewModel
 import com.crackmydroid.shared.ui.home.HomeViewModel
 import com.crackmydroid.shared.ui.info.InfoEvent
 import com.crackmydroid.shared.ui.info.InfoViewModel
@@ -54,9 +55,11 @@ class AppNavigationViewModelTest : BaseViewModelUnitTest() {
     private val permissionsVm = mockk<PermissionsViewModel>(relaxed = true)
     private val installedAppsVm = mockk<InstalledAppsViewModel>(relaxed = true)
     private val penTestingVm = mockk<PenTestingViewModel>(relaxed = true)
+    private val apkContentVm = mockk<AnalyzeApkContentViewModel>(relaxed = true)
 
     private val penTestingState = MutableStateFlow(PenTestingState())
     private val settingsState = MutableStateFlow(SettingsState())
+    private val apkContentState = MutableStateFlow(com.crackmydroid.shared.ui.apkcontent.AnalyzeApkContentState())
 
     override fun setUp() {
         super.setUp()
@@ -65,6 +68,7 @@ class AppNavigationViewModelTest : BaseViewModelUnitTest() {
         coEvery { getVerboseLog() } returns Result.success(false)
         every { penTestingVm.state } returns penTestingState
         every { settingsVm.state } returns settingsState
+        every { apkContentVm.state } returns apkContentState
     }
 
     private fun createViewModel() = autoClear(
@@ -81,6 +85,7 @@ class AppNavigationViewModelTest : BaseViewModelUnitTest() {
             permissions = permissionsVm,
             installedApps = installedAppsVm,
             penTesting = penTestingVm,
+            apkContent = apkContentVm,
             getVerboseLogUseCase = getVerboseLog,
             dispatchers = appDispatchers,
         ),

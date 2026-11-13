@@ -5,6 +5,7 @@ import com.crackmydroid.architecture.coroutines.AppDispatchers
 import com.crackmydroid.architecture.coroutines.DefaultAppDispatchers
 import com.crackmydroid.architecture.logging.AppLogger
 import com.crackmydroid.shared.domain.usecase.activities.GetActivitiesUseCase
+import com.crackmydroid.shared.domain.usecase.apkcontent.AnalyzeApkContentUseCase
 import com.crackmydroid.shared.domain.usecase.activities.LaunchActivityUseCase
 import com.crackmydroid.shared.domain.usecase.info.BuildDeviceInfoReportUseCase
 import com.crackmydroid.shared.domain.usecase.info.GetDeviceInfoUseCase
@@ -53,6 +54,7 @@ import com.crackmydroid.shared.domain.usecase.trick.ExecuteShellCommandUseCase
 import com.crackmydroid.shared.domain.usecase.trick.ListShellCommandsUseCase
 import com.crackmydroid.shared.ui.AppPresentationDependencies
 import com.crackmydroid.shared.ui.activities.ActivityListViewModel
+import com.crackmydroid.shared.ui.apkcontent.AnalyzeApkContentViewModel
 import com.crackmydroid.shared.ui.navigation.AppNavigationViewModel
 import com.crackmydroid.shared.ui.home.HomeViewModel
 import com.crackmydroid.shared.ui.info.InfoViewModel
@@ -123,6 +125,7 @@ fun commonModule() = module {
     factory { RunPenTestChecksUseCase(get(), dispatchers = get(), logger = get()) }
     factory { ExportReportUseCase(get(), get(), logger = get()) }
     factory { ListInstalledAppsUseCase(get(), logger = get()) }
+    factory { AnalyzeApkContentUseCase(get(), logger = get()) }
     factory { ExportApkUseCase(get(), logger = get()) }
     factory { ShareApkUseCase(get(), logger = get()) }
 }
@@ -141,6 +144,7 @@ fun presentationModule() = module {
         val permissions = get<PermissionsViewModel>()
         val installedApps = get<InstalledAppsViewModel>()
         val penTesting = get<PenTestingViewModel>()
+        val apkContent = get<AnalyzeApkContentViewModel>()
         AppPresentationDependencies(
             navigation = AppNavigationViewModel(
                 getIntroSeenUseCase = get(),
@@ -155,6 +159,7 @@ fun presentationModule() = module {
                 permissions = permissions,
                 installedApps = installedApps,
                 penTesting = penTesting,
+                apkContent = apkContent,
                 getVerboseLogUseCase = get(),
                 dispatchers = get(),
             ),
@@ -168,6 +173,7 @@ fun presentationModule() = module {
             permissions = permissions,
             installedApps = installedApps,
             penTesting = penTesting,
+            apkContent = apkContent,
         )
     }
     factory { RootViewModel(get(), get(), get(), get()) }
@@ -192,4 +198,5 @@ fun presentationModule() = module {
     factory { PermissionsViewModel(get(), get(), get(), get(), get(), get(), get()) }
     factory { InstalledAppsViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
     factory { PenTestingViewModel(get(), get(), get(), get(), get(), get(), get()) }
+    factory { AnalyzeApkContentViewModel(get(), get(), get(), get()) }
 }

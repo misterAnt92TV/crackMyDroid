@@ -13,6 +13,7 @@ import com.crackmydroid.shared.domain.model.app.AppLanguage
 import com.crackmydroid.shared.domain.model.app.AppTheme
 import com.crackmydroid.shared.domain.model.shell.ShellCommand
 import com.crackmydroid.shared.domain.repository.ActivityRepository
+import com.crackmydroid.shared.domain.repository.ApkContentRepository
 import com.crackmydroid.shared.domain.repository.DeviceInfoRepository
 import com.crackmydroid.shared.domain.repository.InstalledAppsRepository
 import com.crackmydroid.shared.domain.repository.PermissionsRepository
@@ -61,6 +62,7 @@ class AppPresentationDependenciesTest {
     private val settingsRepository = mockk<SettingsRepository>()
     private val activityRepository = mockk<ActivityRepository>()
     private val installedRepository = mockk<InstalledAppsRepository>()
+    private val apkContentRepository = mockk<ApkContentRepository>()
     private val permissionsRepository = mockk<PermissionsRepository>()
     private val shellRepository = mockk<ShellCommandRepository>()
     private val logRepository = mockk<LogRepository>()
@@ -114,6 +116,7 @@ class AppPresentationDependenciesTest {
                     single { settingsRepository }
                     single { activityRepository }
                     single { installedRepository }
+                    single { apkContentRepository }
                     single { permissionsRepository }
                     single { shellRepository }
                     single { logRepository }
