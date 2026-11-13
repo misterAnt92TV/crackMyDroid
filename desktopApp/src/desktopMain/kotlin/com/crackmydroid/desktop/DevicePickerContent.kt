@@ -22,7 +22,7 @@ import androidx.compose.ui.unit.dp
 import com.crackmydroid.shared.domain.model.ConnectedDevice
 import com.crackmydroid.shared.i18n.LocalStrings
 import com.crackmydroid.ui.components.button.AppButton
-import com.crackmydroid.ui.components.AppProgressIndicator
+import com.crackmydroid.ui.components.progress.AppProgressIndicator
 import com.crackmydroid.ui.components.text.AppTextField
 import com.crackmydroid.ui.components.button.ButtonVariant
 import com.crackmydroid.ui.components.card.AppCard

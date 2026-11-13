@@ -57,7 +57,7 @@ import com.crackmydroid.shared.ui.root.RootState
 import com.crackmydroid.shared.ui.root.RootViewModel
 import com.crackmydroid.ui.components.AppIcon
 import com.crackmydroid.ui.components.button.AppButton
-import com.crackmydroid.ui.components.AppProgressIndicator
+import com.crackmydroid.ui.components.progress.AppProgressIndicator
 import com.crackmydroid.ui.components.text.AppTextField
 import com.crackmydroid.ui.components.dialog.ErrorDialogComponent
 import com.crackmydroid.ui.components.LocalAccessibilityPrefs

@@ -25,7 +25,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -68,6 +67,7 @@ import com.crackmydroid.ui.components.PackageIcon
 import com.crackmydroid.ui.components.button.ScrollToTopButton
 import com.crackmydroid.ui.components.card.AppCard
 import com.crackmydroid.ui.components.card.ExportDetailsCard
+import com.crackmydroid.ui.components.progress.AppProgressBar
 import com.crackmydroid.ui.components.text.AppText
 import kotlinx.coroutines.launch
 
@@ -216,8 +216,8 @@ private fun PermissionsScreenContent(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }
-                        LinearProgressIndicator(
-                            progress = { scanProgress.coerceIn(0f, 1f) },
+                        AppProgressBar(
+                            progress = scanProgress.coerceIn(0f, 1f),
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(top = 6.dp),
@@ -355,7 +355,7 @@ private fun PermissionsScreenContent(
                     AppListSkeleton()
                 }
             } else if (state.loadState is UiLoadState.Loading) {
-                item { LinearProgressIndicator(modifier = Modifier.fillMaxWidth()) }
+                item { AppProgressBar(modifier = Modifier.fillMaxWidth()) }
             }
 
             if (state.loadState !is UiLoadState.Loading && filteredApps.isEmpty()) {
@@ -410,7 +410,7 @@ private fun PermissionsScreenContent(
                 }
             }
             if (state.reportPreviewLoadState is UiLoadState.Loading) {
-                item { LinearProgressIndicator(modifier = Modifier.fillMaxWidth()) }
+                item { AppProgressBar(modifier = Modifier.fillMaxWidth()) }
             }
             state.reportPreviewErrorFromState?.let { error ->
                 item { AppText(error, color = MaterialTheme.colorScheme.error) }

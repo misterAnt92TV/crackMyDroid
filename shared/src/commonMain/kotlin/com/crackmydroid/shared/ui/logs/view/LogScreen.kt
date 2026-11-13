@@ -26,7 +26,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.IconButton
@@ -62,6 +61,7 @@ import com.crackmydroid.ui.components.AppIcon
 import com.crackmydroid.ui.components.AppListSkeleton
 import com.crackmydroid.ui.components.button.AppButton
 import com.crackmydroid.ui.components.dialog.ErrorDialogComponent
+import com.crackmydroid.ui.components.progress.AppProgressBar
 import com.crackmydroid.ui.components.button.ScrollToTopButton
 import com.crackmydroid.ui.components.text.AppText
 import com.crackmydroid.ui.theme.CrackMyDroidTheme
@@ -232,7 +232,7 @@ private fun LogScreenContent(
             if (state.loadState is UiLoadState.Loading && state.logs.isEmpty()) {
                 AppListSkeleton(modifier = Modifier.fillMaxWidth())
             } else if (state.loadState is UiLoadState.Loading) {
-                LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                AppProgressBar(modifier = Modifier.fillMaxWidth())
             }
 
             state.message?.let {

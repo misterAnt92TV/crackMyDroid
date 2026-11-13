@@ -22,7 +22,6 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
@@ -55,8 +54,9 @@ import com.crackmydroid.shared.ui.trick.TrickViewModel
 import com.crackmydroid.ui.components.AppIcon
 import com.crackmydroid.ui.components.button.AppButton
 import com.crackmydroid.ui.components.button.ButtonVariant
-import com.crackmydroid.ui.components.dialog.ErrorDialogComponent
 import com.crackmydroid.ui.components.button.ScrollToTopButton
+import com.crackmydroid.ui.components.dialog.ErrorDialogComponent
+import com.crackmydroid.ui.components.progress.AppProgressBar
 import com.crackmydroid.ui.components.text.AppText
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -412,7 +412,7 @@ private fun TrickCommandCard(command: ShellCommand, running: Boolean, runningThi
             )
 
             if (runningThis) {
-                LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                AppProgressBar(modifier = Modifier.fillMaxWidth())
             }
         }
     }

@@ -20,7 +20,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -67,6 +66,7 @@ import com.crackmydroid.ui.components.AppListSkeleton
 import com.crackmydroid.ui.components.button.AppButton
 import com.crackmydroid.ui.components.button.ButtonVariant
 import com.crackmydroid.ui.components.dialog.ErrorDialogComponent
+import com.crackmydroid.ui.components.progress.AppProgressBar
 import com.crackmydroid.ui.components.PackageIcon
 import com.crackmydroid.ui.components.button.ScrollToTopButton
 import com.crackmydroid.ui.components.card.AppCard
@@ -231,7 +231,7 @@ private fun ActivityListContent(
                     AppListSkeleton()
                 }
             } else if (state.loadState is UiLoadState.Loading) {
-                item { LinearProgressIndicator(modifier = Modifier.fillMaxWidth()) }
+                item { AppProgressBar(modifier = Modifier.fillMaxWidth()) }
             }
 
             if (state.loadState !is UiLoadState.Loading && state.loadError == null && state.error == null) {

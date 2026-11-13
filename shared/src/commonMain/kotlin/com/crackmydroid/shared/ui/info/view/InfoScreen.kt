@@ -29,7 +29,6 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -53,9 +52,10 @@ import com.crackmydroid.shared.ui.info.InfoEvent
 import com.crackmydroid.shared.ui.info.InfoState
 import com.crackmydroid.shared.ui.info.InfoViewModel
 import com.crackmydroid.ui.components.AppIcon
-import com.crackmydroid.ui.components.AppProgressIndicator
+import com.crackmydroid.ui.components.progress.AppProgressIndicator
 import com.crackmydroid.ui.components.button.ScrollToTopButton
 import com.crackmydroid.ui.components.card.AppCard
+import com.crackmydroid.ui.components.progress.AppProgressBar
 import com.crackmydroid.ui.components.text.AppText
 import kotlinx.coroutines.launch
 
@@ -143,7 +143,7 @@ private fun InfoScreenContent(
                             }
                         }
                         if (state.reportLoadState is UiLoadState.Loading && state.reportContent == null) {
-                            LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                            AppProgressBar(modifier = Modifier.fillMaxWidth())
                         }
                         InfoRow(strings.manufacturer, info.manufacturer ?: strings.notAvailable)
                         InfoRow(strings.model, info.model ?: strings.notAvailable)
