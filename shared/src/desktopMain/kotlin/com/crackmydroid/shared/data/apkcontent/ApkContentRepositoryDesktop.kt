@@ -5,11 +5,15 @@ import com.crackmydroid.shared.domain.model.apkcontent.ApkContentAnalysis
 import com.crackmydroid.shared.domain.model.apkcontent.ApkContentFinding
 import com.crackmydroid.shared.domain.model.apkcontent.ApkFindingSeverity
 import com.crackmydroid.shared.domain.model.apkcontent.ApkLibrary
+import com.crackmydroid.shared.domain.model.apkcontent.ApkPlainTextCategory
+import com.crackmydroid.shared.domain.model.apkcontent.ApkPlainTextItem
+import com.crackmydroid.shared.domain.model.apkcontent.ApkPlaintextContent
 import com.crackmydroid.shared.domain.repository.AdbBridge
 import com.crackmydroid.shared.domain.repository.ApkContentRepository
 import com.crackmydroid.shared.domain.repository.DeviceSessionController
 import com.crackmydroid.shared.domain.repository.RemotePackageManager
 import com.crackmydroid.shared.util.DesktopPaths
+import com.crackmydroid.shared.util.revealInDesktop
 import java.io.File
 import java.security.MessageDigest
 import java.util.zip.ZipFile
@@ -36,12 +40,30 @@ class ApkContentRepositoryDesktop(
                         it.isNotBlank()
                     },
                 ).getOrThrow()
-                val zip = File(workspace, "$packageName.zip")
-                require(apk.renameTo(zip)) { "Unable to rename APK copy" }
-                ApkArchiveInspector.inspect(packageName, zip)
+                val temporaryZip = File(workspace, "$packageName.zip")
+                require(apk.renameTo(temporaryZip)) { "Unable to rename APK copy" }
+                ApkArchiveInspector.inspect(packageName, temporaryZip)
             } finally {
                 workspace.deleteRecursively()
             }
+        }
+    }
+
+    override suspend fun prepareAndOpenArchive(packageName: String): Result<Unit> = withContext(Dispatchers.IO) {
+        runCatching {
+            val device = requireNotNull(session.state.value.selectedDevice) { "No selected device" }
+            val remote = packageManager.readPackagePaths(packageName).firstOrNull() ?: error("APK not found")
+            val workspace = File(DesktopPaths.exportsDir(), "apk-navigation-${System.nanoTime()}").apply { mkdirs() }
+            val copiedApk = File(workspace, "$packageName.apk")
+            adb.pull(
+                device.serial,
+                remote,
+                copiedApk.absolutePath,
+                session.state.value.adbPath.takeIf { it.isNotBlank() },
+            ).getOrThrow()
+            val zip = File(workspace, "$packageName.zip")
+            require(copiedApk.renameTo(zip)) { "Unable to rename APK copy" }
+            revealInDesktop(zip)
         }
     }
 }
@@ -149,6 +171,8 @@ internal object ApkArchiveInspector {
                 "Review library origin and runtime behavior.",
             )
         }
+        val plainItems = extractPlaintextContent(archive, entries)
+
         return ApkContentAnalysis(
             packageName,
             ApkArchiveMetadata(
@@ -173,7 +197,77 @@ internal object ApkArchiveInspector {
                     it.startsWith("assets/") ||
                     it.startsWith("res/raw/")
             }.sorted(),
+            plaintextContent = ApkPlaintextContent(plainItems),
         )
+    }
+
+    private fun extractPlaintextContent(archive: File, entries: List<String>): List<ApkPlainTextItem> {
+        val results = mutableListOf<ApkPlainTextItem>()
+        val seen = mutableSetOf<String>()
+
+        fun addItem(category: ApkPlainTextCategory, value: String, source: String) {
+            val trimmed = value.trim()
+            if (trimmed.length in 4..250 && seen.add("${category.name}:$trimmed")) {
+                results += ApkPlainTextItem(category, trimmed, source)
+            }
+        }
+
+        val urlRegex = Regex("""https?://[a-zA-Z0-9.-]+(?::[0-9]+)?(?:/[^\s"']*)?""", RegexOption.IGNORE_CASE)
+        val configKeyRegex =
+            Regex(
+                """\b([A-Za-z0-9_]{3,40}(?:API_KEY|SECRET|TOKEN|CLIENT_ID|APP_ID|BASE_URL|HOST))""" +
+                    """\s*[:=]\s*([^\s"';,]{3,100})\b""",
+                RegexOption.IGNORE_CASE,
+            )
+        val plainTextRegex = Regex("""[a-zA-Z0-9_. -]{6,100}""")
+
+        val targets = entries.filter { path ->
+            path == "AndroidManifest.xml" ||
+                path.startsWith("assets/") ||
+                path.startsWith("res/raw/") ||
+                path.endsWith(".json") ||
+                path.endsWith(".properties") ||
+                path.endsWith(".xml") ||
+                path.matches(Regex("classes(\\d+)?\\.dex"))
+        }.take(30)
+
+        ZipFile(archive).use { zip ->
+            for (path in targets) {
+                if (results.size >= 120) break
+                val entry = zip.getEntry(path) ?: continue
+                val maxRead = if (path.endsWith(".dex")) 64 * 1024 else 32 * 1024
+                val bytes = zip.getInputStream(entry).use { it.readNBytes(maxRead) }
+                val content = String(bytes, Charsets.ISO_8859_1)
+
+                // 1. URLs
+                urlRegex.findAll(content).forEach { match ->
+                    if (results.size < 120) {
+                        addItem(ApkPlainTextCategory.Endpoint, match.value, path)
+                    }
+                }
+
+                // 2. Config & Keys
+                configKeyRegex.findAll(content).forEach { match ->
+                    if (results.size < 120) {
+                        val key = match.groupValues[1]
+                        val value = match.groupValues[2]
+                        addItem(ApkPlainTextCategory.ConfigurationKey, "$key = $value", path)
+                    }
+                }
+
+                // 3. Plaintext readable strings (e.g., config / properties / assets)
+                if (path.endsWith(".json") || path.endsWith(".properties") || path.startsWith("assets/")) {
+                    plainTextRegex.findAll(content).forEach { match ->
+                        val text = match.value.trim()
+                        if (results.size < 120 && text.isNotBlank() && !text.startsWith("http", ignoreCase = true)) {
+                            addItem(ApkPlainTextCategory.TextString, text, path)
+                        }
+                    }
+                }
+            }
+        }
+
+        return results
     }
     private fun sha256(file: File): String =
         MessageDigest.getInstance("SHA-256").digest(file.readBytes()).joinToString("") { "%02x".format(it) }

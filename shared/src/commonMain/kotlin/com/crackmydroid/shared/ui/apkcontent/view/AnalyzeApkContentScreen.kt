@@ -19,9 +19,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -32,6 +37,9 @@ import com.crackmydroid.shared.domain.model.apkcontent.ApkContentAnalysis
 import com.crackmydroid.shared.domain.model.apkcontent.ApkContentFinding
 import com.crackmydroid.shared.domain.model.apkcontent.ApkFindingSeverity
 import com.crackmydroid.shared.domain.model.apkcontent.ApkLibrary
+import com.crackmydroid.shared.domain.model.apkcontent.ApkPlainTextCategory
+import com.crackmydroid.shared.domain.model.apkcontent.ApkPlainTextItem
+import com.crackmydroid.shared.domain.model.apkcontent.ApkPlaintextContent
 import com.crackmydroid.shared.i18n.LocalStrings
 import com.crackmydroid.shared.i18n.ScreenUiStrings
 import com.crackmydroid.shared.i18n.format
@@ -41,13 +49,18 @@ import com.crackmydroid.shared.ui.apkcontent.AnalyzeApkContentState
 import com.crackmydroid.shared.ui.apkcontent.AnalyzeApkContentViewModel
 import com.crackmydroid.shared.ui.screens.screenContentPadding
 import com.crackmydroid.ui.components.AppIcon
+import com.crackmydroid.ui.components.AppAccordion
+import com.crackmydroid.ui.components.PackageIcon
 import com.crackmydroid.ui.components.button.AppButton
 import com.crackmydroid.ui.components.button.ButtonVariant
 import com.crackmydroid.ui.components.card.AppCard
+import com.crackmydroid.ui.components.dialog.ErrorDialogComponent
 import com.crackmydroid.ui.components.progress.AppProgressBar
 import com.crackmydroid.ui.components.progress.ProgressBarVariant
 import com.crackmydroid.ui.components.text.AppText
 import com.crackmydroid.ui.icons.AppIcons
+import com.crackmydroid.ui.preview.AppComponentPreviews
+import com.crackmydroid.ui.preview.ComponentPreviewContainer
 import com.crackmydroid.ui.theme.CrackMyDroidTheme
 
 @Composable
@@ -89,6 +102,15 @@ private fun AnalyzeApkContentContent(
     val screenStrings = ScreenUiStrings.from(strings)
     val listState = rememberLazyListState()
     val spacing = CrackMyDroidTheme.spacing
+    val archiveButtonFocusRequester = remember { FocusRequester() }
+    var restoreArchiveFocus by remember { mutableStateOf(false) }
+
+    LaunchedEffect(restoreArchiveFocus) {
+        if (restoreArchiveFocus) {
+            archiveButtonFocusRequester.requestFocus()
+            restoreArchiveFocus = false
+        }
+    }
 
     LaunchedEffect(searchRequestId) {
         if (searchRequestId > 0) {
@@ -183,6 +205,9 @@ private fun AnalyzeApkContentContent(
                             screenStrings = screenStrings,
                             onExport = { onEvent(AnalyzeApkContentEvent.ReportExportRequested()) },
                             onShare = { onEvent(AnalyzeApkContentEvent.ReportShareRequested()) },
+                            onOpenAnalyzedArchive = { onEvent(AnalyzeApkContentEvent.ArchiveOpenRequested()) },
+                            archiveNavigationState = state.archiveNavigationState,
+                            archiveButtonFocusRequester = archiveButtonFocusRequester,
                             onReset = { onEvent(AnalyzeApkContentEvent.Reset()) },
                         )
                     }
@@ -190,30 +215,16 @@ private fun AnalyzeApkContentContent(
             }
         }
 
-        state.error?.let { error ->
-            item {
-                AppCard(modifier = Modifier.fillMaxWidth()) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        AppText(
-                            text = error,
-                            color = MaterialTheme.colorScheme.error,
-                            style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.weight(1f),
-                        )
-                        AppButton(
-                            text = strings.close,
-                            onClick = { onEvent(AnalyzeApkContentEvent.ErrorDismissed()) },
-                            variant = ButtonVariant.Secondary,
-                            fullWidth = false,
-                        )
-                    }
-                }
-            }
-        }
+    }
+
+    state.error?.let { error ->
+        ErrorDialogComponent(
+            message = error,
+            onDismiss = {
+                restoreArchiveFocus = true
+                onEvent(AnalyzeApkContentEvent.ErrorDismissed())
+            },
+        )
     }
 }
 
@@ -254,11 +265,12 @@ private fun AppItemCard(app: InstalledAppEntry, screenStrings: ScreenUiStrings, 
             horizontalArrangement = Arrangement.spacedBy(CrackMyDroidTheme.spacing.medium),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            AppIcon(
-                imageVector = AppIcons.Rounded.Apps,
-                contentDescription = null,
+            PackageIcon(
+                packageName = app.packageName,
                 modifier = Modifier.size(36.dp),
-                tint = MaterialTheme.colorScheme.primary,
+                size = 36.dp,
+                contentPadding = 4.dp,
+                contentDescription = null,
             )
             Column(modifier = Modifier.weight(1f)) {
                 AppText(
@@ -364,6 +376,9 @@ private fun AnalysisReportCard(
     screenStrings: ScreenUiStrings,
     onExport: () -> Unit,
     onShare: () -> Unit,
+    onOpenAnalyzedArchive: () -> Unit,
+    archiveNavigationState: UiLoadState,
+    archiveButtonFocusRequester: FocusRequester,
     onReset: () -> Unit,
 ) {
     val spacing = CrackMyDroidTheme.spacing
@@ -379,6 +394,8 @@ private fun AnalysisReportCard(
         ReportLibrariesCard(libraries = analysis.libraries, screenStrings = screenStrings)
 
         ReportFindingsCard(findings = analysis.findings, screenStrings = screenStrings)
+
+        ReportPlaintextCard(plaintextContent = analysis.plaintextContent, screenStrings = screenStrings)
 
         ReportDisclaimerCard(screenStrings = screenStrings)
 
@@ -405,6 +422,20 @@ private fun AnalysisReportCard(
                 leadingIcon = AppIcons.Filled.Share,
             )
         }
+
+        val openingArchive = archiveNavigationState is UiLoadState.Loading
+        if (openingArchive) {
+            AppProgressBar(modifier = Modifier.fillMaxWidth(), variant = ProgressBarVariant.Primary)
+        }
+        AppButton(
+            text = if (openingArchive) screenStrings.apkContentPreparingArchive else screenStrings.apkContentOpenAnalyzedArchive,
+            onClick = onOpenAnalyzedArchive,
+            enabled = !openingArchive,
+            modifier = Modifier.focusRequester(archiveButtonFocusRequester),
+            variant = ButtonVariant.Tonal,
+            fullWidth = true,
+            leadingIcon = AppIcons.Filled.PlayArrow,
+        )
 
         AppButton(
             text = screenStrings.apkContentAnalyzeAnother,
@@ -811,6 +842,137 @@ private fun FindingItem(finding: ApkContentFinding, screenStrings: ScreenUiStrin
 }
 
 @Composable
+private fun ReportPlaintextCard(plaintextContent: ApkPlaintextContent, screenStrings: ScreenUiStrings) {
+    val spacing = CrackMyDroidTheme.spacing
+
+    AppCard(modifier = Modifier.fillMaxWidth()) {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(spacing.small),
+        ) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(spacing.small),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                AppIcon(
+                    imageVector = AppIcons.Filled.Description,
+                    contentDescription = null,
+                    modifier = Modifier.size(20.dp),
+                    tint = MaterialTheme.colorScheme.primary,
+                )
+                AppText(
+                    text = screenStrings.apkContentPlaintextTitle.format(plaintextContent.totalCount),
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold,
+                )
+            }
+
+            if (plaintextContent.items.isEmpty()) {
+                AppText(
+                    text = screenStrings.apkContentNoPlaintext,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            } else {
+                PlaintextSection(
+                    title = screenStrings.apkContentPlaintextFilterEndpoints,
+                    items = plaintextContent.endpoints,
+                    screenStrings = screenStrings,
+                )
+                PlaintextSection(
+                    title = screenStrings.apkContentPlaintextFilterConfig,
+                    items = plaintextContent.configKeys,
+                    screenStrings = screenStrings,
+                )
+                PlaintextSection(
+                    title = screenStrings.apkContentPlaintextFilterStrings,
+                    items = plaintextContent.textStrings,
+                    screenStrings = screenStrings,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun PlaintextSection(title: String, items: List<ApkPlainTextItem>, screenStrings: ScreenUiStrings) {
+    if (items.isEmpty()) return
+    var expanded by remember(title, items) { mutableStateOf(false) }
+    val visibleItems = if (expanded) items else items.take(3)
+    AppAccordion(
+        title = title,
+        meta = items.size.toString(),
+        expanded = expanded,
+        onToggle = { expanded = !expanded },
+    ) {
+        Column(verticalArrangement = Arrangement.spacedBy(CrackMyDroidTheme.spacing.extraSmall)) {
+            visibleItems.forEach { PlaintextItemRow(item = it, screenStrings = screenStrings) }
+            if (!expanded && items.size > visibleItems.size) {
+                AppText(
+                    text = screenStrings.apkContentPlaintextPreview.format(items.size - visibleItems.size),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun PlaintextItemRow(item: ApkPlainTextItem, screenStrings: ScreenUiStrings) {
+    val spacing = CrackMyDroidTheme.spacing
+    val categoryLabel = when (item.category) {
+        ApkPlainTextCategory.Endpoint -> "URL"
+        ApkPlainTextCategory.ConfigurationKey -> "CONFIG"
+        ApkPlainTextCategory.TextString -> "TEXT"
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(spacing.extraSmall))
+            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .padding(spacing.small),
+    ) {
+        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(2.dp))
+                        .background(MaterialTheme.colorScheme.primaryContainer)
+                        .padding(horizontal = 6.dp, vertical = 2.dp),
+                ) {
+                    AppText(
+                        text = categoryLabel,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        fontWeight = FontWeight.Bold,
+                    )
+                }
+
+                AppText(
+                    text = screenStrings.apkContentSourceLabel.format(item.source),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+
+            AppText(
+                text = item.value,
+                style = MaterialTheme.typography.bodySmall,
+                fontWeight = FontWeight.Medium,
+            )
+        }
+    }
+}
+
+@Composable
 private fun ReportDisclaimerCard(screenStrings: ScreenUiStrings) {
     val spacing = CrackMyDroidTheme.spacing
 
@@ -862,4 +1024,18 @@ private fun formatSize(bytes: Long): String = when {
     bytes >= 1024 * 1024 -> "${bytes / (1024 * 1024)} MB ($bytes B)"
     bytes >= 1024 -> "${bytes / 1024} KB ($bytes B)"
     else -> "$bytes B"
+}
+
+@AppComponentPreviews
+@Composable
+private fun AppItemCardPreview() = ComponentPreviewContainer {
+    AppItemCard(
+        app = InstalledAppEntry(
+            appLabel = "Example application",
+            packageName = "com.example.application",
+            sourcePath = "/data/app/com.example.application/base.apk",
+        ),
+        screenStrings = ScreenUiStrings("en"),
+        onSelect = {},
+    )
 }

@@ -30,5 +30,6 @@ class AnalyzeApkContentUseCaseTest {
 
     private class FakeRepository(private val response: Result<ApkContentAnalysis>) : ApkContentRepository {
         override suspend fun analyze(packageName: String): Result<ApkContentAnalysis> = response
+        override suspend fun prepareAndOpenArchive(packageName: String): Result<Unit> = Result.success(Unit)
     }
 }

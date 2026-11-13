@@ -125,4 +125,27 @@ class ApkContentAnalysisTest {
 
         assertEquals(ApkFindingSeverity.Critical, analysis.highestSeverity)
     }
+
+    @Test
+    fun plaintextContent_defaultsToEmptyAndFiltersCategoriesCorrectly() {
+        val analysis = ApkContentAnalysis(
+            packageName = "com.test.app",
+            metadata = sampleMetadata,
+            libraries = emptyList(),
+            findings = emptyList(),
+            structuralEntries = emptyList(),
+            plaintextContent = ApkPlaintextContent(
+                listOf(
+                    ApkPlainTextItem(ApkPlainTextCategory.Endpoint, "https://api.test.com", "classes.dex"),
+                    ApkPlainTextItem(ApkPlainTextCategory.ConfigurationKey, "KEY = 123", "assets/app.json"),
+                    ApkPlainTextItem(ApkPlainTextCategory.TextString, "Welcome", "assets/strings.json"),
+                ),
+            ),
+        )
+
+        assertEquals(3, analysis.plaintextContent.totalCount)
+        assertEquals(1, analysis.plaintextContent.endpoints.size)
+        assertEquals(1, analysis.plaintextContent.configKeys.size)
+        assertEquals(1, analysis.plaintextContent.textStrings.size)
+    }
 }

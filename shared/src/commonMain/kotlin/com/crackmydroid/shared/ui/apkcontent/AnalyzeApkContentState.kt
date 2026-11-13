@@ -11,6 +11,7 @@ data class AnalyzeApkContentState(
     val selectedPackage: String? = null,
     val loadState: UiLoadState = UiLoadState.Idle,
     val analysisState: UiLoadState = UiLoadState.Idle,
+    val archiveNavigationState: UiLoadState = UiLoadState.Idle,
     val analysis: ApkContentAnalysis? = null,
     val error: String? = null,
     val exportPath: String? = null,

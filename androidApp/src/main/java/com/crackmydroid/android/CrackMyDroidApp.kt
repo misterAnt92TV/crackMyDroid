@@ -11,5 +11,6 @@ class CrackMyDroidApp : Application() {
             androidContext(this@CrackMyDroidApp)
         }
         SnapshotWorkScheduler.enqueue(this)
+        NavigableApkArchiveCleanupWorkScheduler.schedule(this)
     }
 }

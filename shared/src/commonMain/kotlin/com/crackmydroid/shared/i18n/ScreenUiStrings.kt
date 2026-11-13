@@ -775,6 +775,86 @@ class ScreenUiStrings(private val language: String) {
             "Análisis offline de archivos APK, bibliotecas e indicadores heurísticos.",
             "Analyse hors ligne de l'archive APK, des bibliothèques et des indicateurs heuristiques.",
         )
+    val apkContentPlaintextTitle
+        get() = text(
+            "Elementi e testi in chiaro (%d)",
+            "Readable & Plaintext Elements (%d)",
+            "Klartext- & lesbare Elemente (%d)",
+            "Elementos y texto en claro (%d)",
+            "Éléments et textes en clair (%d)",
+        )
+    val apkContentPlaintextFilterAll
+        get() = text(
+            "Tutti",
+            "All",
+            "Alle",
+            "Todos",
+            "Tous",
+        )
+    val apkContentPlaintextFilterEndpoints
+        get() = text(
+            "URL ed endpoint",
+            "URLs & Endpoints",
+            "URLs & Endpunkte",
+            "URLs y endpoints",
+            "URLs et points de terminaison",
+        )
+    val apkContentPlaintextFilterConfig
+        get() = text(
+            "Chiavi e configurazioni",
+            "Keys & Configurations",
+            "Schlüssel & Konfiguration",
+            "Claves y configuración",
+            "Clés et configurations",
+        )
+    val apkContentPlaintextFilterStrings
+        get() = text(
+            "Stringhe e nomi",
+            "Strings & Names",
+            "Zeichenketten & Namen",
+            "Cadenas y nombres",
+            "Chaînes et noms",
+        )
+    val apkContentNoPlaintext
+        get() = text(
+            "Nessun testo o variabile in chiaro rilevante estratto.",
+            "No notable readable text or plaintext variables extracted.",
+            "Keine bemerkenswerten Klartext-Variablen oder Texte extrahiert.",
+            "No se extrajo texto legible ni variables en claro destacables.",
+            "Aucun texte lisible ou variable en clair notable extrait.",
+        )
+    val apkContentSourceLabel
+        get() = text(
+            "Sorgente: %s",
+            "Source: %s",
+            "Quelle: %s",
+            "Origen: %s",
+            "Source : %s",
+        )
+    val apkContentOpenAnalyzedArchive
+        get() = text(
+            "Apri ZIP analizzato",
+            "Open analyzed ZIP",
+            "Analysierte ZIP öffnen",
+            "Abrir ZIP analizado",
+            "Ouvrir le ZIP analysé",
+        )
+    val apkContentPreparingArchive
+        get() = text(
+            "Preparazione ZIP...",
+            "Preparing ZIP...",
+            "ZIP wird vorbereitet...",
+            "Preparando ZIP...",
+            "Préparation du ZIP...",
+        )
+    val apkContentPlaintextPreview
+        get() = text(
+            "Mostra altri %d elementi",
+            "Show %d more items",
+            "%d weitere Elemente anzeigen",
+            "Mostrar %d elementos más",
+            "Afficher %d éléments supplémentaires",
+        )
 
     companion object {
         fun from(strings: Strings): ScreenUiStrings = ScreenUiStrings(strings.activityUi.languageCode)

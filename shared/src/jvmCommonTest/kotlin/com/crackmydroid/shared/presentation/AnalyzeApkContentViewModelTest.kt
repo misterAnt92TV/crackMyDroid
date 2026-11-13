@@ -12,6 +12,7 @@ import com.crackmydroid.shared.domain.repository.ApkContentRepository
 import com.crackmydroid.shared.domain.repository.InstalledAppsRepository
 import com.crackmydroid.shared.domain.repository.ReportFileRepository
 import com.crackmydroid.shared.domain.usecase.apkcontent.AnalyzeApkContentUseCase
+import com.crackmydroid.shared.domain.usecase.apkcontent.OpenAnalyzedApkArchiveUseCase
 import com.crackmydroid.shared.domain.usecase.installedapps.ListInstalledAppsUseCase
 import com.crackmydroid.shared.domain.usecase.reports.ExportReportUseCase
 import com.crackmydroid.shared.ui.apkcontent.AnalyzeApkContentEvent
@@ -35,6 +36,7 @@ class AnalyzeApkContentViewModelTest : BaseViewModelUnitTest() {
 
     private val listAppsUseCase = ListInstalledAppsUseCase(appsRepo)
     private val analyzeApkUseCase = AnalyzeApkContentUseCase(apkContentRepo)
+    private val openArchiveUseCase = OpenAnalyzedApkArchiveUseCase(apkContentRepo)
     private val exportReportUseCase = ExportReportUseCase(reportFileRepo)
 
     @BeforeTest
@@ -51,6 +53,7 @@ class AnalyzeApkContentViewModelTest : BaseViewModelUnitTest() {
         AnalyzeApkContentViewModel(
             listApps = listAppsUseCase,
             analyzeApk = analyzeApkUseCase,
+            openArchive = openArchiveUseCase,
             reportExporter = exportReportUseCase,
             dispatchers = appDispatchers,
         ),

@@ -8,6 +8,7 @@ sealed class AnalyzeApkContentEvent : UiEvent() {
     class PackageSelected(val packageName: String) : AnalyzeApkContentEvent()
     class ClearSelection : AnalyzeApkContentEvent()
     class AnalysisRequested : AnalyzeApkContentEvent()
+    class ArchiveOpenRequested : AnalyzeApkContentEvent()
     class ReportExportRequested : AnalyzeApkContentEvent()
     class ReportShareRequested : AnalyzeApkContentEvent()
     class ErrorDismissed : AnalyzeApkContentEvent()

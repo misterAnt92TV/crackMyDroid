@@ -133,6 +133,37 @@ class ApkContentRepositoryDesktopTest {
     }
 
     @Test
+    fun inspector_extractsPlaintextEndpointsAndConfigs() {
+        val zip = createZip(
+            "AndroidManifest.xml" to
+                """<manifest xmlns:android="http://schemas.android.com/apk/res/android"/>""".encodeToByteArray(),
+            "classes.dex" to "some bytes https://api.crackmydroid.com/v1/auth more bytes".encodeToByteArray(),
+            "assets/app_config.json" to
+                """{"BASE_URL": "https://gateway.example.com", "APP_API_KEY": "secret_abc123"}""".encodeToByteArray(),
+            "res/raw/server.properties" to
+                "REMOTE_HOST=staging.example.net\nSERVER_TOKEN=xyz987token".encodeToByteArray(),
+        )
+
+        try {
+            val analysis = ApkArchiveInspector.inspect("com.plaintext.test", zip)
+
+            assertTrue(analysis.plaintextContent.totalCount >= 2)
+            val endpoints = analysis.plaintextContent.endpoints.map { it.value }
+            assertTrue(endpoints.any { it.contains("crackmydroid.com") || it.contains("gateway.example.com") })
+
+            val configs = analysis.plaintextContent.configKeys.map { it.value }
+            assertTrue(
+                configs.any {
+                    it.contains("APP_API_KEY") || it.contains("BASE_URL") || it.contains("REMOTE_HOST") ||
+                        it.contains("SERVER_TOKEN")
+                },
+            )
+        } finally {
+            zip.delete()
+        }
+    }
+
+    @Test
     fun repository_pullsApkAndAnalyzesSuccessfully() = runTest {
         val fakeDevice = ConnectedDevice("emulator-5554", "device", model = "Pixel 8")
         val sessionState = MutableStateFlow(

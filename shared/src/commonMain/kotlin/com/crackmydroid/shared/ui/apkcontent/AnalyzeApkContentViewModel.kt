@@ -3,6 +3,7 @@ package com.crackmydroid.shared.ui.apkcontent
 import com.crackmydroid.architecture.coroutines.AppDispatchers
 import com.crackmydroid.architecture.presentation.model.UiLoadState
 import com.crackmydroid.shared.domain.usecase.apkcontent.AnalyzeApkContentUseCase
+import com.crackmydroid.shared.domain.usecase.apkcontent.OpenAnalyzedApkArchiveUseCase
 import com.crackmydroid.shared.domain.usecase.installedapps.ListInstalledAppsUseCase
 import com.crackmydroid.shared.domain.usecase.reports.ExportReportUseCase
 import com.crackmydroid.shared.presentation.LocalizedBaseViewModel
@@ -10,6 +11,7 @@ import com.crackmydroid.shared.presentation.LocalizedBaseViewModel
 class AnalyzeApkContentViewModel(
     private val listApps: ListInstalledAppsUseCase,
     private val analyzeApk: AnalyzeApkContentUseCase,
+    private val openArchive: OpenAnalyzedApkArchiveUseCase,
     private val reportExporter: ExportReportUseCase,
     dispatchers: AppDispatchers,
 ) : LocalizedBaseViewModel<AnalyzeApkContentEvent, AnalyzeApkContentState>(AnalyzeApkContentState(), dispatchers) {
@@ -28,6 +30,8 @@ class AnalyzeApkContentViewModel(
             }
 
             is AnalyzeApkContentEvent.AnalysisRequested -> analyze()
+
+            is AnalyzeApkContentEvent.ArchiveOpenRequested -> prepareAndOpenArchive()
 
             is AnalyzeApkContentEvent.ReportExportRequested -> export(false)
 
@@ -88,6 +92,12 @@ class AnalyzeApkContentViewModel(
                 analysis.findings.forEach {
                     appendLine("- [${it.severity}] ${it.category}: ${it.evidence} — ${it.remediation}")
                 }
+                if (analysis.plaintextContent.items.isNotEmpty()) {
+                    appendLine("Readable / Plaintext Content (${analysis.plaintextContent.totalCount} items):")
+                    analysis.plaintextContent.items.forEach {
+                        appendLine("- [${it.category}] (${it.source}) ${it.value}")
+                    }
+                }
                 appendLine("Offline static analysis only; this is not an antivirus verdict.")
             }
             val result = if (share) {
@@ -102,6 +112,24 @@ class AnalyzeApkContentViewModel(
                             error.message ?: strings.commandError,
                     )
                 }
+            }
+        }
+    }
+
+    private fun prepareAndOpenArchive() {
+        val packageName = currentState.analysis?.packageName ?: return
+        if (currentState.archiveNavigationState is UiLoadState.Loading) return
+        launchLatest("apk-content-archive-navigation") {
+            updateState { it.copy(archiveNavigationState = UiLoadState.Loading, error = null) }
+            openArchive(packageName).onFailure { error ->
+                updateState {
+                    it.copy(
+                        archiveNavigationState = UiLoadState.Error(error.message ?: strings.commandError),
+                        error = error.message ?: strings.commandError,
+                    )
+                }
+            }.onSuccess {
+                updateState { it.copy(archiveNavigationState = UiLoadState.Success) }
             }
         }
     }

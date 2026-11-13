@@ -8,6 +8,19 @@ class BootCompletedReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action != Intent.ACTION_BOOT_COMPLETED) return
 
-        SnapshotWorkScheduler.enqueue(context)
+        scheduleBootCompletedWork(
+            enqueueSnapshot = { SnapshotWorkScheduler.enqueue(context) },
+            enqueueArchiveCleanup = {
+                NavigableApkArchiveCleanupWorkScheduler.enqueueImmediate(context)
+            },
+        )
     }
+}
+
+internal fun scheduleBootCompletedWork(
+    enqueueSnapshot: () -> Unit,
+    enqueueArchiveCleanup: () -> Unit,
+) {
+    enqueueSnapshot()
+    enqueueArchiveCleanup()
 }

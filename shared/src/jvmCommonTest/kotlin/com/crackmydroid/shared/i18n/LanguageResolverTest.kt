@@ -182,13 +182,20 @@ class LanguageResolverTest {
                 screenStrings.apkContentNoLibraries,
                 screenStrings.apkContentNoFindings,
                 screenStrings.apkContentDisclaimer,
+                screenStrings.apkContentPlaintextFilterAll,
+                screenStrings.apkContentPlaintextFilterEndpoints,
+                screenStrings.apkContentPlaintextFilterConfig,
+                screenStrings.apkContentPlaintextFilterStrings,
+                screenStrings.apkContentNoPlaintext,
             ).forEach { value -> assertTrue(value.isNotBlank(), "$languageCode has blank APK content text") }
 
             assertTrue(screenStrings.apkContentRiskBadge.contains("%s"), languageCode)
             assertTrue(screenStrings.apkContentLibrariesTitle.contains("%d"), languageCode)
             assertTrue(screenStrings.apkContentFindingsTitle.contains("%d"), languageCode)
+            assertTrue(screenStrings.apkContentPlaintextTitle.contains("%d"), languageCode)
             assertTrue(screenStrings.apkContentRemediationPrefix.contains("%s"), languageCode)
             assertTrue(screenStrings.apkContentExportedTo.contains("%s"), languageCode)
+            assertTrue(screenStrings.apkContentSourceLabel.contains("%s"), languageCode)
         }
     }
 

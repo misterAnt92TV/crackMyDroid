@@ -6,6 +6,7 @@ import com.crackmydroid.architecture.coroutines.DefaultAppDispatchers
 import com.crackmydroid.architecture.logging.AppLogger
 import com.crackmydroid.shared.domain.usecase.activities.GetActivitiesUseCase
 import com.crackmydroid.shared.domain.usecase.apkcontent.AnalyzeApkContentUseCase
+import com.crackmydroid.shared.domain.usecase.apkcontent.OpenAnalyzedApkArchiveUseCase
 import com.crackmydroid.shared.domain.usecase.activities.LaunchActivityUseCase
 import com.crackmydroid.shared.domain.usecase.info.BuildDeviceInfoReportUseCase
 import com.crackmydroid.shared.domain.usecase.info.GetDeviceInfoUseCase
@@ -126,6 +127,7 @@ fun commonModule() = module {
     factory { ExportReportUseCase(get(), get(), logger = get()) }
     factory { ListInstalledAppsUseCase(get(), logger = get()) }
     factory { AnalyzeApkContentUseCase(get(), logger = get()) }
+    factory { OpenAnalyzedApkArchiveUseCase(get(), logger = get()) }
     factory { ExportApkUseCase(get(), logger = get()) }
     factory { ShareApkUseCase(get(), logger = get()) }
 }
@@ -198,5 +200,5 @@ fun presentationModule() = module {
     factory { PermissionsViewModel(get(), get(), get(), get(), get(), get(), get()) }
     factory { InstalledAppsViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
     factory { PenTestingViewModel(get(), get(), get(), get(), get(), get(), get()) }
-    factory { AnalyzeApkContentViewModel(get(), get(), get(), get()) }
+    factory { AnalyzeApkContentViewModel(get(), get(), get(), get(), get()) }
 }
