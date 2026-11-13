@@ -1,4 +1,6 @@
 package com.crackmydroid.shared.ui.logs.view
+
+import com.crackmydroid.architecture.presentation.model.UiLoadState
 import com.crackmydroid.ui.typography.AppTypography
 import com.crackmydroid.ui.icons.AppIcons
 
@@ -24,6 +26,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.IconButton
@@ -56,6 +59,7 @@ import com.crackmydroid.shared.ui.logs.LogState
 import com.crackmydroid.shared.ui.logs.LogViewModel
 import com.crackmydroid.ui.components.AppAccordion
 import com.crackmydroid.ui.components.AppIcon
+import com.crackmydroid.ui.components.AppListSkeleton
 import com.crackmydroid.ui.components.button.AppButton
 import com.crackmydroid.ui.components.dialog.ErrorDialogComponent
 import com.crackmydroid.ui.components.button.ScrollToTopButton
@@ -78,12 +82,12 @@ fun LogScreen(
         searchRequestId = searchRequestId,
         searchVisible = searchVisible,
         onSearchVisibilityChanged = onSearchVisibilityChanged,
-        onFilterChange = { viewModel.handleEvent(LogEvent.FilterChanged(it)) },
-        onLevelToggle = { viewModel.handleEvent(LogEvent.LevelToggled(it)) },
-        onRefresh = { viewModel.handleEvent(LogEvent.Refresh()) },
-        onExport = { viewModel.handleEvent(LogEvent.Export()) },
-        onColorByLevelChange = { viewModel.handleEvent(LogEvent.ColorByLevelChanged(it)) },
-        onClearError = { viewModel.handleEvent(LogEvent.ErrorDismissed()) },
+        onFilterChange = { viewModel.emitEvent(LogEvent.FilterChanged(it)) },
+        onLevelToggle = { viewModel.emitEvent(LogEvent.LevelToggled(it)) },
+        onRefresh = { viewModel.emitEvent(LogEvent.Refresh()) },
+        onExport = { viewModel.emitEvent(LogEvent.Export()) },
+        onColorByLevelChange = { viewModel.emitEvent(LogEvent.ColorByLevelChanged(it)) },
+        onClearError = { viewModel.emitEvent(LogEvent.ErrorDismissed()) },
     )
 }
 
@@ -225,8 +229,10 @@ private fun LogScreenContent(
                     }
             }
 
-            if (state.loading) {
-                CircularProgressIndicator(modifier = Modifier.padding(top = 12.dp))
+            if (state.loadState is UiLoadState.Loading && state.logs.isEmpty()) {
+                AppListSkeleton(modifier = Modifier.fillMaxWidth())
+            } else if (state.loadState is UiLoadState.Loading) {
+                LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
             }
 
             state.message?.let {
@@ -244,7 +250,7 @@ private fun LogScreenContent(
                 )
             }
 
-            state.error?.let {
+            state.errorMessage?.let {
                 AppText(
                     it,
                     color = MaterialTheme.colorScheme.error,
@@ -306,7 +312,7 @@ private fun LogScreenContent(
         )
     }
 
-    state.error?.let { ErrorDialogComponent(it, onClearError) }
+    state.errorMessage?.let { ErrorDialogComponent(it, onClearError) }
 }
 
 @AppScreenPreviews

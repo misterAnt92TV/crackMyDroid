@@ -1,5 +1,8 @@
 package com.crackmydroid.shared.presentation
 
+import com.crackmydroid.architecture.testing.*
+
+
 import com.crackmydroid.shared.domain.model.ExportDocument
 import com.crackmydroid.shared.domain.model.ExportFormat
 import com.crackmydroid.shared.domain.model.InstalledAppEntry
@@ -35,9 +38,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromJsonElement
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class InstalledAppsViewModelTest {
-    private val dispatcher = StandardTestDispatcher()
-
+class InstalledAppsViewModelTest : BaseViewModelUnitTest() {
     private fun reportExporter() = ExportReportUseCase(mockk<ReportFileRepository>())
 
     private fun installedAppsViewModel(
@@ -45,14 +46,16 @@ class InstalledAppsViewModelTest {
         export: ExportApkUseCase,
         share: ShareApkUseCase,
         reportExporter: ExportReportUseCase,
-    ) = InstalledAppsViewModel(
-        listInstalledAppsUseCase = list,
-        exportApkUseCase = export,
-        shareApkUseCase = share,
-        reportExporterUseCase = reportExporter,
-        getFavoritesUseCase = emptyFavorites(),
-        setFavoritesUseCase = mockk<SetInstalledAppFavoritesUseCase>(relaxed = true),
-        dispatchers = TestAppDispatchers(dispatcher),
+    ) = autoClear(
+        InstalledAppsViewModel(
+            listInstalledAppsUseCase = list,
+            exportApkUseCase = export,
+            shareApkUseCase = share,
+            reportExporterUseCase = reportExporter,
+            getFavoritesUseCase = emptyFavorites(),
+            setFavoritesUseCase = mockk<SetInstalledAppFavoritesUseCase>(relaxed = true),
+            dispatchers = appDispatchers,
+        ),
     )
 
     private fun emptyFavorites(): GetInstalledAppFavoritesUseCase {
@@ -61,25 +64,15 @@ class InstalledAppsViewModelTest {
         return getFavorites
     }
 
-    @BeforeTest
-    fun setUp() {
-        Dispatchers.setMain(dispatcher)
-    }
-
-    @AfterTest
-    fun tearDown() {
-        Dispatchers.resetMain()
-    }
-
     @Test
-    fun refreshLoadsInstalledApps() = runTest(dispatcher) {
+    fun refreshLoadsInstalledApps() = runViewModelTest {
         val list = mockk<ListInstalledAppsUseCase>()
         val export = mockk<ExportApkUseCase>()
         val share = mockk<ShareApkUseCase>()
         coEvery { list() } returns Result.success(listOf(InstalledAppEntry("App", "pkg", "/path")))
         val vm = installedAppsViewModel(list, export, share, reportExporter())
 
-        vm.assertEvent(InstalledAppsEvent.Refresh()) {
+        vm.assertEventState(InstalledAppsEvent.Refresh()) {
             val initialState = awaitItem()
             val loadingState = awaitItem()
             assertEquals(true, loadingState.loading)
@@ -95,7 +88,7 @@ class InstalledAppsViewModelTest {
     }
 
     @Test
-    fun exportStoresPathOnSuccess() = runTest(dispatcher) {
+    fun exportStoresPathOnSuccess() = runViewModelTest {
         val list = mockk<ListInstalledAppsUseCase>()
         val export = mockk<ExportApkUseCase>()
         val share = mockk<ShareApkUseCase>()
@@ -113,7 +106,7 @@ class InstalledAppsViewModelTest {
     }
 
     @Test
-    fun exportAllWritesTheGeneratedReportThroughTheReportPort() = runTest(dispatcher) {
+    fun exportAllWritesTheGeneratedReportThroughTheReportPort() = runViewModelTest {
         val list = mockk<ListInstalledAppsUseCase>()
         val export = mockk<ExportApkUseCase>()
         val share = mockk<ShareApkUseCase>()
@@ -145,7 +138,7 @@ class InstalledAppsViewModelTest {
     }
 
     @Test
-    fun shareSetsLastSharedOnSuccess() = runTest(dispatcher) {
+    fun shareSetsLastSharedOnSuccess() = runViewModelTest {
         val list = mockk<ListInstalledAppsUseCase>()
         val export = mockk<ExportApkUseCase>()
         val share = mockk<ShareApkUseCase>()
@@ -163,7 +156,7 @@ class InstalledAppsViewModelTest {
     }
 
     @Test
-    fun shareErrorSetsErrorMessage() = runTest(dispatcher) {
+    fun shareErrorSetsErrorMessage() = runViewModelTest {
         val list = mockk<ListInstalledAppsUseCase>()
         val export = mockk<ExportApkUseCase>()
         val share = mockk<ShareApkUseCase>()
@@ -180,7 +173,7 @@ class InstalledAppsViewModelTest {
     }
 
     @Test
-    fun filterTracksTopQueryAndFavoritesArePrioritized() = runTest(dispatcher) {
+    fun filterTracksTopQueryAndFavoritesArePrioritized() = runViewModelTest {
         val list = mockk<ListInstalledAppsUseCase>()
         val export = mockk<ExportApkUseCase>()
         val share = mockk<ShareApkUseCase>()
@@ -208,7 +201,7 @@ class InstalledAppsViewModelTest {
     }
 
     @Test
-    fun setFilterDoesNotTrackTopQueryUntilExplicitSubmit() = runTest(dispatcher) {
+    fun setFilterDoesNotTrackTopQueryUntilExplicitSubmit() = runViewModelTest {
         val list = mockk<ListInstalledAppsUseCase>()
         val export = mockk<ExportApkUseCase>()
         val share = mockk<ShareApkUseCase>()

@@ -1,6 +1,7 @@
 package com.crackmydroid.shared.ui.trick
 
 import com.crackmydroid.architecture.coroutines.AppDispatchers
+import com.crackmydroid.architecture.presentation.model.UiLoadState
 import com.crackmydroid.shared.domain.model.shell.ShellCommand
 import com.crackmydroid.shared.domain.usecase.trick.ExecuteShellCommandUseCase
 import com.crackmydroid.shared.domain.usecase.trick.ListShellCommandsUseCase
@@ -13,6 +14,10 @@ class TrickViewModel(
     private val executeShellCommandUseCase: ExecuteShellCommandUseCase,
     dispatchers: AppDispatchers,
 ) : LocalizedBaseViewModel<TrickEvent, TrickState>(TrickState(), dispatchers) {
+    private companion object {
+        const val LOAD_KEY = "trick-load"
+    }
+
     private val uiStrings get() = ScreenUiStrings.from(strings)
 
     override fun onEvent(event: TrickEvent) = when (event) {
@@ -29,10 +34,13 @@ class TrickViewModel(
     }
 
     private fun load() {
-        launchLatest("trick-load") {
+        launchLatest(LOAD_KEY) {
+            updateState { it.copy(commandsLoadState = UiLoadState.Loading) }
             listShellCommandsUseCase()
-                .onSuccess { list -> updateState { it.copy(commands = list) } }
-                .onFailure { error -> updateState { it.copy(error = error.message) } }
+                .onSuccess { list -> updateState { it.copy(commands = list, commandsLoadState = UiLoadState.Success) } }
+                .onFailure { error ->
+                    updateState { it.copy(commandsLoadState = UiLoadState.Error(error.message ?: presentationTexts.error)) }
+                }
         }
     }
 
@@ -46,10 +54,9 @@ class TrickViewModel(
         }
         updateState {
             it.copy(
-                running = true,
+                executionLoadState = UiLoadState.Loading,
                 runningCommand = command,
                 interactionHint = null,
-                error = null,
             )
         }
         launchTask {
@@ -67,7 +74,7 @@ class TrickViewModel(
                                 .map { line -> line.removePrefix("package:").trim() },
                             stdoutIsPackageList = res.stdout.lines().map(String::trim)
                                 .filter(String::isNotEmpty).all { line -> line.startsWith("package:") },
-                            running = false,
+                            executionLoadState = UiLoadState.Success,
                             runningCommand = null,
                         )
                     }
@@ -75,9 +82,8 @@ class TrickViewModel(
                 .onFailure { err ->
                     updateState {
                         it.copy(
-                            error = err.message,
+                            executionLoadState = UiLoadState.Error(err.message ?: presentationTexts.error),
                             lastCommandTitle = command.title,
-                            running = false,
                             runningCommand = null,
                         )
                     }
@@ -125,6 +131,11 @@ class TrickViewModel(
     }
 
     private fun clearError() {
-        updateState { it.copy(error = null) }
+        updateState {
+            it.copy(
+                commandsLoadState = if (it.commandsLoadState is UiLoadState.Error) UiLoadState.Idle else it.commandsLoadState,
+                executionLoadState = if (it.executionLoadState is UiLoadState.Error) UiLoadState.Idle else it.executionLoadState,
+            )
+        }
     }
 }

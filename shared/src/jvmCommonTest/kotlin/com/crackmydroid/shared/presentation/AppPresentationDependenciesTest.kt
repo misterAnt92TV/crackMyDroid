@@ -170,7 +170,7 @@ class AppPresentationDependenciesTest {
         assertFalse(AppLogger.isVerbose())
         assertTrue(graph.navigation.state.value.initialized)
         assertEquals(apps, graph.installedApps.state.value.apps)
-        assertEquals("diagnostics unavailable", graph.settings.state.value.error)
+        assertEquals("diagnostics unavailable", graph.settings.state.value.loadError)
     }
 
     @Test

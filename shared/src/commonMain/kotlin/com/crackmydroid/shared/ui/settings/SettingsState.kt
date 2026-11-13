@@ -2,6 +2,7 @@ package com.crackmydroid.shared.ui.settings
 
 import com.crackmydroid.architecture.presentation.model.UiState
 import com.crackmydroid.shared.domain.model.ExportFormat
+import com.crackmydroid.architecture.presentation.model.UiLoadState
 import com.crackmydroid.shared.domain.model.app.AppLanguage
 import com.crackmydroid.shared.domain.model.app.AppTheme
 import com.crackmydroid.shared.ui.settings.model.ThirdPartyLibraries
@@ -18,7 +19,10 @@ data class SettingsState(
     val featureHintsEnabled: Boolean = true,
     val showIntroOnLaunch: Boolean = true,
     val exportFormat: ExportFormat = ExportFormat.TXT,
-    val loading: Boolean = false,
+    val loadState: UiLoadState = UiLoadState.Idle,
     val error: String? = null,
     val thirdPartyLibraries: List<ThirdPartyLibrary> = ThirdPartyLibraries.catalog,
-) : UiState
+) : UiState {
+    val loading: Boolean get() = loadState is UiLoadState.Loading
+    val loadError: String? get() = (loadState as? UiLoadState.Error)?.message
+}

@@ -158,7 +158,7 @@ fun CrackMyDroidApp(
             }
 
             navigationState.selectedScreen != Screen.Home || navigationState.navigationHistory.isNotEmpty() -> {
-                navigationVm.handleEvent(AppNavigationEvent.BackRequested())
+                navigationVm.emitEvent(AppNavigationEvent.BackRequested())
             }
 
             onExitApp != null -> {
@@ -177,11 +177,11 @@ fun CrackMyDroidApp(
         largeText = settingsState.value.largeText,
     )
 
-    LaunchedEffect(Unit) { navigationVm.handleEvent(AppNavigationEvent.Initialize()) }
+    LaunchedEffect(Unit) { navigationVm.emitEvent(AppNavigationEvent.Initialize()) }
 
     LaunchedEffect(settingsState.value.featureHintsEnabled) {
         if (!settingsState.value.featureHintsEnabled) {
-            navigationVm.handleEvent(AppNavigationEvent.HintDismissed())
+            navigationVm.emitEvent(AppNavigationEvent.HintDismissed())
         }
     }
 
@@ -209,7 +209,7 @@ fun CrackMyDroidApp(
         ) {
             val navigateFromDrawer: (Screen) -> Unit = { target ->
                 scope.launch { drawerState.close() }
-                navigationVm.handleEvent(
+                navigationVm.emitEvent(
                     AppNavigationEvent.ScreenSelected(
                         screen = target,
                         origin = com.crackmydroid.shared.ui.navigation.NavigationSource.Drawer,
@@ -316,7 +316,7 @@ fun CrackMyDroidApp(
                                     NavigationRailItem(
                                         selected = navigationState.selectedScreen == screen,
                                         onClick = {
-                                            navigationVm.handleEvent(
+                                            navigationVm.emitEvent(
                                                 AppNavigationEvent.ScreenSelected(
                                                     screen,
                                                     com.crackmydroid.shared.ui.navigation.NavigationSource.Rail,
@@ -353,14 +353,14 @@ fun CrackMyDroidApp(
                                     onNavigationClick = {
                                         when (navigationState.topBar.navigationAction) {
                                             AppTopBarNavigationAction.Menu -> scope.launch { drawerState.open() }
-                                            AppTopBarNavigationAction.Back -> navigationVm.handleEvent(AppNavigationEvent.BackRequested())
+                                            AppTopBarNavigationAction.Back -> navigationVm.emitEvent(AppNavigationEvent.BackRequested())
                                             AppTopBarNavigationAction.None -> Unit
                                         }
                                     },
                                     showSearch = navigationState.topBar.showSearch,
-                                    onSearchClick = { navigationVm.handleEvent(AppNavigationEvent.TopBarSearchRequested()) },
+                                    onSearchClick = { navigationVm.emitEvent(AppNavigationEvent.TopBarSearchRequested()) },
                                     showHelp = navigationState.topBar.showHelp,
-                                    onHelpClick = { navigationVm.handleEvent(AppNavigationEvent.TopBarHelpRequested()) },
+                                    onHelpClick = { navigationVm.emitEvent(AppNavigationEvent.TopBarHelpRequested()) },
                                 )
                             },
                             bottomBar = {
@@ -382,7 +382,7 @@ fun CrackMyDroidApp(
                                                 .firstOrNull { it.screen.id == id }
                                                 ?.screen
                                                 ?.let { screen ->
-                                                    navigationVm.handleEvent(
+                                                    navigationVm.emitEvent(
                                                         AppNavigationEvent.ScreenSelected(
                                                             screen,
                                                             com.crackmydroid.shared.ui.navigation.NavigationSource.BottomBar,
@@ -432,7 +432,7 @@ fun CrackMyDroidApp(
                                         searchRequestId = navigationState.topBar.searchRequestId,
                                         searchVisible = navigationState.topBar.searchVisible,
                                         onSearchVisibilityChanged = { visible ->
-                                            navigationVm.handleEvent(AppNavigationEvent.SearchPanelVisibilityChanged(visible))
+                                            navigationVm.emitEvent(AppNavigationEvent.SearchPanelVisibilityChanged(visible))
                                         },
                                     )
 
@@ -457,7 +457,7 @@ fun CrackMyDroidApp(
                                         searchRequestId = navigationState.topBar.searchRequestId,
                                         searchVisible = navigationState.topBar.searchVisible,
                                         onSearchVisibilityChanged = { visible ->
-                                            navigationVm.handleEvent(AppNavigationEvent.SearchPanelVisibilityChanged(visible))
+                                            navigationVm.emitEvent(AppNavigationEvent.SearchPanelVisibilityChanged(visible))
                                         },
                                     )
 
@@ -467,7 +467,7 @@ fun CrackMyDroidApp(
                                         searchRequestId = navigationState.topBar.searchRequestId,
                                         searchVisible = navigationState.topBar.searchVisible,
                                         onSearchVisibilityChanged = { visible ->
-                                            navigationVm.handleEvent(AppNavigationEvent.SearchPanelVisibilityChanged(visible))
+                                            navigationVm.emitEvent(AppNavigationEvent.SearchPanelVisibilityChanged(visible))
                                         },
                                     )
 
@@ -477,7 +477,7 @@ fun CrackMyDroidApp(
                                         searchRequestId = navigationState.topBar.searchRequestId,
                                         searchVisible = navigationState.topBar.searchVisible,
                                         onSearchVisibilityChanged = { visible ->
-                                            navigationVm.handleEvent(AppNavigationEvent.SearchPanelVisibilityChanged(visible))
+                                            navigationVm.emitEvent(AppNavigationEvent.SearchPanelVisibilityChanged(visible))
                                         },
                                     )
 
@@ -487,7 +487,7 @@ fun CrackMyDroidApp(
                                         searchRequestId = navigationState.topBar.searchRequestId,
                                         searchVisible = navigationState.topBar.searchVisible,
                                         onSearchVisibilityChanged = { visible ->
-                                            navigationVm.handleEvent(AppNavigationEvent.SearchPanelVisibilityChanged(visible))
+                                            navigationVm.emitEvent(AppNavigationEvent.SearchPanelVisibilityChanged(visible))
                                         },
                                     )
 
@@ -500,7 +500,7 @@ fun CrackMyDroidApp(
                                     Screen.Help -> HelpScreen(
                                         padding = adjustedPadding,
                                         onNavigate = { target ->
-                                            navigationVm.handleEvent(
+                                            navigationVm.emitEvent(
                                                 AppNavigationEvent.ScreenSelected(
                                                     target,
                                                     com.crackmydroid.shared.ui.navigation.NavigationSource.InContent,
@@ -545,12 +545,12 @@ fun CrackMyDroidApp(
 
         if (navigationState.showIntro) {
             androidx.compose.material3.AlertDialog(
-                onDismissRequest = { navigationVm.handleEvent(AppNavigationEvent.IntroDismissed()) },
+                onDismissRequest = { navigationVm.emitEvent(AppNavigationEvent.IntroDismissed()) },
                 title = { AppText(strings.introTitle) },
                 text = { AppText(strings.introBody) },
                 confirmButton = {
                     androidx.compose.material3.Button(onClick = {
-                        navigationVm.handleEvent(AppNavigationEvent.IntroDismissed())
+                        navigationVm.emitEvent(AppNavigationEvent.IntroDismissed())
                     }) {
                         AppText(strings.introAgree)
                     }
@@ -582,7 +582,7 @@ fun CrackMyDroidApp(
                     confirmButton = {
                         androidx.compose.material3.Button(
                             onClick = {
-                                navigationVm.handleEvent(AppNavigationEvent.HintConfirmed(disableHintsForever, target))
+                                navigationVm.emitEvent(AppNavigationEvent.HintConfirmed(disableHintsForever, target))
                             },
                         ) {
                             AppText(strings.sectionHintConfirm)
@@ -591,7 +591,7 @@ fun CrackMyDroidApp(
                     dismissButton = {
                         TextButton(
                             onClick = {
-                                navigationVm.handleEvent(AppNavigationEvent.HintDismissed())
+                                navigationVm.emitEvent(AppNavigationEvent.HintDismissed())
                             },
                         ) {
                             AppText(strings.close)
@@ -603,10 +603,10 @@ fun CrackMyDroidApp(
 
         navigationState.helpDialog?.let { msg ->
             androidx.compose.material3.AlertDialog(
-                onDismissRequest = { navigationVm.handleEvent(AppNavigationEvent.HelpDismissed()) },
+                onDismissRequest = { navigationVm.emitEvent(AppNavigationEvent.HelpDismissed()) },
                 confirmButton = {
                     androidx.compose.material3.TextButton(onClick = {
-                        navigationVm.handleEvent(AppNavigationEvent.HelpDismissed())
+                        navigationVm.emitEvent(AppNavigationEvent.HelpDismissed())
                     }) {
                         AppText(strings.close)
                     }

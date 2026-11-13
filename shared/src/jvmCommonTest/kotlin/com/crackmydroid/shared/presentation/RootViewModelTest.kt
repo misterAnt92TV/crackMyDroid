@@ -1,5 +1,8 @@
 package com.crackmydroid.shared.presentation
 
+import com.crackmydroid.architecture.testing.*
+
+
 import com.crackmydroid.shared.domain.model.ExportDocument
 import com.crackmydroid.shared.domain.model.ExportFormat
 import com.crackmydroid.shared.domain.model.PlayIntegrityResult
@@ -29,22 +32,9 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 
-@OptIn(ExperimentalCoroutinesApi::class)
-class RootViewModelTest {
-    private val dispatcher = StandardTestDispatcher()
-
-    @BeforeTest
-    fun setUp() {
-        Dispatchers.setMain(dispatcher)
-    }
-
-    @AfterTest
-    fun tearDown() {
-        Dispatchers.resetMain()
-    }
-
+class RootViewModelTest : BaseViewModelUnitTest() {
     @Test
-    fun verifyUpdatesRootStatus() = runTest(dispatcher) {
+    fun verifyUpdatesRootStatus() = runViewModelTest {
         val repository = mockk<RootCheckRepository>()
         coEvery { repository.checkRoot() } returns RootStatus(
             isRooted = true,
@@ -52,16 +42,14 @@ class RootViewModelTest {
         )
         val viewModel = viewModel(repository)
 
-        viewModel.handleEvent(RootEvent.Verify())
-        advanceUntilIdle()
+        val state = viewModel.emitEventAndAwaitIdle(RootEvent.Verify())
 
-        assertEquals(true, viewModel.state.value.status?.isRooted)
-        assertEquals("su available", viewModel.state.value.status?.details)
-        viewModel.onCleared()
+        assertEquals(true, state.status?.isRooted)
+        assertEquals("su available", state.status?.details)
     }
 
     @Test
-    fun verifyPlayIntegrityUpdatesIntegrityResult() = runTest(dispatcher) {
+    fun verifyPlayIntegrityUpdatesIntegrityResult() = runViewModelTest {
         val repository = mockk<RootCheckRepository>()
         coEvery { repository.checkPlayIntegrity("nonce") } returns PlayIntegrityResult(
             basicIntegrity = true,
@@ -70,31 +58,27 @@ class RootViewModelTest {
         )
         val viewModel = viewModel(repository)
 
-        viewModel.handleEvent(RootEvent.PlayIntegrityNonceChanged("nonce"))
-        viewModel.handleEvent(RootEvent.VerifyPlayIntegrity())
-        advanceUntilIdle()
+        viewModel.emitEventAndAwaitIdle(RootEvent.PlayIntegrityNonceChanged("nonce"))
+        val state = viewModel.emitEventAndAwaitIdle(RootEvent.VerifyPlayIntegrity())
 
-        assertEquals(true, viewModel.state.value.playIntegrity?.basicIntegrity)
-        assertEquals(false, viewModel.state.value.playIntegrity?.deviceIntegrity)
-        viewModel.onCleared()
+        assertEquals(true, state.playIntegrity?.basicIntegrity)
+        assertEquals(false, state.playIntegrity?.deviceIntegrity)
     }
 
     @Test
-    fun verify_failure_storesErrorAndStopsLoading() = runTest(dispatcher) {
+    fun verify_failure_storesErrorAndStopsLoading() = runViewModelTest {
         val repository = mockk<RootCheckRepository>()
         coEvery { repository.checkRoot() } throws IllegalStateException("root service unavailable")
         val viewModel = viewModel(repository)
 
-        viewModel.handleEvent(RootEvent.Verify())
-        advanceUntilIdle()
+        val state = viewModel.emitEventAndAwaitIdle(RootEvent.Verify())
 
-        assertEquals(false, viewModel.state.value.loading)
-        assertEquals("root service unavailable", viewModel.state.value.error)
-        viewModel.onCleared()
+        assertEquals(false, state.loading)
+        assertEquals("root service unavailable", state.loadError)
     }
 
     @Test
-    fun verifyRootAccess_isExplicitAndPublishesPrivilegeResult() = runTest(dispatcher) {
+    fun verifyRootAccess_isExplicitAndPublishesPrivilegeResult() = runViewModelTest {
         val repository = mockk<RootCheckRepository>()
         coEvery { repository.checkRoot(RootCheckMode.PRIVILEGE_ACCESS) } returns RootStatus(
             isRooted = true,
@@ -102,17 +86,15 @@ class RootViewModelTest {
         )
         val viewModel = viewModel(repository)
 
-        viewModel.handleEvent(RootEvent.VerifyRootAccess())
-        advanceUntilIdle()
+        val state = viewModel.emitEventAndAwaitIdle(RootEvent.VerifyRootAccess())
 
-        assertEquals(true, viewModel.state.value.status?.isRooted)
-        assertEquals("uid=0(root)", viewModel.state.value.status?.details)
+        assertEquals(true, state.status?.isRooted)
+        assertEquals("uid=0(root)", state.status?.details)
         coVerify(exactly = 1) { repository.checkRoot(RootCheckMode.PRIVILEGE_ACCESS) }
-        viewModel.onCleared()
     }
 
     @Test
-    fun shareReport_success_storesPathAndExportsRootDetails() = runTest(dispatcher) {
+    fun shareReport_success_storesPathAndExportsRootDetails() = runViewModelTest {
         val repository = mockk<RootCheckRepository>()
         val files = mockk<ReportFileRepository>()
         val format = mockk<GetExportFormatUseCase>()
@@ -120,31 +102,32 @@ class RootViewModelTest {
         coEvery { repository.checkRoot() } returns RootStatus(true, "su available")
         coEvery { format() } returns Result.success(ExportFormat.PDF)
         coEvery { files.share(capture(shared)) } returns Result.success("/tmp/root.pdf")
-        val viewModel = RootViewModel(
-            CheckRootUseCase(repository),
-            CheckPlayIntegrityUseCase(repository),
-            ExportReportUseCase(files, format),
-            TestAppDispatchers(dispatcher),
+        val viewModel = autoClear(
+            RootViewModel(
+                CheckRootUseCase(repository),
+                CheckPlayIntegrityUseCase(repository),
+                ExportReportUseCase(files, format),
+                appDispatchers,
+            ),
         )
-        viewModel.handleEvent(RootEvent.Verify())
-        advanceUntilIdle()
+        viewModel.emitEventAndAwaitIdle(RootEvent.Verify())
 
         viewModel.updateLanguage("en")
-        viewModel.handleEvent(RootEvent.ShareReport())
-        advanceUntilIdle()
+        val state = viewModel.emitEventAndAwaitIdle(RootEvent.ShareReport())
 
-        assertEquals("/tmp/root.pdf", viewModel.state.value.reportPath)
+        assertEquals("/tmp/root.pdf", state.reportPath)
         assertEquals("root_test_report.pdf", shared.captured.fileName)
         assertEquals("root_test", shared.captured.reportType)
         assertEquals(true, shared.captured.textContent.contains("su available"))
         coVerify(exactly = 1) { files.share(any<ExportDocument>()) }
-        viewModel.onCleared()
     }
 
-    private fun viewModel(repository: RootCheckRepository): RootViewModel = RootViewModel(
-        CheckRootUseCase(repository),
-        CheckPlayIntegrityUseCase(repository),
-        ExportReportUseCase(mockk<ReportFileRepository>(relaxed = true)),
-        TestAppDispatchers(dispatcher),
+    private fun viewModel(repository: RootCheckRepository): RootViewModel = autoClear(
+        RootViewModel(
+            CheckRootUseCase(repository),
+            CheckPlayIntegrityUseCase(repository),
+            ExportReportUseCase(mockk<ReportFileRepository>(relaxed = true)),
+            appDispatchers,
+        ),
     )
 }

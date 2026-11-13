@@ -5,6 +5,7 @@
 
 package com.crackmydroid.shared.ui.permissions.view
 
+import com.crackmydroid.architecture.presentation.model.UiLoadState
 import com.crackmydroid.ui.icons.AppIcons
 
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -42,8 +43,6 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalClipboardManager
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.crackmydroid.shared.domain.model.PermissionRiskLevel
@@ -58,10 +57,10 @@ import com.crackmydroid.shared.ui.permissions.PermissionsEvent
 import com.crackmydroid.shared.ui.permissions.PermissionsState
 import com.crackmydroid.shared.ui.permissions.PermissionsViewModel
 import com.crackmydroid.shared.ui.permissions.model.PermissionFindingUi
-import com.crackmydroid.shared.ui.permissions.model.PermissionsEffect
 import com.crackmydroid.shared.ui.screens.screenContentPadding
 import com.crackmydroid.ui.components.AppAccordion
 import com.crackmydroid.ui.components.AppIcon
+import com.crackmydroid.ui.components.AppListSkeleton
 import com.crackmydroid.ui.components.button.AppButton
 import com.crackmydroid.ui.components.button.ButtonVariant
 import com.crackmydroid.ui.components.dialog.ErrorDialogComponent
@@ -82,22 +81,8 @@ fun PermissionsScreen(
 ) {
     val state by viewModel.state.collectAsState()
 
-    @Suppress("DEPRECATION")
-    val clipboard = LocalClipboardManager.current
     DisposableEffect(viewModel) {
-        onDispose { viewModel.handleEvent(PermissionsEvent.ReportPreviewDismissed()) }
-    }
-    LaunchedEffect(viewModel) {
-        viewModel.effects.collect { effect ->
-            if (effect is PermissionsEffect.CopyToClipboard) clipboard.setText(AnnotatedString(effect.content))
-        }
-    }
-    LaunchedEffect(state.reportPreviewPackage, state.reportPreviewContent) {
-        val packageName = state.reportPreviewPackage
-        val content = state.reportPreviewContent
-        if (packageName != null && content != null) {
-            viewModel.handleEvent(PermissionsEvent.ReportShared(packageName))
-        }
+        onDispose { viewModel.emitEvent(PermissionsEvent.ReportPreviewDismissed()) }
     }
     PermissionsScreenContent(
         state = state,
@@ -105,17 +90,17 @@ fun PermissionsScreen(
         searchRequestId = searchRequestId,
         searchVisible = searchVisible,
         onSearchVisibilityChanged = onSearchVisibilityChanged,
-        onRefresh = { viewModel.handleEvent(PermissionsEvent.Refresh()) },
-        onStartAutoRiskScan = { viewModel.handleEvent(PermissionsEvent.AutoRiskScanStarted()) },
-        onCancelAutoRiskScan = { viewModel.handleEvent(PermissionsEvent.AutoRiskScanCancelled()) },
+        onRefresh = { viewModel.emitEvent(PermissionsEvent.Refresh()) },
+        onStartAutoRiskScan = { viewModel.emitEvent(PermissionsEvent.AutoRiskScanStarted()) },
+        onCancelAutoRiskScan = { viewModel.emitEvent(PermissionsEvent.AutoRiskScanCancelled()) },
         onFilterChange = { value, trackUsage ->
-            viewModel.handleEvent(PermissionsEvent.FilterChanged(value, trackUsage))
+            viewModel.emitEvent(PermissionsEvent.FilterChanged(value, trackUsage))
         },
-        onToggleShowOnlyRisky = { viewModel.handleEvent(PermissionsEvent.RiskFilterToggled()) },
-        onSetShowOnlyRisky = { viewModel.handleEvent(PermissionsEvent.RiskFilterChanged(it)) },
-        onRequestReportPreview = { viewModel.handleEvent(PermissionsEvent.ReportPreviewRequested(it)) },
-        onToggleFavorite = { viewModel.handleEvent(PermissionsEvent.FavoriteToggled(it)) },
-        onClearError = { viewModel.handleEvent(PermissionsEvent.ErrorDismissed()) },
+        onToggleShowOnlyRisky = { viewModel.emitEvent(PermissionsEvent.RiskFilterToggled()) },
+        onSetShowOnlyRisky = { viewModel.emitEvent(PermissionsEvent.RiskFilterChanged(it)) },
+        onRequestReportPreview = { viewModel.emitEvent(PermissionsEvent.ReportPreviewRequested(it)) },
+        onToggleFavorite = { viewModel.emitEvent(PermissionsEvent.FavoriteToggled(it)) },
+        onClearError = { viewModel.emitEvent(PermissionsEvent.ErrorDismissed()) },
     )
 }
 
@@ -342,7 +327,7 @@ private fun PermissionsScreenContent(
                 }
             }
 
-            if (!state.loading && state.error == null) {
+            if (state.loadState !is UiLoadState.Loading && state.loadError == null && state.error == null) {
                 item {
                     AppText(
                         screenStrings.resultsSummary.format(filteredApps.size, state.apps.size),
@@ -365,13 +350,15 @@ private fun PermissionsScreenContent(
                     )
                 }
             }
-            if (state.loading) {
+            if (state.loadState is UiLoadState.Loading && state.apps.isEmpty()) {
                 item {
-                    CircularProgressIndicator(modifier = Modifier.padding(top = 8.dp))
+                    AppListSkeleton()
                 }
+            } else if (state.loadState is UiLoadState.Loading) {
+                item { LinearProgressIndicator(modifier = Modifier.fillMaxWidth()) }
             }
 
-            if (!state.loading && filteredApps.isEmpty()) {
+            if (state.loadState !is UiLoadState.Loading && filteredApps.isEmpty()) {
                 item {
                     AppCard(modifier = Modifier.fillMaxWidth()) {
                         val hasFilter = state.filter.isNotBlank() || state.showOnlyRisky
@@ -417,15 +404,15 @@ private fun PermissionsScreenContent(
                 }
             }
 
-            state.error?.let { err ->
+            (state.loadError ?: state.scanError ?: state.exportError ?: state.error)?.let { err ->
                 item {
                     AppText(err, color = MaterialTheme.colorScheme.error)
                 }
             }
-            if (state.reportPreviewLoading) {
+            if (state.reportPreviewLoadState is UiLoadState.Loading) {
                 item { LinearProgressIndicator(modifier = Modifier.fillMaxWidth()) }
             }
-            state.reportPreviewError?.let { error ->
+            state.reportPreviewErrorFromState?.let { error ->
                 item { AppText(error, color = MaterialTheme.colorScheme.error) }
             }
             items(filteredApps, key = { it.packageName }) { app ->
@@ -545,7 +532,7 @@ private fun PermissionsScreenContent(
         )
     }
 
-    state.error?.let { ErrorDialogComponent(it, onClearError) }
+    (state.loadError ?: state.scanError ?: state.exportError ?: state.error)?.let { ErrorDialogComponent(it, onClearError) }
 }
 
 @AppScreenPreviews

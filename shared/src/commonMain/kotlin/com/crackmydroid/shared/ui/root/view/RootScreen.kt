@@ -1,4 +1,6 @@
 package com.crackmydroid.shared.ui.root.view
+
+import com.crackmydroid.architecture.presentation.model.UiLoadState
 import com.crackmydroid.ui.icons.AppIcons
 
 import androidx.compose.animation.AnimatedContent
@@ -73,13 +75,13 @@ fun RootScreen(
     RootScreenContent(
         state = state,
         padding = padding,
-        onVerify = { viewModel.handleEvent(RootEvent.Verify()) },
-        onVerifyRootAccess = { viewModel.handleEvent(RootEvent.VerifyRootAccess()) },
-        onPlayIntegrityNonceChange = { viewModel.handleEvent(RootEvent.PlayIntegrityNonceChanged(it)) },
-        onVerifyPlayIntegrity = { viewModel.handleEvent(RootEvent.VerifyPlayIntegrity()) },
-        onShareReport = { viewModel.handleEvent(RootEvent.ShareReport()) },
-        onClearError = { viewModel.handleEvent(RootEvent.ErrorDismissed()) },
-        onLoad = { viewModel.handleEvent(RootEvent.Verify()) },
+        onVerify = { viewModel.emitEvent(RootEvent.Verify()) },
+        onVerifyRootAccess = { viewModel.emitEvent(RootEvent.VerifyRootAccess()) },
+        onPlayIntegrityNonceChange = { viewModel.emitEvent(RootEvent.PlayIntegrityNonceChanged(it)) },
+        onVerifyPlayIntegrity = { viewModel.emitEvent(RootEvent.VerifyPlayIntegrity()) },
+        onShareReport = { viewModel.emitEvent(RootEvent.ShareReport()) },
+        onClearError = { viewModel.emitEvent(RootEvent.ErrorDismissed()) },
+        onLoad = { viewModel.emitEvent(RootEvent.Verify()) },
     )
 }
 
@@ -139,7 +141,7 @@ private fun RootScreenContent(
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.SemiBold,
                         )
-                        IconButton(onClick = onVerify, enabled = !state.loading) {
+                        IconButton(onClick = onVerify, enabled = state.loadState !is UiLoadState.Loading) {
                             AppIcon(
                                 AppIcons.Filled.Refresh,
                                 contentDescription = strings.verifyRoot,
@@ -150,14 +152,14 @@ private fun RootScreenContent(
                     AppButton(
                         text = strings.verifyRoot,
                         onClick = onVerify,
-                        enabled = !state.loading,
+                        enabled = state.loadState !is UiLoadState.Loading,
                         fullWidth = true,
                     )
                     AppText(strings.rootPassiveHint, style = MaterialTheme.typography.bodySmall)
                     AppButton(
                         text = strings.rootPrivilegeTest,
                         onClick = onVerifyRootAccess,
-                        enabled = !state.loading,
+                        enabled = state.loadState !is UiLoadState.Loading,
                         fullWidth = true,
                     )
 
@@ -170,13 +172,13 @@ private fun RootScreenContent(
                     AppButton(
                         text = strings.verifyPlayIntegrity,
                         onClick = onVerifyPlayIntegrity,
-                        enabled = !state.loading,
+                        enabled = state.loadState !is UiLoadState.Loading,
                         fullWidth = true,
                     )
                 }
             }
 
-            if (state.loading) {
+            if (state.loadState is UiLoadState.Loading) {
                 AppProgressIndicator(
                     label = strings.rootChecking,
                     modifier = Modifier.padding(top = 12.dp),
@@ -345,7 +347,7 @@ private fun RootScreenContent(
                 }
             }
 
-            state.error?.let { err ->
+            (state.loadError ?: state.error)?.let { err ->
                 AppText(
                     err,
                     modifier = Modifier.padding(top = 8.dp),
@@ -375,7 +377,7 @@ private fun RootScreenContent(
         }
     }
 
-    state.error?.let { ErrorDialogComponent(it, onClearError) }
+    (state.loadError ?: state.error)?.let { ErrorDialogComponent(it, onClearError) }
 }
 
 @AppScreenPreviews

@@ -1,5 +1,8 @@
 package com.crackmydroid.shared.presentation
 
+import com.crackmydroid.architecture.testing.*
+
+
 import com.crackmydroid.architecture.logging.AppLogger
 import com.crackmydroid.shared.domain.model.ExportFormat
 import com.crackmydroid.shared.domain.model.app.AppLanguage
@@ -43,23 +46,19 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class SettingsViewModelTest {
-    private val dispatcher = StandardTestDispatcher()
-
-    @BeforeTest
-    fun setUp() {
-        Dispatchers.setMain(dispatcher)
+class SettingsViewModelTest : BaseViewModelUnitTest() {
+    override fun setUp() {
+        super.setUp()
         AppLogger.setVerbose(false)
         SearchHistoryStore.clearAll()
         SearchHistoryStore.setEnabled(true)
     }
 
-    @AfterTest
-    fun tearDown() {
+    override fun tearDown() {
         SearchHistoryStore.clearAll()
         SearchHistoryStore.setEnabled(true)
-        Dispatchers.resetMain()
         AppLogger.setVerbose(false)
+        super.tearDown()
     }
 
     @Test
@@ -126,7 +125,7 @@ class SettingsViewModelTest {
         advanceUntilIdle()
 
         assertEquals(false, viewModel.state.value.loading)
-        assertEquals("settings unavailable", viewModel.state.value.error)
+        assertEquals("settings unavailable", viewModel.state.value.loadError)
         viewModel.onCleared()
     }
 
@@ -202,7 +201,7 @@ class SettingsViewModelTest {
         viewModel.handleEvent(SettingsEvent.Load())
         advanceUntilIdle()
         assertEquals(false, AppLogger.isVerbose())
-        assertEquals("read failed", viewModel.state.value.error)
+        assertEquals("read failed", viewModel.state.value.loadError)
         assertEquals(false, viewModel.state.value.loading)
         viewModel.onCleared()
     }
@@ -267,11 +266,13 @@ class SettingsViewModelTest {
         setHints: SetFeatureHintsEnabledUseCase = mockk(relaxed = true),
         setIntro: SetIntroSeenUseCase = mockk(relaxed = true),
         setLanguage: SetLanguageUseCase = mockk(relaxed = true),
-    ) = SettingsViewModel(
-        getTheme, setTheme, getVerbose, setVerbose, getFormat, setFormat,
-        getHighContrast, setHighContrast, getReduceMotion, setReduceMotion,
-        getLargeText, setLargeText, getSuggestions, setSuggestions,
-        getHints, setHints, getIntroSeen, setIntro, getLanguage, setLanguage,
-        TestAppDispatchers(dispatcher),
+    ) = autoClear(
+        SettingsViewModel(
+            getTheme, setTheme, getVerbose, setVerbose, getFormat, setFormat,
+            getHighContrast, setHighContrast, getReduceMotion, setReduceMotion,
+            getLargeText, setLargeText, getSuggestions, setSuggestions,
+            getHints, setHints, getIntroSeen, setIntro, getLanguage, setLanguage,
+            appDispatchers,
+        ),
     )
 }

@@ -2,6 +2,9 @@ package com.crackmydroid.architecture.presentation
 
 import com.crackmydroid.architecture.coroutines.AppDispatchers
 import com.crackmydroid.architecture.presentation.model.UiEvent
+import com.crackmydroid.architecture.presentation.model.UiEventDispatcher
+import com.crackmydroid.architecture.presentation.model.UiEventHandler
+import com.crackmydroid.architecture.presentation.model.UiEffect
 import com.crackmydroid.architecture.presentation.model.UiState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
@@ -19,11 +22,12 @@ import kotlinx.coroutines.launch
 abstract class BaseViewModel<E : UiEvent, S : UiState>(
     initialState: S,
     protected val dispatchers: AppDispatchers,
-) {
+) : UiEventDispatcher<E>, UiEventHandler<E> {
     private val job = SupervisorJob()
     protected val scope = CoroutineScope(job + dispatchers.main)
     private val latestJobs = mutableMapOf<String, Job>()
     private val latestVersions = mutableMapOf<String, Long>()
+    private val effectChannels = mutableListOf<UiEffectChannel<*>>()
     private val mutableState = MutableStateFlow(initialState)
 
     /** Immutable state observed by the screen. */
@@ -39,14 +43,27 @@ abstract class BaseViewModel<E : UiEvent, S : UiState>(
     }
 
     /** Replaces the complete rendering state. */
-    protected fun setState(state: S) {
+    protected fun emitState(state: S) {
         mutableState.value = state
     }
 
-    /** The only public input boundary for a ViewModel. */
-    fun handleEvent(event: E) = onEvent(event)
+    /** Semantic entry point used by screens, coordinators and tests. */
+    final override fun emitEvent(event: E) {
+        handleEvent(event)
+    }
+
+    /**
+     * Synchronous dispatch boundary retained for the architecture contract.
+     * Screens should call [emitEvent] so the public UDF entry point is consistent.
+     */
+    final override fun handleEvent(event: E) {
+        onEvent(event)
+    }
 
     protected abstract fun onEvent(event: E)
+
+    /** Creates an effect stream owned by this ViewModel without making effects rendering state. */
+    protected fun <F : UiEffect> effectChannel(): UiEffectChannel<F> = UiEffectChannel<F>().also(effectChannels::add)
 
     protected fun launchTask(block: suspend CoroutineScope.() -> Unit): Job = scope.launch(block = block)
 
@@ -85,9 +102,19 @@ abstract class BaseViewModel<E : UiEvent, S : UiState>(
         }
     }
 
-    open fun onCleared() {
+    /**
+     * Final lifecycle boundary: feature cleanup cannot bypass cancellation of jobs, effects and
+     * the ViewModel scope.
+     */
+    final fun onCleared() {
+        onClearing()
         latestJobs.values.toList().forEach(Job::cancel)
         latestJobs.clear()
+        effectChannels.forEach(UiEffectChannel<*>::close)
+        effectChannels.clear()
         scope.cancel()
     }
+
+    /** Optional feature cleanup invoked before the ViewModel scope is cancelled. */
+    protected open fun onClearing() = Unit
 }

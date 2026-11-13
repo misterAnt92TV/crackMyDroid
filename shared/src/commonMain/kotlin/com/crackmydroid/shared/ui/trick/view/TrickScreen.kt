@@ -72,16 +72,16 @@ fun TrickScreen(
         padding = padding,
         onCommandTap = { command ->
             when {
-                state.running -> viewModel.handleEvent(TrickEvent.BusyInteractionNotified(command))
-                !command.supported -> viewModel.handleEvent(TrickEvent.UnsupportedCommandNotified(command))
-                else -> viewModel.handleEvent(TrickEvent.ExecutionRequested(command))
+                state.running -> viewModel.emitEvent(TrickEvent.BusyInteractionNotified(command))
+                !command.supported -> viewModel.emitEvent(TrickEvent.UnsupportedCommandNotified(command))
+                else -> viewModel.emitEvent(TrickEvent.ExecutionRequested(command))
             }
         },
-        onClearInteractionHint = { viewModel.handleEvent(TrickEvent.InteractionHintDismissed()) },
-        onConfirmPending = { viewModel.handleEvent(TrickEvent.ExecutionConfirmed()) },
-        onDismissPending = { viewModel.handleEvent(TrickEvent.PendingCommandDismissed()) },
-        onDismissResult = { viewModel.handleEvent(TrickEvent.ResultDismissed()) },
-        onClearError = { viewModel.handleEvent(TrickEvent.ErrorDismissed()) },
+        onClearInteractionHint = { viewModel.emitEvent(TrickEvent.InteractionHintDismissed()) },
+        onConfirmPending = { viewModel.emitEvent(TrickEvent.ExecutionConfirmed()) },
+        onDismissPending = { viewModel.emitEvent(TrickEvent.PendingCommandDismissed()) },
+        onDismissResult = { viewModel.emitEvent(TrickEvent.ResultDismissed()) },
+        onClearError = { viewModel.emitEvent(TrickEvent.ErrorDismissed()) },
     )
 }
 
@@ -167,7 +167,7 @@ private fun TrickScreenContent(
                     )
                 }
             }
-            state.error?.let { err ->
+            state.errorMessage?.let { err ->
                 item {
                     AppText(
                         text = err,
@@ -218,7 +218,7 @@ private fun TrickScreenContent(
         )
     }
 
-    state.error?.let { ErrorDialogComponent(it, onClearError) }
+    state.errorMessage?.let { ErrorDialogComponent(it, onClearError) }
 
     state.resultToDisplay?.let { res ->
         AlertDialog(

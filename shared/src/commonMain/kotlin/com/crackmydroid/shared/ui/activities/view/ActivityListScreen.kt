@@ -1,4 +1,6 @@
 package com.crackmydroid.shared.ui.activities.view
+
+import com.crackmydroid.architecture.presentation.model.UiLoadState
 import com.crackmydroid.ui.icons.AppIcons
 
 import androidx.compose.foundation.layout.Arrangement
@@ -18,6 +20,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -60,6 +63,7 @@ import com.crackmydroid.shared.ui.activities.model.uiLabel
 import com.crackmydroid.shared.ui.screens.screenContentPadding
 import com.crackmydroid.ui.components.AppAccordion
 import com.crackmydroid.ui.components.AppIcon
+import com.crackmydroid.ui.components.AppListSkeleton
 import com.crackmydroid.ui.components.button.AppButton
 import com.crackmydroid.ui.components.button.ButtonVariant
 import com.crackmydroid.ui.components.dialog.ErrorDialogComponent
@@ -89,25 +93,25 @@ fun ActivityListScreen(
     }
     val callbacks = remember(viewModel) {
         ActivityListCallbacks(
-            onRefresh = { viewModel.handleEvent(ActivityListEvent.Refresh()) },
+            onRefresh = { viewModel.emitEvent(ActivityListEvent.Refresh()) },
             onSetFilter = { value, trackUsage ->
-                viewModel.handleEvent(ActivityListEvent.FilterChanged(value, trackUsage))
+                viewModel.emitEvent(ActivityListEvent.FilterChanged(value, trackUsage))
             },
-            onReportRequested = { viewModel.handleEvent(ActivityListEvent.ReportRequested(it)) },
-            onReportDismissed = { viewModel.handleEvent(ActivityListEvent.ReportDismissed()) },
-            onExportVisualReport = { viewModel.handleEvent(ActivityListEvent.VisualReportExportRequested(it)) },
-            onClearError = { viewModel.handleEvent(ActivityListEvent.ErrorDismissed()) },
-            onToggleExpanded = { viewModel.handleEvent(ActivityListEvent.GroupExpansionToggled(it)) },
-            onGroupClipboardCopy = { viewModel.handleEvent(ActivityListEvent.GroupClipboardCopyRequested(it)) },
-            onExportGroup = { viewModel.handleEvent(ActivityListEvent.GroupExportRequested(it)) },
-            onToggleFavoritePackage = { viewModel.handleEvent(ActivityListEvent.PackageFavoriteToggled(it)) },
-            onLaunch = { viewModel.handleEvent(ActivityListEvent.ActivityLaunched(it)) },
-            onOpenGuidedLaunch = { viewModel.handleEvent(ActivityListEvent.GuidedLaunchOpened(it)) },
-            onToggleFavorite = { viewModel.handleEvent(ActivityListEvent.FavoriteToggled(it)) },
+            onReportRequested = { viewModel.emitEvent(ActivityListEvent.ReportRequested(it)) },
+            onReportDismissed = { viewModel.emitEvent(ActivityListEvent.ReportDismissed()) },
+            onExportVisualReport = { viewModel.emitEvent(ActivityListEvent.VisualReportExportRequested(it)) },
+            onClearError = { viewModel.emitEvent(ActivityListEvent.ErrorDismissed()) },
+            onToggleExpanded = { viewModel.emitEvent(ActivityListEvent.GroupExpansionToggled(it)) },
+            onGroupClipboardCopy = { viewModel.emitEvent(ActivityListEvent.GroupClipboardCopyRequested(it)) },
+            onExportGroup = { viewModel.emitEvent(ActivityListEvent.GroupExportRequested(it)) },
+            onToggleFavoritePackage = { viewModel.emitEvent(ActivityListEvent.PackageFavoriteToggled(it)) },
+            onLaunch = { viewModel.emitEvent(ActivityListEvent.ActivityLaunched(it)) },
+            onOpenGuidedLaunch = { viewModel.emitEvent(ActivityListEvent.GuidedLaunchOpened(it)) },
+            onToggleFavorite = { viewModel.emitEvent(ActivityListEvent.FavoriteToggled(it)) },
             onLaunchGuided = { action, dataUri, mimeType ->
-                viewModel.handleEvent(ActivityListEvent.GuidedLaunchConfirmed(action, dataUri, mimeType))
+                viewModel.emitEvent(ActivityListEvent.GuidedLaunchConfirmed(action, dataUri, mimeType))
             },
-            onDismissGuidedLaunch = { viewModel.handleEvent(ActivityListEvent.GuidedLaunchDismissed()) },
+            onDismissGuidedLaunch = { viewModel.emitEvent(ActivityListEvent.GuidedLaunchDismissed()) },
         )
     }
 
@@ -222,13 +226,15 @@ private fun ActivityListContent(
                         }
                 }
             }
-            if (state.loading) {
+            if (state.loadState is UiLoadState.Loading && state.activities.isEmpty()) {
                 item {
-                    CircularProgressIndicator(modifier = Modifier.padding(top = 8.dp))
+                    AppListSkeleton()
                 }
+            } else if (state.loadState is UiLoadState.Loading) {
+                item { LinearProgressIndicator(modifier = Modifier.fillMaxWidth()) }
             }
 
-            if (!state.loading && state.error == null) {
+            if (state.loadState !is UiLoadState.Loading && state.loadError == null && state.error == null) {
                 item {
                     val totalActivities = state.activities.size
                     val currentActivities = groups.sumOf { it.activities.size }
@@ -251,7 +257,7 @@ private fun ActivityListContent(
                 }
             }
 
-            if (!state.loading && groups.isEmpty()) {
+            if (state.loadState !is UiLoadState.Loading && groups.isEmpty()) {
                 item {
                     AppCard(modifier = Modifier.fillMaxWidth()) {
                         val hasFilter = state.filter.isNotBlank()
@@ -298,7 +304,7 @@ private fun ActivityListContent(
                     }
                 }
             }
-            state.error?.let { err ->
+            (state.loadError ?: state.error)?.let { err ->
                 item {
                     AppText(
                         err,
@@ -576,7 +582,7 @@ private fun ActivityListContent(
         )
     }
 
-    state.error?.let {
+    (state.loadError ?: state.error)?.let {
         ErrorDialogComponent(message = it, onDismiss = callbacks.onClearError)
     }
 

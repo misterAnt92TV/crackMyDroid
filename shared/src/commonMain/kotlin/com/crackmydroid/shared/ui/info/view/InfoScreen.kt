@@ -5,6 +5,7 @@
 
 package com.crackmydroid.shared.ui.info.view
 
+import com.crackmydroid.architecture.presentation.model.UiLoadState
 import com.crackmydroid.ui.icons.AppIcons
 import com.crackmydroid.ui.typography.AppTypography
 
@@ -67,7 +68,7 @@ fun InfoScreen(
     InfoScreenContent(
         state = state,
         padding = padding,
-        onShare = { content -> viewModel.handleEvent(InfoEvent.Share(content)) },
+        onShare = { content -> viewModel.emitEvent(InfoEvent.Share(content)) },
     )
 }
 
@@ -126,7 +127,7 @@ private fun InfoScreenContent(
                                 )
                             }
                             IconButton(
-                                enabled = state.reportContent != null && !state.reportLoading,
+                                enabled = state.reportContent != null && !(state.reportLoadState is UiLoadState.Loading),
                                 onClick = {
                                     state.reportContent?.let { content ->
                                         clipboard.setText(AnnotatedString(content))
@@ -141,7 +142,7 @@ private fun InfoScreenContent(
                                 )
                             }
                         }
-                        if (state.reportLoading && state.reportContent == null) {
+                        if (state.reportLoadState is UiLoadState.Loading && state.reportContent == null) {
                             LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
                         }
                         InfoRow(strings.manufacturer, info.manufacturer ?: strings.notAvailable)
@@ -285,7 +286,7 @@ private fun InfoScreenContent(
                 }
             }
 
-            if (state.loading && state.info == null) {
+            if (state.loadState is UiLoadState.Loading && state.info == null) {
                 AppCard(modifier = Modifier.fillMaxWidth()) {
                     Box(
                         modifier = Modifier
@@ -298,7 +299,7 @@ private fun InfoScreenContent(
                 }
             }
 
-            state.error?.let { err ->
+            (state.loadError ?: state.reportError ?: state.error)?.let { err ->
                 AppText(err)
             }
         }

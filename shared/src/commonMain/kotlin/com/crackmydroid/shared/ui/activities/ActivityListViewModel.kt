@@ -1,6 +1,7 @@
 package com.crackmydroid.shared.ui.activities
 
 import com.crackmydroid.architecture.coroutines.AppDispatchers
+import com.crackmydroid.architecture.presentation.model.UiLoadState
 import com.crackmydroid.shared.domain.model.activity.ActivityEntry
 import com.crackmydroid.shared.domain.model.activity.ActivityIntentRiskAnalyzer
 import com.crackmydroid.shared.domain.model.activity.ActivityIntentRiskLevel
@@ -23,8 +24,7 @@ import com.crackmydroid.shared.presentation.operations.NoOpOperationLogRepositor
 import com.crackmydroid.shared.ui.activities.model.ActivityListEffect
 import com.crackmydroid.shared.ui.activities.model.uiLabel
 import com.crackmydroid.shared.util.runSuspendCatching
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.Flow
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
@@ -43,9 +43,14 @@ class ActivityListViewModel(
     private val operationLogs: OperationLogRepository = NoOpOperationLogRepository,
     dispatchers: AppDispatchers,
 ) : LocalizedBaseViewModel<ActivityListEvent, ActivityListState>(ActivityListState(), dispatchers) {
+    private companion object {
+        const val REFRESH_KEY = "activities-refresh"
+        const val RECOMPUTE_KEY = "activities-recompute"
+    }
+
     private val json = Json { prettyPrint = true }
-    private val _effects = MutableSharedFlow<ActivityListEffect>()
-    val effects: SharedFlow<ActivityListEffect> = _effects
+    private val effectChannel = effectChannel<ActivityListEffect>()
+    val effects: Flow<ActivityListEffect> = effectChannel.effects
     private val queryCount = mutableMapOf<String, Int>()
     private val multiSpaceRegex = Regex("\\s+")
 
@@ -93,7 +98,7 @@ class ActivityListViewModel(
     }
 
     private fun refresh() {
-        launchLatest("activities-refresh") {
+        launchLatest(REFRESH_KEY) {
             val favoritesResult = runSuspendCatching {
                 getFavoritesUseCase().getOrThrow() to getPackageFavoritesUseCase().getOrThrow()
             }
@@ -102,12 +107,12 @@ class ActivityListViewModel(
                 updateState { it.copy(favorites = favorites, favoritePackages = packages) }
             }
             updateState {
-                it.copy(loading = true, error = favoritesResult.exceptionOrNull()?.message)
+                it.copy(loadState = UiLoadState.Loading)
             }
             getActivitiesUseCase()
                 .onSuccess { list ->
                     if (!isCurrent()) return@onSuccess
-                    recomputeAsync(currentState.copy(activities = list, loading = false))
+                    recomputeAsync(currentState.copy(activities = list, loadState = UiLoadState.Success))
                     operationLogs.record(
                         OperationEvent(OperationEventKey.ACTIVITY_LOAD, listOf(list.size.toString())),
                         success = true,
@@ -115,7 +120,11 @@ class ActivityListViewModel(
                 }
                 .onFailure { err ->
                     if (!isCurrent()) return@onFailure
-                    updateState { it.copy(error = err.message ?: presentationTexts.error, loading = false) }
+                    updateState {
+                        it.copy(
+                            loadState = UiLoadState.Error(err.message ?: presentationTexts.error),
+                        )
+                    }
                     operationLogs.record(
                         OperationEvent(OperationEventKey.ACTIVITY_LOAD),
                         success = false,
@@ -208,7 +217,12 @@ class ActivityListViewModel(
     }
 
     private fun clearError() {
-        updateState { it.copy(error = null) }
+        updateState {
+            it.copy(
+                error = null,
+                loadState = if (it.loadState is UiLoadState.Error) UiLoadState.Idle else it.loadState,
+            )
+        }
     }
 
     private fun toggleFavorite(entry: ActivityEntry) {
@@ -314,7 +328,7 @@ class ActivityListViewModel(
 
     private fun copyGroupContent(packageName: String) {
         launchTask {
-            groupContent(packageName)?.let { _effects.emit(ActivityListEffect.CopyToClipboard(it)) }
+            groupContent(packageName)?.let { effectChannel.emit(ActivityListEffect.CopyToClipboard(it)) }
         }
     }
 
@@ -514,11 +528,11 @@ class ActivityListViewModel(
     }
 
     private fun recomputeAsync(state: ActivityListState) {
-        setState(state)
-        launchLatest("activities-recompute") {
+        emitState(state)
+        launchLatest(RECOMPUTE_KEY) {
             val recomputed = withContext(dispatchers.default) { recompute(state) }
             ensureCurrent()
-            setState(recomputed)
+            emitState(recomputed)
         }
     }
 

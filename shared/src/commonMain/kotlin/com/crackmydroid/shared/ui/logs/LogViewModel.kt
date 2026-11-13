@@ -1,6 +1,7 @@
 package com.crackmydroid.shared.ui.logs
 
 import com.crackmydroid.architecture.coroutines.AppDispatchers
+import com.crackmydroid.architecture.presentation.model.UiLoadState
 import com.crackmydroid.shared.domain.usecase.log.ExportLogsUseCase
 import com.crackmydroid.shared.domain.usecase.log.GetLogsUseCase
 import com.crackmydroid.shared.presentation.LocalizedBaseViewModel
@@ -11,6 +12,11 @@ class LogViewModel(
     private val exportLogsUseCase: ExportLogsUseCase,
     dispatchers: AppDispatchers,
 ) : LocalizedBaseViewModel<LogEvent, LogState>(LogState(), dispatchers) {
+    private companion object {
+        const val REFRESH_KEY = "logs-refresh"
+        const val RECOMPUTE_KEY = "logs-recompute"
+        const val MAX_LINES = 1500
+    }
 
     override fun onEvent(event: LogEvent) = when (event) {
         is LogEvent.Refresh -> refresh()
@@ -22,8 +28,8 @@ class LogViewModel(
     }
 
     private fun refresh() {
-        launchLatest("logs-refresh") {
-            updateState { it.copy(loading = true, error = null, message = null) }
+        launchLatest(REFRESH_KEY) {
+            updateState { it.copy(loadState = UiLoadState.Loading, message = null) }
             getLogsUseCase()
                 .onSuccess { list ->
                     if (!isCurrent()) return@onSuccess
@@ -32,7 +38,7 @@ class LogViewModel(
                         currentState.copy(
                             logs = trimmed,
                             trimmed = list.size > MAX_LINES,
-                            loading = false,
+                            loadState = UiLoadState.Success,
                         ),
                     )
                 }
@@ -40,8 +46,7 @@ class LogViewModel(
                     if (!isCurrent()) return@onFailure
                     updateState {
                         it.copy(
-                            error = err.message,
-                            loading = false,
+                            loadState = UiLoadState.Error(err.message ?: presentationTexts.error),
                         )
                     }
                 }
@@ -58,13 +63,15 @@ class LogViewModel(
         launchTask {
             val current = currentState.visibleLogs
             exportLogsUseCase(current)
-                .onSuccess { path -> updateState { it.copy(message = path) } }
-                .onFailure { err -> updateState { it.copy(error = err.message) } }
+                .onSuccess { path -> updateState { it.copy(message = path, exportLoadState = UiLoadState.Success) } }
+                .onFailure { err ->
+                    updateState { it.copy(exportLoadState = UiLoadState.Error(err.message ?: presentationTexts.error)) }
+                }
         }
     }
 
     private fun clearError() {
-        updateState { it.copy(error = null) }
+        updateState { it.copy(loadState = UiLoadState.Idle, exportLoadState = UiLoadState.Idle) }
     }
 
     private fun toggleLevel(level: Char) {
@@ -96,15 +103,12 @@ class LogViewModel(
     }
 
     private fun recomputeAsync(state: LogState) {
-        setState(state)
-        launchLatest("logs-recompute") {
+        emitState(state)
+        launchLatest(RECOMPUTE_KEY) {
             val newState = withContext(dispatchers.default) { recompute(state) }
             ensureCurrent()
-            setState(newState)
+            emitState(newState)
         }
     }
 
-    companion object {
-        private const val MAX_LINES = 1500
-    }
 }

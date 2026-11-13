@@ -1,5 +1,8 @@
 package com.crackmydroid.shared.presentation
 
+import com.crackmydroid.architecture.testing.*
+
+
 import com.crackmydroid.shared.domain.model.shell.ShellCommand
 import com.crackmydroid.shared.domain.model.shell.ShellCommandResult
 import com.crackmydroid.shared.domain.usecase.trick.ExecuteShellCommandUseCase
@@ -16,7 +19,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.yield
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
@@ -24,43 +27,34 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class TrickViewModelTest {
-    private val dispatcher = StandardTestDispatcher()
-
-    @BeforeTest
-    fun setUp() {
-        Dispatchers.setMain(dispatcher)
-    }
-
-    @AfterTest
-    fun tearDown() {
-        Dispatchers.resetMain()
-    }
+class TrickViewModelTest : BaseViewModelUnitTest() {
+    private fun createViewModel(
+        listUseCase: ListShellCommandsUseCase = mockk(),
+        execUseCase: ExecuteShellCommandUseCase = mockk(),
+    ) = autoClear(TrickViewModel(listUseCase, execUseCase, appDispatchers))
 
     @Test
-    fun loadPopulatesCommands() = runTest(dispatcher) {
+    fun loadPopulatesCommands() = runViewModelTest {
         val listUseCase = mockk<ListShellCommandsUseCase>()
         val execUseCase = mockk<ExecuteShellCommandUseCase>()
         val cmd = ShellCommand("Elenco pacchetti", "pm list packages", requiresRoot = false)
         coEvery { listUseCase() } returns Result.success(listOf(cmd))
-        val vm = TrickViewModel(listUseCase, execUseCase, TestAppDispatchers(dispatcher))
+        val vm = createViewModel(listUseCase, execUseCase)
 
-        vm.handleEvent(TrickEvent.Load())
-        advanceUntilIdle()
+        val state = vm.emitEventAndAwaitIdle(TrickEvent.Load())
 
-        assertEquals(1, vm.state.value.commands.size)
-        assertEquals("Elenco pacchetti", vm.state.value.commands.first().title)
-        vm.onCleared()
+        assertEquals(1, state.commands.size)
+        assertEquals("Elenco pacchetti", state.commands.first().title)
     }
 
     @Test
-    fun secondExecuteWhileRunningIsBlockedAndShowsHint() = runTest(dispatcher) {
+    fun secondExecuteWhileRunningIsBlockedAndShowsHint() = runViewModelTest {
         val listUseCase = mockk<ListShellCommandsUseCase>()
         val execUseCase = mockk<ExecuteShellCommandUseCase>()
         val packages = ShellCommand("Elenco pacchetti", "pm list packages", requiresRoot = false)
         val top = ShellCommand("Mostra top process", "top -n 1", requiresRoot = false)
         coEvery { execUseCase(packages) } coAnswers {
-            delay(120)
+            yield()
             Result.success(ShellCommandResult(success = true, stdout = "package:com.test", stderr = "", code = 0))
         }
         coEvery { execUseCase(top) } returns Result.success(
@@ -71,7 +65,7 @@ class TrickViewModelTest {
                 code = 0,
             ),
         )
-        val vm = TrickViewModel(listUseCase, execUseCase, TestAppDispatchers(dispatcher))
+        val vm = createViewModel(listUseCase, execUseCase)
 
         vm.handleEvent(TrickEvent.Execute(packages))
         assertTrue(vm.state.value.running)
@@ -87,38 +81,35 @@ class TrickViewModelTest {
         assertEquals("Elenco pacchetti", vm.state.value.lastCommandTitle)
         coVerify(exactly = 1) { execUseCase(packages) }
         coVerify(exactly = 0) { execUseCase(top) }
-        vm.onCleared()
     }
 
     @Test
-    fun execute_failedCommand_storesErrorAndClearsRunningState() = runTest(dispatcher) {
+    fun execute_failedCommand_storesErrorAndClearsRunningState() = runViewModelTest {
         val listUseCase = mockk<ListShellCommandsUseCase>()
         val execUseCase = mockk<ExecuteShellCommandUseCase>()
         val command = ShellCommand("Root check", "id", requiresRoot = true)
         coEvery { execUseCase(command) } returns Result.failure(IllegalStateException("su unavailable"))
-        val vm = TrickViewModel(listUseCase, execUseCase, TestAppDispatchers(dispatcher))
+        val vm = createViewModel(listUseCase, execUseCase)
 
-        vm.handleEvent(TrickEvent.Execute(command))
-        advanceUntilIdle()
+        val state = vm.emitEventAndAwaitIdle(TrickEvent.Execute(command))
 
-        assertEquals(false, vm.state.value.running)
-        assertEquals("Root check", vm.state.value.lastCommandTitle)
-        assertEquals("su unavailable", vm.state.value.error)
-        vm.handleEvent(TrickEvent.ErrorDismissed())
-        assertEquals(null, vm.state.value.error)
-        vm.onCleared()
+        assertEquals(false, state.running)
+        assertEquals("Root check", state.lastCommandTitle)
+        assertEquals("su unavailable", state.errorMessage)
+
+        val dismissedState = vm.emitEventAndAwaitIdle(TrickEvent.ErrorDismissed())
+        assertEquals(null, dismissedState.errorMessage)
     }
 
     @Test
-    fun unsupportedCommand_andClearHint_manageInteractionHint() {
-        val vm = TrickViewModel(mockk(), mockk(), TestAppDispatchers(dispatcher))
+    fun unsupportedCommand_andClearHint_manageInteractionHint() = runViewModelTest {
+        val vm = createViewModel()
         val command = ShellCommand("Root command", "id", requiresRoot = true, unsupportedReason = "Root unavailable")
 
-        vm.handleEvent(TrickEvent.UnsupportedCommandNotified(command))
-        assertEquals("Root unavailable", vm.state.value.interactionHint)
-        vm.handleEvent(TrickEvent.InteractionHintDismissed())
+        val stateWithHint = vm.emitEventAndAwaitIdle(TrickEvent.UnsupportedCommandNotified(command))
+        assertEquals("Root unavailable", stateWithHint.interactionHint)
 
-        assertEquals(null, vm.state.value.interactionHint)
-        vm.onCleared()
+        val stateAfterDismiss = vm.emitEventAndAwaitIdle(TrickEvent.InteractionHintDismissed())
+        assertEquals(null, stateAfterDismiss.interactionHint)
     }
 }

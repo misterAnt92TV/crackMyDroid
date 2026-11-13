@@ -1,6 +1,7 @@
 package com.crackmydroid.shared.ui.installedapps
 
 import com.crackmydroid.architecture.coroutines.AppDispatchers
+import com.crackmydroid.architecture.presentation.model.UiLoadState
 import com.crackmydroid.shared.domain.model.InstalledAppEntry
 import com.crackmydroid.shared.domain.repository.log.OperationLogRepository
 import com.crackmydroid.shared.domain.usecase.installedapps.ExportApkUseCase
@@ -29,6 +30,11 @@ class InstalledAppsViewModel(
     private val operationLogs: OperationLogRepository = NoOpOperationLogRepository,
     dispatchers: AppDispatchers,
 ) : LocalizedBaseViewModel<InstalledAppsEvent, InstalledAppsState>(InstalledAppsState(), dispatchers) {
+    private companion object {
+        const val REFRESH_KEY = "installed-apps-refresh"
+        const val RECOMPUTE_KEY = "installed-apps-recompute"
+    }
+
     private val queryCount = mutableMapOf<String, Int>()
     private val multiSpaceRegex = Regex("\\s+")
     private val uiStrings get() = ScreenUiStrings.from(strings)
@@ -45,24 +51,28 @@ class InstalledAppsViewModel(
     }
 
     private fun refresh() {
-        launchLatest("installed-apps-refresh") {
+        launchLatest(REFRESH_KEY) {
             val favoritesResult = getFavoritesUseCase()
             ensureCurrent()
             favoritesResult.onSuccess { favorites ->
                 updatePresentation { it.copy(favorites = favorites) }
             }
             updateState {
-                it.copy(loading = true, error = favoritesResult.exceptionOrNull()?.message)
+                it.copy(loadState = UiLoadState.Loading)
             }
             listInstalledAppsUseCase()
                 .onSuccess { list ->
                     if (!isCurrent()) return@onSuccess
-                    updatePresentation { it.copy(apps = list, loading = false) }
+                    updatePresentation { it.copy(apps = list, loadState = UiLoadState.Success) }
                     operationLogs.record(uiStrings.appsLoaded.format(list.size), success = true)
                 }
                 .onFailure { err ->
                     if (!isCurrent()) return@onFailure
-                    updateState { it.copy(error = err.message ?: strings.commandError, loading = false) }
+                    updateState {
+                        it.copy(
+                            loadState = UiLoadState.Error(err.message ?: strings.commandError),
+                        )
+                    }
                     operationLogs.record(
                         uiStrings.loadingInstalledApps,
                         success = false,
@@ -181,7 +191,12 @@ class InstalledAppsViewModel(
     }
 
     private fun clearError() {
-        updateState { it.copy(error = null) }
+        updateState {
+            it.copy(
+                error = null,
+                loadState = if (it.loadState is UiLoadState.Error) UiLoadState.Idle else it.loadState,
+            )
+        }
     }
 
     private fun toggleFavorite(packageName: String) {
@@ -200,13 +215,13 @@ class InstalledAppsViewModel(
         val transformed = transform(currentState)
         val updated = transformed.copy(favoriteQueries = transformed.favorites.sorted())
         if (updated == currentState) return
-        setState(updated)
-        launchLatest("installed-apps-recompute") {
+        emitState(updated)
+        launchLatest(RECOMPUTE_KEY) {
             val recomputed = withContext(dispatchers.default) {
                 updated.copy(visibleApps = visibleApps(updated))
             }
             ensureCurrent()
-            setState(recomputed)
+            emitState(recomputed)
         }
     }
 

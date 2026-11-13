@@ -1,6 +1,7 @@
 package com.crackmydroid.shared.ui.permissions
 
 import com.crackmydroid.architecture.coroutines.AppDispatchers
+import com.crackmydroid.architecture.presentation.model.UiLoadState
 import com.crackmydroid.shared.domain.model.PermissionRiskReport
 import com.crackmydroid.shared.domain.model.app.AppPermissionEntry
 import com.crackmydroid.shared.domain.usecase.permissions.AnalyzePermissionRisksUseCase
@@ -10,13 +11,9 @@ import com.crackmydroid.shared.domain.usecase.reports.ExportReportUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetPermissionFavoritesUseCase
 import com.crackmydroid.shared.domain.usecase.settings.SetPermissionFavoritesUseCase
 import com.crackmydroid.shared.presentation.LocalizedBaseViewModel
-import com.crackmydroid.shared.ui.permissions.model.PermissionsEffect
 import com.crackmydroid.shared.ui.permissions.model.toUi
 import com.crackmydroid.shared.util.runSuspendCatching
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.withContext
 
 class PermissionsViewModel(
@@ -32,10 +29,9 @@ class PermissionsViewModel(
         const val REFRESH_KEY = "permissions-refresh"
         const val RISK_SCAN_KEY = "permissions-risk-scan"
         const val REPORT_PREVIEW_KEY = "permissions-preview"
+        const val RECOMPUTE_KEY = "permissions-recompute"
     }
 
-    private val _effects = MutableSharedFlow<PermissionsEffect>()
-    val effects: SharedFlow<PermissionsEffect> = _effects
     private val queryCount = mutableMapOf<String, Int>()
     private val multiSpaceRegex = Regex("\\s+")
 
@@ -86,7 +82,7 @@ class PermissionsViewModel(
             }
             updatePresentation {
                 it.copy(
-                    loading = true,
+                    loadState = UiLoadState.Loading,
                     error = favoritesResult.exceptionOrNull()?.message,
                     autoScanRunning = false,
                     autoScanTotalApps = 0,
@@ -101,12 +97,12 @@ class PermissionsViewModel(
             val result = listPermissionsUseCase()
             ensureCurrent()
             result
-                .onSuccess { apps -> updatePresentation { it.copy(apps = apps, loading = false) } }
+                .onSuccess { apps -> updatePresentation { it.copy(apps = apps, loadState = UiLoadState.Success) } }
                 .onFailure { err ->
                     updateState {
                         it.copy(
                             error = err.message,
-                            loading = false,
+                            loadState = UiLoadState.Error(err.message ?: presentationTexts.error),
                         )
                     }
                 }
@@ -124,11 +120,11 @@ class PermissionsViewModel(
             topQuery = queryCount.maxByOrNull { it.value }?.key
         }
         val requested = currentState.copy(filter = value, topQuery = topQuery)
-        setState(requested)
-        launchLatest("permissions-recompute") {
+        emitState(requested)
+        launchLatest(RECOMPUTE_KEY) {
             val visible = withContext(dispatchers.default) { visibleApps(requested) }
             ensureCurrent()
-            setState(requested.copy(visibleApps = visible))
+            emitState(requested.copy(visibleApps = visible))
         }
     }
 
@@ -170,12 +166,25 @@ class PermissionsViewModel(
     }
 
     private fun clearError() {
-        updateState { it.copy(error = null) }
+        updateState {
+            it.copy(
+                error = null,
+                loadState = if (it.loadState is UiLoadState.Error) UiLoadState.Idle else it.loadState,
+                scanLoadState = if (it.scanLoadState is UiLoadState.Error) UiLoadState.Idle else it.scanLoadState,
+                exportLoadState = if (it.exportLoadState is UiLoadState.Error) UiLoadState.Idle else it.exportLoadState,
+                reportPreviewLoadState = if (it.reportPreviewLoadState is UiLoadState.Error) {
+                    UiLoadState.Idle
+                } else {
+                    it.reportPreviewLoadState
+                },
+            )
+        }
     }
 
     private fun export() {
         val reportText = useCaseTexts
         launchTask {
+            updateState { it.copy(exportLoadState = UiLoadState.Loading) }
             val currentState = currentState
             runSuspendCatching {
                 val content = buildPermissionsReportUseCase(
@@ -189,11 +198,13 @@ class PermissionsViewModel(
                     updateState {
                         it.copy(
                             lastExportPath = path,
-                            error = null,
+                            exportLoadState = UiLoadState.Success,
                         )
                     }
                 }
-                .onFailure { error -> updateState { it.copy(error = error.message) } }
+                .onFailure { error ->
+                    updateState { it.copy(exportLoadState = UiLoadState.Error(error.message ?: presentationTexts.error)) }
+                }
         }
     }
 
@@ -219,6 +230,7 @@ class PermissionsViewModel(
         val reportText = useCaseTexts
         val noData = presentationTexts.noPackageData
         launchTask {
+            updateState { it.copy(exportLoadState = UiLoadState.Loading) }
             val currentState = currentState
             val app = currentState.apps.find { it.packageName == packageName }
             val risk = currentState.riskReports.find { it.packageName == packageName }
@@ -236,11 +248,13 @@ class PermissionsViewModel(
                     updateState {
                         it.copy(
                             lastExportPath = path,
-                            error = null,
+                            exportLoadState = UiLoadState.Success,
                         )
                     }
                 }
-                .onFailure { error -> updateState { it.copy(error = error.message) } }
+                .onFailure { error ->
+                    updateState { it.copy(exportLoadState = UiLoadState.Error(error.message ?: presentationTexts.error)) }
+                }
         }
     }
 
@@ -253,9 +267,8 @@ class PermissionsViewModel(
         updateState {
             it.copy(
                 reportPreviewPackage = packageName,
-                reportPreviewLoading = true,
+                reportPreviewLoadState = UiLoadState.Loading,
                 reportPreviewContent = null,
-                reportPreviewError = null,
             )
         }
         launchLatest(REPORT_PREVIEW_KEY) {
@@ -266,12 +279,12 @@ class PermissionsViewModel(
             }
             ensureCurrent()
             result.onSuccess { content ->
-                updateState { it.copy(reportPreviewLoading = false, reportPreviewContent = content) }
+                updateState { it.copy(reportPreviewLoadState = UiLoadState.Success, reportPreviewContent = content) }
+                shareSingle(packageName, content)
             }.onFailure { error ->
                 updateState {
                     it.copy(
-                        reportPreviewLoading = false,
-                        reportPreviewError = error.message ?: reportCopy.reportFailed,
+                        reportPreviewLoadState = UiLoadState.Error(error.message ?: reportCopy.reportFailed),
                     )
                 }
             }
@@ -283,9 +296,8 @@ class PermissionsViewModel(
         updateState {
             it.copy(
                 reportPreviewPackage = null,
-                reportPreviewLoading = false,
+                reportPreviewLoadState = UiLoadState.Success,
                 reportPreviewContent = null,
-                reportPreviewError = null,
             )
         }
     }
@@ -303,7 +315,8 @@ class PermissionsViewModel(
         updatePresentation {
             it.copy(
                 error = null,
-                loading = false,
+                loadState = UiLoadState.Success,
+                scanLoadState = UiLoadState.Loading,
                 autoScanRunning = true,
                 autoScanTotalApps = apps.size,
                 autoScanScannedApps = 0,
@@ -338,18 +351,24 @@ class PermissionsViewModel(
                             riskReports = sorted,
                         )
                     }
-                    delay(40)
                 }
             } catch (cancellation: CancellationException) {
                 throw cancellation
             } catch (failure: Exception) {
                 if (isCurrent()) {
-                    updateState { it.copy(error = failure.message ?: presentationTexts.permissionScanFailed) }
+                    updateState {
+                        it.copy(scanLoadState = UiLoadState.Error(failure.message ?: presentationTexts.permissionScanFailed))
+                    }
                 }
             } finally {
                 if (isCurrent()) {
                     updateState {
                         it.copy(
+                            scanLoadState = if (it.scanLoadState is UiLoadState.Loading) {
+                                UiLoadState.Success
+                            } else {
+                                it.scanLoadState
+                            },
                             autoScanRunning = false,
                             autoScanCurrentLabel = null,
                         )
@@ -363,6 +382,7 @@ class PermissionsViewModel(
         cancelLatest(RISK_SCAN_KEY)
         updateState {
             it.copy(
+                scanLoadState = if (it.scanLoadState is UiLoadState.Loading) UiLoadState.Idle else it.scanLoadState,
                 autoScanRunning = false,
                 autoScanCurrentLabel = null,
             )

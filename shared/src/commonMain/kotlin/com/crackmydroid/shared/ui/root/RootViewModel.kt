@@ -1,6 +1,7 @@
 package com.crackmydroid.shared.ui.root
 
 import com.crackmydroid.architecture.coroutines.AppDispatchers
+import com.crackmydroid.architecture.presentation.model.UiLoadState
 import com.crackmydroid.shared.domain.model.root.RootCheckMode
 import com.crackmydroid.shared.domain.usecase.reports.ExportReportUseCase
 import com.crackmydroid.shared.domain.usecase.root.CheckPlayIntegrityUseCase
@@ -13,6 +14,9 @@ class RootViewModel(
     private val reportExporterUseCase: ExportReportUseCase,
     dispatchers: AppDispatchers,
 ) : LocalizedBaseViewModel<RootEvent, RootState>(RootState(), dispatchers) {
+    private companion object {
+        const val CHECK_KEY = "root-check"
+    }
 
     override fun onEvent(event: RootEvent) = when (event) {
         is RootEvent.Verify -> verify()
@@ -41,27 +45,22 @@ class RootViewModel(
         }
     }
 
-    private fun verify() {
-        verify(RootCheckMode.PASSIVE)
-    }
-
     private fun verifyRootAccess() {
         verify(RootCheckMode.PRIVILEGE_ACCESS)
     }
 
-    private fun verify(mode: RootCheckMode) {
-        launchLatest("root-check") {
-            updateState { it.copy(loading = true, error = null) }
+    private fun verify(mode: RootCheckMode = RootCheckMode.PASSIVE) {
+        launchLatest(CHECK_KEY) {
+            updateState { it.copy(loadState = UiLoadState.Loading) }
             checkRootUseCase(mode)
                 .onSuccess { status ->
-                    if (isCurrent()) updateState { it.copy(status = status, loading = false) }
+                    if (isCurrent()) updateState { it.copy(status = status, loadState = UiLoadState.Success) }
                 }
                 .onFailure { err ->
                     if (!isCurrent()) return@onFailure
                     updateState {
                         it.copy(
-                            error = err.message,
-                            loading = false,
+                            loadState = UiLoadState.Error(err.message ?: presentationTexts.error),
                         )
                     }
                 }
@@ -75,21 +74,20 @@ class RootViewModel(
     private fun verifyPlayIntegrity() {
         val nonce = currentState.playIntegrityNonce.ifBlank { "sample-nonce" }
         launchTask {
-            updateState { it.copy(loading = true, error = null) }
+            updateState { it.copy(loadState = UiLoadState.Loading) }
             checkPlayIntegrityUseCase(nonce)
                 .onSuccess { res ->
                     updateState {
                         it.copy(
                             playIntegrity = res,
-                            loading = false,
+                            loadState = UiLoadState.Success,
                         )
                     }
                 }
                 .onFailure { err ->
                     updateState {
                         it.copy(
-                            error = err.message,
-                            loading = false,
+                            loadState = UiLoadState.Error(err.message ?: presentationTexts.error),
                         )
                     }
                 }

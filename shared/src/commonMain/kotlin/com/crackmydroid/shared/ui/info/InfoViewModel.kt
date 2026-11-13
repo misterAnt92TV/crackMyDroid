@@ -1,6 +1,7 @@
 package com.crackmydroid.shared.ui.info
 
 import com.crackmydroid.architecture.coroutines.AppDispatchers
+import com.crackmydroid.architecture.presentation.model.UiLoadState
 import com.crackmydroid.shared.domain.usecase.info.BuildDeviceInfoReportUseCase
 import com.crackmydroid.shared.domain.usecase.info.GetDeviceInfoUseCase
 import com.crackmydroid.shared.domain.usecase.reports.ExportReportUseCase
@@ -15,6 +16,9 @@ class InfoViewModel(
     private val buildReportUseCase: BuildDeviceInfoReportUseCase,
     dispatchers: AppDispatchers,
 ) : LocalizedBaseViewModel<InfoEvent, InfoState>(InfoState(), dispatchers) {
+    private companion object {
+        const val REPORT_KEY = "info-report"
+    }
 
     override fun onEvent(event: InfoEvent) = when (event) {
         is InfoEvent.Load -> load()
@@ -29,14 +33,18 @@ class InfoViewModel(
     private fun load() {
         if (currentState.info != null && !currentState.loading) return
         launchTask {
-            updateState { it.copy(loading = true, error = null) }
+            updateState { it.copy(loadState = UiLoadState.Loading) }
             runSuspendCatching {
                 getInfoUseCase().getOrThrow() to checkRootUseCase().getOrThrow()
             }.onSuccess { (info, root) ->
-                updateState { it.copy(info = info, root = root, loading = false) }
+                updateState { it.copy(info = info, root = root, loadState = UiLoadState.Success) }
                 refreshReport()
             }.onFailure { error ->
-                updateState { it.copy(error = error.message, loading = false) }
+                updateState {
+                    it.copy(
+                        loadState = UiLoadState.Error(error.message ?: presentationTexts.error),
+                    )
+                }
             }
         }
     }
@@ -46,18 +54,21 @@ class InfoViewModel(
         val root = currentState.root
         val reportText = useCaseTexts
         val initialReportLoading = currentState.reportContent == null
-        updateState { it.copy(reportLoading = initialReportLoading) }
-        launchLatest("info-report") {
+        updateState {
+            it.copy(
+                reportLoadState = if (initialReportLoading) UiLoadState.Loading else UiLoadState.Success,
+            )
+        }
+        launchLatest(REPORT_KEY) {
             val result = buildReportUseCase(info, root, reportText)
             if (!isCurrent()) return@launchLatest
             result.onSuccess { content ->
-                updateState { it.copy(reportContent = content, reportLoading = false) }
+                updateState { it.copy(reportContent = content, reportLoadState = UiLoadState.Success) }
             }.onFailure { error ->
                 if (!isCurrent()) return@onFailure
                 updateState {
                     it.copy(
-                        error = error.message ?: presentationTexts.reportFailed,
-                        reportLoading = false,
+                        reportLoadState = UiLoadState.Error(error.message ?: presentationTexts.reportFailed),
                     )
                 }
             }

@@ -1,5 +1,8 @@
 package com.crackmydroid.shared.presentation
 
+import com.crackmydroid.architecture.testing.*
+
+
 import com.crackmydroid.architecture.coroutines.AppDispatchers
 import com.crackmydroid.shared.domain.model.ExportDocument
 import com.crackmydroid.shared.domain.model.ExportFormat
@@ -22,63 +25,54 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class LogViewModelTest {
-    private val dispatcher = StandardTestDispatcher()
-    private val appDispatchers = object : AppDispatchers {
-        override val main = dispatcher
-        override val default = dispatcher
-    }
-
+class LogViewModelTest : BaseViewModelUnitTest() {
     @Test
-    fun refreshFiltersLogsByTextAndLevel() = runTest(dispatcher) {
+    fun refreshFiltersLogsByTextAndLevel() = runViewModelTest {
         val repository = mockk<LogRepository>()
         coEvery { repository.fetchLog() } returns listOf(
             "I/App: started",
             "E/App: failed",
             "W/App: retrying",
         )
-        val viewModel = LogViewModel(
-            GetLogsUseCase(repository),
-            ExportLogsUseCase(
-                ExportReportUseCase(mockk<ReportFileRepository>(), mockk<GetExportFormatUseCase>()),
+        val viewModel = autoClear(
+            LogViewModel(
+                GetLogsUseCase(repository),
+                ExportLogsUseCase(
+                    ExportReportUseCase(mockk<ReportFileRepository>(), mockk<GetExportFormatUseCase>()),
+                ),
+                appDispatchers,
             ),
-            appDispatchers,
         )
 
-        viewModel.handleEvent(LogEvent.Refresh())
-        advanceUntilIdle()
-        viewModel.handleEvent(LogEvent.FilterChanged("app: failed"))
-        advanceUntilIdle()
+        viewModel.emitEventAndAwaitIdle(LogEvent.Refresh())
+        val filteredState = viewModel.emitEventAndAwaitIdle(LogEvent.FilterChanged("app: failed"))
 
-        assertEquals(listOf("E/App: failed"), viewModel.state.value.visibleLogs)
-        viewModel.onCleared()
+        assertEquals(listOf("E/App: failed"), filteredState.visibleLogs)
     }
 
     @Test
-    fun exportUsesCurrentlyVisibleLogs() = runTest(dispatcher) {
+    fun exportUsesCurrentlyVisibleLogs() = runViewModelTest {
         val repository = mockk<LogRepository>()
         val reportFiles = mockk<ReportFileRepository>()
         val format = mockk<GetExportFormatUseCase>()
         coEvery { repository.fetchLog() } returns listOf("I/App: started", "E/App: failed")
         coEvery { format() } returns Result.success(ExportFormat.TXT)
         coEvery { reportFiles.save(any<ExportDocument>()) } returns Result.success("/tmp/log.txt")
-        val viewModel = LogViewModel(
-            GetLogsUseCase(repository),
-            ExportLogsUseCase(ExportReportUseCase(reportFiles, format)),
-            appDispatchers,
+        val viewModel = autoClear(
+            LogViewModel(
+                GetLogsUseCase(repository),
+                ExportLogsUseCase(ExportReportUseCase(reportFiles, format)),
+                appDispatchers,
+            ),
         )
 
-        viewModel.handleEvent(LogEvent.Refresh())
-        advanceUntilIdle()
-        viewModel.handleEvent(LogEvent.FilterChanged("failed"))
-        advanceUntilIdle()
-        viewModel.handleEvent(LogEvent.Export())
-        advanceUntilIdle()
+        viewModel.emitEventAndAwaitIdle(LogEvent.Refresh())
+        viewModel.emitEventAndAwaitIdle(LogEvent.FilterChanged("failed"))
+        val exportState = viewModel.emitEventAndAwaitIdle(LogEvent.Export())
 
         coVerify {
             reportFiles.save(match { it.fileName == "crackmydroid-log.txt" && it.textContent == "E/App: failed" })
         }
-        assertEquals("/tmp/log.txt", viewModel.state.value.message)
-        viewModel.onCleared()
+        assertEquals("/tmp/log.txt", exportState.message)
     }
 }

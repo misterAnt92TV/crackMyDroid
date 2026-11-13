@@ -1,5 +1,8 @@
 package com.crackmydroid.shared.presentation
 
+import com.crackmydroid.architecture.testing.*
+
+
 import com.crackmydroid.shared.domain.model.DeviceInfo
 import com.crackmydroid.shared.domain.model.ExportDocument
 import com.crackmydroid.shared.domain.model.ExportFormat
@@ -28,7 +31,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.yield
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
@@ -37,17 +40,9 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class InfoViewModelTest {
-    private val dispatcher = StandardTestDispatcher()
-
-    @BeforeTest
-    fun setUp() = Dispatchers.setMain(dispatcher)
-
-    @AfterTest
-    fun tearDown() = Dispatchers.resetMain()
-
+class InfoViewModelTest : BaseViewModelUnitTest() {
     @Test
-    fun load_success_updatesDeviceAndRootState() = runTest(dispatcher) {
+    fun load_success_updatesDeviceAndRootState() = runViewModelTest {
         val info = deviceInfo()
         val infoRepository = mockk<DeviceInfoRepository>()
         val rootRepository = mockk<RootCheckRepository>()
@@ -55,32 +50,28 @@ class InfoViewModelTest {
         coEvery { rootRepository.checkRoot() } returns RootStatus(true, "su available")
         val viewModel = viewModel(infoRepository, rootRepository)
 
-        viewModel.handleEvent(InfoEvent.Load())
-        advanceUntilIdle()
+        val state = viewModel.emitEventAndAwaitIdle(InfoEvent.Load())
 
-        assertEquals(info, viewModel.state.value.info)
-        assertEquals(RootStatus(true, "su available"), viewModel.state.value.root)
-        assertEquals(false, viewModel.state.value.loading)
-        viewModel.onCleared()
+        assertEquals(info, state.info)
+        assertEquals(RootStatus(true, "su available"), state.root)
+        assertEquals(false, state.loading)
     }
 
     @Test
-    fun load_failure_storesErrorAndStopsLoading() = runTest(dispatcher) {
+    fun load_failure_storesErrorAndStopsLoading() = runViewModelTest {
         val infoRepository = mockk<DeviceInfoRepository>()
         val rootRepository = mockk<RootCheckRepository>()
         coEvery { infoRepository.getDeviceInfo() } throws IllegalStateException("device unavailable")
         val viewModel = viewModel(infoRepository, rootRepository)
 
-        viewModel.handleEvent(InfoEvent.Load())
-        advanceUntilIdle()
+        val state = viewModel.emitEventAndAwaitIdle(InfoEvent.Load())
 
-        assertEquals("device unavailable", viewModel.state.value.error)
-        assertEquals(false, viewModel.state.value.loading)
-        viewModel.onCleared()
+        assertEquals("device unavailable", state.loadError)
+        assertEquals(false, state.loading)
     }
 
     @Test
-    fun exportAndShare_successPersistPathAndForwardGeneratedContent() = runTest(dispatcher) {
+    fun exportAndShare_successPersistPathAndForwardGeneratedContent() = runViewModelTest {
         val infoRepository = mockk<DeviceInfoRepository>()
         val rootRepository = mockk<RootCheckRepository>()
         val exporter = mockk<ReportFileRepository>()
@@ -114,7 +105,7 @@ class InfoViewModelTest {
     }
 
     @Test
-    fun exportAndShare_failure_storeSpecificErrors() = runTest(dispatcher) {
+    fun exportAndShare_failure_storeSpecificErrors() = runViewModelTest {
         val infoRepository = mockk<DeviceInfoRepository>()
         val rootRepository = mockk<RootCheckRepository>()
         val exporter = mockk<ReportFileRepository>()
@@ -139,7 +130,7 @@ class InfoViewModelTest {
     }
 
     @Test
-    fun loadedDeviceReportChangesLanguageWithoutReloadingRepositories() = runTest(dispatcher) {
+    fun loadedDeviceReportChangesLanguageWithoutReloadingRepositories() = runViewModelTest {
         val infoRepository = mockk<DeviceInfoRepository>()
         val rootRepository = mockk<RootCheckRepository>()
         val files = mockk<ReportFileRepository>()
@@ -165,11 +156,10 @@ class InfoViewModelTest {
         assertTrue(saved.captured.textContent.startsWith(UseCaseTexts("fr").label(ReportLabel.DEVICE_INFO_TITLE)))
         coVerify(exactly = 1) { infoRepository.getDeviceInfo() }
         coVerify(exactly = 1) { rootRepository.checkRoot() }
-        vm.onCleared()
     }
 
     @Test
-    fun languageSwitchCannotPublishAnObsoleteDevicePreview() = runTest(dispatcher) {
+    fun languageSwitchCannotPublishAnObsoleteDevicePreview() = runViewModelTest {
         val infoRepository = mockk<DeviceInfoRepository>()
         val rootRepository = mockk<RootCheckRepository>()
         val builder = mockk<BuildDeviceInfoReportUseCase>()
@@ -182,21 +172,22 @@ class InfoViewModelTest {
                 UseCaseTexts("en").label(ReportLabel.DEVICE_INFO_TITLE)
             ) {
                 try {
-                    delay(1_000)
+                    yield()
                 } finally {
                     cancelled = true
                 }
             }
             Result.success(reportText.label(ReportLabel.DEVICE_INFO_TITLE))
         }
-        val vm =
+        val vm = autoClear(
             InfoViewModel(
                 GetDeviceInfoUseCase(infoRepository),
                 CheckRootUseCase(rootRepository),
                 ExportReportUseCase(mockk()),
                 builder,
-                TestAppDispatchers(dispatcher),
-            )
+                appDispatchers,
+            ),
+        )
         vm.handleEvent(InfoEvent.Load())
         runCurrent()
         vm.updateLanguage("de")
@@ -205,11 +196,10 @@ class InfoViewModelTest {
         assertTrue(cancelled)
         assertEquals(UseCaseTexts("de").label(ReportLabel.DEVICE_INFO_TITLE), vm.state.value.reportContent)
         assertEquals(false, vm.state.value.reportLoading)
-        vm.onCleared()
     }
 
     @Test
-    fun handleEvent_load_usingAssertEvent() = runTest(dispatcher) {
+    fun handleEvent_load_usingAssertEvent() = runViewModelTest {
         val info = deviceInfo()
         val infoRepository = mockk<DeviceInfoRepository>()
         val rootRepository = mockk<RootCheckRepository>()
@@ -217,7 +207,7 @@ class InfoViewModelTest {
         coEvery { rootRepository.checkRoot() } returns RootStatus(true, "su available")
         val vm = viewModel(infoRepository, rootRepository)
 
-        vm.assertEvent(InfoEvent.Load()) {
+        vm.assertEventState(InfoEvent.Load()) {
             val initialState = awaitItem()
             val loadingState = awaitItem()
             val loadedState = awaitItem()
@@ -226,7 +216,6 @@ class InfoViewModelTest {
             assertEquals(false, loadedState.loading)
             cancelAndIgnoreRemainingEvents()
         }
-        vm.onCleared()
     }
 
     private fun viewModel(
@@ -234,17 +223,19 @@ class InfoViewModelTest {
         rootRepository: RootCheckRepository,
         exporter: ReportFileRepository = mockk(relaxed = true),
         format: ExportFormat = ExportFormat.PDF,
-    ) = InfoViewModel(
-        GetDeviceInfoUseCase(infoRepository),
-        CheckRootUseCase(rootRepository),
-        ExportReportUseCase(
-            exporter,
-            mockk<GetExportFormatUseCase>().also {
-                coEvery { it() } returns Result.success(format)
-            },
+    ) = autoClear(
+        InfoViewModel(
+            GetDeviceInfoUseCase(infoRepository),
+            CheckRootUseCase(rootRepository),
+            ExportReportUseCase(
+                exporter,
+                mockk<GetExportFormatUseCase>().also {
+                    coEvery { it() } returns Result.success(format)
+                },
+            ),
+            BuildDeviceInfoReportUseCase(dispatchers = appDispatchers),
+            appDispatchers,
         ),
-        BuildDeviceInfoReportUseCase(dispatchers = TestAppDispatchers(dispatcher)),
-        TestAppDispatchers(dispatcher),
     )
 
     private fun deviceInfo() = DeviceInfo(

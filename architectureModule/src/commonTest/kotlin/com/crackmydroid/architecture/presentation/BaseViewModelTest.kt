@@ -1,6 +1,8 @@
 package com.crackmydroid.architecture.presentation
 
+import app.cash.turbine.test
 import com.crackmydroid.architecture.coroutines.AppDispatchers
+import com.crackmydroid.architecture.presentation.model.UiEffect
 import com.crackmydroid.architecture.presentation.model.UiEvent
 import com.crackmydroid.architecture.presentation.model.UiState
 import kotlin.test.Test
@@ -43,6 +45,27 @@ class BaseViewModelTest {
     }
 
     @Test
+    fun emitEventDelegatesSynchronouslyToHandleEvent() {
+        val viewModel = TestViewModel(testDispatchers(StandardTestDispatcher()))
+        val event = TestEvent()
+
+        viewModel.emitEvent(event)
+
+        assertEquals(event, viewModel.handledEvent)
+    }
+
+    @Test
+    fun baseViewModelImplementsThePublicEventHandlerBoundary() {
+        val handler: com.crackmydroid.architecture.presentation.model.UiEventHandler<TestEvent> =
+            TestViewModel(testDispatchers(StandardTestDispatcher()))
+        val event = TestEvent()
+
+        handler.handleEvent(event)
+
+        assertEquals(event, (handler as TestViewModel).handledEvent)
+    }
+
+    @Test
     fun exposesInitialStateAndPublishesAtomicUpdates() {
         val viewModel = TestViewModel(testDispatchers(StandardTestDispatcher()))
 
@@ -50,6 +73,15 @@ class BaseViewModelTest {
         viewModel.incrementState()
 
         assertEquals(TestState(count = 1), viewModel.state.value)
+    }
+
+    @Test
+    fun emitStateReplacesTheCurrentRenderingState() {
+        val viewModel = TestViewModel(testDispatchers(StandardTestDispatcher()))
+
+        viewModel.replaceState(TestState(count = 4))
+
+        assertEquals(TestState(count = 4), viewModel.state.value)
     }
     @Test
     fun onClearedCancelsChildCoroutines() = runTest {
@@ -69,6 +101,16 @@ class BaseViewModelTest {
 
         assertTrue(job.isCancelled)
         assertTrue(cleanupRan)
+    }
+
+    @Test
+    fun onClearedClosesFeatureEffectChannels() = runTest {
+        val viewModel = TestViewModel(testDispatchers(StandardTestDispatcher(testScheduler)))
+        val effects = viewModel.createEffects()
+
+        viewModel.onCleared()
+
+        effects.test { awaitComplete() }
     }
 
     @Test
@@ -105,14 +147,18 @@ class BaseViewModelTest {
         fun launch(block: suspend () -> Unit): Job = scope.launch { block() }
         fun latest(key: String, block: suspend () -> Unit): Job = launchLatest(key) { block() }
         fun incrementState() = updateState { it.copy(count = it.count + 1) }
+        fun replaceState(state: TestState) = emitState(state)
         fun nonCooperativeLatest(key: String, gate: CompletableDeferred<Unit>, publish: () -> Unit): Job =
             launchLatest(key) {
                 withContext(NonCancellable) { gate.await() }
                 ensureCurrent()
                 publish()
             }
+
+        fun createEffects() = effectChannel<TestEffect>().effects
     }
 
     private class TestEvent : UiEvent()
     private data class TestState(val count: Int = 0) : UiState
+    private data class TestEffect(val value: String) : UiEffect
 }

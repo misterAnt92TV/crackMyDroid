@@ -24,6 +24,7 @@ kotlin {
         commonTest.dependencies {
             implementation(kotlin("test"))
             implementation(libs.coroutines.test)
+            implementation(libs.turbine)
         }
         val jvmCommonTest by creating {
             dependsOn(commonTest.get())

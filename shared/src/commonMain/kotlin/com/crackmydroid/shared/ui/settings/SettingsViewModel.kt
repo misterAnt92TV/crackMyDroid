@@ -1,6 +1,7 @@
 package com.crackmydroid.shared.ui.settings
 
 import com.crackmydroid.architecture.coroutines.AppDispatchers
+import com.crackmydroid.architecture.presentation.model.UiLoadState
 import com.crackmydroid.architecture.logging.AppLogger
 import com.crackmydroid.shared.domain.model.ExportFormat
 import com.crackmydroid.shared.domain.model.app.AppLanguage
@@ -52,6 +53,9 @@ class SettingsViewModel(
     private val setLanguageUseCase: SetLanguageUseCase,
     dispatchers: AppDispatchers,
 ) : LocalizedBaseViewModel<SettingsEvent, SettingsState>(SettingsState(), dispatchers) {
+    private companion object {
+        const val LOAD_KEY = "settings-load"
+    }
 
     override fun onEvent(event: SettingsEvent) {
         when (event) {
@@ -72,8 +76,8 @@ class SettingsViewModel(
     }
     private var savingFormat = false
 
-    private fun load() = launchLatest("settings-load") {
-        updateState { it.copy(loading = true, error = null) }
+    private fun load() = launchLatest(LOAD_KEY) {
+        updateState { it.copy(loadState = UiLoadState.Loading) }
         val language = getLanguageUseCase().onSuccess { value ->
             updateState { it.copy(language = value) }
         }
@@ -104,11 +108,15 @@ class SettingsViewModel(
                     suggestionsEnabled = loaded.suggestionsEnabled,
                     featureHintsEnabled = loaded.featureHintsEnabled,
                     showIntroOnLaunch = !loaded.introSeen,
-                    loading = false,
+                    loadState = UiLoadState.Success,
                 )
             }
         }.onFailure { err ->
-            updateState { it.copy(error = err.message, loading = false) }
+            updateState {
+                it.copy(
+                    loadState = UiLoadState.Error(err.message ?: presentationTexts.error),
+                )
+            }
         }
     }
 

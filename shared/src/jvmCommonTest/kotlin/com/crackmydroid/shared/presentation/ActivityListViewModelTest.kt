@@ -1,5 +1,8 @@
 package com.crackmydroid.shared.presentation
 
+import com.crackmydroid.architecture.testing.*
+
+
 import com.crackmydroid.shared.domain.model.ExportDocument
 import com.crackmydroid.shared.domain.model.ExportFormat
 import com.crackmydroid.shared.domain.model.activity.ActivityEntry
@@ -15,6 +18,7 @@ import com.crackmydroid.shared.domain.usecase.settings.SetActivityFavoritesUseCa
 import com.crackmydroid.shared.domain.usecase.settings.SetActivityPackageFavoritesUseCase
 import com.crackmydroid.shared.ui.activities.ActivityListEvent
 import com.crackmydroid.shared.ui.activities.ActivityListViewModel
+import com.crackmydroid.shared.ui.activities.model.ActivityListEffect
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -38,8 +42,7 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class ActivityListViewModelTest {
-    private val dispatcher = StandardTestDispatcher()
+class ActivityListViewModelTest : BaseViewModelUnitTest() {
     private fun reportExporter() = ExportReportUseCase(mockk<ReportFileRepository>(relaxed = true))
 
     private fun activityViewModel(
@@ -47,16 +50,18 @@ class ActivityListViewModelTest {
         launchActivity: LaunchActivityUseCase,
         getExportFormat: GetExportFormatUseCase,
         reportExporter: ExportReportUseCase = reportExporter(),
-    ) = ActivityListViewModel(
-        getActivitiesUseCase = getActivities,
-        launchActivityUseCase = launchActivity,
-        getExportFormatUseCase = getExportFormat,
-        getFavoritesUseCase = emptyActivityFavorites(),
-        setFavoritesUseCase = mockk<SetActivityFavoritesUseCase>(relaxed = true),
-        getPackageFavoritesUseCase = emptyPackageFavorites(),
-        setPackageFavoritesUseCase = mockk<SetActivityPackageFavoritesUseCase>(relaxed = true),
-        reportExporterUseCase = reportExporter,
-        dispatchers = TestAppDispatchers(dispatcher),
+    ) = autoClear(
+        ActivityListViewModel(
+            getActivitiesUseCase = getActivities,
+            launchActivityUseCase = launchActivity,
+            getExportFormatUseCase = getExportFormat,
+            getFavoritesUseCase = emptyActivityFavorites(),
+            setFavoritesUseCase = mockk<SetActivityFavoritesUseCase>(relaxed = true),
+            getPackageFavoritesUseCase = emptyPackageFavorites(),
+            setPackageFavoritesUseCase = mockk<SetActivityPackageFavoritesUseCase>(relaxed = true),
+            reportExporterUseCase = reportExporter,
+            dispatchers = appDispatchers,
+        ),
     )
 
     private fun emptyActivityFavorites(): GetActivityFavoritesUseCase {
@@ -71,18 +76,8 @@ class ActivityListViewModelTest {
         return getFavorites
     }
 
-    @BeforeTest
-    fun setUp() {
-        Dispatchers.setMain(dispatcher)
-    }
-
-    @AfterTest
-    fun tearDown() {
-        Dispatchers.resetMain()
-    }
-
     @Test
-    fun exportAllUsesPdfAndGroupSharePreservesThePayload() = runTest(dispatcher) {
+    fun exportAllUsesPdfAndGroupSharePreservesThePayload() = runViewModelTest {
         val get = mockk<GetActivitiesUseCase>()
         val format = mockk<GetExportFormatUseCase>()
         val repository = mockk<ReportFileRepository>()
@@ -115,7 +110,7 @@ class ActivityListViewModelTest {
     }
 
     @Test
-    fun refreshLoadsActivitiesAndUpdatesState() = runTest(dispatcher) {
+    fun refreshLoadsActivitiesAndUpdatesState() = runViewModelTest {
         val get = mockk<GetActivitiesUseCase>()
         val launch = mockk<LaunchActivityUseCase>()
         val format = mockk<GetExportFormatUseCase>()
@@ -132,7 +127,25 @@ class ActivityListViewModelTest {
     }
 
     @Test
-    fun setFilterUpdatesImmediatelyAndMatchesActivityName() = runTest(dispatcher) {
+    fun copyGroupEventEmitsClipboardEffectAfterSubscription() = runViewModelTest {
+        val get = mockk<GetActivitiesUseCase>()
+        val launch = mockk<LaunchActivityUseCase>()
+        val format = mockk<GetExportFormatUseCase>()
+        coEvery { get() } returns Result.success(listOf(ActivityEntry("Label", "App", "pkg", "Activity")))
+        coEvery { format() } returns Result.success(ExportFormat.TXT)
+        val vm = activityViewModel(get, launch, format)
+
+        vm.emitEventAndAwaitIdle(ActivityListEvent.Refresh())
+        vm.assertEventEffect(ActivityListEvent.GroupClipboardCopyRequested("pkg"), vm.effects) {
+            val effect = awaitItem()
+            assertTrue(effect is ActivityListEffect.CopyToClipboard)
+            assertTrue(effect.content.contains("pkg"))
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun setFilterUpdatesImmediatelyAndMatchesActivityName() = runViewModelTest {
         val get = mockk<GetActivitiesUseCase>()
         val launch = mockk<LaunchActivityUseCase>()
         val format = mockk<GetExportFormatUseCase>()
@@ -160,7 +173,7 @@ class ActivityListViewModelTest {
     }
 
     @Test
-    fun setFilterTracksMostFrequentTopQuery() = runTest(dispatcher) {
+    fun setFilterTracksMostFrequentTopQuery() = runViewModelTest {
         val get = mockk<GetActivitiesUseCase>()
         val launch = mockk<LaunchActivityUseCase>()
         val format = mockk<GetExportFormatUseCase>()
@@ -180,7 +193,7 @@ class ActivityListViewModelTest {
     }
 
     @Test
-    fun launchWithIntentPassesGuidedArgumentsToUseCase() = runTest(dispatcher) {
+    fun launchWithIntentPassesGuidedArgumentsToUseCase() = runViewModelTest {
         val get = mockk<GetActivitiesUseCase>()
         val launch = mockk<LaunchActivityUseCase>()
         val format = mockk<GetExportFormatUseCase>()
@@ -230,7 +243,7 @@ class ActivityListViewModelTest {
     }
 
     @Test
-    fun buildReportAggregatesSelectedAppAnalysis() = runTest(dispatcher) {
+    fun buildReportAggregatesSelectedAppAnalysis() = runViewModelTest {
         val get = mockk<GetActivitiesUseCase>()
         val launch = mockk<LaunchActivityUseCase>()
         val format = mockk<GetExportFormatUseCase>()

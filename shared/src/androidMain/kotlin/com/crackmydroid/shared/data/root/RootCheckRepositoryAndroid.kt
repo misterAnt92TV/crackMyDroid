@@ -15,6 +15,7 @@ import com.crackmydroid.shared.i18n.platformLanguage
 import com.crackmydroid.shared.i18n.stringsFor
 import com.scottyab.rootbeer.RootBeer
 import java.io.File
+import java.util.concurrent.TimeUnit
 import java.util.Calendar
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
@@ -276,16 +277,7 @@ class RootCheckRepositoryAndroid(
     private fun runShellCommand(command: String, timeoutMs: Long = 450L): ShellCommandOutput {
         return runCatching {
             val process = Runtime.getRuntime().exec(arrayOf("sh", "-c", command))
-            val start = System.currentTimeMillis()
-            var exitCode: Int? = null
-            while (exitCode == null && (System.currentTimeMillis() - start) < timeoutMs) {
-                exitCode = runCatching { process.exitValue() }.getOrNull()
-                if (exitCode == null) {
-                    Thread.sleep(25)
-                }
-            }
-
-            if (exitCode == null) {
+            if (!process.waitFor(timeoutMs, TimeUnit.MILLISECONDS)) {
                 process.destroy()
                 return@runCatching ShellCommandOutput(
                     success = false,
@@ -295,6 +287,7 @@ class RootCheckRepositoryAndroid(
                 )
             }
 
+            val exitCode = process.exitValue()
             val stdout = process.inputStream.bufferedReader().use { it.readText().trim() }
             val stderr = process.errorStream.bufferedReader().use { it.readText().trim() }
             ShellCommandOutput(

@@ -1,4 +1,6 @@
 package com.crackmydroid.shared.ui.installedapps.view
+
+import com.crackmydroid.architecture.presentation.model.UiLoadState
 import com.crackmydroid.ui.icons.AppIcons
 
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -18,6 +20,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -55,6 +58,7 @@ import com.crackmydroid.shared.ui.installedapps.InstalledAppsViewModel
 import com.crackmydroid.shared.ui.screens.screenContentPadding
 import com.crackmydroid.ui.components.AppAccordion
 import com.crackmydroid.ui.components.AppIcon
+import com.crackmydroid.ui.components.AppListSkeleton
 import com.crackmydroid.ui.components.button.AppButton
 import com.crackmydroid.ui.components.button.ButtonVariant
 import com.crackmydroid.ui.components.dialog.ErrorDialogComponent
@@ -80,15 +84,15 @@ fun InstalledAppsScreen(
         searchRequestId = searchRequestId,
         searchVisible = searchVisible,
         onSearchVisibilityChanged = onSearchVisibilityChanged,
-        onRefresh = { viewModel.handleEvent(InstalledAppsEvent.Refresh()) },
-        onShareAll = { viewModel.handleEvent(InstalledAppsEvent.AllShareRequested()) },
+        onRefresh = { viewModel.emitEvent(InstalledAppsEvent.Refresh()) },
+        onShareAll = { viewModel.emitEvent(InstalledAppsEvent.AllShareRequested()) },
         onFilterChange = { value, trackUsage ->
-            viewModel.handleEvent(InstalledAppsEvent.FilterChanged(value, trackUsage))
+            viewModel.emitEvent(InstalledAppsEvent.FilterChanged(value, trackUsage))
         },
-        onToggleFavorite = { viewModel.handleEvent(InstalledAppsEvent.FavoriteToggled(it)) },
-        onShare = { viewModel.handleEvent(InstalledAppsEvent.ApkShareRequested(it)) },
-        onExport = { viewModel.handleEvent(InstalledAppsEvent.ApkExportRequested(it)) },
-        onClearError = { viewModel.handleEvent(InstalledAppsEvent.ErrorDismissed()) },
+        onToggleFavorite = { viewModel.emitEvent(InstalledAppsEvent.FavoriteToggled(it)) },
+        onShare = { viewModel.emitEvent(InstalledAppsEvent.ApkShareRequested(it)) },
+        onExport = { viewModel.emitEvent(InstalledAppsEvent.ApkExportRequested(it)) },
+        onClearError = { viewModel.emitEvent(InstalledAppsEvent.ErrorDismissed()) },
     )
 }
 
@@ -197,10 +201,12 @@ private fun InstalledAppsScreenContent(
                 }
             }
 
-            if (state.loading) {
+            if (state.loadState is UiLoadState.Loading && state.apps.isEmpty()) {
                 item {
-                    CircularProgressIndicator(modifier = Modifier.padding(top = 8.dp))
+                    AppListSkeleton()
                 }
+            } else if (state.loadState is UiLoadState.Loading) {
+                item { LinearProgressIndicator(modifier = Modifier.fillMaxWidth()) }
             }
 
             state.lastExportPath?.let { path ->
@@ -227,7 +233,7 @@ private fun InstalledAppsScreenContent(
                 }
             }
 
-            state.error?.let { err ->
+            (state.loadError ?: state.error)?.let { err ->
                 item {
                     AppText(
                         err,
@@ -237,7 +243,7 @@ private fun InstalledAppsScreenContent(
                 }
             }
 
-            if (!state.loading && state.error == null) {
+            if (state.loadState !is UiLoadState.Loading && state.loadError == null && state.error == null) {
                 item {
                     AppText(
                         screenStrings.resultsSummary.format(filteredApps.size, state.apps.size),
@@ -247,7 +253,7 @@ private fun InstalledAppsScreenContent(
                 }
             }
 
-            if (!state.loading && filteredApps.isEmpty()) {
+            if (state.loadState !is UiLoadState.Loading && filteredApps.isEmpty()) {
                 item {
                     AppCard(modifier = Modifier.fillMaxWidth()) {
                         val hasFilter = state.filter.isNotBlank()
@@ -411,7 +417,7 @@ private fun InstalledAppsScreenContent(
         )
     }
 
-    state.error?.let { ErrorDialogComponent(it, onClearError) }
+    (state.loadError ?: state.error)?.let { ErrorDialogComponent(it, onClearError) }
 }
 
 @AppScreenPreviews

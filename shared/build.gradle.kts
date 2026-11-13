@@ -54,6 +54,7 @@ kotlin {
         val jvmCommonTest by creating {
             dependsOn(commonTest.get())
             dependencies {
+                implementation(project(":architectureTestSupport"))
                 implementation(libs.mockk)
                 implementation(libs.sqldelight.sqlite)
             }

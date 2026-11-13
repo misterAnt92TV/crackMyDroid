@@ -47,6 +47,10 @@ class AppNavigationViewModel(
     private val getVerboseLogUseCase: GetVerboseLogUseCase,
     dispatchers: AppDispatchers,
 ) : LocalizedBaseViewModel<AppNavigationEvent, AppNavigationState>(AppNavigationState(), dispatchers) {
+    private companion object {
+        const val INITIALIZE_KEY = "app-shell-initialize"
+    }
+
     private var initializing = false
 
     override fun onEvent(event: AppNavigationEvent) = when (event) {
@@ -65,20 +69,20 @@ class AppNavigationViewModel(
     private fun initialize() {
         if (currentState.initialized || initializing) return
         initializing = true
-        launchLatest("app-shell-initialize") {
+        launchLatest(INITIALIZE_KEY) {
             try {
                 getVerboseLogUseCase().onSuccess(AppLogger::setVerbose)
-                settings.handleEvent(SettingsEvent.Load())
+                settings.emitEvent(SettingsEvent.Load())
                 updateLanguage(resolveLanguageCode(settings.state.value.language, platformLanguage()))
                 val introSeen = getIntroSeenUseCase().getOrDefault(false)
                 updateState { it.copy(showIntro = !introSeen, initialized = true) }
-                activity.handleEvent(ActivityListEvent.Refresh())
-                info.handleEvent(InfoEvent.Load())
-                trick.handleEvent(TrickEvent.Load())
-                logs.handleEvent(LogEvent.Refresh())
-                permissions.handleEvent(PermissionsEvent.Refresh())
-                installedApps.handleEvent(InstalledAppsEvent.Refresh())
-                penTesting.handleEvent(PenTestingEvent.Refresh())
+                activity.emitEvent(ActivityListEvent.Refresh())
+                info.emitEvent(InfoEvent.Load())
+                trick.emitEvent(TrickEvent.Load())
+                logs.emitEvent(LogEvent.Refresh())
+                permissions.emitEvent(PermissionsEvent.Refresh())
+                installedApps.emitEvent(InstalledAppsEvent.Refresh())
+                penTesting.emitEvent(PenTestingEvent.Refresh())
                 launchTask {
                     penTesting.state
                         .map { it.currentStep }
@@ -127,7 +131,7 @@ class AppNavigationViewModel(
     }
 
     private fun confirmHint(disableHints: Boolean, target: Screen) {
-        if (disableHints) settings.handleEvent(SettingsEvent.FeatureHintsEnabledChanged(false))
+        if (disableHints) settings.emitEvent(SettingsEvent.FeatureHintsEnabledChanged(false))
         navigateTo(target, currentState.pendingNavigationSource ?: NavigationSource.Drawer)
     }
 

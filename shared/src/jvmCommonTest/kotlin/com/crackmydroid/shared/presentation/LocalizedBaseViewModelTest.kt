@@ -1,15 +1,18 @@
 package com.crackmydroid.shared.presentation
 
+import com.crackmydroid.architecture.testing.*
+
+
 import com.crackmydroid.architecture.coroutines.DefaultAppDispatchers
 import com.crackmydroid.architecture.presentation.model.UiEvent
 import com.crackmydroid.architecture.presentation.model.UiState
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class LocalizedBaseViewModelTest {
+class LocalizedBaseViewModelTest : BaseViewModelUnitTest() {
     @Test
-    fun updateLanguageUpdatesAllCatalogsAndNotifiesOnlyForEffectiveChanges() {
-        val viewModel = TestViewModel()
+    fun updateLanguageUpdatesAllCatalogsAndNotifiesOnlyForEffectiveChanges() = runViewModelTest {
+        val viewModel = autoClear(TestViewModel())
 
         viewModel.updateLanguage("fr-FR")
 
@@ -23,11 +26,10 @@ class LocalizedBaseViewModelTest {
 
         assertEquals(2, viewModel.languageChanges)
         assertEquals("en", viewModel.useCaseLanguage)
-        viewModel.onCleared()
     }
 
-    private class TestViewModel :
-        LocalizedBaseViewModel<TestEvent, TestState>(TestState, DefaultAppDispatchers) {
+    private inner class TestViewModel :
+        LocalizedBaseViewModel<TestEvent, TestState>(TestState, appDispatchers) {
         var languageChanges = 0
         val useCaseLanguage get() = useCaseTexts.languageCode
         val localizedStrings get() = strings

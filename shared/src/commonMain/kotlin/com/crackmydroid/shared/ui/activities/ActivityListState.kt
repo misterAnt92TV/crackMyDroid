@@ -1,6 +1,7 @@
 package com.crackmydroid.shared.ui.activities
 
 import com.crackmydroid.architecture.presentation.model.UiState
+import com.crackmydroid.architecture.presentation.model.UiLoadState
 import com.crackmydroid.shared.domain.model.activity.ActivityEntry
 import com.crackmydroid.shared.domain.model.activity.ActivityIntentRiskLevel
 import com.crackmydroid.shared.domain.model.activity.ActivityIntentRiskReport
@@ -9,7 +10,7 @@ data class ActivityListState(
     val activities: List<ActivityEntry> = emptyList(),
     val filter: String = "",
     val error: String? = null,
-    val loading: Boolean = false,
+    val loadState: UiLoadState = UiLoadState.Idle,
     val topQuery: String? = null,
     val favorites: Set<String> = emptySet(),
     val favoritePackages: Set<String> = emptySet(),
@@ -19,7 +20,10 @@ data class ActivityListState(
     val guidedLaunch: GuidedLaunchState? = null,
     val selectedReport: ActivityAppReport? = null,
     val reportExportPath: String? = null,
-) : UiState
+) : UiState {
+    val loading: Boolean get() = loadState is UiLoadState.Loading
+    val loadError: String? get() = (loadState as? UiLoadState.Error)?.message
+}
 
 data class GuidedLaunchState(val entry: ActivityEntry)
 

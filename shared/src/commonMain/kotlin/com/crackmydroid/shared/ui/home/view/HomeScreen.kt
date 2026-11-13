@@ -59,8 +59,8 @@ fun HomeScreen(
     HomeContent(
         state = uiState,
         padding = padding,
-        onHideRecent = { viewModel.handleEvent(HomeEvent.HideFromRecent(it)) },
-        onRemove = { viewModel.handleEvent(HomeEvent.Remove(it)) },
+        onHideRecent = { viewModel.emitEvent(HomeEvent.HideFromRecent(it)) },
+        onRemove = { viewModel.emitEvent(HomeEvent.Remove(it)) },
     )
 }
 

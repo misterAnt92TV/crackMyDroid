@@ -61,19 +61,19 @@ fun SettingsScreen(
         padding = padding,
         appInfo = appInfo,
         actions = SettingsActions(
-            onSelectTheme = { viewModel.handleEvent(SettingsEvent.ThemeSelected(it)) },
-            onSelectLanguage = { viewModel.handleEvent(SettingsEvent.LanguageSelected(it)) },
-            onSetSuggestionsEnabled = { viewModel.handleEvent(SettingsEvent.SuggestionsEnabledChanged(it)) },
-            onClearSuggestions = { viewModel.handleEvent(SettingsEvent.SuggestionsCleared()) },
-            onSetFeatureHintsEnabled = { viewModel.handleEvent(SettingsEvent.FeatureHintsEnabledChanged(it)) },
-            onSetShowIntroOnLaunch = { viewModel.handleEvent(SettingsEvent.IntroOnLaunchChanged(it)) },
-            onToggleVerbose = { viewModel.handleEvent(SettingsEvent.VerboseLoggingChanged(it)) },
-            onSetExportFormat = { viewModel.handleEvent(SettingsEvent.ExportFormatSelected(it)) },
-            onSetHighContrast = { viewModel.handleEvent(SettingsEvent.HighContrastChanged(it)) },
-            onSetReduceMotion = { viewModel.handleEvent(SettingsEvent.ReduceMotionChanged(it)) },
-            onSetLargeText = { viewModel.handleEvent(SettingsEvent.LargeTextChanged(it)) },
+            onSelectTheme = { viewModel.emitEvent(SettingsEvent.ThemeSelected(it)) },
+            onSelectLanguage = { viewModel.emitEvent(SettingsEvent.LanguageSelected(it)) },
+            onSetSuggestionsEnabled = { viewModel.emitEvent(SettingsEvent.SuggestionsEnabledChanged(it)) },
+            onClearSuggestions = { viewModel.emitEvent(SettingsEvent.SuggestionsCleared()) },
+            onSetFeatureHintsEnabled = { viewModel.emitEvent(SettingsEvent.FeatureHintsEnabledChanged(it)) },
+            onSetShowIntroOnLaunch = { viewModel.emitEvent(SettingsEvent.IntroOnLaunchChanged(it)) },
+            onToggleVerbose = { viewModel.emitEvent(SettingsEvent.VerboseLoggingChanged(it)) },
+            onSetExportFormat = { viewModel.emitEvent(SettingsEvent.ExportFormatSelected(it)) },
+            onSetHighContrast = { viewModel.emitEvent(SettingsEvent.HighContrastChanged(it)) },
+            onSetReduceMotion = { viewModel.emitEvent(SettingsEvent.ReduceMotionChanged(it)) },
+            onSetLargeText = { viewModel.emitEvent(SettingsEvent.LargeTextChanged(it)) },
             onOpenUri = uriHandler::openUri,
-            onClearError = { viewModel.handleEvent(SettingsEvent.ErrorDismissed()) },
+            onClearError = { viewModel.emitEvent(SettingsEvent.ErrorDismissed()) },
         ),
     )
 }
@@ -303,7 +303,7 @@ internal fun SettingsContent(
                 Spacer(modifier = Modifier.height(8.dp))
             }
 
-            state.error?.let { err ->
+            (state.loadError ?: state.error)?.let { err ->
                 AppText(err, color = MaterialTheme.colorScheme.error)
             }
         }
@@ -317,7 +317,7 @@ internal fun SettingsContent(
         )
     }
 
-    state.error?.let { ErrorDialogComponent(it, actions.onClearError) }
+    (state.loadError ?: state.error)?.let { ErrorDialogComponent(it, actions.onClearError) }
 }
 
 @Composable
