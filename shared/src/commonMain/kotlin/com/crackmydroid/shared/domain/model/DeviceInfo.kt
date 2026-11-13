@@ -30,5 +30,5 @@ data class DeviceInfo(
     val imei: String? = null,
     val serial: String? = null,
     val systemPropSource: String? = null,
-    val systemPropDump: String? = null
+    val systemPropDump: String? = null,
 )

@@ -8,19 +8,17 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
 import androidx.core.content.edit
-import com.crackmydroid.shared.presentation.components.text.AppText
 import com.crackmydroid.shared.ui.AppPresentationDependencies
 import com.crackmydroid.shared.ui.CrackMyDroidApp
+import com.crackmydroid.ui.components.dialog.AppDialog
+import com.crackmydroid.ui.components.text.AppText
 import org.koin.mp.KoinPlatform
 
 class MainActivity : ComponentActivity() {
@@ -47,6 +45,7 @@ class MainActivity : ComponentActivity() {
                         CrackMyDroidApp(
                             dependencies = presentationDependencies,
                             systemMotionReductionEnabled = rememberSystemMotionReduction(),
+                            onExitApp = ::finish,
                         )
                         var showDisclosure by remember { mutableStateOf(!disclosureSeen) }
                         if (showDisclosure) {
@@ -77,36 +76,24 @@ class MainActivity : ComponentActivity() {
 
 @androidx.compose.runtime.Composable
 private fun PackageInventoryDisclosure(onAcknowledge: () -> Unit) {
-    AlertDialog(
-        onDismissRequest = onAcknowledge,
-        title = { AppText(stringResource(R.string.package_inventory_disclosure_title)) },
-        text = {
-            AppText(
-                stringResource(R.string.package_inventory_disclosure_body),
-            )
-        },
-        confirmButton = {
-            Button(onClick = onAcknowledge) {
-                AppText(stringResource(R.string.package_inventory_disclosure_confirm))
-            }
-        },
-    )
+    AppDialog(
+        title = stringResource(R.string.package_inventory_disclosure_title),
+        onDismiss = onAcknowledge,
+        confirmLabel = stringResource(R.string.package_inventory_disclosure_confirm),
+        onConfirm = onAcknowledge,
+    ) {
+        AppText(stringResource(R.string.package_inventory_disclosure_body))
+    }
 }
 
 @androidx.compose.runtime.Composable
 private fun PackageInventoryUnavailableDialog(onClose: () -> Unit) {
-    AlertDialog(
-        onDismissRequest = {},
-        title = { AppText(stringResource(R.string.package_inventory_unavailable_title)) },
-        text = {
-            AppText(
-                stringResource(R.string.package_inventory_unavailable_body),
-            )
-        },
-        confirmButton = {
-            Button(onClick = onClose) {
-                AppText(stringResource(R.string.close))
-            }
-        },
-    )
+    AppDialog(
+        title = stringResource(R.string.package_inventory_unavailable_title),
+        onDismiss = {},
+        confirmLabel = stringResource(R.string.close),
+        onConfirm = onClose,
+    ) {
+        AppText(stringResource(R.string.package_inventory_unavailable_body))
+    }
 }

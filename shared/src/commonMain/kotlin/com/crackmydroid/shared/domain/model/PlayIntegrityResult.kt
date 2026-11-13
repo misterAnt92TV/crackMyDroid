@@ -11,5 +11,5 @@ data class PlayIntegrityResult(
     val appLicensingVerdict: String? = null,
     val deviceRecognitionVerdicts: List<String> = emptyList(),
     val playProtectVerdict: String? = null,
-    val verifiedAtEpochMs: Long? = null
+    val verifiedAtEpochMs: Long? = null,
 )

@@ -2,14 +2,14 @@ package com.crackmydroid.shared.data.packages
 
 import com.crackmydroid.shared.data.DesktopScanCache
 import com.crackmydroid.shared.domain.model.ConnectedDevice
+import com.crackmydroid.shared.domain.model.DeviceSessionState
 import com.crackmydroid.shared.domain.repository.AdbBridge
 import com.crackmydroid.shared.domain.repository.DeviceSessionController
-import com.crackmydroid.shared.domain.model.DeviceSessionState
+import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.runTest
-import kotlin.test.Test
-import kotlin.test.assertEquals
 
 class RemotePackageManagerDesktopTest {
     @Test
@@ -21,13 +21,13 @@ class RemotePackageManagerDesktopTest {
                     package:/data/app/~~hash==/base.apk=com.example.demo
                 """.trimIndent(),
                 "dumpsys package com.example.demo" to "requested permissions:\n  android.permission.CAMERA",
-                "pm path com.example.demo" to "package:/data/app/~~hash==/base.apk"
-            )
+                "pm path com.example.demo" to "package:/data/app/~~hash==/base.apk",
+            ),
         )
         val packageManager = RemotePackageManagerDesktop(
             adbBridge = bridge,
             sessionController = FakeDeviceSessionController(),
-            cache = DesktopScanCache()
+            cache = DesktopScanCache(),
         )
 
         val firstList = packageManager.listInstalledApps()
@@ -46,9 +46,7 @@ class RemotePackageManagerDesktopTest {
     }
 }
 
-private class FakePackageAdbBridge(
-    private val outputs: Map<String, String>
-) : AdbBridge {
+private class FakePackageAdbBridge(private val outputs: Map<String, String>) : AdbBridge {
     val commands: MutableList<String> = mutableListOf()
 
     override suspend fun resolveBinary(configuredPath: String?): Result<String> =
@@ -61,7 +59,7 @@ private class FakePackageAdbBridge(
         serial: String,
         command: String,
         configuredPath: String?,
-        asRoot: Boolean
+        asRoot: Boolean,
     ): Result<String> {
         commands += command
         return Result.success(outputs.getValue(command))
@@ -71,22 +69,19 @@ private class FakePackageAdbBridge(
         serial: String,
         remotePath: String,
         localPath: String,
-        configuredPath: String?
+        configuredPath: String?,
     ): Result<String> = Result.success(localPath)
 
-    override suspend fun logcat(
-        serial: String,
-        configuredPath: String?,
-        lines: Int
-    ): Result<List<String>> = Result.success(emptyList())
+    override suspend fun logcat(serial: String, configuredPath: String?, lines: Int): Result<List<String>> =
+        Result.success(emptyList())
 }
 
 private class FakeDeviceSessionController : DeviceSessionController {
     private val internalState = MutableStateFlow(
         DeviceSessionState(
             adbPath = "/usr/bin/adb",
-            selectedDevice = ConnectedDevice(serial = "SERIAL1", state = "device")
-        )
+            selectedDevice = ConnectedDevice(serial = "SERIAL1", state = "device"),
+        ),
     )
 
     override val state: StateFlow<DeviceSessionState> = internalState
@@ -94,14 +89,10 @@ private class FakeDeviceSessionController : DeviceSessionController {
     override suspend fun refreshDevices(adbPathOverride: String?): Result<List<ConnectedDevice>> =
         Result.success(emptyList())
 
-    override suspend fun selectDevice(
-        device: ConnectedDevice,
-        adbPathOverride: String?
-    ): Result<Unit> =
+    override suspend fun selectDevice(device: ConnectedDevice, adbPathOverride: String?): Result<Unit> =
         Result.success(Unit)
 
     override suspend fun clearSelection() = Unit
 
-    override suspend fun rescanSelectedDevice(): Result<Unit> =
-        Result.success(Unit)
+    override suspend fun rescanSelectedDevice(): Result<Unit> = Result.success(Unit)
 }

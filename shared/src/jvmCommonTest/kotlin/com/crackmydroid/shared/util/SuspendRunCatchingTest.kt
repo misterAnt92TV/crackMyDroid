@@ -1,11 +1,11 @@
 package com.crackmydroid.shared.util
 
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertSame
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.test.runTest
 
 class SuspendRunCatchingTest {
     @Test

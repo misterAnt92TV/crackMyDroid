@@ -11,13 +11,13 @@ object CacheDatabaseSchema : SqlSchema<QueryResult.Value<Unit>> by CacheDatabase
         driver: SqlDriver,
         oldVersion: Long,
         newVersion: Long,
-        vararg callbacks: AfterVersion
+        vararg callbacks: AfterVersion,
     ): QueryResult.Value<Unit> = CacheDatabase.Schema.migrate(
         driver,
         oldVersion,
         newVersion,
         AfterVersion(2) { repairLegacyColumns(it) },
-        *callbacks
+        *callbacks,
     )
 
     private fun repairLegacyColumns(driver: SqlDriver) {
@@ -29,16 +29,16 @@ object CacheDatabaseSchema : SqlSchema<QueryResult.Value<Unit>> by CacheDatabase
                 "allowBackup" to "INTEGER NOT NULL DEFAULT 0",
                 "testOnly" to "INTEGER NOT NULL DEFAULT 0",
                 "targetSdkVersion" to "INTEGER",
-                "minSdkVersion" to "INTEGER"
-            )
+                "minSdkVersion" to "INTEGER",
+            ),
         )
         repairTable(
             driver,
             "activities_cache",
             mapOf(
                 "exported" to "INTEGER NOT NULL DEFAULT 0",
-                "permission" to "TEXT"
-            )
+                "permission" to "TEXT",
+            ),
         )
     }
 
@@ -53,7 +53,7 @@ object CacheDatabaseSchema : SqlSchema<QueryResult.Value<Unit>> by CacheDatabase
                 }
                 QueryResult.Value(names)
             },
-            parameters = 0
+            parameters = 0,
         ).value
         check(columns.isNotEmpty()) { "Missing cache table during migration: $table" }
         val missing = definitions.filterKeys { it !in columns }

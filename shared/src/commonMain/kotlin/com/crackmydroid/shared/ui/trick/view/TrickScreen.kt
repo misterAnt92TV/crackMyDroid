@@ -1,4 +1,6 @@
 package com.crackmydroid.shared.ui.trick.view
+import com.crackmydroid.ui.typography.AppTypography
+import com.crackmydroid.ui.icons.AppIcons
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -16,18 +18,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Bolt
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Code
-import androidx.compose.material.icons.filled.Error
-import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.Icon
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
@@ -43,7 +37,6 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -51,14 +44,20 @@ import com.crackmydroid.shared.domain.model.shell.ShellCommand
 import com.crackmydroid.shared.domain.model.shell.ShellCommandResult
 import com.crackmydroid.shared.i18n.LocalStrings
 import com.crackmydroid.shared.i18n.ScreenUiStrings
-import com.crackmydroid.shared.presentation.components.AppButton
-import com.crackmydroid.shared.presentation.components.ButtonVariant
-import com.crackmydroid.shared.presentation.components.ErrorDialogComponent
-import com.crackmydroid.shared.presentation.components.ScrollToTopButton
-import com.crackmydroid.shared.presentation.components.SectionHeader
-import com.crackmydroid.shared.presentation.components.text.AppText
+import com.crackmydroid.shared.i18n.format
+import com.crackmydroid.shared.presentation.preview.AppPreviewEnvironment
+import com.crackmydroid.shared.presentation.preview.AppScreenPreviews
 import com.crackmydroid.shared.ui.screens.screenContentPadding
+import com.crackmydroid.shared.ui.trick.TrickEvent
+import com.crackmydroid.shared.ui.trick.TrickState
 import com.crackmydroid.shared.ui.trick.TrickViewModel
+import com.crackmydroid.ui.components.AppIcon
+import com.crackmydroid.ui.components.button.AppButton
+import com.crackmydroid.ui.components.button.ButtonVariant
+import com.crackmydroid.ui.components.button.ScrollToTopButton
+import com.crackmydroid.ui.components.dialog.ErrorDialogComponent
+import com.crackmydroid.ui.components.progress.AppProgressBar
+import com.crackmydroid.ui.components.text.AppText
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -66,12 +65,37 @@ import kotlinx.coroutines.launch
 fun TrickScreen(
     viewModel: TrickViewModel,
     padding: PaddingValues,
-    headerHelp: String,
-    onHelp: (String) -> Unit,
-    onBack: (() -> Unit)? = null,
-    onMenu: () -> Unit = {}
 ) {
     val state by viewModel.state.collectAsState()
+    TrickScreenContent(
+        state = state,
+        padding = padding,
+        onCommandTap = { command ->
+            when {
+                state.running -> viewModel.emitEvent(TrickEvent.BusyInteractionNotified(command))
+                !command.supported -> viewModel.emitEvent(TrickEvent.UnsupportedCommandNotified(command))
+                else -> viewModel.emitEvent(TrickEvent.ExecutionRequested(command))
+            }
+        },
+        onClearInteractionHint = { viewModel.emitEvent(TrickEvent.InteractionHintDismissed()) },
+        onConfirmPending = { viewModel.emitEvent(TrickEvent.ExecutionConfirmed()) },
+        onDismissPending = { viewModel.emitEvent(TrickEvent.PendingCommandDismissed()) },
+        onDismissResult = { viewModel.emitEvent(TrickEvent.ResultDismissed()) },
+        onClearError = { viewModel.emitEvent(TrickEvent.ErrorDismissed()) },
+    )
+}
+
+@Composable
+private fun TrickScreenContent(
+    state: TrickState,
+    padding: PaddingValues,
+    onCommandTap: (ShellCommand) -> Unit,
+    onClearInteractionHint: () -> Unit,
+    onConfirmPending: () -> Unit,
+    onDismissPending: () -> Unit,
+    onDismissResult: () -> Unit,
+    onClearError: () -> Unit,
+) {
     val strings = LocalStrings.current
     val screenStrings = ScreenUiStrings.from(strings)
     val listState = rememberLazyListState()
@@ -83,62 +107,41 @@ fun TrickScreen(
     LaunchedEffect(state.interactionHint) {
         if (state.interactionHint != null) {
             delay(1800)
-            viewModel.clearInteractionHint()
+            onClearInteractionHint()
         }
-    }
-
-    fun handleCommandTap(command: ShellCommand) {
-        if (state.running) {
-            viewModel.notifyBusyInteraction(command)
-            return
-        }
-        if (!command.supported) {
-            viewModel.notifyUnsupportedCommand(command)
-            return
-        }
-        viewModel.requestExecution(command)
     }
 
     Box(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier.fillMaxSize(),
     ) {
         LazyColumn(
             state = listState,
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(10.dp),
-            contentPadding = screenContentPadding(padding, horizontal = 16.dp, vertical = 10.dp)
+            contentPadding = screenContentPadding(padding, horizontal = 16.dp, vertical = 10.dp),
         ) {
-            item {
-                SectionHeader(
-                    title = strings.navTrick,
-                    help = headerHelp,
-                    onHelp = onHelp,
-                    onBack = onBack,
-                    onMenu = onMenu
-                )
-            }
             state.interactionHint?.let { hint ->
                 item {
                     ElevatedCard(
                         modifier = Modifier.fillMaxWidth(),
                         colors = CardDefaults.elevatedCardColors(
-                            containerColor = MaterialTheme.colorScheme.secondaryContainer
-                        )
+                            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                        ),
                     ) {
                         Row(
                             modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
-                            verticalAlignment = Alignment.CenterVertically
+                            verticalAlignment = Alignment.CenterVertically,
                         ) {
-                            Icon(
-                                imageVector = Icons.Filled.Schedule,
+                            AppIcon(
+                                imageVector = AppIcons.Filled.Schedule,
                                 contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onSecondaryContainer
+                                tint = MaterialTheme.colorScheme.onSecondaryContainer,
                             )
                             AppText(
                                 text = hint,
                                 modifier = Modifier.padding(start = 8.dp),
                                 style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSecondaryContainer
+                                color = MaterialTheme.colorScheme.onSecondaryContainer,
                             )
                         }
                     }
@@ -146,30 +149,30 @@ fun TrickScreen(
             }
             itemsIndexed(
                 items = state.commands,
-                key = { index, command -> "${command.command}:$index" }
+                key = { index, command -> "${command.command}:$index" },
             ) { _, command ->
                 val isRunningThis = state.runningCommand?.command == command.command
                 TrickCommandCard(
                     command = command,
                     running = state.running,
                     runningThis = isRunningThis,
-                    onExecute = { handleCommandTap(command) }
+                    onExecute = { onCommandTap(command) },
                 )
             }
             state.lastResult?.let { res ->
                 item {
                     TrickInlineResultSummary(
                         commandTitle = state.lastCommandTitle,
-                        result = res
+                        result = res,
                     )
                 }
             }
-            state.error?.let { err ->
+            state.errorMessage?.let { err ->
                 item {
                     AppText(
                         text = err,
                         color = MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.bodySmall
+                        style = MaterialTheme.typography.bodySmall,
                     )
                 }
             }
@@ -180,18 +183,18 @@ fun TrickScreen(
             onClick = { scope.launch { listState.animateScrollToItem(0) } },
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(12.dp)
+                .padding(12.dp),
         )
     }
 
     state.pendingCommand?.let { command ->
         AlertDialog(
-            onDismissRequest = viewModel::dismissPendingCommand,
+            onDismissRequest = onDismissPending,
             title = { AppText(screenStrings.confirmCommand) },
             text = {
                 AppText(
                     text = command.confirmation ?: "${screenStrings.execute}: ${command.command}",
-                    style = MaterialTheme.typography.bodySmall
+                    style = MaterialTheme.typography.bodySmall,
                 )
             },
             confirmButton = {
@@ -200,8 +203,8 @@ fun TrickScreen(
                     enabled = !state.running,
                     fullWidth = false,
                     onClick = {
-                        viewModel.confirmPendingExecution()
-                    }
+                        onConfirmPending()
+                    },
                 )
             },
             dismissButton = {
@@ -209,22 +212,22 @@ fun TrickScreen(
                     text = screenStrings.cancel,
                     fullWidth = false,
                     variant = ButtonVariant.Secondary,
-                    onClick = viewModel::dismissPendingCommand
+                    onClick = onDismissPending,
                 )
-            }
+            },
         )
     }
 
-    state.error?.let { ErrorDialogComponent(it, viewModel::clearError) }
+    state.errorMessage?.let { ErrorDialogComponent(it, onClearError) }
 
     state.resultToDisplay?.let { res ->
         AlertDialog(
-            onDismissRequest = viewModel::dismissResult,
+            onDismissRequest = onDismissResult,
             title = {
                 AppText(
                     text = if (res.success) strings.commandSuccess else strings.commandError,
                     color = if (res.success) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
-                    fontWeight = FontWeight.SemiBold
+                    fontWeight = FontWeight.SemiBold,
                 )
             },
             text = {
@@ -234,26 +237,44 @@ fun TrickScreen(
                     stdoutLines = state.stdoutLines,
                     stderrLines = state.stderrLines,
                     packageLines = state.packageLines,
-                    showPackageList = state.stdoutIsPackageList
+                    showPackageList = state.stdoutIsPackageList,
                 )
             },
             confirmButton = {
                 AppButton(
                     text = strings.close,
                     fullWidth = false,
-                    onClick = viewModel::dismissResult
+                    onClick = onDismissResult,
                 )
-            }
+            },
         )
     }
 }
+
+@AppScreenPreviews
 @Composable
-private fun TrickCommandCard(
-    command: ShellCommand,
-    running: Boolean,
-    runningThis: Boolean,
-    onExecute: () -> Unit
-) {
+private fun TrickScreenPreview() {
+    val demoCommand = ShellCommand(
+        title = "List installed packages",
+        command = "pm list packages",
+        requiresRoot = false,
+    )
+    AppPreviewEnvironment {
+        TrickScreenContent(
+            state = TrickState(commands = listOf(demoCommand)),
+            padding = PaddingValues(),
+            onCommandTap = {},
+            onClearInteractionHint = {},
+            onConfirmPending = {},
+            onDismissPending = {},
+            onDismissResult = {},
+            onClearError = {},
+        )
+    }
+}
+
+@Composable
+private fun TrickCommandCard(command: ShellCommand, running: Boolean, runningThis: Boolean, onExecute: () -> Unit) {
     val screenStrings = ScreenUiStrings.from(LocalStrings.current)
     val disabledByOther = running && !runningThis
     val unsupported = !command.supported
@@ -275,17 +296,17 @@ private fun TrickCommandCard(
             if (!unsupported && !disabledByOther && !runningThis) {
                 onExecute()
             }
-        }
+        },
     ) {
         Column(
             modifier = Modifier.padding(14.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+            verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                val icon = if (command.requiresRoot) Icons.Filled.Bolt else Icons.Filled.Code
+                val icon = if (command.requiresRoot) AppIcons.Filled.Bolt else AppIcons.Filled.Code
                 Box(
                     modifier = Modifier
                         .size(34.dp)
@@ -295,29 +316,29 @@ private fun TrickCommandCard(
                                 MaterialTheme.colorScheme.tertiary.copy(alpha = 0.18f)
                             } else {
                                 MaterialTheme.colorScheme.primary.copy(alpha = 0.16f)
-                            }
+                            },
                         ),
-                    contentAlignment = Alignment.Center
+                    contentAlignment = Alignment.Center,
                 ) {
-                    Icon(
+                    AppIcon(
                         imageVector = icon,
                         contentDescription = null,
                         tint = if (command.requiresRoot) {
                             MaterialTheme.colorScheme.tertiary
                         } else {
                             MaterialTheme.colorScheme.primary
-                        }
+                        },
                     )
                 }
                 Column(
                     modifier = Modifier
                         .padding(start = 10.dp)
-                        .weight(1f)
+                        .weight(1f),
                 ) {
                     AppText(
                         text = command.title,
                         style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold
+                        fontWeight = FontWeight.SemiBold,
                     )
                     AppText(
                         text = when {
@@ -326,13 +347,13 @@ private fun TrickCommandCard(
                             else -> screenStrings.standardCommand
                         },
                         style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
                 if (runningThis) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(18.dp),
-                        strokeWidth = 2.dp
+                        strokeWidth = 2.dp,
                     )
                 }
             }
@@ -340,18 +361,22 @@ private fun TrickCommandCard(
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 CommandTag(
                     text = if (command.requiresRoot) screenStrings.rootTag else screenStrings.safeTag,
-                    tint = if (command.requiresRoot) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary
+                    tint = if (command.requiresRoot) {
+                        MaterialTheme.colorScheme.tertiary
+                    } else {
+                        MaterialTheme.colorScheme.primary
+                    },
                 )
                 if (unsupported) {
                     CommandTag(
                         text = screenStrings.unavailableTag,
-                        tint = MaterialTheme.colorScheme.error
+                        tint = MaterialTheme.colorScheme.error,
                     )
                 }
                 if (command.confirmation != null) {
                     CommandTag(
                         text = screenStrings.confirmationTag,
-                        tint = MaterialTheme.colorScheme.secondary
+                        tint = MaterialTheme.colorScheme.secondary,
                     )
                 }
             }
@@ -361,14 +386,14 @@ private fun TrickCommandCard(
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(12.dp))
                     .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f))
-                    .padding(horizontal = 10.dp, vertical = 8.dp)
+                    .padding(horizontal = 10.dp, vertical = 8.dp),
             ) {
                 AppText(
                     text = command.command,
-                    style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
+                    style = MaterialTheme.typography.bodySmall.copy(fontFamily = AppTypography.monospace),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 3,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
                 )
             }
 
@@ -383,36 +408,35 @@ private fun TrickCommandCard(
                 enabled = !runningThis && !unsupported,
                 fullWidth = false,
                 variant = if (command.requiresRoot) ButtonVariant.Secondary else ButtonVariant.Tonal,
-                modifier = Modifier.align(Alignment.End)
+                modifier = Modifier.align(Alignment.End),
             )
 
             if (runningThis) {
-                LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                AppProgressBar(modifier = Modifier.fillMaxWidth())
             }
         }
     }
 }
+
 @Composable
 private fun CommandTag(text: String, tint: Color) {
     Box(
         modifier = Modifier
             .clip(RoundedCornerShape(999.dp))
             .background(tint.copy(alpha = 0.16f))
-            .padding(horizontal = 9.dp, vertical = 4.dp)
+            .padding(horizontal = 9.dp, vertical = 4.dp),
     ) {
         AppText(
             text = text,
             style = MaterialTheme.typography.labelSmall,
             color = tint,
-            fontWeight = FontWeight.SemiBold
+            fontWeight = FontWeight.SemiBold,
         )
     }
 }
+
 @Composable
-private fun TrickInlineResultSummary(
-    commandTitle: String?,
-    result: ShellCommandResult
-) {
+private fun TrickInlineResultSummary(commandTitle: String?, result: ShellCommandResult) {
     val screenStrings = ScreenUiStrings.from(LocalStrings.current)
     val title = commandTitle ?: screenStrings.command
     ElevatedCard(
@@ -422,24 +446,24 @@ private fun TrickInlineResultSummary(
                 MaterialTheme.colorScheme.primary.copy(alpha = 0.11f)
             } else {
                 MaterialTheme.colorScheme.error.copy(alpha = 0.12f)
-            }
+            },
         ),
-        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 0.dp)
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 0.dp),
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            Icon(
-                imageVector = if (result.success) Icons.Filled.CheckCircle else Icons.Filled.Error,
+            AppIcon(
+                imageVector = if (result.success) AppIcons.Filled.CheckCircle else AppIcons.Filled.Error,
                 contentDescription = null,
-                tint = if (result.success) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
+                tint = if (result.success) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
             )
             Column(modifier = Modifier.padding(start = 8.dp)) {
                 AppText(
                     text = "${screenStrings.exitCode.format(result.code)} - $title",
                     style = MaterialTheme.typography.labelLarge,
-                    fontWeight = FontWeight.SemiBold
+                    fontWeight = FontWeight.SemiBold,
                 )
                 val subtitle = when {
                     result.stderr.isNotBlank() -> result.stderr.lineSequence().first().trim()
@@ -451,7 +475,7 @@ private fun TrickInlineResultSummary(
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
                 )
             }
         }
@@ -465,7 +489,7 @@ private fun TrickResultDialogBody(
     stdoutLines: List<String>,
     stderrLines: List<String>,
     packageLines: List<String>,
-    showPackageList: Boolean
+    showPackageList: Boolean,
 ) {
     val screenStrings = ScreenUiStrings.from(LocalStrings.current)
 
@@ -473,30 +497,30 @@ private fun TrickResultDialogBody(
         modifier = Modifier
             .fillMaxWidth()
             .heightIn(max = 420.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         item {
             ElevatedCard(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.elevatedCardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp)
-                )
+                    containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
+                ),
             ) {
                 Column(
                     modifier = Modifier.padding(horizontal = 10.dp, vertical = 9.dp),
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
                     commandTitle?.let {
                         AppText(
                             text = it,
                             style = MaterialTheme.typography.labelLarge,
-                            fontWeight = FontWeight.SemiBold
+                            fontWeight = FontWeight.SemiBold,
                         )
                     }
                     AppText(
                         text = screenStrings.exitCode.format(result.code),
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
             }
@@ -507,14 +531,14 @@ private fun TrickResultDialogBody(
                 AppText(
                     text = screenStrings.packagesFound.format(packageLines.size),
                     style = MaterialTheme.typography.labelMedium,
-                    fontWeight = FontWeight.SemiBold
+                    fontWeight = FontWeight.SemiBold,
                 )
             }
             items(packageLines) { pkg ->
                 TrickResultLine(
                     text = pkg,
-                    icon = Icons.Filled.Code,
-                    tint = MaterialTheme.colorScheme.primary
+                    icon = AppIcons.Filled.Code,
+                    tint = MaterialTheme.colorScheme.primary,
                 )
             }
         } else if (stdoutLines.isNotEmpty()) {
@@ -522,14 +546,14 @@ private fun TrickResultDialogBody(
                 AppText(
                     text = screenStrings.output,
                     style = MaterialTheme.typography.labelMedium,
-                    fontWeight = FontWeight.SemiBold
+                    fontWeight = FontWeight.SemiBold,
                 )
             }
             items(stdoutLines) { line ->
                 TrickResultLine(
                     text = line,
-                    icon = Icons.Filled.CheckCircle,
-                    tint = MaterialTheme.colorScheme.primary
+                    icon = AppIcons.Filled.CheckCircle,
+                    tint = MaterialTheme.colorScheme.primary,
                 )
             }
         }
@@ -540,14 +564,14 @@ private fun TrickResultDialogBody(
                     text = screenStrings.errorOutput,
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.error
+                    color = MaterialTheme.colorScheme.error,
                 )
             }
             items(stderrLines) { line ->
                 TrickResultLine(
                     text = line,
-                    icon = Icons.Filled.Error,
-                    tint = MaterialTheme.colorScheme.error
+                    icon = AppIcons.Filled.Error,
+                    tint = MaterialTheme.colorScheme.error,
                 )
             }
         }
@@ -556,8 +580,8 @@ private fun TrickResultDialogBody(
             item {
                 TrickResultLine(
                     text = screenStrings.noTextOutput,
-                    icon = Icons.Filled.Schedule,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    icon = AppIcons.Filled.Schedule,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
         }
@@ -565,31 +589,27 @@ private fun TrickResultDialogBody(
 }
 
 @Composable
-private fun TrickResultLine(
-    text: String,
-    icon: ImageVector,
-    tint: Color
-) {
+private fun TrickResultLine(text: String, icon: ImageVector, tint: Color) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
             .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.52f))
             .padding(horizontal = 10.dp, vertical = 8.dp),
-        verticalAlignment = Alignment.Top
+        verticalAlignment = Alignment.Top,
     ) {
-        Icon(
+        AppIcon(
             imageVector = icon,
             contentDescription = null,
             tint = tint,
             modifier = Modifier
                 .size(15.dp)
-                .padding(top = 2.dp)
+                .padding(top = 2.dp),
         )
         AppText(
             text = text,
             style = MaterialTheme.typography.bodySmall,
-            modifier = Modifier.padding(start = 8.dp)
+            modifier = Modifier.padding(start = 8.dp),
         )
     }
 }

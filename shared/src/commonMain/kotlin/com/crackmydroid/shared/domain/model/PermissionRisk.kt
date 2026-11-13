@@ -3,7 +3,7 @@ package com.crackmydroid.shared.domain.model
 enum class PermissionRiskLevel {
     Medium,
     High,
-    Critical
+    Critical,
 }
 
 enum class PermissionFindingKind {
@@ -20,14 +20,14 @@ enum class PermissionFindingKind {
     OVERLAY_ACCESSIBILITY_PATTERN,
     INSTALL_QUERY_PATTERN,
     BOOT_SMS_PATTERN,
-    BACKGROUND_LOCATION_CAPTURE_PATTERN
+    BACKGROUND_LOCATION_CAPTURE_PATTERN,
 }
 
 data class PermissionRiskFinding(
     val key: String,
     val kind: PermissionFindingKind,
     val level: PermissionRiskLevel,
-    val isPattern: Boolean = false
+    val isPattern: Boolean = false,
 )
 
 data class PermissionRiskReport(
@@ -37,5 +37,5 @@ data class PermissionRiskReport(
     val score: Int,
     val criticalCount: Int,
     val highCount: Int,
-    val mediumCount: Int
+    val mediumCount: Int,
 )

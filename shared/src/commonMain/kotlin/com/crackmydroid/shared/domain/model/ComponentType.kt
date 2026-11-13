@@ -7,5 +7,5 @@ enum class ComponentType {
     ACTIVITY,
     SERVICE,
     RECEIVER,
-    PROVIDER
+    PROVIDER,
 }

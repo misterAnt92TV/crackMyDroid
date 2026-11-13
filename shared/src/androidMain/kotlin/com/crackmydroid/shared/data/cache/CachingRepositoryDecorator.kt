@@ -19,7 +19,7 @@ class CachingRepositoryDecorator {
         cacheSetter: (T) -> Unit,
         timeGetter: () -> Long,
         timeSetter: (Long) -> Unit,
-        compute: suspend () -> T
+        compute: suspend () -> T,
     ): T {
         val cached = cacheGetter()
         val now = System.currentTimeMillis()

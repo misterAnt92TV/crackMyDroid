@@ -1,5 +1,8 @@
 package com.crackmydroid.shared.presentation
 
+import com.crackmydroid.architecture.testing.*
+
+
 import com.crackmydroid.shared.domain.model.ExportDocument
 import com.crackmydroid.shared.domain.model.ExportFormat
 import com.crackmydroid.shared.domain.model.UseCaseReportText
@@ -12,10 +15,10 @@ import com.crackmydroid.shared.domain.usecase.reports.ExportReportUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetExportFormatUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetPermissionFavoritesUseCase
 import com.crackmydroid.shared.domain.usecase.settings.SetPermissionFavoritesUseCase
-import com.crackmydroid.shared.i18n.UseCaseTexts
+import com.crackmydroid.shared.i18n.usecase.UseCaseTexts
+import com.crackmydroid.shared.ui.permissions.PermissionsEvent
 import com.crackmydroid.shared.ui.permissions.PermissionsViewModel
 import io.mockk.coEvery
-import io.mockk.coJustRun
 import io.mockk.coVerify
 import io.mockk.mockk
 import io.mockk.slot
@@ -27,12 +30,12 @@ import kotlin.test.assertNull
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.awaitCancellation
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.yield
 import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
@@ -41,24 +44,13 @@ import kotlinx.coroutines.test.setMain
 import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class PermissionsViewModelTest {
-    private val dispatcher = StandardTestDispatcher()
+class PermissionsViewModelTest : BaseViewModelUnitTest() {
     private fun reportExporter() = ExportReportUseCase(mockk<ReportFileRepository>(relaxed = true))
 
     private fun emptyFavorites(): GetPermissionFavoritesUseCase {
         val getFavorites = mockk<GetPermissionFavoritesUseCase>()
         coEvery { getFavorites() } returns Result.success(emptySet())
         return getFavorites
-    }
-
-    @BeforeTest
-    fun setUp() {
-        Dispatchers.setMain(dispatcher)
-    }
-
-    @AfterTest
-    fun tearDown() {
-        Dispatchers.resetMain()
     }
 
     @Test
@@ -72,7 +64,7 @@ class PermissionsViewModelTest {
         coEvery { files.save(capture(saved)) } returns Result.success("/tmp/permissions_report.pdf")
         val vm = previewViewModel(builder, ExportReportUseCase(files, format))
 
-        vm.export()
+        vm.handleEvent(PermissionsEvent.ExportRequested())
         advanceUntilIdle()
 
         assertEquals("/tmp/permissions_report.pdf", vm.state.value.lastExportPath)
@@ -104,11 +96,11 @@ class PermissionsViewModelTest {
             TestAppDispatchers(dispatcher),
         )
 
-        vm.refresh()
+        vm.handleEvent(PermissionsEvent.Refresh())
         advanceUntilIdle()
-        vm.setFilter("sms", trackUsage = true)
-        vm.setFilter("cam", trackUsage = true)
-        vm.setFilter("sms", trackUsage = true)
+        vm.handleEvent(PermissionsEvent.FilterChanged("sms", trackUsage = true))
+        vm.handleEvent(PermissionsEvent.FilterChanged("cam", trackUsage = true))
+        vm.handleEvent(PermissionsEvent.FilterChanged("sms", trackUsage = true))
 
         assertEquals("sms", vm.state.value.topQuery)
         vm.onCleared()
@@ -140,11 +132,11 @@ class PermissionsViewModelTest {
             TestAppDispatchers(dispatcher),
         )
 
-        vm.refresh()
+        vm.handleEvent(PermissionsEvent.Refresh())
         advanceUntilIdle()
-        vm.startAutoRiskScan()
+        vm.handleEvent(PermissionsEvent.AutoRiskScanStarted())
         advanceUntilIdle()
-        vm.setShowOnlyRisky(true)
+        vm.handleEvent(PermissionsEvent.RiskFilterChanged(true))
 
         val filtered = vm.state.value.visibleApps
         assertEquals(1, filtered.size)
@@ -171,9 +163,9 @@ class PermissionsViewModelTest {
             TestAppDispatchers(dispatcher),
         )
 
-        vm.refresh()
+        vm.handleEvent(PermissionsEvent.Refresh())
         advanceUntilIdle()
-        vm.toggleFavorite("pkg.favorite")
+        vm.handleEvent(PermissionsEvent.FavoriteToggled("pkg.favorite"))
         advanceUntilIdle()
 
         assertEquals(emptySet(), vm.state.value.favorites)
@@ -192,18 +184,16 @@ class PermissionsViewModelTest {
         coEvery { files.share(capture(shared)) } returns Result.success("/tmp/report.pdf")
         io.mockk.every { builder.singleFileName("pkg.first") } returns "first.txt"
         val vm = previewViewModel(builder, ExportReportUseCase(files, format))
-        vm.refresh()
+        vm.handleEvent(PermissionsEvent.Refresh())
         advanceUntilIdle()
 
-        vm.requestReportPreview("pkg.first")
+        vm.handleEvent(PermissionsEvent.ReportPreviewRequested("pkg.first"))
         assertTrue(vm.state.value.reportPreviewLoading)
         assertNull(vm.state.value.reportPreviewContent)
         advanceUntilIdle()
         assertEquals("generated content", vm.state.value.reportPreviewContent)
         assertEquals(false, vm.state.value.reportPreviewLoading)
 
-        vm.shareSingle("pkg.first", vm.state.value.reportPreviewContent)
-        advanceUntilIdle()
         coVerify(exactly = 1) { builder.single(any(), any(), any()) }
         assertEquals("first.pdf", shared.captured.fileName)
         assertEquals("permissions", shared.captured.reportType)
@@ -218,7 +208,7 @@ class PermissionsViewModelTest {
         var firstCancelled = false
         coEvery { builder.single(match { it.packageName == "pkg.first" }, any(), any()) } coAnswers {
             try {
-                delay(1_000)
+                yield()
                 Result.success("first")
             } finally {
                 firstCancelled = true
@@ -227,17 +217,17 @@ class PermissionsViewModelTest {
         coEvery { builder.single(match { it.packageName == "pkg.second" }, any(), any()) } returns
             Result.success("second")
         val vm = previewViewModel(builder)
-        vm.refresh()
+        vm.handleEvent(PermissionsEvent.Refresh())
         advanceUntilIdle()
-        vm.requestReportPreview("pkg.first")
+        vm.handleEvent(PermissionsEvent.ReportPreviewRequested("pkg.first"))
         runCurrent()
-        vm.requestReportPreview("pkg.second")
+        vm.handleEvent(PermissionsEvent.ReportPreviewRequested("pkg.second"))
         advanceUntilIdle()
 
         assertTrue(firstCancelled)
         assertEquals("pkg.second", vm.state.value.reportPreviewPackage)
         assertEquals("second", vm.state.value.reportPreviewContent)
-        assertNull(vm.state.value.reportPreviewError)
+        assertNull(vm.state.value.reportPreviewErrorFromState)
         vm.onCleared()
     }
 
@@ -245,20 +235,20 @@ class PermissionsViewModelTest {
     fun dismissCancelsPreviewWithoutErrorOrLateContent() = runTest(dispatcher) {
         val builder = mockk<BuildPermissionsReportUseCase>()
         coEvery { builder.single(any(), any(), any()) } coAnswers {
-            delay(1_000)
+            yield()
             Result.success("late")
         }
         val vm = previewViewModel(builder)
-        vm.refresh()
+        vm.handleEvent(PermissionsEvent.Refresh())
         advanceUntilIdle()
-        vm.requestReportPreview("pkg.first")
+        vm.handleEvent(PermissionsEvent.ReportPreviewRequested("pkg.first"))
         runCurrent()
-        vm.dismissReportPreview()
+        vm.handleEvent(PermissionsEvent.ReportPreviewDismissed())
         advanceUntilIdle()
 
         assertNull(vm.state.value.reportPreviewPackage)
         assertNull(vm.state.value.reportPreviewContent)
-        assertNull(vm.state.value.reportPreviewError)
+        assertNull(vm.state.value.reportPreviewErrorFromState)
         assertEquals(false, vm.state.value.reportPreviewLoading)
         vm.onCleared()
     }
@@ -268,13 +258,13 @@ class PermissionsViewModelTest {
         val builder = mockk<BuildPermissionsReportUseCase>()
         coEvery { builder.single(any(), any(), any()) } returns Result.failure(IllegalStateException("report failed"))
         val vm = previewViewModel(builder)
-        vm.refresh()
+        vm.handleEvent(PermissionsEvent.Refresh())
         advanceUntilIdle()
-        vm.requestReportPreview("pkg.first")
+        vm.handleEvent(PermissionsEvent.ReportPreviewRequested("pkg.first"))
         advanceUntilIdle()
 
         assertNull(vm.state.value.reportPreviewContent)
-        assertEquals("report failed", vm.state.value.reportPreviewError)
+        assertEquals("report failed", vm.state.value.reportPreviewErrorFromState)
         assertEquals(false, vm.state.value.reportPreviewLoading)
         vm.onCleared()
     }
@@ -284,12 +274,12 @@ class PermissionsViewModelTest {
         val analyzer = mockk<AnalyzePermissionRisksUseCase>()
         coEvery { analyzer(any()) } returns Result.failure(IllegalStateException("analysis failed"))
         val vm = previewViewModel(mockk(), analyzer = analyzer)
-        vm.refresh()
+        vm.handleEvent(PermissionsEvent.Refresh())
         advanceUntilIdle()
-        vm.startAutoRiskScan()
+        vm.handleEvent(PermissionsEvent.AutoRiskScanStarted())
         advanceUntilIdle()
 
-        assertEquals("analysis failed", vm.state.value.error)
+        assertEquals("analysis failed", vm.state.value.scanError)
         assertEquals(false, vm.state.value.autoScanRunning)
         assertEquals(0, vm.state.value.autoScanScannedApps)
         vm.onCleared()
@@ -314,9 +304,9 @@ class PermissionsViewModelTest {
             mockk(),
             dispatchers,
         )
-        vm.refresh()
+        vm.handleEvent(PermissionsEvent.Refresh())
         advanceUntilIdle()
-        vm.startAutoRiskScan()
+        vm.handleEvent(PermissionsEvent.AutoRiskScanStarted())
         advanceUntilIdle()
         val report = vm.state.value.riskReports.single()
 
@@ -345,7 +335,7 @@ class PermissionsViewModelTest {
             val reportText = thirdArg<UseCaseReportText>()
             if (reportText.noDataAvailable() == UseCaseTexts("en").noDataAvailable()) {
                 try {
-                    delay(1_000)
+                    yield()
                 } finally {
                     cancelled = true
                 }
@@ -356,9 +346,9 @@ class PermissionsViewModelTest {
         io.mockk.every { builder.singleFileName("pkg.first") } returns "first.txt"
         coEvery { files.share(capture(shared)) } returns Result.success("/tmp/report.pdf")
         val vm = previewViewModel(builder, ExportReportUseCase(files, format))
-        vm.refresh()
+        vm.handleEvent(PermissionsEvent.Refresh())
         advanceUntilIdle()
-        vm.requestReportPreview("pkg.first")
+        vm.handleEvent(PermissionsEvent.ReportPreviewRequested("pkg.first"))
         runCurrent()
         vm.updateLanguage("fr")
         advanceUntilIdle()
@@ -366,7 +356,7 @@ class PermissionsViewModelTest {
 
         assertTrue(cancelled)
         assertEquals(UseCaseTexts("fr").noDataAvailable(), content)
-        vm.shareSingle("pkg.first", content)
+        vm.handleEvent(PermissionsEvent.ReportShared("pkg.first", content))
         advanceUntilIdle()
         assertEquals("first.pdf", shared.captured.fileName)
         assertEquals(UseCaseTexts("fr").noDataAvailable(), shared.captured.textContent)
@@ -377,30 +367,44 @@ class PermissionsViewModelTest {
     @Test
     fun oldScanFinallyDoesNotClearReplacementProgress() = runTest(dispatcher) {
         val analyzer = mockk<AnalyzePermissionRisksUseCase>()
+        val oldFinallyGate = CompletableDeferred<Unit>()
+        val firstScanStarted = CompletableDeferred<Unit>()
+        val replacementScanStarted = CompletableDeferred<Unit>()
+        val replacementScanGate = CompletableDeferred<Unit>()
         var calls = 0
         coEvery { analyzer(any()) } coAnswers {
-            if (++calls == 1) {
+            when (++calls) {
+                1 -> {
+                firstScanStarted.complete(Unit)
                 try {
                     awaitCancellation()
                 } finally {
-                    withContext(NonCancellable) { delay(1_000) }
+                    withContext(NonCancellable) { oldFinallyGate.await() }
+                }
+                }
+                2 -> {
+                    replacementScanStarted.complete(Unit)
+                    replacementScanGate.await()
                 }
             }
-            delay(2_000)
+            yield()
             Result.success(null)
         }
         val vm = previewViewModel(mockk(), analyzer = analyzer)
-        vm.refresh()
+        vm.handleEvent(PermissionsEvent.Refresh())
         advanceUntilIdle()
-        vm.startAutoRiskScan()
+        vm.handleEvent(PermissionsEvent.AutoRiskScanStarted())
         runCurrent()
-        vm.startAutoRiskScan()
-        advanceTimeBy(1_100)
+        firstScanStarted.await()
+        vm.handleEvent(PermissionsEvent.AutoRiskScanStarted())
         runCurrent()
+        replacementScanStarted.await()
 
         assertTrue(vm.state.value.autoScanRunning)
         assertEquals("First", vm.state.value.autoScanCurrentLabel)
         assertEquals(0, vm.state.value.autoScanScannedApps)
+        oldFinallyGate.complete(Unit)
+        replacementScanGate.complete(Unit)
         advanceUntilIdle()
         assertEquals(false, vm.state.value.autoScanRunning)
         assertEquals(2, vm.state.value.autoScanScannedApps)
@@ -415,15 +419,15 @@ class PermissionsViewModelTest {
         val real = AnalyzePermissionRisksUseCase(TestAppDispatchers(dispatcher))
         val report = real(app).getOrThrow()
         coEvery { analyzer(any()) } coAnswers {
-            withContext(NonCancellable) { delay(1_000) }
+            withContext(NonCancellable) { yield() }
             Result.success(report)
         }
         val vm = previewViewModel(mockk(), analyzer = analyzer)
-        vm.refresh()
+        vm.handleEvent(PermissionsEvent.Refresh())
         advanceUntilIdle()
-        vm.startAutoRiskScan()
+        vm.handleEvent(PermissionsEvent.AutoRiskScanStarted())
         runCurrent()
-        vm.refresh()
+        vm.handleEvent(PermissionsEvent.Refresh())
         advanceUntilIdle()
 
         assertTrue(vm.state.value.riskReports.isEmpty())
@@ -441,16 +445,16 @@ class PermissionsViewModelTest {
         val latest = listOf(AppPermissionEntry("Latest", "pkg.latest", emptyList()))
         coEvery { list() } coAnswers {
             if (++calls == 1) {
-                withContext(NonCancellable) { delay(1_000) }
+                withContext(NonCancellable) { yield() }
                 Result.success(listOf(AppPermissionEntry("Old", "pkg.old", emptyList())))
             } else {
                 Result.success(latest)
             }
         }
         val vm = previewViewModel(mockk(), list = list)
-        vm.refresh()
+        vm.handleEvent(PermissionsEvent.Refresh())
         runCurrent()
-        vm.refresh()
+        vm.handleEvent(PermissionsEvent.Refresh())
         advanceUntilIdle()
 
         assertEquals(latest, vm.state.value.apps)
@@ -471,17 +475,17 @@ class PermissionsViewModelTest {
             ),
         )
         val vm = previewViewModel(mockk(), analyzer = analyzer, list = list)
-        vm.refresh()
+        vm.handleEvent(PermissionsEvent.Refresh())
         advanceUntilIdle()
-        vm.startAutoRiskScan()
+        vm.handleEvent(PermissionsEvent.AutoRiskScanStarted())
         runCurrent()
         val findings = vm.state.value.findingsByPackage
         val visibleFindings = vm.state.value.visibleFindingsByPackage
         assertEquals(1, findings.size)
         advanceUntilIdle()
         assertSame(findings, vm.state.value.findingsByPackage)
-        vm.setFilter("First")
-        vm.setShowOnlyRisky(true)
+        vm.handleEvent(PermissionsEvent.FilterChanged("First"))
+        vm.handleEvent(PermissionsEvent.RiskFilterChanged(true))
 
         assertSame(findings, vm.state.value.findingsByPackage)
         assertSame(visibleFindings, vm.state.value.visibleFindingsByPackage)
@@ -501,9 +505,9 @@ class PermissionsViewModelTest {
             ),
         )
         val vm = previewViewModel(mockk(), analyzer = analyzer, list = list)
-        vm.refresh()
+        vm.handleEvent(PermissionsEvent.Refresh())
         advanceUntilIdle()
-        vm.startAutoRiskScan()
+        vm.handleEvent(PermissionsEvent.AutoRiskScanStarted())
         runCurrent()
         val firstItems = vm.state.value.findingsByPackage.getValue("pkg.first")
         advanceUntilIdle()
@@ -530,15 +534,16 @@ class PermissionsViewModelTest {
         val list = mockk<ListPermissionsUseCase>()
         coEvery { list() } returns Result.success(apps)
         val vm = previewViewModel(mockk(), analyzer = analyzer, list = list)
-        vm.refresh()
+        vm.handleEvent(PermissionsEvent.Refresh())
         advanceUntilIdle()
-        vm.startAutoRiskScan()
+        vm.handleEvent(PermissionsEvent.AutoRiskScanStarted())
         advanceUntilIdle()
 
         assertEquals(expected, vm.state.value.riskReports)
         assertEquals(apps.size, vm.state.value.autoScanScannedApps)
         val findings = vm.state.value.findingsByPackage
-        vm.setFilter("SYSTEM_ALERT_WINDOW")
+        vm.handleEvent(PermissionsEvent.FilterChanged("SYSTEM_ALERT_WINDOW"))
+        advanceUntilIdle()
         assertEquals(60, vm.state.value.visibleApps.size)
         assertSame(findings, vm.state.value.findingsByPackage)
         vm.onCleared()
@@ -548,7 +553,7 @@ class PermissionsViewModelTest {
         builder: BuildPermissionsReportUseCase,
         exporter: ExportReportUseCase = reportExporter(),
         analyzer: AnalyzePermissionRisksUseCase =
-            AnalyzePermissionRisksUseCase(dispatchers = TestAppDispatchers(dispatcher)),
+            AnalyzePermissionRisksUseCase(dispatchers = appDispatchers),
         list: ListPermissionsUseCase? = null,
     ): PermissionsViewModel {
         val permissions = list ?: mockk<ListPermissionsUseCase>().also {
@@ -559,14 +564,16 @@ class PermissionsViewModelTest {
                 ),
             )
         }
-        return PermissionsViewModel(
-            permissions,
-            analyzer,
-            builder,
-            exporter,
-            emptyFavorites(),
-            mockk(),
-            TestAppDispatchers(dispatcher),
+        return autoClear(
+            PermissionsViewModel(
+                permissions,
+                analyzer,
+                builder,
+                exporter,
+                emptyFavorites(),
+                mockk(),
+                appDispatchers,
+            ),
         )
     }
 }

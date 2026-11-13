@@ -1,17 +1,19 @@
 package com.crackmydroid.shared.domain.usecase.reports
 
 import co.touchlab.kermit.Logger
-import com.crackmydroid.shared.AppLogger
+import com.crackmydroid.architecture.domain.usecase.BaseUseCase
+import com.crackmydroid.architecture.logging.AppLogger
 import com.crackmydroid.shared.domain.model.ExportDocument
 import com.crackmydroid.shared.domain.model.ExportFormat
 import com.crackmydroid.shared.domain.repository.ReportFileRepository
-import com.crackmydroid.shared.domain.usecase.BaseUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetExportFormatUseCase
+import com.crackmydroid.shared.i18n.usecase.UseCasePresentationTexts
 import kotlinx.serialization.json.JsonElement
 
 class ExportReportUseCase(
     private val reportFileRepository: ReportFileRepository,
     private val getExportFormat: GetExportFormatUseCase? = null,
+    private val text: UseCasePresentationTexts = UseCasePresentationTexts("en"),
     logger: Logger = AppLogger.logger,
 ) : BaseUseCase(TAG, logger = logger) {
     private companion object {
@@ -71,6 +73,6 @@ class ExportReportUseCase(
         )
 
     private suspend fun selectedFormat(): ExportFormat = checkNotNull(getExportFormat) {
-        "GetExportFormatUseCase is required to export a report in the selected format"
+        text.exportFormatUseCaseRequired
     }().getOrThrow()
 }

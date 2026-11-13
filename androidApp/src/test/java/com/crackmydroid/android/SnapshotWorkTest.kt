@@ -25,7 +25,7 @@ class SnapshotWorkTest {
     fun executeSnapshot_ioFailure_requestsRetry() = runTest {
         assertEquals(
             SnapshotWorkResult.Retry,
-            executeSnapshot { throw IOException("storage temporarily unavailable") }
+            executeSnapshot { throw IOException("storage temporarily unavailable") },
         )
     }
 
@@ -33,7 +33,7 @@ class SnapshotWorkTest {
     fun executeSnapshot_nonRecoverableFailure_returnsFailure() = runTest {
         assertEquals(
             SnapshotWorkResult.Failure,
-            executeSnapshot { error("invalid snapshot state") }
+            executeSnapshot { error("invalid snapshot state") },
         )
     }
 }

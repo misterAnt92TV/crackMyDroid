@@ -1,12 +1,25 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="720" height="280" viewBox="0 0 720 280" role="img" data-source="shared/src/commonMain/kotlin/com/crackmydroid/shared/presentation/components/card/CardBlock.kt">
-<title>CardBlock · light theme</title>
-<desc>Editable SVG visual reference for CardBlock, based on shared/src/commonMain/kotlin/com/crackmydroid/shared/presentation/components/card/CardBlock.kt.</desc>
-<rect x="0" y="0" width="720" height="280" fill="#F7F9FC" rx="0"/>
-<rect x="24" y="24" width="672" height="232" fill="#F7F9FC" rx="22" stroke="#C2C8D3" stroke-width="1"/>
-<rect x="48" y="50" width="624" height="182" fill="#FFFFFF" rx="18" stroke="#C2C8D3" stroke-width="1"/>
-<circle cx="87" cy="91" r="17" fill="#D2E3FC"/>
-<text x="79" y="98" fill="#1A73E8" font-family="Inter, Roboto, sans-serif" font-size="20" font-weight="700">↓</text>
-<text x="118" y="98" fill="#1C1F26" font-family="Inter, Roboto, sans-serif" font-size="20" font-weight="600">Export complete</text>
-<text x="76" y="143" fill="#1C1F26" font-family="Inter, Roboto, sans-serif" font-size="16" font-weight="400">The report is ready to share.</text>
-<text x="76" y="180" fill="#444A56" font-family="Inter, Roboto, sans-serif" font-size="14" font-weight="400">Saved to Downloads</text>
+<svg data-source="shared/src/commonMain/kotlin/com/crackmydroid/shared/presentation/components/card/CardBlock.kt" height="280" role="img" viewBox="0 0 720 280" width="720"
+    xmlns="http://www.w3.org/2000/svg">
+    <title>CardBlock · light theme</title>
+    <desc>Editable SVG visual reference for CardBlock, based on
+        shared/src/commonMain/kotlin/com/crackmydroid/shared/presentation/components/card/CardBlock.kt.
+    </desc>
+    <rect fill="#F7F9FC" height="280" rx="0" width="720" x="0" y="0" />
+    <rect fill="#F7F9FC" height="232" rx="22" stroke="#C2C8D3" stroke-width="1" width="672" x="24"
+        y="24" />
+    <rect fill="#FFFFFF" height="182" rx="18" stroke="#C2C8D3" stroke-width="1" width="624" x="48"
+        y="50" />
+    <circle cx="87" cy="91" fill="#D2E3FC" r="17" />
+    <text fill="#1A73E8" font-family="Inter, Roboto, sans-serif" font-size="20" font-weight="700" x="79"
+        y="98">↓
+    </text>
+    <text fill="#1C1F26" font-family="Inter, Roboto, sans-serif" font-size="20" font-weight="600" x="118"
+        y="98">Export complete
+    </text>
+    <text fill="#1C1F26" font-family="Inter, Roboto, sans-serif" font-size="16" font-weight="400" x="76"
+        y="143">The report is ready to share.
+    </text>
+    <text fill="#444A56" font-family="Inter, Roboto, sans-serif" font-size="14" font-weight="400" x="76"
+        y="180">Saved to Downloads
+    </text>
 </svg>

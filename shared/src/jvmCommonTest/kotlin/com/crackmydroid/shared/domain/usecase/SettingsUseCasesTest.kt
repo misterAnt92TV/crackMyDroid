@@ -1,8 +1,8 @@
 package com.crackmydroid.shared.domain.usecase
 
+import com.crackmydroid.shared.domain.model.ExportFormat
 import com.crackmydroid.shared.domain.model.app.AppLanguage
 import com.crackmydroid.shared.domain.model.app.AppTheme
-import com.crackmydroid.shared.domain.model.ExportFormat
 import com.crackmydroid.shared.domain.repository.SettingsRepository
 import com.crackmydroid.shared.domain.usecase.settings.GetActivityFavoritesUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetActivityPackageFavoritesUseCase
@@ -36,10 +36,10 @@ import io.mockk.coEvery
 import io.mockk.coJustRun
 import io.mockk.coVerify
 import io.mockk.mockk
-import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertSame
+import kotlinx.coroutines.test.runTest
 
 class SettingsUseCasesTest {
     @Test

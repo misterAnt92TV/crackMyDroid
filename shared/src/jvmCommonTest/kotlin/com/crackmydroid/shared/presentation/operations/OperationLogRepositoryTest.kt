@@ -1,14 +1,14 @@
 package com.crackmydroid.shared.presentation.operations
 
 import com.crackmydroid.shared.domain.model.operation.OperationEntry
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class OperationLogRepositoryTest {
@@ -17,7 +17,7 @@ class OperationLogRepositoryTest {
         val persistence = RecordingPersistence()
         val repository = DefaultOperationLogRepository(
             persistence = persistence,
-            scope = CoroutineScope(StandardTestDispatcher(testScheduler))
+            scope = CoroutineScope(StandardTestDispatcher(testScheduler)),
         )
 
         repository.record("first", success = true)
@@ -32,7 +32,7 @@ class OperationLogRepositoryTest {
         val persistence = RecordingPersistence()
         val repository = DefaultOperationLogRepository(
             persistence = persistence,
-            scope = CoroutineScope(StandardTestDispatcher(testScheduler))
+            scope = CoroutineScope(StandardTestDispatcher(testScheduler)),
         )
 
         repository.record("first", success = true)
@@ -53,7 +53,7 @@ class OperationLogRepositoryTest {
         val persistence = RecordingPersistence(initialEntries = listOf(first, second))
         val repository = DefaultOperationLogRepository(
             persistence = persistence,
-            scope = CoroutineScope(StandardTestDispatcher(testScheduler))
+            scope = CoroutineScope(StandardTestDispatcher(testScheduler)),
         )
         advanceUntilIdle()
 
@@ -71,7 +71,7 @@ class OperationLogRepositoryTest {
         val persistence = RecordingPersistence(initialEntries = listOf(first, second))
         val repository = DefaultOperationLogRepository(
             persistence = persistence,
-            scope = CoroutineScope(StandardTestDispatcher(testScheduler))
+            scope = CoroutineScope(StandardTestDispatcher(testScheduler)),
         )
         advanceUntilIdle()
 
@@ -85,18 +85,17 @@ class OperationLogRepositoryTest {
     @Test
     fun noOpRepositoryDoesNotRemoveEntries() {
         NoOpOperationLogRepository.hideFromRecent(
-            OperationEntry("operation", success = true, timestamp = 0L)
+            OperationEntry("operation", success = true, timestamp = 0L),
         )
         NoOpOperationLogRepository.remove(
-            OperationEntry("operation", success = true, timestamp = 0L)
+            OperationEntry("operation", success = true, timestamp = 0L),
         )
 
         assertTrue(NoOpOperationLogRepository.entries.value.isEmpty())
     }
 
-    private class RecordingPersistence(
-        private val initialEntries: List<OperationEntry> = emptyList()
-    ) : OperationLogPersistence {
+    private class RecordingPersistence(private val initialEntries: List<OperationEntry> = emptyList()) :
+        OperationLogPersistence {
         var savedEntries = emptyList<OperationEntry>()
 
         override suspend fun load() = initialEntries

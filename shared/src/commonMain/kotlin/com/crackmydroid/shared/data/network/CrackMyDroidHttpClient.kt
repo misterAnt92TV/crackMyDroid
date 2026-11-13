@@ -1,7 +1,7 @@
 package com.crackmydroid.shared.data.network
 
 import co.touchlab.kermit.Logger
-import com.crackmydroid.shared.AppLogger
+import com.crackmydroid.architecture.logging.AppLogger
 import io.ktor.client.HttpClientConfig
 import io.ktor.client.engine.HttpClientEngineConfig
 import io.ktor.client.plugins.DefaultRequest
@@ -15,9 +15,7 @@ import io.ktor.http.HttpHeaders
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 
-internal fun <T : HttpClientEngineConfig> HttpClientConfig<T>.configureCrackMyDroidNetwork(
-    debugLogging: Boolean
-) {
+internal fun <T : HttpClientEngineConfig> HttpClientConfig<T>.configureCrackMyDroidNetwork(debugLogging: Boolean) {
     expectSuccess = false
     install(ContentNegotiation) {
         json(Json { ignoreUnknownKeys = true })
@@ -52,7 +50,7 @@ private val SENSITIVE_HEADERS = setOf(
     HttpHeaders.Cookie.lowercase(),
     HttpHeaders.SetCookie.lowercase(),
     "x-api-key",
-    "x-integrity-token"
+    "x-integrity-token",
 )
 
 private const val CONNECT_TIMEOUT_MS = 10_000L

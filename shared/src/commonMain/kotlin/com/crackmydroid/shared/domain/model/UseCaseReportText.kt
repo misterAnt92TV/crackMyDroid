@@ -51,7 +51,7 @@ enum class ReportLabel {
     PERMISSIONS,
     NO_SENSITIVE_BEHAVIOR,
     NO_RISKY_PERMISSIONS,
-    NO_PERMISSION_DECLARED
+    NO_PERMISSION_DECLARED,
 }
 
 interface UseCaseReportText {
@@ -70,12 +70,15 @@ interface UseCaseReportText {
         findingCount: Int,
         criticalCount: Int,
         highCount: Int,
-        mediumCount: Int
+        mediumCount: Int,
     ): String
+
     fun declaredPermissionCount(count: Int): String
     fun permissionFindingHeading(index: Int, finding: PermissionRiskFinding): String
     fun noSensitiveBehavior(): String
     fun noRiskyPermissions(): String
     fun noDataAvailable(): String
     fun noDeclaredPermissions(): String
+    fun sectionSeparator(): String
+    fun subsectionSeparator(): String
 }

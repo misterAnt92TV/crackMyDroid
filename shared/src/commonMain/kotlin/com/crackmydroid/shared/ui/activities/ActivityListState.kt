@@ -1,5 +1,7 @@
 package com.crackmydroid.shared.ui.activities
 
+import com.crackmydroid.architecture.presentation.model.UiState
+import com.crackmydroid.architecture.presentation.model.UiLoadState
 import com.crackmydroid.shared.domain.model.activity.ActivityEntry
 import com.crackmydroid.shared.domain.model.activity.ActivityIntentRiskLevel
 import com.crackmydroid.shared.domain.model.activity.ActivityIntentRiskReport
@@ -8,23 +10,24 @@ data class ActivityListState(
     val activities: List<ActivityEntry> = emptyList(),
     val filter: String = "",
     val error: String? = null,
-    val loading: Boolean = false,
+    val loadState: UiLoadState = UiLoadState.Idle,
     val topQuery: String? = null,
     val favorites: Set<String> = emptySet(),
     val favoritePackages: Set<String> = emptySet(),
     val expandedPackages: Set<String> = emptySet(),
     val groups: List<ActivityGroup> = emptyList(),
     val favoriteQueries: List<String> = emptyList(),
-    val guidedLaunch: GuidedLaunchState? = null
-)
+    val guidedLaunch: GuidedLaunchState? = null,
+    val selectedReport: ActivityAppReport? = null,
+    val reportExportPath: String? = null,
+) : UiState {
+    val loading: Boolean get() = loadState is UiLoadState.Loading
+    val loadError: String? get() = (loadState as? UiLoadState.Error)?.message
+}
 
 data class GuidedLaunchState(val entry: ActivityEntry)
 
-data class ActivityGroup(
-    val packageName: String,
-    val label: String?,
-    val activities: List<ActivityEntry>
-)
+data class ActivityGroup(val packageName: String, val label: String?, val activities: List<ActivityEntry>)
 
 data class ActivityAppReport(
     val packageName: String,
@@ -40,5 +43,5 @@ data class ActivityAppReport(
     val highestRiskLevel: ActivityIntentRiskLevel,
     val recommendations: List<String>,
     val findings: List<String>,
-    val highlights: List<ActivityIntentRiskReport>
+    val highlights: List<ActivityIntentRiskReport>,
 )

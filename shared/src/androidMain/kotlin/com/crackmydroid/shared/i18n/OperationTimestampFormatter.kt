@@ -1,4 +1,4 @@
-package com.crackmydroid.shared.i18n
+package com.crackmydroid.shared.i18n.operation
 
 import java.text.DateFormat
 import java.util.Date
@@ -10,7 +10,7 @@ actual fun formatOperationTimestamp(timestamp: Long, languageCode: String): Stri
         DateFormat.getDateTimeInstance(
             DateFormat.SHORT,
             DateFormat.SHORT,
-            Locale.forLanguageTag(languageCode)
+            Locale.forLanguageTag(languageCode),
         ).format(Date(timestamp))
     }.getOrDefault("—")
 }

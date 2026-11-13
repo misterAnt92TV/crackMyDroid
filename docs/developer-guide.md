@@ -28,12 +28,12 @@ librerie e plugin, inclusi plugin ktlint e relativa CLI, con versioni distinte.
 Le impostazioni di build non sono versioni di dipendenze: SDK e JVM sono
 proprieta comuni in `gradle.properties`, lette direttamente dai moduli.
 
-| Proprieta | Valore | Utilizzo |
-|-----------|--------|----------|
-| `android.compileSdk` | `36` | shared e androidApp |
-| `android.minSdk` | `24` | shared e androidApp |
-| `android.targetSdk` | `35` | androidApp |
-| `build.jvmVersion` | `17` | toolchain shared/desktopApp e target Java/Kotlin Android |
+| Proprieta            | Valore | Utilizzo                                                 |
+|----------------------|--------|----------------------------------------------------------|
+| `android.compileSdk` | `36`   | shared e androidApp                                      |
+| `android.minSdk`     | `24`   | shared e androidApp                                      |
+| `android.targetSdk`  | `35`   | androidApp                                               |
+| `build.jvmVersion`   | `17`   | toolchain shared/desktopApp e target Java/Kotlin Android |
 
 Non duplicare questi valori nei `.kts` o nel catalogo. Proprieta mancanti o
 non numeriche devono produrre un errore di configurazione, non un valore
@@ -185,6 +185,30 @@ I warning Android residui relativi a `HardwareIds` sono intenzionali nel
 repository diagnostico del dispositivo. Le raccomandazioni di upgrade
 dipendenze/targetSdk e di icone monocromatiche richiedono interventi separati;
 non vengono soppressi globalmente.
+
+---
+
+## Compose Preview
+
+Le schermate condivise devono avere una preview rappresentativa basata su uno
+state demo e callback innocue, senza creare un ViewModel o invocare servizi.
+Separare il contenuto composable state-driven dal wrapper che raccoglie lo
+state del ViewModel; il wrapper mantiene la logica di produzione e inoltra lo
+state e le azioni al contenuto. I dati demo vanno costruiti localmente nella
+funzione preview, evitando dipendenze da device, database o rete.
+
+Usare `AppPreviewEnvironment` per applicare tema, lingua italiana e preferenze
+di accessibilità coerenti. Per componenti e schermate usare rispettivamente
+`@AppComponentPreviews` (chiaro/scuro) e `@AppScreenPreviews` (telefono/tablet,
+chiaro/scuro). `@AppLocalePreviews` è riservata a esempi di localizzazione
+secondari con una sola variante: non sostituisce la matrice completa della
+preview principale. Preferire preview mirate per i casi d'uso visibili e
+evitare combinazioni ridondanti che rallentano la tool window.
+
+Le preview devono essere dichiarate in `commonMain` con le dipendenze Compose
+Preview già configurate. In Android Studio/IntelliJ, verificare sia che la
+funzione appaia nella tool window Preview sia che il rendering non dipenda
+dall'esecuzione dell'app.
 
 ---
 

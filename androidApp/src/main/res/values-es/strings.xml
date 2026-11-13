@@ -1,1 +1,8 @@
-<resources><string name="package_inventory_disclosure_title">Escaneo de apps instaladas</string><string name="package_inventory_disclosure_body">CrackMyDroid lee localmente el inventario de aplicaciones instaladas para mostrar APK, actividades, componentes y permisos.</string><string name="package_inventory_disclosure_confirm">Entendido</string><string name="package_inventory_unavailable_title">Escaneo completo no disponible</string><string name="package_inventory_unavailable_body">Esta instalación no tiene visibilidad completa de aplicaciones. El escaneo no se inicia para evitar resultados parciales.</string><string name="close">Cerrar</string></resources>
+<resources>
+    <string name="package_inventory_disclosure_title">Escaneo de apps instaladas</string>
+    <string name="package_inventory_disclosure_body">CrackMyDroid lee localmente el inventario de aplicaciones instaladas para mostrar APK, actividades, componentes y permisos.</string>
+    <string name="package_inventory_disclosure_confirm">Entendido</string>
+    <string name="package_inventory_unavailable_title">Escaneo completo no disponible</string>
+    <string name="package_inventory_unavailable_body">Esta instalación no tiene visibilidad completa de aplicaciones. El escaneo no se inicia para evitar resultados parciales.</string>
+    <string name="close">Cerrar</string>
+</resources>

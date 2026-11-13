@@ -699,7 +699,8 @@ assertNull(cache.deviceInfo)   // cache non toccata
 
 ## ReportFileRepositoryDesktopTest
 
-**File:** `shared/src/desktopTest/kotlin/com/crackmydroid/shared/data/reports/ReportFileRepositoryDesktopTest.kt`
+**File:**
+`shared/src/desktopTest/kotlin/com/crackmydroid/shared/data/reports/ReportFileRepositoryDesktopTest.kt`
 
 La suite verifica la scrittura di PDF paginati e validi, la conservazione dei caratteri accentati
 nei report e l'involucro JSON e l'estensione corretti per i report JSON.

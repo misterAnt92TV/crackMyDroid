@@ -6,15 +6,13 @@ import com.crackmydroid.shared.domain.repository.DeviceSessionController
 
 abstract class DesktopAdbRepositorySupport(
     protected val adbBridge: AdbBridge,
-    protected val sessionController: DeviceSessionController
+    protected val sessionController: DeviceSessionController,
 ) {
-    protected fun selectedDevice(): ConnectedDevice =
-        requireNotNull(sessionController.state.value.selectedDevice) {
-            "Nessun device selezionato"
-        }
+    protected fun selectedDevice(): ConnectedDevice = requireNotNull(sessionController.state.value.selectedDevice) {
+        "Nessun device selezionato"
+    }
 
-    protected fun adbPath(): String? =
-        sessionController.state.value.adbPath.takeIf { it.isNotBlank() }
+    protected fun adbPath(): String? = sessionController.state.value.adbPath.takeIf { it.isNotBlank() }
 
     protected suspend fun shell(command: String, asRoot: Boolean = false, timeoutMs: Long = 60_000L): String {
         val device = selectedDevice()
@@ -23,7 +21,7 @@ abstract class DesktopAdbRepositorySupport(
             command = command,
             configuredPath = adbPath(),
             asRoot = asRoot,
-            timeoutMs = timeoutMs
+            timeoutMs = timeoutMs,
         ).getOrThrow()
     }
 }

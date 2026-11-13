@@ -1,79 +1,88 @@
 package com.crackmydroid.shared.ui.logs
 
+import com.crackmydroid.architecture.coroutines.AppDispatchers
+import com.crackmydroid.architecture.presentation.model.UiLoadState
 import com.crackmydroid.shared.domain.usecase.log.ExportLogsUseCase
 import com.crackmydroid.shared.domain.usecase.log.GetLogsUseCase
-import com.crackmydroid.shared.util.AppDispatchers
-import com.crackmydroid.shared.presentation.BaseViewModel
-import com.crackmydroid.shared.util.DefaultAppDispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
+import com.crackmydroid.shared.presentation.LocalizedBaseViewModel
 import kotlinx.coroutines.withContext
 
 class LogViewModel(
-    private val getLogs: GetLogsUseCase,
-    private val exportLogs: ExportLogsUseCase,
-    dispatchers: AppDispatchers = DefaultAppDispatchers
-) : BaseViewModel(dispatchers) {
-    private val _state = MutableStateFlow(LogState())
-    val state: StateFlow<LogState> = _state
-    private var recomputeJob: Job? = null
+    private val getLogsUseCase: GetLogsUseCase,
+    private val exportLogsUseCase: ExportLogsUseCase,
+    dispatchers: AppDispatchers,
+) : LocalizedBaseViewModel<LogEvent, LogState>(LogState(), dispatchers) {
+    private companion object {
+        const val REFRESH_KEY = "logs-refresh"
+        const val RECOMPUTE_KEY = "logs-recompute"
+        const val MAX_LINES = 1500
+    }
 
-    fun refresh() {
-        scope.launch {
-            _state.update { it.copy(loading = true, error = null, message = null) }
-            getLogs()
+    override fun onEvent(event: LogEvent) = when (event) {
+        is LogEvent.Refresh -> refresh()
+        is LogEvent.FilterChanged -> setFilter(event.value)
+        is LogEvent.Export -> export()
+        is LogEvent.ErrorDismissed -> clearError()
+        is LogEvent.LevelToggled -> toggleLevel(event.level)
+        is LogEvent.ColorByLevelChanged -> setColorByLevel(event.enabled)
+    }
+
+    private fun refresh() {
+        launchLatest(REFRESH_KEY) {
+            updateState { it.copy(loadState = UiLoadState.Loading, message = null) }
+            getLogsUseCase()
                 .onSuccess { list ->
+                    if (!isCurrent()) return@onSuccess
                     val trimmed = if (list.size > MAX_LINES) list.takeLast(MAX_LINES) else list
                     recomputeAsync(
-                        _state.value.copy(
+                        currentState.copy(
                             logs = trimmed,
                             trimmed = list.size > MAX_LINES,
-                            loading = false
-                        )
+                            loadState = UiLoadState.Success,
+                        ),
                     )
                 }
                 .onFailure { err ->
-                    _state.update {
+                    if (!isCurrent()) return@onFailure
+                    updateState {
                         it.copy(
-                            error = err.message,
-                            loading = false
+                            loadState = UiLoadState.Error(err.message ?: presentationTexts.error),
                         )
                     }
                 }
         }
     }
 
-    fun setFilter(value: String) {
-        recomputeAsync(_state.value.copy(filter = value))
+    private fun setFilter(value: String) {
+        recomputeAsync(currentState.copy(filter = value))
     }
 
-    fun filtered(): List<String> = _state.value.visibleLogs
+    private fun filtered(): List<String> = currentState.visibleLogs
 
-    fun export() {
-        scope.launch {
-            val current = _state.value.visibleLogs
-            exportLogs(current)
-                .onSuccess { path -> _state.update { it.copy(message = path) } }
-                .onFailure { err -> _state.update { it.copy(error = err.message) } }
+    private fun export() {
+        launchTask {
+            val current = currentState.visibleLogs
+            exportLogsUseCase(current)
+                .onSuccess { path -> updateState { it.copy(message = path, exportLoadState = UiLoadState.Success) } }
+                .onFailure { err ->
+                    updateState { it.copy(exportLoadState = UiLoadState.Error(err.message ?: presentationTexts.error)) }
+                }
         }
     }
 
-    fun clearError() {
-        _state.update { it.copy(error = null) }
+    private fun clearError() {
+        updateState { it.copy(loadState = UiLoadState.Idle, exportLoadState = UiLoadState.Idle) }
     }
 
-    fun toggleLevel(level: Char) {
-        val current = _state.value
+    private fun toggleLevel(level: Char) {
+        val current = currentState
         val set = current.levels.toMutableSet()
         if (set.contains(level)) set.remove(level) else set.add(level)
         recomputeAsync(current.copy(levels = set))
     }
 
-    fun setColorByLevel(enabled: Boolean) {
-        _state.update { it.copy(colorByLevel = enabled) }
+    private fun setColorByLevel(enabled: Boolean) {
+        updateState { it.copy(colorByLevel = enabled) }
     }
 
     private fun recompute(state: LogState): LogState {
@@ -81,26 +90,25 @@ class LogViewModel(
         val lv = state.levels
         val filtered = state.logs.filter { line ->
             (f.isBlank() || line.contains(f, ignoreCase = true)) &&
-                    (lv.isEmpty() || lv.any { level ->
+                (
+                    lv.isEmpty() || lv.any { level ->
                         line.startsWith("$level/") || line.contains(
                             " $level/",
-                            ignoreCase = true
+                            ignoreCase = true,
                         )
-                    })
+                    }
+                    )
         }
         return state.copy(visibleLogs = filtered)
     }
 
     private fun recomputeAsync(state: LogState) {
-        _state.value = state
-        recomputeJob?.cancel()
-        recomputeJob = scope.launch(dispatchers.default) {
-            val newState = recompute(state)
-            withContext(dispatchers.main) { _state.value = newState }
+        emitState(state)
+        launchLatest(RECOMPUTE_KEY) {
+            val newState = withContext(dispatchers.default) { recompute(state) }
+            ensureCurrent()
+            emitState(newState)
         }
     }
 
-    companion object {
-        private const val MAX_LINES = 1500
-    }
 }

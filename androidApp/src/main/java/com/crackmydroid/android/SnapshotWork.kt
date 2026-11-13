@@ -8,7 +8,7 @@ import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
-import com.crackmydroid.shared.AppLogger
+import com.crackmydroid.architecture.logging.AppLogger
 import com.crackmydroid.shared.data.snapshot.AndroidDeviceSnapshotCoordinator
 import java.io.IOException
 import java.util.concurrent.TimeUnit
@@ -28,7 +28,7 @@ internal object SnapshotWorkScheduler {
         WorkManager.getInstance(context.applicationContext).enqueueUniqueWork(
             UNIQUE_WORK_NAME,
             ExistingWorkPolicy.KEEP,
-            request
+            request,
         )
     }
 
@@ -38,10 +38,8 @@ internal object SnapshotWorkScheduler {
         .build()
 }
 
-class AndroidSnapshotWorker(
-    appContext: Context,
-    workerParameters: WorkerParameters
-) : CoroutineWorker(appContext, workerParameters) {
+class AndroidSnapshotWorker(appContext: Context, workerParameters: WorkerParameters) :
+    CoroutineWorker(appContext, workerParameters) {
     override suspend fun doWork(): Result = when (
         executeSnapshot {
             GlobalContext.get().get<AndroidDeviceSnapshotCoordinator>().runSnapshotIfIdle()
@@ -56,19 +54,18 @@ class AndroidSnapshotWorker(
 internal enum class SnapshotWorkResult {
     Success,
     Retry,
-    Failure
+    Failure,
 }
 
-internal suspend fun executeSnapshot(snapshot: suspend () -> Boolean): SnapshotWorkResult =
-    try {
-        snapshot()
-        SnapshotWorkResult.Success
-    } catch (cancellation: CancellationException) {
-        throw cancellation
-    } catch (error: IOException) {
-        AppLogger.logger.w(error) { "Snapshot Android rinviato dopo errore I/O" }
-        SnapshotWorkResult.Retry
-    } catch (error: Throwable) {
-        AppLogger.logger.e(error) { "Snapshot Android non eseguito dal worker" }
-        SnapshotWorkResult.Failure
-    }
+internal suspend fun executeSnapshot(snapshot: suspend () -> Boolean): SnapshotWorkResult = try {
+    snapshot()
+    SnapshotWorkResult.Success
+} catch (cancellation: CancellationException) {
+    throw cancellation
+} catch (error: IOException) {
+    AppLogger.logger.w(error) { "Snapshot Android rinviato dopo errore I/O" }
+    SnapshotWorkResult.Retry
+} catch (error: Throwable) {
+    AppLogger.logger.e(error) { "Snapshot Android non eseguito dal worker" }
+    SnapshotWorkResult.Failure
+}

@@ -3,32 +3,31 @@ package com.crackmydroid.shared.data.adb
 import com.crackmydroid.shared.domain.model.ConnectedDevice
 import com.crackmydroid.shared.domain.repository.AdbBridge
 import com.crackmydroid.shared.util.runSuspendCatching
+import java.io.File
+import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runInterruptible
 import kotlinx.coroutines.withContext
-import java.io.File
-import java.util.concurrent.TimeUnit
 
 class ProcessAdbBridge : AdbBridge {
     override suspend fun resolveBinary(configuredPath: String?): Result<String> = runSuspendCatching {
         resolveBinaryPath(configuredPath)
     }
 
-    override suspend fun listDevices(configuredPath: String?): Result<List<ConnectedDevice>> =
-        runSuspendCatching {
-            val adb = resolveBinaryPath(configuredPath)
-            val output = runCommand(listOf(adb, "devices", "-l"))
-            ensureSuccess(output, "Impossibile leggere i device ADB")
-            AdbParsers.parseAdbDevices(output.stdout)
-        }
+    override suspend fun listDevices(configuredPath: String?): Result<List<ConnectedDevice>> = runSuspendCatching {
+        val adb = resolveBinaryPath(configuredPath)
+        val output = runCommand(listOf(adb, "devices", "-l"))
+        ensureSuccess(output, "Impossibile leggere i device ADB")
+        AdbParsers.parseAdbDevices(output.stdout)
+    }
 
     override suspend fun shell(
         serial: String,
         command: String,
         configuredPath: String?,
-        asRoot: Boolean
+        asRoot: Boolean,
     ): Result<String> = shellWithTimeout(serial, command, configuredPath, asRoot)
 
     override suspend fun shellWithTimeout(
@@ -36,7 +35,7 @@ class ProcessAdbBridge : AdbBridge {
         command: String,
         configuredPath: String?,
         asRoot: Boolean,
-        timeoutMs: Long
+        timeoutMs: Long,
     ): Result<String> = runSuspendCatching {
         val adb = resolveBinaryPath(configuredPath)
         val shellArgs = if (asRoot) {
@@ -53,7 +52,7 @@ class ProcessAdbBridge : AdbBridge {
         serial: String,
         remotePath: String,
         localPath: String,
-        configuredPath: String?
+        configuredPath: String?,
     ): Result<String> = runSuspendCatching {
         val adb = resolveBinaryPath(configuredPath)
         File(localPath).parentFile?.mkdirs()
@@ -62,28 +61,25 @@ class ProcessAdbBridge : AdbBridge {
         localPath
     }
 
-    override suspend fun logcat(
-        serial: String,
-        configuredPath: String?,
-        lines: Int
-    ): Result<List<String>> = runSuspendCatching {
-        val adb = resolveBinaryPath(configuredPath)
-        val output = runCommand(
-            listOf(
-                adb,
-                "-s",
-                serial,
-                "logcat",
-                "-d",
-                "-t",
-                lines.toString(),
-                "-v",
-                "time"
+    override suspend fun logcat(serial: String, configuredPath: String?, lines: Int): Result<List<String>> =
+        runSuspendCatching {
+            val adb = resolveBinaryPath(configuredPath)
+            val output = runCommand(
+                listOf(
+                    adb,
+                    "-s",
+                    serial,
+                    "logcat",
+                    "-d",
+                    "-t",
+                    lines.toString(),
+                    "-v",
+                    "time",
+                ),
             )
-        )
-        ensureSuccess(output, "Lettura logcat fallita")
-        output.stdout.lines().filter { it.isNotBlank() }
-    }
+            ensureSuccess(output, "Lettura logcat fallita")
+            output.stdout.lines().filter { it.isNotBlank() }
+        }
 
     private fun resolveBinaryPath(configuredPath: String?): String {
         val explicit = configuredPath?.trim().orEmpty()
@@ -122,7 +118,7 @@ class ProcessAdbBridge : AdbBridge {
                     CommandOutput(
                         exitCode = process.exitValue(),
                         stdout = stdout.await().trim(),
-                        stderr = stderr.await().trim()
+                        stderr = stderr.await().trim(),
                     )
                 } finally {
                     if (process.isAlive) process.destroyForcibly()
@@ -136,9 +132,5 @@ class ProcessAdbBridge : AdbBridge {
         error("$message: $detail")
     }
 
-    private data class CommandOutput(
-        val exitCode: Int,
-        val stdout: String,
-        val stderr: String
-    )
+    private data class CommandOutput(val exitCode: Int, val stdout: String, val stderr: String)
 }

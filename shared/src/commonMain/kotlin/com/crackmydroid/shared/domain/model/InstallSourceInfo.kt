@@ -12,7 +12,7 @@ data class InstallSourceInfo(
     val initiatingPackageName: String? = null,
     val originatingPackageName: String? = null,
     val observedAtEpochMs: Long? = null,
-    val unavailableReason: String? = null
+    val unavailableReason: String? = null,
 )
 
 @Serializable
@@ -20,5 +20,5 @@ enum class InstallSourceClassification {
     GOOGLE_PLAY,
     OTHER,
     UNKNOWN,
-    UNAVAILABLE
+    UNAVAILABLE,
 }

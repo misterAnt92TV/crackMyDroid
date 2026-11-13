@@ -1,5 +1,8 @@
 package com.crackmydroid.shared.presentation
 
+import com.crackmydroid.architecture.testing.*
+
+
 import com.crackmydroid.shared.domain.model.ExportDocument
 import com.crackmydroid.shared.domain.model.ExportFormat
 import com.crackmydroid.shared.domain.model.activity.ActivityEntry
@@ -13,8 +16,9 @@ import com.crackmydroid.shared.domain.usecase.settings.GetActivityPackageFavorit
 import com.crackmydroid.shared.domain.usecase.settings.GetExportFormatUseCase
 import com.crackmydroid.shared.domain.usecase.settings.SetActivityFavoritesUseCase
 import com.crackmydroid.shared.domain.usecase.settings.SetActivityPackageFavoritesUseCase
-import com.crackmydroid.shared.i18n.stringsFor
+import com.crackmydroid.shared.ui.activities.ActivityListEvent
 import com.crackmydroid.shared.ui.activities.ActivityListViewModel
+import com.crackmydroid.shared.ui.activities.model.ActivityListEffect
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -38,8 +42,7 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class ActivityListViewModelTest {
-    private val dispatcher = StandardTestDispatcher()
+class ActivityListViewModelTest : BaseViewModelUnitTest() {
     private fun reportExporter() = ExportReportUseCase(mockk<ReportFileRepository>(relaxed = true))
 
     private fun activityViewModel(
@@ -47,15 +50,18 @@ class ActivityListViewModelTest {
         launchActivity: LaunchActivityUseCase,
         getExportFormat: GetExportFormatUseCase,
         reportExporter: ExportReportUseCase = reportExporter(),
-    ) = ActivityListViewModel(
-        getActivities = getActivities,
-        launchActivity = launchActivity,
-        getExportFormat = getExportFormat,
-        getFavorites = emptyActivityFavorites(),
-        setFavorites = mockk<SetActivityFavoritesUseCase>(relaxed = true),
-        getPackageFavorites = emptyPackageFavorites(),
-        setPackageFavorites = mockk<SetActivityPackageFavoritesUseCase>(relaxed = true),
-        reportExporter = reportExporter,
+    ) = autoClear(
+        ActivityListViewModel(
+            getActivitiesUseCase = getActivities,
+            launchActivityUseCase = launchActivity,
+            getExportFormatUseCase = getExportFormat,
+            getFavoritesUseCase = emptyActivityFavorites(),
+            setFavoritesUseCase = mockk<SetActivityFavoritesUseCase>(relaxed = true),
+            getPackageFavoritesUseCase = emptyPackageFavorites(),
+            setPackageFavoritesUseCase = mockk<SetActivityPackageFavoritesUseCase>(relaxed = true),
+            reportExporterUseCase = reportExporter,
+            dispatchers = appDispatchers,
+        ),
     )
 
     private fun emptyActivityFavorites(): GetActivityFavoritesUseCase {
@@ -70,18 +76,8 @@ class ActivityListViewModelTest {
         return getFavorites
     }
 
-    @BeforeTest
-    fun setUp() {
-        Dispatchers.setMain(dispatcher)
-    }
-
-    @AfterTest
-    fun tearDown() {
-        Dispatchers.resetMain()
-    }
-
     @Test
-    fun exportAllUsesPdfAndGroupSharePreservesThePayload() = runTest(dispatcher) {
+    fun exportAllUsesPdfAndGroupSharePreservesThePayload() = runViewModelTest {
         val get = mockk<GetActivitiesUseCase>()
         val format = mockk<GetExportFormatUseCase>()
         val repository = mockk<ReportFileRepository>()
@@ -93,11 +89,11 @@ class ActivityListViewModelTest {
         coEvery { repository.share(capture(shared)) } returns Result.success("/activities_pkg.pdf")
         val vm = activityViewModel(get, mockk(), format, ExportReportUseCase(repository, format))
 
-        vm.refresh()
+        vm.handleEvent(ActivityListEvent.Refresh())
         advanceUntilIdle()
-        vm.exportAll()
+        vm.handleEvent(ActivityListEvent.AllExportRequested())
         advanceUntilIdle()
-        vm.exportGroup("pkg")
+        vm.handleEvent(ActivityListEvent.GroupExportRequested("pkg"))
         advanceUntilIdle()
 
         assertNull(vm.state.value.error)
@@ -114,7 +110,7 @@ class ActivityListViewModelTest {
     }
 
     @Test
-    fun refreshLoadsActivitiesAndUpdatesState() = runTest(dispatcher) {
+    fun refreshLoadsActivitiesAndUpdatesState() = runViewModelTest {
         val get = mockk<GetActivitiesUseCase>()
         val launch = mockk<LaunchActivityUseCase>()
         val format = mockk<GetExportFormatUseCase>()
@@ -122,7 +118,7 @@ class ActivityListViewModelTest {
         coEvery { format() } returns Result.success(ExportFormat.TXT)
         val vm = activityViewModel(get, launch, format)
 
-        vm.refresh()
+        vm.handleEvent(ActivityListEvent.Refresh())
         advanceUntilIdle()
 
         assertEquals(1, vm.state.value.activities.size)
@@ -131,7 +127,25 @@ class ActivityListViewModelTest {
     }
 
     @Test
-    fun setFilterUpdatesImmediatelyAndMatchesActivityName() = runTest(dispatcher) {
+    fun copyGroupEventEmitsClipboardEffectAfterSubscription() = runViewModelTest {
+        val get = mockk<GetActivitiesUseCase>()
+        val launch = mockk<LaunchActivityUseCase>()
+        val format = mockk<GetExportFormatUseCase>()
+        coEvery { get() } returns Result.success(listOf(ActivityEntry("Label", "App", "pkg", "Activity")))
+        coEvery { format() } returns Result.success(ExportFormat.TXT)
+        val vm = activityViewModel(get, launch, format)
+
+        vm.emitEventAndAwaitIdle(ActivityListEvent.Refresh())
+        vm.assertEventEffect(ActivityListEvent.GroupClipboardCopyRequested("pkg"), vm.effects) {
+            val effect = awaitItem()
+            assertTrue(effect is ActivityListEffect.CopyToClipboard)
+            assertTrue(effect.content.contains("pkg"))
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun setFilterUpdatesImmediatelyAndMatchesActivityName() = runViewModelTest {
         val get = mockk<GetActivitiesUseCase>()
         val launch = mockk<LaunchActivityUseCase>()
         val format = mockk<GetExportFormatUseCase>()
@@ -148,9 +162,9 @@ class ActivityListViewModelTest {
         coEvery { format() } returns Result.success(ExportFormat.TXT)
         val vm = activityViewModel(get, launch, format)
 
-        vm.refresh()
+        vm.handleEvent(ActivityListEvent.Refresh())
         advanceUntilIdle()
-        vm.setFilter("Hidden")
+        vm.handleEvent(ActivityListEvent.FilterChanged("Hidden"))
 
         assertEquals("Hidden", vm.state.value.filter)
         advanceUntilIdle()
@@ -159,7 +173,7 @@ class ActivityListViewModelTest {
     }
 
     @Test
-    fun setFilterTracksMostFrequentTopQuery() = runTest(dispatcher) {
+    fun setFilterTracksMostFrequentTopQuery() = runViewModelTest {
         val get = mockk<GetActivitiesUseCase>()
         val launch = mockk<LaunchActivityUseCase>()
         val format = mockk<GetExportFormatUseCase>()
@@ -167,11 +181,11 @@ class ActivityListViewModelTest {
         coEvery { format() } returns Result.success(ExportFormat.TXT)
         val vm = activityViewModel(get, launch, format)
 
-        vm.refresh()
+        vm.handleEvent(ActivityListEvent.Refresh())
         advanceUntilIdle()
-        vm.setFilter("sec", trackUsage = true)
-        vm.setFilter("api", trackUsage = true)
-        vm.setFilter("sec", trackUsage = true)
+        vm.handleEvent(ActivityListEvent.FilterChanged("sec", trackUsage = true))
+        vm.handleEvent(ActivityListEvent.FilterChanged("api", trackUsage = true))
+        vm.handleEvent(ActivityListEvent.FilterChanged("sec", trackUsage = true))
         advanceUntilIdle()
 
         assertEquals("sec", vm.state.value.topQuery)
@@ -179,7 +193,7 @@ class ActivityListViewModelTest {
     }
 
     @Test
-    fun launchWithIntentPassesGuidedArgumentsToUseCase() = runTest(dispatcher) {
+    fun launchWithIntentPassesGuidedArgumentsToUseCase() = runViewModelTest {
         val get = mockk<GetActivitiesUseCase>()
         val launch = mockk<LaunchActivityUseCase>()
         val format = mockk<GetExportFormatUseCase>()
@@ -204,9 +218,16 @@ class ActivityListViewModelTest {
         coEvery { format() } returns Result.success(ExportFormat.TXT)
         val vm = activityViewModel(get, launch, format)
 
-        vm.refresh()
+        vm.handleEvent(ActivityListEvent.Refresh())
         advanceUntilIdle()
-        vm.launchWithIntent(entry, "android.intent.action.VIEW", "demo://host/details", null)
+        vm.handleEvent(
+            ActivityListEvent.ActivityLaunchedWithIntent(
+                entry,
+                "android.intent.action.VIEW",
+                "demo://host/details",
+                null,
+            ),
+        )
         advanceUntilIdle()
 
         assertNull(vm.state.value.error)
@@ -222,7 +243,7 @@ class ActivityListViewModelTest {
     }
 
     @Test
-    fun buildReportAggregatesSelectedAppAnalysis() = runTest(dispatcher) {
+    fun buildReportAggregatesSelectedAppAnalysis() = runViewModelTest {
         val get = mockk<GetActivitiesUseCase>()
         val launch = mockk<LaunchActivityUseCase>()
         val format = mockk<GetExportFormatUseCase>()
@@ -262,20 +283,25 @@ class ActivityListViewModelTest {
         )
         val vm = activityViewModel(get, launch, format)
 
-        vm.refresh()
+        vm.handleEvent(ActivityListEvent.Refresh())
         advanceUntilIdle()
-        vm.toggleFavoritePackage("com.demo.app")
-        vm.toggleFavorite(
-            ActivityEntry(
-                label = "Home",
-                appLabel = "Demo App",
-                packageName = "com.demo.app",
-                activityName = "com.demo.app.HomeActivity",
+        vm.handleEvent(ActivityListEvent.PackageFavoriteToggled("com.demo.app"))
+        vm.handleEvent(
+            ActivityListEvent.FavoriteToggled(
+                ActivityEntry(
+                    label = "Home",
+                    appLabel = "Demo App",
+                    packageName = "com.demo.app",
+                    activityName = "com.demo.app.HomeActivity",
+                ),
             ),
         )
         advanceUntilIdle()
 
-        val report = vm.buildReport("com.demo.app", stringsFor("en"))
+        vm.updateLanguage("en")
+        vm.handleEvent(ActivityListEvent.ReportRequested("com.demo.app"))
+        advanceUntilIdle()
+        val report = vm.state.value.selectedReport
 
         assertNotNull(report)
         assertEquals(3, report.totalActivities)

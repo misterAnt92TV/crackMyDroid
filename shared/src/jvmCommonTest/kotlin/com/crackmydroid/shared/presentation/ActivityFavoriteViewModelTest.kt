@@ -1,23 +1,31 @@
 package com.crackmydroid.shared.presentation
 
-import com.crackmydroid.shared.domain.model.activity.ActivityEntry
+import com.crackmydroid.architecture.testing.*
+
+
 import com.crackmydroid.shared.domain.model.ExportFormat
+import com.crackmydroid.shared.domain.model.activity.ActivityEntry
 import com.crackmydroid.shared.domain.model.activity.favoriteKey
 import com.crackmydroid.shared.domain.repository.ReportFileRepository
 import com.crackmydroid.shared.domain.repository.SettingsRepository
 import com.crackmydroid.shared.domain.usecase.activities.GetActivitiesUseCase
+import com.crackmydroid.shared.domain.usecase.activities.LaunchActivityUseCase
+import com.crackmydroid.shared.domain.usecase.reports.ExportReportUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetActivityFavoritesUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetActivityPackageFavoritesUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetExportFormatUseCase
-import com.crackmydroid.shared.domain.usecase.activities.LaunchActivityUseCase
 import com.crackmydroid.shared.domain.usecase.settings.SetActivityFavoritesUseCase
 import com.crackmydroid.shared.domain.usecase.settings.SetActivityPackageFavoritesUseCase
-import com.crackmydroid.shared.domain.usecase.reports.ExportReportUseCase
+import com.crackmydroid.shared.ui.activities.ActivityListEvent
 import com.crackmydroid.shared.ui.activities.ActivityListViewModel
 import io.mockk.coEvery
 import io.mockk.coJustRun
 import io.mockk.coVerify
 import io.mockk.mockk
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -25,32 +33,16 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
-import kotlin.test.Test
-import kotlin.test.assertEquals
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class ActivityFavoriteViewModelTest {
-    private val dispatcher = StandardTestDispatcher()
-
-    @BeforeTest
-    fun setUp() {
-        Dispatchers.setMain(dispatcher)
-    }
-
-    @AfterTest
-    fun tearDown() {
-        Dispatchers.resetMain()
-    }
-
+class ActivityFavoriteViewModelTest : BaseViewModelUnitTest() {
     @Test
-    fun refresh_persistedFavorite_recognizesCanonicalKey() = runTest(dispatcher) {
+    fun refresh_persistedFavorite_recognizesCanonicalKey() = runViewModelTest {
         val entry = ActivityEntry(
             label = "Details",
             appLabel = "Demo",
             packageName = "com.example.demo",
-            activityName = "com.example.demo.DetailsActivity"
+            activityName = "com.example.demo.DetailsActivity",
         )
         val getActivities = mockk<GetActivitiesUseCase>()
         val launchActivity = mockk<LaunchActivityUseCase>()
@@ -63,25 +55,25 @@ class ActivityFavoriteViewModelTest {
         coJustRun { settings.setActivityFavorites(any()) }
         coJustRun { settings.setActivityPackageFavorites(any()) }
 
-        val viewModel = ActivityListViewModel(
-            getActivities = getActivities,
-            launchActivity = launchActivity,
-            getExportFormat = getExportFormat,
-            getFavorites = GetActivityFavoritesUseCase(settings),
-            setFavorites = SetActivityFavoritesUseCase(settings),
-            getPackageFavorites = GetActivityPackageFavoritesUseCase(settings),
-            setPackageFavorites = SetActivityPackageFavoritesUseCase(settings),
-            reportExporter = ExportReportUseCase(mockk<ReportFileRepository>(relaxed = true))
+        val viewModel = autoClear(
+            ActivityListViewModel(
+                getActivitiesUseCase = getActivities,
+                launchActivityUseCase = launchActivity,
+                getExportFormatUseCase = getExportFormat,
+                getFavoritesUseCase = GetActivityFavoritesUseCase(settings),
+                setFavoritesUseCase = SetActivityFavoritesUseCase(settings),
+                getPackageFavoritesUseCase = GetActivityPackageFavoritesUseCase(settings),
+                setPackageFavoritesUseCase = SetActivityPackageFavoritesUseCase(settings),
+                reportExporterUseCase = ExportReportUseCase(mockk<ReportFileRepository>(relaxed = true)),
+                dispatchers = appDispatchers,
+            ),
         )
 
-        viewModel.refresh()
-        advanceUntilIdle()
-        assertEquals(setOf(entry.favoriteKey()), viewModel.state.value.favorites)
-        viewModel.toggleFavorite(entry)
-        advanceUntilIdle()
+        val refreshedState = viewModel.emitEventAndAwaitIdle(ActivityListEvent.Refresh())
+        assertEquals(setOf(entry.favoriteKey()), refreshedState.favorites)
 
-        assertEquals(emptySet(), viewModel.state.value.favorites)
+        val toggledState = viewModel.emitEventAndAwaitIdle(ActivityListEvent.FavoriteToggled(entry))
+        assertEquals(emptySet(), toggledState.favorites)
         coVerify { settings.setActivityFavorites(emptySet()) }
-        viewModel.onCleared()
     }
 }

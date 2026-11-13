@@ -1,13 +1,13 @@
 package com.crackmydroid.shared.data.adb
 
+import com.crackmydroid.shared.domain.model.ConnectedDevice
+import com.crackmydroid.shared.domain.model.InstallSourceClassification
+import com.crackmydroid.shared.domain.model.InstallSourceInfo
+import com.crackmydroid.shared.domain.model.InstalledAppEntry
 import com.crackmydroid.shared.domain.model.activity.ActivityEntry
 import com.crackmydroid.shared.domain.model.app.AppComponentType
 import com.crackmydroid.shared.domain.model.app.AppManifestSecurity
-import com.crackmydroid.shared.domain.model.ConnectedDevice
 import com.crackmydroid.shared.domain.model.app.ExposedComponentInfo
-import com.crackmydroid.shared.domain.model.InstalledAppEntry
-import com.crackmydroid.shared.domain.model.InstallSourceClassification
-import com.crackmydroid.shared.domain.model.InstallSourceInfo
 
 internal object AdbParsers {
     private val deviceKeyValue = Regex("""([A-Za-z_]+):([^\s]+)""")
@@ -33,20 +33,19 @@ internal object AdbParsers {
                     model = extras["model"],
                     product = extras["product"],
                     device = extras["device"],
-                    transportId = extras["transport_id"]
+                    transportId = extras["transport_id"],
                 )
             }
             .toList()
     }
 
-    fun parseGetProp(output: String): Map<String, String> =
-        output.lineSequence()
-            .mapNotNull { line ->
-                propLine.matchEntire(line.trim())?.let { match ->
-                    match.groupValues[1] to match.groupValues[2]
-                }
+    fun parseGetProp(output: String): Map<String, String> = output.lineSequence()
+        .mapNotNull { line ->
+            propLine.matchEntire(line.trim())?.let { match ->
+                match.groupValues[1] to match.groupValues[2]
             }
-            .toMap()
+        }
+        .toMap()
 
     fun parseInstalledApps(output: String): List<InstalledAppEntry> {
         return output.lineSequence()
@@ -71,8 +70,10 @@ internal object AdbParsers {
                         observedAtEpochMs = if (installer != null) System.currentTimeMillis() else null,
                         unavailableReason = if (installer == null) {
                             "ADB package manager did not report an installer"
-                        } else null
-                    )
+                        } else {
+                            null
+                        },
+                    ),
                 )
             }
             .sortedBy { it.appLabel.lowercase() }
@@ -85,39 +86,35 @@ internal object AdbParsers {
         else -> InstallSourceClassification.OTHER
     }
 
-    fun parsePmPath(output: String): List<String> =
-        output.lineSequence()
-            .map { it.trim() }
-            .filter { it.startsWith("package:") }
-            .map { it.removePrefix("package:") }
-            .map { it.substringBefore("=") }
-            .filter { it.isNotBlank() }
-            .toList()
+    fun parsePmPath(output: String): List<String> = output.lineSequence()
+        .map { it.trim() }
+        .filter { it.startsWith("package:") }
+        .map { it.removePrefix("package:") }
+        .map { it.substringBefore("=") }
+        .filter { it.isNotBlank() }
+        .toList()
 
-    fun parseBatteryLevel(output: String): Int? =
-        output.lineSequence()
-            .map { it.trim() }
-            .firstOrNull { it.startsWith("level:") }
-            ?.substringAfter("level:")
-            ?.trim()
-            ?.toIntOrNull()
+    fun parseBatteryLevel(output: String): Int? = output.lineSequence()
+        .map { it.trim() }
+        .firstOrNull { it.startsWith("level:") }
+        ?.substringAfter("level:")
+        ?.trim()
+        ?.toIntOrNull()
 
-    fun parseWmSize(output: String): String? =
-        output.lineSequence()
-            .map { it.trim() }
-            .firstOrNull { it.startsWith("Physical size:") || it.startsWith("Override size:") }
-            ?.substringAfter(":")
-            ?.trim()
+    fun parseWmSize(output: String): String? = output.lineSequence()
+        .map { it.trim() }
+        .firstOrNull { it.startsWith("Physical size:") || it.startsWith("Override size:") }
+        ?.substringAfter(":")
+        ?.trim()
 
-    fun parseDensity(output: String): Int? =
-        output.lineSequence()
-            .map { it.trim() }
-            .firstOrNull { it.startsWith("Physical density:") || it.startsWith("Override density:") }
-            ?.substringAfter(":")
-            ?.trim()
-            ?.substringBefore("dpi")
-            ?.trim()
-            ?.toIntOrNull()
+    fun parseDensity(output: String): Int? = output.lineSequence()
+        .map { it.trim() }
+        .firstOrNull { it.startsWith("Physical density:") || it.startsWith("Override density:") }
+        ?.substringAfter(":")
+        ?.trim()
+        ?.substringBefore("dpi")
+        ?.trim()
+        ?.toIntOrNull()
 
     fun parseMemInfo(output: String): Pair<Long?, Long?> {
         val values = output.lineSequence()
@@ -141,11 +138,7 @@ internal object AdbParsers {
             .toList()
     }
 
-    fun parseManifestSecurity(
-        packageName: String,
-        appLabel: String,
-        output: String
-    ): AppManifestSecurity {
+    fun parseManifestSecurity(packageName: String, appLabel: String, output: String): AppManifestSecurity {
         val debuggable = output.contains(Regex("debuggable\\s*=\\s*true"))
         val allowBackup = output.contains(Regex("allowBackup\\s*=\\s*true"))
         val testOnly = output.contains(Regex("testOnly\\s*=\\s*true"))
@@ -168,14 +161,14 @@ internal object AdbParsers {
         extractComponentsFromSection(
             output,
             "Service Resolver Table:",
-            "SERVICE"
+            "SERVICE",
         ).forEach { (name, permission) ->
             if (name.contains(packageName)) {
                 components += ExposedComponentInfo(
                     type = AppComponentType.SERVICE,
                     name = name.substringAfterLast('/'),
                     exported = true,
-                    permission = permission
+                    permission = permission,
                 )
             }
         }
@@ -184,14 +177,14 @@ internal object AdbParsers {
         extractComponentsFromSection(
             output,
             "Receiver Resolver Table:",
-            "RECEIVER"
+            "RECEIVER",
         ).forEach { (name, permission) ->
             if (name.contains(packageName)) {
                 components += ExposedComponentInfo(
                     type = AppComponentType.RECEIVER,
                     name = name.substringAfterLast('/'),
                     exported = true,
-                    permission = permission
+                    permission = permission,
                 )
             }
         }
@@ -200,14 +193,14 @@ internal object AdbParsers {
         extractComponentsFromSection(
             output,
             "Provider Resolver Table:",
-            "PROVIDER"
+            "PROVIDER",
         ).forEach { (name, permission) ->
             if (name.contains(packageName)) {
                 components += ExposedComponentInfo(
                     type = AppComponentType.PROVIDER,
                     name = name.substringAfterLast('/'),
                     exported = true,
-                    permission = permission
+                    permission = permission,
                 )
             }
         }
@@ -221,35 +214,31 @@ internal object AdbParsers {
             targetSdkVersion = targetSdk,
             minSdkVersion = minSdk,
             exposedComponents = components,
-            supportsComponentAnalysis = true
+            supportsComponentAnalysis = true,
         )
     }
 
-    fun parseActivities(
-        packageName: String,
-        appLabel: String,
-        output: String
-    ): List<ActivityEntry> {
+    fun parseActivities(packageName: String, appLabel: String, output: String): List<ActivityEntry> {
         val resolverSpecs = parseResolverActivitySpecs(
             extractSections(
                 output,
-                headers = setOf("Activity Resolver Table:", "Activity Intent Resolver Table:")
+                headers = setOf("Activity Resolver Table:", "Activity Intent Resolver Table:"),
             ),
-            packageName = packageName
+            packageName = packageName,
         )
         val resolverActivities = parseActivityComponents(
             extractSections(
                 output,
-                headers = setOf("Activity Resolver Table:", "Activity Intent Resolver Table:")
+                headers = setOf("Activity Resolver Table:", "Activity Intent Resolver Table:"),
             ),
-            packageName = packageName
+            packageName = packageName,
         )
         val declaredActivities = parseActivityComponents(
             extractSections(
                 output,
-                headers = setOf("Activities:")
+                headers = setOf("Activities:"),
             ),
-            packageName = packageName
+            packageName = packageName,
         )
 
         val allActivities = linkedSetOf<String>().apply {
@@ -271,8 +260,9 @@ internal object AdbParsers {
                     launchableViaShell = launchable,
                     launchabilityReason = when {
                         launchable -> null
+
                         requiresIntentContext -> {
-                            val hint = resolverSpec?.toHint()
+                            val hint = resolverSpec.toHint()
                             if (hint.isNullOrBlank()) {
                                 "Activity richiede un intent contestualizzato; usa il launcher guidato"
                             } else {
@@ -287,14 +277,13 @@ internal object AdbParsers {
                     launchContextHint = resolverSpec?.toHint(),
                     launchIntentAction = resolverSpec?.defaultAction(),
                     launchIntentData = resolverSpec?.defaultDataUri(),
-                    launchIntentMimeType = resolverSpec?.defaultMimeType()
+                    launchIntentMimeType = resolverSpec?.defaultMimeType(),
                 )
             }
     }
 
-    fun labelFromPackage(packageName: String): String =
-        packageName.substringAfterLast('.')
-            .replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
+    fun labelFromPackage(packageName: String): String = packageName.substringAfterLast('.')
+        .replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
 
     private fun extractSection(output: String, header: String): String {
         val lines = output.lines()
@@ -343,10 +332,7 @@ internal object AdbParsers {
         return builder.toString()
     }
 
-    private fun parseActivityComponents(
-        output: String,
-        packageName: String
-    ): LinkedHashSet<String> {
+    private fun parseActivityComponents(output: String, packageName: String): LinkedHashSet<String> {
         val matches = linkedSetOf<String>()
         componentPattern.findAll(output).forEach { match ->
             if (match.groupValues[1] != packageName) return@forEach
@@ -357,10 +343,7 @@ internal object AdbParsers {
         return matches
     }
 
-    private fun parseResolverActivitySpecs(
-        output: String,
-        packageName: String
-    ): Map<String, ResolverActivitySpec> {
+    private fun parseResolverActivitySpecs(output: String, packageName: String): Map<String, ResolverActivitySpec> {
         val specs = linkedMapOf<String, ResolverActivitySpec>()
         var currentComponent: String? = null
 
@@ -424,7 +407,7 @@ internal object AdbParsers {
     private fun extractComponentsFromSection(
         output: String,
         sectionHeader: String,
-        componentType: String
+        componentType: String,
     ): List<Pair<String, String?>> {
         val section = extractSection(output, sectionHeader)
         if (section.isBlank()) return emptyList()
@@ -449,13 +432,12 @@ internal object AdbParsers {
         val authorities: LinkedHashSet<String> = linkedSetOf(),
         val staticTypes: LinkedHashSet<String> = linkedSetOf(),
         val paths: LinkedHashSet<String> = linkedSetOf(),
-        var hasPath: Boolean = false
+        var hasPath: Boolean = false,
     ) {
-        fun requiresIntentContext(): Boolean =
-            schemes.isNotEmpty() ||
-                    authorities.isNotEmpty() ||
-                    staticTypes.isNotEmpty() ||
-                    hasPath
+        fun requiresIntentContext(): Boolean = schemes.isNotEmpty() ||
+            authorities.isNotEmpty() ||
+            staticTypes.isNotEmpty() ||
+            hasPath
 
         fun defaultAction(): String? = actions.firstOrNull()
 

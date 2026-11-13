@@ -1,15 +1,15 @@
 package com.crackmydroid.shared.ui.root.view
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
-import androidx.compose.animation.core.tween
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,14 +24,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -49,30 +43,58 @@ import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.crackmydroid.architecture.presentation.model.UiLoadState
+import com.crackmydroid.shared.domain.model.RootStatus
 import com.crackmydroid.shared.i18n.LocalStrings
 import com.crackmydroid.shared.i18n.ScreenUiStrings
-import com.crackmydroid.shared.presentation.components.AppButton
-import com.crackmydroid.shared.presentation.components.AppProgressIndicator
-import com.crackmydroid.shared.presentation.components.AppTextField
-import com.crackmydroid.shared.presentation.components.ErrorDialogComponent
-import com.crackmydroid.shared.presentation.components.ScrollToTopButton
-import com.crackmydroid.shared.presentation.components.SectionHeader
-import com.crackmydroid.shared.presentation.components.LocalAccessibilityPrefs
-import com.crackmydroid.shared.presentation.components.text.AppText
+import com.crackmydroid.shared.i18n.format
+import com.crackmydroid.shared.presentation.preview.AppPreviewEnvironment
+import com.crackmydroid.shared.presentation.preview.AppScreenPreviews
+import com.crackmydroid.shared.ui.root.RootEvent
+import com.crackmydroid.shared.ui.root.RootState
 import com.crackmydroid.shared.ui.root.RootViewModel
+import com.crackmydroid.ui.components.AppIcon
+import com.crackmydroid.ui.components.LocalAccessibilityPrefs
+import com.crackmydroid.ui.components.button.AppButton
+import com.crackmydroid.ui.components.button.ScrollToTopButton
+import com.crackmydroid.ui.components.dialog.ErrorDialogComponent
+import com.crackmydroid.ui.components.progress.AppProgressIndicator
+import com.crackmydroid.ui.components.text.AppText
+import com.crackmydroid.ui.components.text.AppTextField
+import com.crackmydroid.ui.icons.AppIcons
+import com.crackmydroid.ui.theme.CrackMyDroidTheme
 import kotlinx.coroutines.launch
 
 @Composable
 @OptIn(ExperimentalFoundationApi::class)
-fun RootScreen(
-    viewModel: RootViewModel,
-    padding: PaddingValues,
-    headerHelp: String,
-    onHelp: (String) -> Unit,
-    onBack: (() -> Unit)? = null,
-    onMenu: () -> Unit = {}
-) {
+fun RootScreen(viewModel: RootViewModel, padding: PaddingValues) {
     val state by viewModel.state.collectAsState()
+    RootScreenContent(
+        state = state,
+        padding = padding,
+        onVerify = { viewModel.emitEvent(RootEvent.Verify()) },
+        onVerifyRootAccess = { viewModel.emitEvent(RootEvent.VerifyRootAccess()) },
+        onPlayIntegrityNonceChange = { viewModel.emitEvent(RootEvent.PlayIntegrityNonceChanged(it)) },
+        onVerifyPlayIntegrity = { viewModel.emitEvent(RootEvent.VerifyPlayIntegrity()) },
+        onShareReport = { viewModel.emitEvent(RootEvent.ShareReport()) },
+        onClearError = { viewModel.emitEvent(RootEvent.ErrorDismissed()) },
+        onLoad = { viewModel.emitEvent(RootEvent.Verify()) },
+    )
+}
+
+@Composable
+@OptIn(ExperimentalFoundationApi::class)
+private fun RootScreenContent(
+    state: RootState,
+    padding: PaddingValues,
+    onVerify: () -> Unit,
+    onVerifyRootAccess: () -> Unit,
+    onPlayIntegrityNonceChange: (String) -> Unit,
+    onVerifyPlayIntegrity: () -> Unit,
+    onShareReport: () -> Unit,
+    onClearError: () -> Unit,
+    onLoad: () -> Unit,
+) {
     val strings = LocalStrings.current
     val screenStrings = ScreenUiStrings.from(strings)
     val accessibilityPrefs = LocalAccessibilityPrefs.current
@@ -87,135 +109,147 @@ fun RootScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(padding)
+            .padding(padding),
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp)
+                .padding(
+                    horizontal = CrackMyDroidTheme.spacing.screenHorizontal,
+                    vertical = CrackMyDroidTheme.spacing.screenVertical,
+                )
                 .verticalScroll(scrollState),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(CrackMyDroidTheme.spacing.itemSpacing),
         ) {
-            SectionHeader(
-                title = strings.navRoot,
-                help = headerHelp,
-                onHelp = onHelp,
-                onBack = onBack,
-                onMenu = onMenu
-            )
-
             ElevatedCard(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
                 colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surface),
-                elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp)
+                elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp),
             ) {
                 Column(
                     modifier = Modifier.padding(12.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
                         AppText(
                             strings.verifyRoot,
                             style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.SemiBold
+                            fontWeight = FontWeight.SemiBold,
                         )
-                        IconButton(onClick = { viewModel.verify() }, enabled = !state.loading) {
-                            Icon(
-                                Icons.Filled.Refresh,
+                        IconButton(onClick = onVerify, enabled = state.loadState !is UiLoadState.Loading) {
+                            AppIcon(
+                                AppIcons.Filled.Refresh,
                                 contentDescription = strings.verifyRoot,
-                                tint = MaterialTheme.colorScheme.primary
+                                tint = MaterialTheme.colorScheme.primary,
                             )
                         }
                     }
                     AppButton(
                         text = strings.verifyRoot,
-                        onClick = { viewModel.verify() },
-                        enabled = !state.loading,
-                        fullWidth = true
+                        onClick = onVerify,
+                        enabled = state.loadState !is UiLoadState.Loading,
+                        fullWidth = true,
                     )
                     AppText(strings.rootPassiveHint, style = MaterialTheme.typography.bodySmall)
                     AppButton(
                         text = strings.rootPrivilegeTest,
-                        onClick = { viewModel.verifyRootAccess() },
-                        enabled = !state.loading,
-                        fullWidth = true
+                        onClick = onVerifyRootAccess,
+                        enabled = state.loadState !is UiLoadState.Loading,
+                        fullWidth = true,
                     )
 
                     AppTextField(
                         value = state.playIntegrityNonce,
-                        onValueChange = viewModel::updatePlayIntegrityNonce,
+                        onValueChange = onPlayIntegrityNonceChange,
                         label = strings.nonceLabel,
-                        modifier = Modifier.padding(top = 4.dp)
+                        modifier = Modifier.padding(top = 4.dp),
                     )
                     AppButton(
                         text = strings.verifyPlayIntegrity,
-                        onClick = viewModel::verifyPlayIntegrity,
-                        enabled = !state.loading,
-                        fullWidth = true
+                        onClick = onVerifyPlayIntegrity,
+                        enabled = state.loadState !is UiLoadState.Loading,
+                        fullWidth = true,
                     )
                 }
             }
 
-            if (state.loading) {
+            if (state.loadState is UiLoadState.Loading) {
                 AppProgressIndicator(
                     label = strings.rootChecking,
-                    modifier = Modifier.padding(top = 12.dp)
+                    modifier = Modifier.padding(top = 12.dp),
                 )
             }
 
             AnimatedVisibility(
                 visible = state.status != null || state.playIntegrity != null,
-                enter = if (accessibilityPrefs.reduceMotion) EnterTransition.None else fadeIn(tween(180)) + expandVertically(tween(180)),
-                exit = if (accessibilityPrefs.reduceMotion) ExitTransition.None else fadeOut(tween(120))
+                enter = if (accessibilityPrefs.reduceMotion) {
+                    EnterTransition.None
+                } else {
+                    fadeIn(tween(180)) +
+                        expandVertically(
+                            tween(180),
+                        )
+                },
+                exit = if (accessibilityPrefs.reduceMotion) ExitTransition.None else fadeOut(tween(120)),
             ) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .bringIntoViewRequester(resultBringIntoView)
                         .semantics { liveRegion = LiveRegionMode.Polite },
-                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
                     state.status?.let { status ->
-                        val bg =
-                            if (status.isRooted) MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.secondaryContainer
-                        val onBg =
-                            if (status.isRooted) MaterialTheme.colorScheme.onErrorContainer else MaterialTheme.colorScheme.onSecondaryContainer
+                        val bg = if (status.isRooted) {
+                            MaterialTheme.colorScheme.errorContainer
+                        } else {
+                            MaterialTheme.colorScheme.secondaryContainer
+                        }
+                        val onBg = if (status.isRooted) {
+                            MaterialTheme.colorScheme.onErrorContainer
+                        } else {
+                            MaterialTheme.colorScheme.onSecondaryContainer
+                        }
                         ElevatedCard(
                             modifier = Modifier.fillMaxWidth(),
                             shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp),
                             colors = CardDefaults.elevatedCardColors(containerColor = bg),
-                            elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp)
+                            elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp),
                         ) {
                             Column(
                                 modifier = Modifier.padding(12.dp),
-                                verticalArrangement = Arrangement.spacedBy(6.dp)
+                                verticalArrangement = Arrangement.spacedBy(6.dp),
                             ) {
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
                                     horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
+                                    verticalAlignment = Alignment.CenterVertically,
                                 ) {
                                     val statusContent: @Composable (Boolean) -> Unit = { rooted ->
                                         Row(
                                             horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                            verticalAlignment = Alignment.CenterVertically
+                                            verticalAlignment = Alignment.CenterVertically,
                                         ) {
-                                            Icon(
-                                                imageVector = if (rooted) Icons.Filled.Warning else Icons.Filled.CheckCircle,
+                                            AppIcon(
+                                                imageVector = if (rooted) {
+                                                    AppIcons.Filled.Warning
+                                                } else {
+                                                    AppIcons.Filled.CheckCircle
+                                                },
                                                 contentDescription = null,
-                                                tint = onBg
+                                                tint = onBg,
                                             )
                                             AppText(
                                                 text = if (rooted) strings.rootDetected else strings.rootNotDetected,
                                                 style = MaterialTheme.typography.titleMedium,
                                                 color = onBg,
                                                 fontWeight = FontWeight.SemiBold,
-                                                modifier = Modifier.semantics { heading() }
+                                                modifier = Modifier.semantics { heading() },
                                             )
                                         }
                                     }
@@ -225,14 +259,14 @@ fun RootScreen(
                                         AnimatedContent(
                                             targetState = status.isRooted,
                                             transitionSpec = { fadeIn(tween(160)) togetherWith fadeOut(tween(120)) },
-                                            label = "rootStatus"
+                                            label = "rootStatus",
                                         ) { statusContent(it) }
                                     }
-                                    IconButton(onClick = { viewModel.shareReport(strings) }) {
-                                        Icon(
-                                            imageVector = Icons.Filled.Share,
+                                    IconButton(onClick = onShareReport) {
+                                        AppIcon(
+                                            imageVector = AppIcons.Filled.Share,
                                             contentDescription = strings.pentestShare,
-                                            tint = onBg
+                                            tint = onBg,
                                         )
                                     }
                                 }
@@ -240,24 +274,25 @@ fun RootScreen(
                                     status.details,
                                     modifier = Modifier.fillMaxWidth(),
                                     style = MaterialTheme.typography.bodySmall,
-                                    color = onBg
+                                    color = onBg,
                                 )
                                 if (status.checks.isNotEmpty()) {
                                     AppText(
                                         text = strings.rootChecksTitle,
                                         style = MaterialTheme.typography.titleSmall,
                                         color = onBg,
-                                        fontWeight = FontWeight.SemiBold
+                                        fontWeight = FontWeight.SemiBold,
                                     )
                                     status.checks.forEach { check ->
                                         val label = strings.rootCheckLabels[check.id.name] ?: check.id.name
-                                        val outcome = strings.rootOutcomeLabels[check.outcome.name] ?: check.outcome.name
+                                        val outcome =
+                                            strings.rootOutcomeLabels[check.outcome.name] ?: check.outcome.name
                                         AppText(
                                             text = check.evidence.takeIf { it.isNotBlank() }
                                                 ?.let { screenStrings.rootEvidence.format(label, outcome, it) }
                                                 ?: "$label: $outcome",
                                             color = onBg,
-                                            style = MaterialTheme.typography.bodySmall
+                                            style = MaterialTheme.typography.bodySmall,
                                         )
                                     }
                                 }
@@ -269,28 +304,30 @@ fun RootScreen(
                         ElevatedCard(
                             modifier = Modifier.fillMaxWidth(),
                             shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp),
-                            colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surface),
-                            elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp)
+                            colors = CardDefaults.elevatedCardColors(
+                                containerColor = MaterialTheme.colorScheme.surface,
+                            ),
+                            elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp),
                         ) {
                             Column(
                                 modifier = Modifier.padding(12.dp),
-                                verticalArrangement = Arrangement.spacedBy(6.dp)
+                                verticalArrangement = Arrangement.spacedBy(6.dp),
                             ) {
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
                                     horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
+                                    verticalAlignment = Alignment.CenterVertically,
                                 ) {
                                     AppText(
                                         strings.playIntegrityTitle,
                                         style = MaterialTheme.typography.titleMedium,
-                                        fontWeight = FontWeight.SemiBold
+                                        fontWeight = FontWeight.SemiBold,
                                     )
-                                    IconButton(onClick = { viewModel.shareReport(strings) }) {
-                                        Icon(
-                                            imageVector = Icons.Filled.Share,
+                                    IconButton(onClick = onShareReport) {
+                                        AppIcon(
+                                            imageVector = AppIcons.Filled.Share,
                                             contentDescription = strings.pentestShare,
-                                            tint = MaterialTheme.colorScheme.primary
+                                            tint = MaterialTheme.colorScheme.primary,
                                         )
                                     }
                                 }
@@ -301,7 +338,7 @@ fun RootScreen(
                                         "${strings.playIntegrityDetails}: ${pi.details}",
                                         style = MaterialTheme.typography.bodySmall,
                                         modifier = Modifier
-                                            .fillMaxWidth()
+                                            .fillMaxWidth(),
                                     )
                                 }
                             }
@@ -310,11 +347,11 @@ fun RootScreen(
                 }
             }
 
-            state.error?.let { err ->
+            (state.loadError ?: state.error)?.let { err ->
                 AppText(
                     err,
                     modifier = Modifier.padding(top = 8.dp),
-                    style = MaterialTheme.typography.bodySmall
+                    style = MaterialTheme.typography.bodySmall,
                 )
             }
         }
@@ -328,13 +365,11 @@ fun RootScreen(
             },
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(12.dp)
+                .padding(12.dp),
         )
     }
 
-    LaunchedEffect(Unit) {
-        viewModel.verify()
-    }
+    LaunchedEffect(Unit) { onLoad() }
 
     LaunchedEffect(state.status, state.playIntegrity) {
         if (!accessibilityPrefs.reduceMotion && (state.status != null || state.playIntegrity != null)) {
@@ -342,5 +377,28 @@ fun RootScreen(
         }
     }
 
-    state.error?.let { ErrorDialogComponent(it, viewModel::clearError) }
+    (state.loadError ?: state.error)?.let { ErrorDialogComponent(it, onClearError) }
+}
+
+@AppScreenPreviews
+@Composable
+private fun RootScreenPreview() {
+    AppPreviewEnvironment {
+        RootScreenContent(
+            state = RootState(
+                status = RootStatus(
+                    isRooted = false,
+                    details = "No root access detected.",
+                ),
+            ),
+            padding = PaddingValues(),
+            onVerify = {},
+            onVerifyRootAccess = {},
+            onPlayIntegrityNonceChange = {},
+            onVerifyPlayIntegrity = {},
+            onShareReport = {},
+            onClearError = {},
+            onLoad = {},
+        )
+    }
 }

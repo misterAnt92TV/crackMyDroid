@@ -1,49 +1,68 @@
 package com.crackmydroid.shared.ui.trick
 
+import com.crackmydroid.architecture.coroutines.AppDispatchers
+import com.crackmydroid.architecture.presentation.model.UiLoadState
 import com.crackmydroid.shared.domain.model.shell.ShellCommand
 import com.crackmydroid.shared.domain.usecase.trick.ExecuteShellCommandUseCase
 import com.crackmydroid.shared.domain.usecase.trick.ListShellCommandsUseCase
-import com.crackmydroid.shared.presentation.BaseViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
+import com.crackmydroid.shared.i18n.ScreenUiStrings
+import com.crackmydroid.shared.i18n.format
+import com.crackmydroid.shared.presentation.LocalizedBaseViewModel
 
 class TrickViewModel(
-    private val listUseCase: ListShellCommandsUseCase,
-    private val execUseCase: ExecuteShellCommandUseCase
-) : BaseViewModel() {
-    private val _state = MutableStateFlow(TrickState())
-    val state: StateFlow<TrickState> = _state
+    private val listShellCommandsUseCase: ListShellCommandsUseCase,
+    private val executeShellCommandUseCase: ExecuteShellCommandUseCase,
+    dispatchers: AppDispatchers,
+) : LocalizedBaseViewModel<TrickEvent, TrickState>(TrickState(), dispatchers) {
+    private companion object {
+        const val LOAD_KEY = "trick-load"
+    }
 
-    fun load() {
-        scope.launch {
-            listUseCase()
-                .onSuccess { list -> _state.update { it.copy(commands = list) } }
-                .onFailure { error -> _state.update { it.copy(error = error.message) } }
+    private val uiStrings get() = ScreenUiStrings.from(strings)
+
+    override fun onEvent(event: TrickEvent) = when (event) {
+        is TrickEvent.Load -> load()
+        is TrickEvent.Execute -> execute(event.command)
+        is TrickEvent.ExecutionRequested -> requestExecution(event.command)
+        is TrickEvent.ExecutionConfirmed -> confirmPendingExecution()
+        is TrickEvent.PendingCommandDismissed -> dismissPendingCommand()
+        is TrickEvent.ResultDismissed -> dismissResult()
+        is TrickEvent.BusyInteractionNotified -> notifyBusyInteraction(event.command)
+        is TrickEvent.UnsupportedCommandNotified -> notifyUnsupportedCommand(event.command)
+        is TrickEvent.InteractionHintDismissed -> clearInteractionHint()
+        is TrickEvent.ErrorDismissed -> clearError()
+    }
+
+    private fun load() {
+        launchLatest(LOAD_KEY) {
+            updateState { it.copy(commandsLoadState = UiLoadState.Loading) }
+            listShellCommandsUseCase()
+                .onSuccess { list -> updateState { it.copy(commands = list, commandsLoadState = UiLoadState.Success) } }
+                .onFailure { error ->
+                    updateState { it.copy(commandsLoadState = UiLoadState.Error(error.message ?: presentationTexts.error)) }
+                }
         }
     }
 
-    fun execute(command: ShellCommand) {
-        if (_state.value.running) {
-            val active = _state.value.runningCommand?.title ?: "un altro comando"
-            _state.update {
-                it.copy(interactionHint = "Attendi: \"$active\" e ancora in esecuzione.")
+    private fun execute(command: ShellCommand) {
+        if (currentState.running) {
+            val active = currentState.runningCommand?.title ?: uiStrings.anotherCommand
+            updateState {
+                it.copy(interactionHint = uiStrings.waitCommandRunning.format(active))
             }
             return
         }
-        _state.update {
+        updateState {
             it.copy(
-                running = true,
+                executionLoadState = UiLoadState.Loading,
                 runningCommand = command,
                 interactionHint = null,
-                error = null
             )
         }
-        scope.launch {
-            execUseCase(command)
+        launchTask {
+            executeShellCommandUseCase(command)
                 .onSuccess { res ->
-                    _state.update {
+                    updateState {
                         it.copy(
                             lastResult = res,
                             resultToDisplay = res,
@@ -55,59 +74,68 @@ class TrickViewModel(
                                 .map { line -> line.removePrefix("package:").trim() },
                             stdoutIsPackageList = res.stdout.lines().map(String::trim)
                                 .filter(String::isNotEmpty).all { line -> line.startsWith("package:") },
-                            running = false,
-                            runningCommand = null
+                            executionLoadState = UiLoadState.Success,
+                            runningCommand = null,
                         )
                     }
                 }
                 .onFailure { err ->
-                    _state.update {
+                    updateState {
                         it.copy(
-                            error = err.message,
+                            executionLoadState = UiLoadState.Error(err.message ?: presentationTexts.error),
                             lastCommandTitle = command.title,
-                            running = false,
-                            runningCommand = null
+                            runningCommand = null,
                         )
                     }
                 }
         }
     }
 
-    fun requestExecution(command: ShellCommand) {
-        if (command.confirmation != null) _state.update { it.copy(pendingCommand = command) }
-        else execute(command)
-    }
-
-    fun confirmPendingExecution() {
-        val command = _state.value.pendingCommand ?: return
-        _state.update { it.copy(pendingCommand = null) }
-        execute(command)
-    }
-
-    fun dismissPendingCommand() = _state.update { it.copy(pendingCommand = null) }
-    fun dismissResult() = _state.update { it.copy(resultToDisplay = null) }
-
-    fun notifyBusyInteraction(requestedCommand: ShellCommand) {
-        val active = _state.value.runningCommand?.title ?: "un altro comando"
-        _state.update {
-            it.copy(interactionHint = "\"${requestedCommand.title}\" non avviato: prima termina \"$active\".")
+    private fun requestExecution(command: ShellCommand) {
+        if (command.confirmation != null) {
+            updateState { it.copy(pendingCommand = command) }
+        } else {
+            execute(command)
         }
     }
 
-    fun notifyUnsupportedCommand(command: ShellCommand) {
-        _state.update {
+    private fun confirmPendingExecution() {
+        val command = currentState.pendingCommand ?: return
+        updateState { it.copy(pendingCommand = null) }
+        execute(command)
+    }
+
+    private fun dismissPendingCommand() = updateState { it.copy(pendingCommand = null) }
+    private fun dismissResult() = updateState { it.copy(resultToDisplay = null) }
+
+    private fun notifyBusyInteraction(requestedCommand: ShellCommand) {
+        val active = currentState.runningCommand?.title ?: uiStrings.anotherCommand
+        updateState {
             it.copy(
-                interactionHint = command.unsupportedReason
-                    ?: "\"${command.title}\" non disponibile sul device selezionato."
+                interactionHint = uiStrings.commandNotStartedUntilCurrentEnds.format(requestedCommand.title, active),
             )
         }
     }
 
-    fun clearInteractionHint() {
-        _state.update { it.copy(interactionHint = null) }
+    private fun notifyUnsupportedCommand(command: ShellCommand) {
+        updateState {
+            it.copy(
+                interactionHint = command.unsupportedReason
+                    ?: uiStrings.commandNotAvailableOnSelectedDevice.format(command.title),
+            )
+        }
     }
 
-    fun clearError() {
-        _state.update { it.copy(error = null) }
+    private fun clearInteractionHint() {
+        updateState { it.copy(interactionHint = null) }
+    }
+
+    private fun clearError() {
+        updateState {
+            it.copy(
+                commandsLoadState = if (it.commandsLoadState is UiLoadState.Error) UiLoadState.Idle else it.commandsLoadState,
+                executionLoadState = if (it.executionLoadState is UiLoadState.Error) UiLoadState.Idle else it.executionLoadState,
+            )
+        }
     }
 }

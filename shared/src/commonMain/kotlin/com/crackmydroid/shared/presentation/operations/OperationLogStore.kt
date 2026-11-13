@@ -1,10 +1,11 @@
 package com.crackmydroid.shared.presentation.operations
 
-import com.crackmydroid.shared.AppLogger
+import com.crackmydroid.architecture.logging.AppLogger
 import com.crackmydroid.shared.domain.model.operation.OperationEntry
 import com.crackmydroid.shared.domain.model.operation.OperationEvent
 import com.crackmydroid.shared.domain.repository.log.OperationLogRepository
 import com.crackmydroid.shared.util.runSuspendCatching
+import kotlin.random.Random
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -14,7 +15,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlin.random.Random
 
 interface OperationLogPersistence {
     suspend fun load(): List<OperationEntry>
@@ -33,7 +33,7 @@ class InMemoryOperationLogPersistence : OperationLogPersistence {
 
 class DefaultOperationLogRepository(
     private val persistence: OperationLogPersistence,
-    private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default),
 ) : OperationLogRepository {
     private val maxEntries = 50
     private val persistenceMutex = Mutex()
@@ -62,7 +62,7 @@ class DefaultOperationLogRepository(
                 details = details,
                 timestamp = currentTimeMillis(),
                 operationId = newOperationId(),
-            )
+            ),
         )
     }
 
@@ -76,7 +76,7 @@ class DefaultOperationLogRepository(
                 event = event,
                 legacyDescription = null,
                 operationId = newOperationId(),
-            )
+            ),
         )
     }
 

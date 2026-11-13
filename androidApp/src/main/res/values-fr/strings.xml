@@ -1,1 +1,8 @@
-<resources><string name="package_inventory_disclosure_title">Analyse des applications installées</string><string name="package_inventory_disclosure_body">CrackMyDroid lit localement l\'inventaire des applications installées pour afficher les APK, activités, composants et autorisations.</string><string name="package_inventory_disclosure_confirm">J\'ai compris</string><string name="package_inventory_unavailable_title">Analyse complète indisponible</string><string name="package_inventory_unavailable_body">Cette installation ne dispose pas de la visibilité complète des applications. L\'analyse ne démarre pas afin d\'éviter des résultats partiels.</string><string name="close">Fermer</string></resources>
+<resources>
+    <string name="package_inventory_disclosure_title">Analyse des applications installées</string>
+    <string name="package_inventory_disclosure_body">CrackMyDroid lit localement l\'inventaire des applications installées pour afficher les APK, activités, composants et autorisations.</string>
+    <string name="package_inventory_disclosure_confirm">J\'ai compris</string>
+    <string name="package_inventory_unavailable_title">Analyse complète indisponible</string>
+    <string name="package_inventory_unavailable_body">Cette installation ne dispose pas de la visibilité complète des applications. L\'analyse ne démarre pas afin d\'éviter des résultats partiels.</string>
+    <string name="close">Fermer</string>
+</resources>

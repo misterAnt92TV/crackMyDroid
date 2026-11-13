@@ -1,13 +1,21 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="720" height="280" viewBox="0 0 720 280" role="img" data-source="shared/src/commonMain/kotlin/com/crackmydroid/shared/presentation/components/AppIcon.kt">
-<title>PackageIcon · dark theme</title>
-<desc>Editable SVG visual reference for PackageIcon, based on shared/src/commonMain/kotlin/com/crackmydroid/shared/presentation/components/AppIcon.kt.</desc>
-<rect x="0" y="0" width="720" height="280" fill="#101418" rx="0"/>
-<rect x="24" y="24" width="672" height="232" fill="#101418" rx="22" stroke="#3F4652" stroke-width="1"/>
-<circle cx="360" cy="140" r="66" fill="#0F5223"/>
-<rect x="328" y="117" width="64" height="48" fill="#81C995" rx="24"/>
-<circle cx="343" cy="138" r="4" fill="#053062"/>
-<circle cx="377" cy="138" r="4" fill="#053062"/>
-<line x1="338" y1="106" x2="329" y2="94" stroke="#81C995" stroke-width="4" stroke-linecap="round"/>
-<line x1="382" y1="106" x2="391" y2="94" stroke="#81C995" stroke-width="4" stroke-linecap="round"/>
-<text x="286" y="224" fill="#C0C7D2" font-family="Inter, Roboto, sans-serif" font-size="14" font-weight="400">Fallback Android icon · 64 dp</text>
+<svg data-source="shared/src/commonMain/kotlin/com/crackmydroid/shared/presentation/components/AppIcon.kt" height="280" role="img" viewBox="0 0 720 280" width="720"
+    xmlns="http://www.w3.org/2000/svg">
+    <title>PackageIcon · dark theme</title>
+    <desc>Editable SVG visual reference for PackageIcon, based on
+        shared/src/commonMain/kotlin/com/crackmydroid/shared/presentation/components/AppIcon.kt.
+    </desc>
+    <rect fill="#101418" height="280" rx="0" width="720" x="0" y="0" />
+    <rect fill="#101418" height="232" rx="22" stroke="#3F4652" stroke-width="1" width="672" x="24"
+        y="24" />
+    <circle cx="360" cy="140" fill="#0F5223" r="66" />
+    <rect fill="#81C995" height="48" rx="24" width="64" x="328" y="117" />
+    <circle cx="343" cy="138" fill="#053062" r="4" />
+    <circle cx="377" cy="138" fill="#053062" r="4" />
+    <line stroke="#81C995" stroke-linecap="round" stroke-width="4" x1="338" x2="329" y1="106"
+        y2="94" />
+    <line stroke="#81C995" stroke-linecap="round" stroke-width="4" x1="382" x2="391" y1="106"
+        y2="94" />
+    <text fill="#C0C7D2" font-family="Inter, Roboto, sans-serif" font-size="14" font-weight="400" x="286"
+        y="224">Fallback Android icon · 64 dp
+    </text>
 </svg>

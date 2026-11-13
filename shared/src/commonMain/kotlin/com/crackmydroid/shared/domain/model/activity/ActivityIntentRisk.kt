@@ -4,14 +4,10 @@ enum class ActivityIntentRiskLevel {
     Low,
     Medium,
     High,
-    Critical
+    Critical,
 }
 
-data class ActivityIntentRiskFinding(
-    val level: ActivityIntentRiskLevel,
-    val title: String,
-    val detail: String
-)
+data class ActivityIntentRiskFinding(val level: ActivityIntentRiskLevel, val title: String, val detail: String)
 
 data class ActivityIntentRiskReport(
     val entry: ActivityEntry,
@@ -19,7 +15,7 @@ data class ActivityIntentRiskReport(
     val score: Int,
     val launchMode: String,
     val recommendation: String,
-    val findings: List<ActivityIntentRiskFinding>
+    val findings: List<ActivityIntentRiskFinding>,
 ) {
     val summary: String
         get() = findings.firstOrNull()?.detail ?: "Nessuna esposizione particolare rilevata."
@@ -41,8 +37,8 @@ object ActivityIntentRiskAnalyzer {
                 ActivityIntentRiskFinding(
                     level = ActivityIntentRiskLevel.High,
                     title = "Guided launch richiesto",
-                    detail = "L'activity richiede un intent contestualizzato e merita test dedicati su deeplink/input."
-                )
+                    detail = "L'activity richiede un intent contestualizzato e merita test dedicati su deeplink/input.",
+                ),
             )
         } else if (!entry.launchableViaShell) {
             register(
@@ -51,8 +47,8 @@ object ActivityIntentRiskAnalyzer {
                 ActivityIntentRiskFinding(
                     level = ActivityIntentRiskLevel.Medium,
                     title = "Componente solo dump",
-                    detail = "La componente compare nel dump del package ma non risulta avviabile direttamente."
-                )
+                    detail = "La componente compare nel dump del package ma non risulta avviabile direttamente.",
+                ),
             )
         }
 
@@ -64,8 +60,8 @@ object ActivityIntentRiskAnalyzer {
                     ActivityIntentRiskFinding(
                         level = ActivityIntentRiskLevel.Critical,
                         title = "Intent telefonico sensibile",
-                        detail = "L'intent puo innescare chiamate o flussi telefonici con impatto immediato."
-                    )
+                        detail = "L'intent puo innescare chiamate o flussi telefonici con impatto immediato.",
+                    ),
                 )
 
             normalizedAction.contains("ACTION_SEND") || normalizedAction.contains("ACTION_SENDTO") ->
@@ -75,8 +71,9 @@ object ActivityIntentRiskAnalyzer {
                     ActivityIntentRiskFinding(
                         level = ActivityIntentRiskLevel.High,
                         title = "Intent di condivisione",
-                        detail = "L'activity accetta payload da share/send: verificare input injection ed esposizione dati."
-                    )
+                        detail = "L'activity accetta payload da share/send: " +
+                            "verificare input injection ed esposizione dati.",
+                    ),
                 )
 
             normalizedAction.contains("ACTION_VIEW") && scheme.isNotBlank() ->
@@ -90,12 +87,14 @@ object ActivityIntentRiskAnalyzer {
                             else -> ActivityIntentRiskLevel.High
                         },
                         title = "Entry-point deeplink/view",
-                        detail = "L'activity espone un endpoint VIEW su schema ${scheme.ifBlank { "non specificato" }}."
-                    )
+                        detail = "L'activity espone un endpoint VIEW su schema ${scheme.ifBlank {
+                            "non specificato"
+                        }}.",
+                    ),
                 )
 
             normalizedAction.contains("PROCESS_TEXT") || normalizedAction.contains("PICK") || normalizedAction.contains(
-                "EDIT"
+                "EDIT",
             ) ->
                 register(
                     findings,
@@ -103,8 +102,9 @@ object ActivityIntentRiskAnalyzer {
                     ActivityIntentRiskFinding(
                         level = ActivityIntentRiskLevel.High,
                         title = "Intent orientato a input esterno",
-                        detail = "Accetta input contestuale da altre app: utile per test injection/manipolazione contenuti."
-                    )
+                        detail = "Accetta input contestuale da altre app: " +
+                            "utile per test injection/manipolazione contenuti.",
+                    ),
                 )
         }
 
@@ -116,8 +116,8 @@ object ActivityIntentRiskAnalyzer {
                     ActivityIntentRiskFinding(
                         level = ActivityIntentRiskLevel.Critical,
                         title = "URI file/content",
-                        detail = "Gestisce URI locali/content provider: verificare path traversal, permessi e leakage."
-                    )
+                        detail = "Gestisce URI locali/content provider: verificare path traversal, permessi e leakage.",
+                    ),
                 )
 
             "intent" ->
@@ -127,8 +127,9 @@ object ActivityIntentRiskAnalyzer {
                     ActivityIntentRiskFinding(
                         level = ActivityIntentRiskLevel.High,
                         title = "Intent URI annidato",
-                        detail = "Supporta intent://: verificare sanitizzazione dei parametri e chaining tra componenti."
-                    )
+                        detail = "Supporta intent://: " +
+                            "verificare sanitizzazione dei parametri e chaining tra componenti.",
+                    ),
                 )
 
             "tel", "sms", "smsto", "mms", "mmsto", "mailto" ->
@@ -138,8 +139,8 @@ object ActivityIntentRiskAnalyzer {
                     ActivityIntentRiskFinding(
                         level = ActivityIntentRiskLevel.High,
                         title = "Schema sensibile",
-                        detail = "Lo schema $scheme puo attivare canali sensibili o azioni verso app di sistema."
-                    )
+                        detail = "Lo schema $scheme puo attivare canali sensibili o azioni verso app di sistema.",
+                    ),
                 )
 
             "http", "https" ->
@@ -149,8 +150,8 @@ object ActivityIntentRiskAnalyzer {
                     ActivityIntentRiskFinding(
                         level = ActivityIntentRiskLevel.Medium,
                         title = "Deeplink web",
-                        detail = "Endpoint web da validare con open redirect, host confusion e parametri malevoli."
-                    )
+                        detail = "Endpoint web da validare con open redirect, host confusion e parametri malevoli.",
+                    ),
                 )
 
             else -> if (scheme.isNotBlank()) {
@@ -160,8 +161,8 @@ object ActivityIntentRiskAnalyzer {
                     ActivityIntentRiskFinding(
                         level = ActivityIntentRiskLevel.High,
                         title = "Custom scheme",
-                        detail = "Schema custom $scheme da verificare con payload arbitrari e collisioni di deeplink."
-                    )
+                        detail = "Schema custom $scheme da verificare con payload arbitrari e collisioni di deeplink.",
+                    ),
                 )
             }
         }
@@ -175,14 +176,14 @@ object ActivityIntentRiskAnalyzer {
                 ActivityIntentRiskFinding(
                     level = level,
                     title = "Filtro MIME",
-                    detail = "Accetta MIME type $mimeType: verificare parsing file e contenuti inattesi."
-                )
+                    detail = "Accetta MIME type $mimeType: verificare parsing file e contenuti inattesi.",
+                ),
             )
         }
 
         val orderedFindings = findings.values.sortedWith(
             compareByDescending<ActivityIntentRiskFinding> { weight(it.level) }
-                .thenBy { it.title }
+                .thenBy { it.title },
         )
         val score = orderedFindings.sumOf { weight(it.level) }
         val level =
@@ -213,7 +214,7 @@ object ActivityIntentRiskAnalyzer {
             score = score,
             launchMode = launchMode,
             recommendation = recommendation,
-            findings = orderedFindings
+            findings = orderedFindings,
         )
     }
 
@@ -230,7 +231,7 @@ object ActivityIntentRiskAnalyzer {
     private fun register(
         target: MutableMap<String, ActivityIntentRiskFinding>,
         key: String,
-        finding: ActivityIntentRiskFinding
+        finding: ActivityIntentRiskFinding,
     ) {
         val current = target[key]
         if (current == null || weight(finding.level) > weight(current.level)) {
@@ -250,9 +251,8 @@ object ActivityIntentRiskAnalyzer {
         ActivityIntentRiskLevel.Critical -> 5
     }
 
-    private fun ActivityEntry.hasLaunchMetadata(): Boolean =
-        !launchContextHint.isNullOrBlank() ||
-                !launchIntentAction.isNullOrBlank() ||
-                !launchIntentData.isNullOrBlank() ||
-                !launchIntentMimeType.isNullOrBlank()
+    private fun ActivityEntry.hasLaunchMetadata(): Boolean = !launchContextHint.isNullOrBlank() ||
+        !launchIntentAction.isNullOrBlank() ||
+        !launchIntentData.isNullOrBlank() ||
+        !launchIntentMimeType.isNullOrBlank()
 }

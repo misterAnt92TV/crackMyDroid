@@ -14,15 +14,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.History
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
@@ -33,17 +28,23 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.delay
 import com.crackmydroid.shared.i18n.LocalStrings
-import com.crackmydroid.shared.presentation.components.text.AppText
-import com.crackmydroid.shared.presentation.preview.AppComponentPreviews
-import com.crackmydroid.shared.presentation.preview.ComponentPreviewContainer
+import com.crackmydroid.shared.i18n.format
+import com.crackmydroid.ui.components.AppIcon
+import com.crackmydroid.ui.components.text.AppText
+import com.crackmydroid.ui.components.LocalAccessibilityPrefs
+import com.crackmydroid.ui.icons.AppIcons
+import com.crackmydroid.ui.preview.AppComponentPreviews
+import com.crackmydroid.ui.preview.ComponentPreviewContainer
+import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -56,17 +57,23 @@ fun SearchFieldWithHistoryComponent(
     modifier: Modifier = Modifier,
     shape: androidx.compose.ui.graphics.Shape = RoundedCornerShape(14.dp),
     showClearAction: Boolean = false,
-    onCleared: (() -> Unit)? = null
+    onCleared: (() -> Unit)? = null,
+    focusRequestId: Long = 0,
 ) {
     var historyVersion by remember { mutableStateOf(0) }
     var hasFocus by remember { mutableStateOf(false) }
     var showSuggestions by remember { mutableStateOf(false) }
     val focusManager = LocalFocusManager.current
+    val focusRequester = remember { FocusRequester() }
     val strings = LocalStrings.current
     val suggestions = remember(value, historyKey, historyVersion) {
         SearchHistoryStore.suggestions(historyKey, value)
     }
     val suggestionsVisible = showSuggestions && suggestions.isNotEmpty()
+
+    LaunchedEffect(focusRequestId) {
+        if (focusRequestId > 0) focusRequester.requestFocus()
+    }
 
     LaunchedEffect(hasFocus) {
         if (hasFocus) {
@@ -102,6 +109,7 @@ fun SearchFieldWithHistoryComponent(
             },
             modifier = Modifier
                 .fillMaxWidth()
+                .focusRequester(focusRequester)
                 .onFocusChanged { state ->
                     hasFocus = state.isFocused
                 },
@@ -111,18 +119,20 @@ fun SearchFieldWithHistoryComponent(
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
             colors = TextFieldDefaults.colors(
                 focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant
+                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
             ),
             trailingIcon = {
                 if (value.isNotBlank()) {
-                    IconButton(onClick = {
-                        onValueChange("")
-                        showSuggestions = hasFocus
-                    }) {
-                        Icon(
-                            imageVector = Icons.Filled.Close,
+                    IconButton(
+                        onClick = {
+                            onValueChange("")
+                            showSuggestions = hasFocus
+                        },
+                    ) {
+                        AppIcon(
+                            imageVector = AppIcons.Filled.Close,
                             contentDescription = strings.clearSearchContentDescription,
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
                 }
@@ -133,8 +143,8 @@ fun SearchFieldWithHistoryComponent(
                     onSubmit(value)
                     focusManager.clearFocus()
                     showSuggestions = false
-                }
-            )
+                },
+            ),
         )
 
         val preferences = LocalAccessibilityPrefs.current
@@ -143,18 +153,18 @@ fun SearchFieldWithHistoryComponent(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 6.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
+                verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 LazyRow(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     items(suggestions) { suggestion ->
                         val chipColors = FilterChipDefaults.filterChipColors(
                             containerColor = MaterialTheme.colorScheme.surfaceVariant,
                             selectedContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.14f),
                             selectedLabelColor = MaterialTheme.colorScheme.primary,
-                            labelColor = MaterialTheme.colorScheme.onSurface
+                            labelColor = MaterialTheme.colorScheme.onSurface,
                         )
                         FilterChip(
                             selected = value.equals(suggestion, ignoreCase = true),
@@ -170,17 +180,17 @@ fun SearchFieldWithHistoryComponent(
                                 onLongClick = {
                                     removeFromHistoryAndRefresh(suggestion)
                                 },
-                                onLongClickLabel = strings.removeSearchHistoryContentDescription.format(suggestion)
+                                onLongClickLabel = strings.removeSearchHistoryContentDescription.format(suggestion),
                             ),
                             label = { AppText(suggestion) },
                             leadingIcon = {
-                                Icon(
-                                    imageVector = Icons.Filled.History,
+                                AppIcon(
+                                    imageVector = AppIcons.Filled.History,
                                     contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary
+                                    tint = MaterialTheme.colorScheme.primary,
                                 )
                             },
-                            colors = chipColors
+                            colors = chipColors,
                         )
                     }
                 }
@@ -197,8 +207,8 @@ fun SearchFieldWithHistoryComponent(
                             }
                             .combinedClickable(
                                 onClick = { clearHistoryAndRefresh() },
-                                onLongClick = { clearHistoryAndRefresh() }
-                            )
+                                onLongClick = { clearHistoryAndRefresh() },
+                            ),
                     )
                 }
             }
@@ -209,7 +219,7 @@ fun SearchFieldWithHistoryComponent(
             AnimatedVisibility(
                 visible = suggestionsVisible,
                 enter = fadeIn(),
-                exit = fadeOut()
+                exit = fadeOut(),
             ) { suggestionsContent() }
         }
     }
@@ -225,7 +235,7 @@ private fun SearchFieldWithHistoryComponentPreview() = ComponentPreviewContainer
             onValueChange = {},
             onSubmit = {},
             label = strings.permissionsSearch,
-            historyKey = "component-preview-empty"
+            historyKey = "component-preview-empty",
         )
         SearchFieldWithHistoryComponent(
             value = "crack",
@@ -234,7 +244,7 @@ private fun SearchFieldWithHistoryComponentPreview() = ComponentPreviewContainer
             label = strings.permissionsSearch,
             historyKey = "component-preview-filled",
             showClearAction = true,
-            onCleared = {}
+            onCleared = {},
         )
     }
 }

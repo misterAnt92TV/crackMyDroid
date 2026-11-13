@@ -2,8 +2,12 @@ package com.crackmydroid.shared.domain.model.app
 
 enum class AppLanguage(val code: String) {
     SYSTEM("system"),
-    ENGLISH("en"), ITALIAN("it"), GERMAN("de"),
-    FRENCH("fr"), SPANISH("es");
+    ENGLISH("en"),
+    ITALIAN("it"),
+    GERMAN("de"),
+    FRENCH("fr"),
+    SPANISH("es"),
+    ;
 
     companion object {
         fun fromCode(code: String?): AppLanguage {

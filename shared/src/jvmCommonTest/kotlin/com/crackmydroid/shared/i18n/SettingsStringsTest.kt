@@ -14,36 +14,59 @@ class SettingsStringsTest {
     fun settingsSections_haveExpectedTranslationsInEveryLanguage() {
         val expected = mapOf(
             "it" to listOf(
-                "Suggerimenti di ricerca", "Dialoghi di ingresso alle sezioni", "Introduzione",
-                "Formato di esportazione", "Informazioni app", "Nessun permesso richiesto"
+                "Suggerimenti di ricerca",
+                "Dialoghi di ingresso alle sezioni",
+                "Introduzione",
+                "Formato di esportazione",
+                "Informazioni app",
+                "Nessun permesso richiesto",
             ),
             "en" to listOf(
-                "Search suggestions", "Section introduction dialogs", "Introduction",
-                "Export format", "App information", "No permissions requested"
+                "Search suggestions",
+                "Section introduction dialogs",
+                "Introduction",
+                "Export format",
+                "App information",
+                "No permissions requested",
             ),
             "de" to listOf(
-                "Suchvorschläge", "Einführungsdialoge für Bereiche", "Einführung",
-                "Exportformat", "App-Informationen", "Keine Berechtigungen angefordert"
+                "Suchvorschläge",
+                "Einführungsdialoge für Bereiche",
+                "Einführung",
+                "Exportformat",
+                "App-Informationen",
+                "Keine Berechtigungen angefordert",
             ),
             "fr" to listOf(
-                "Suggestions de recherche", "Dialogues de présentation des sections", "Présentation",
-                "Format d'exportation", "Informations sur l'application", "Aucune autorisation demandée"
+                "Suggestions de recherche",
+                "Dialogues de présentation des sections",
+                "Présentation",
+                "Format d'exportation",
+                "Informations sur l'application",
+                "Aucune autorisation demandée",
             ),
             "es" to listOf(
-                "Sugerencias de búsqueda", "Diálogos de introducción a las secciones", "Introducción",
-                "Formato de exportación", "Información de la aplicación", "No se han solicitado permisos"
-            )
+                "Sugerencias de búsqueda",
+                "Diálogos de introducción a las secciones",
+                "Introducción",
+                "Formato de exportación",
+                "Información de la aplicación",
+                "No se han solicitado permisos",
+            ),
         )
         languages.forEach { code ->
             val strings = stringsFor(code)
             assertEquals(
                 expected.getValue(code),
                 listOf(
-                    strings.settingsSearchSuggestionsTitle, strings.settingsSectionHintsTitle,
-                    strings.settingsOnboardingTitle, strings.settingsExportFormatTitle,
-                    strings.settingsAppInfoTitle, strings.settingsNoRequestedPermissions
+                    strings.settingsSearchSuggestionsTitle,
+                    strings.settingsSectionHintsTitle,
+                    strings.settingsOnboardingTitle,
+                    strings.settingsExportFormatTitle,
+                    strings.settingsAppInfoTitle,
+                    strings.settingsNoRequestedPermissions,
                 ),
-                code
+                code,
             )
         }
     }
@@ -69,7 +92,7 @@ class SettingsStringsTest {
             val strings = stringsFor(code)
             assertTrue(
                 strings.settingsSectionHintsDescription.contains("\"${strings.sectionHintDisable}\""),
-                code
+                code,
             )
         }
     }
@@ -98,7 +121,7 @@ class SettingsStringsTest {
                 strings.thirdPartyTitle, strings.thirdPartyIntro, strings.disclaimerTitle,
                 strings.disclaimerBody, strings.helpSettings, strings.faqTitle, strings.close,
                 strings.confirm, strings.helpContentDescription, strings.menuContentDescription,
-                strings.scrollToTopContentDescription
+                strings.scrollToTopContentDescription,
             ).forEach { assertTrue(it.isNotBlank(), code) }
         }
     }
@@ -110,7 +133,10 @@ class SettingsStringsTest {
             val code = resolveLanguageCode(selected, systemLanguage)
             assertSame(stringsFor(selected.code), stringsFor(code))
         }
-        assertEquals("Export format", stringsFor(resolveLanguageCode(AppLanguage.ENGLISH, "it-IT")).settingsExportFormatTitle)
+        assertEquals(
+            "Export format",
+            stringsFor(resolveLanguageCode(AppLanguage.ENGLISH, "it-IT")).settingsExportFormatTitle,
+        )
         assertSame(stringsFor("en"), stringsFor(resolveLanguageCode(AppLanguage.SYSTEM, "xx-XX")))
         assertEquals("No permissions requested", stringsFor("xx").settingsNoRequestedPermissions)
     }
@@ -136,7 +162,7 @@ class SettingsStringsTest {
             "package" to settingsAppPackage,
             "sdk" to settingsAppSdk,
             "permissions" to settingsRequestedPermissions,
-            "noPermissions" to settingsNoRequestedPermissions
+            "noPermissions" to settingsNoRequestedPermissions,
         )
     }
 }

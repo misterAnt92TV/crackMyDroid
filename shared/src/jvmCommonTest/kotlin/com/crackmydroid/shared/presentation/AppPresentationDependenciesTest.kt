@@ -1,19 +1,19 @@
 package com.crackmydroid.shared.presentation
 
-import com.crackmydroid.shared.AppLogger
-import com.crackmydroid.shared.util.AppDispatchers
-import com.crackmydroid.shared.domain.model.ReportLabel
-import com.crackmydroid.shared.i18n.UseCaseTexts
+import com.crackmydroid.architecture.coroutines.AppDispatchers
+import com.crackmydroid.architecture.logging.AppLogger
 import com.crackmydroid.shared.di.commonModule
 import com.crackmydroid.shared.di.presentationModule
 import com.crackmydroid.shared.domain.model.DeviceInfo
 import com.crackmydroid.shared.domain.model.ExportFormat
 import com.crackmydroid.shared.domain.model.InstalledAppEntry
+import com.crackmydroid.shared.domain.model.ReportLabel
 import com.crackmydroid.shared.domain.model.RootStatus
 import com.crackmydroid.shared.domain.model.app.AppLanguage
 import com.crackmydroid.shared.domain.model.app.AppTheme
 import com.crackmydroid.shared.domain.model.shell.ShellCommand
 import com.crackmydroid.shared.domain.repository.ActivityRepository
+import com.crackmydroid.shared.domain.repository.ApkContentRepository
 import com.crackmydroid.shared.domain.repository.DeviceInfoRepository
 import com.crackmydroid.shared.domain.repository.InstalledAppsRepository
 import com.crackmydroid.shared.domain.repository.PermissionsRepository
@@ -23,12 +23,26 @@ import com.crackmydroid.shared.domain.repository.SettingsRepository
 import com.crackmydroid.shared.domain.repository.ShellCommandRepository
 import com.crackmydroid.shared.domain.repository.log.LogRepository
 import com.crackmydroid.shared.domain.repository.log.OperationLogRepository
+import com.crackmydroid.shared.i18n.usecase.UseCaseTexts
 import com.crackmydroid.shared.presentation.navigation.Screen
 import com.crackmydroid.shared.presentation.operations.NoOpOperationLogRepository
 import com.crackmydroid.shared.ui.AppPresentationDependencies
+import com.crackmydroid.shared.ui.navigation.AppNavigationEvent
+import com.crackmydroid.shared.ui.navigation.NavigationSource
+import com.crackmydroid.shared.ui.pentest.PenTestingEvent
+import com.crackmydroid.shared.ui.pentest.model.PenTestWizardStep
+import com.crackmydroid.shared.ui.settings.SettingsEvent
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertNotSame
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -39,14 +53,6 @@ import kotlinx.coroutines.test.setMain
 import org.koin.core.KoinApplication
 import org.koin.dsl.koinApplication
 import org.koin.dsl.module
-import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertNotSame
-import kotlin.test.assertNull
-import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class AppPresentationDependenciesTest {
@@ -56,14 +62,18 @@ class AppPresentationDependenciesTest {
     private val settingsRepository = mockk<SettingsRepository>()
     private val activityRepository = mockk<ActivityRepository>()
     private val installedRepository = mockk<InstalledAppsRepository>()
+    private val apkContentRepository = mockk<ApkContentRepository>()
     private val permissionsRepository = mockk<PermissionsRepository>()
     private val shellRepository = mockk<ShellCommandRepository>()
     private val logRepository = mockk<LogRepository>()
     private val graphs = mutableListOf<AppPresentationDependencies>()
     private lateinit var application: KoinApplication
     private val device = DeviceInfo(
-        manufacturer = "Acme", model = "Device under test",
-        batteryLevel = 75, totalMemory = 4096L, freeMemory = 2048L
+        manufacturer = "Acme",
+        model = "Device under test",
+        batteryLevel = 75,
+        totalMemory = 4096L,
+        freeMemory = 2048L,
     )
     private val root = RootStatus(false, "not rooted")
     private val apps = listOf(InstalledAppEntry("Test app", "test.app", "/test.apk"))
@@ -97,24 +107,29 @@ class AppPresentationDependenciesTest {
         coEvery { shellRepository.listCommands() } returns commands
         coEvery { logRepository.fetchLog() } returns listOf("I/Test: loaded")
         application = koinApplication {
-            modules(commonModule(), presentationModule(), module {
-                single { deviceRepository }
-                single { rootRepository }
-                single { settingsRepository }
-                single { activityRepository }
-                single { installedRepository }
-                single { permissionsRepository }
-                single { shellRepository }
-                single { logRepository }
-                single<ReportFileRepository> { mockk() }
-                single<OperationLogRepository> { NoOpOperationLogRepository }
-                single<AppDispatchers> {
-                    object : AppDispatchers {
-                        override val main = dispatcher
-                        override val default = dispatcher
+            modules(
+                commonModule(),
+                presentationModule(),
+                module {
+                    single { deviceRepository }
+                    single { rootRepository }
+                    single { settingsRepository }
+                    single { activityRepository }
+                    single { installedRepository }
+                    single { apkContentRepository }
+                    single { permissionsRepository }
+                    single { shellRepository }
+                    single { logRepository }
+                    single<ReportFileRepository> { mockk() }
+                    single<OperationLogRepository> { NoOpOperationLogRepository }
+                    single<AppDispatchers> {
+                        object : AppDispatchers {
+                            override val main = dispatcher
+                            override val default = dispatcher
+                        }
                     }
-                }
-            })
+                },
+            )
         }
     }
 
@@ -131,13 +146,19 @@ class AppPresentationDependenciesTest {
         coEvery { settingsRepository.getLanguage() } returns AppLanguage.FRENCH
         coEvery { settingsRepository.setLanguage(AppLanguage.GERMAN) } returns Unit
         val graph = resolveGraph()
-        graph.shell.initialize()
+        graph.navigation.handleEvent(AppNavigationEvent.Initialize())
         advanceUntilIdle()
-        assertTrue(graph.info.state.value.reportContent.orEmpty().startsWith(UseCaseTexts("fr").label(ReportLabel.DEVICE_INFO_TITLE)))
+        assertTrue(
+            graph.info.state.value.reportContent.orEmpty()
+                .startsWith(UseCaseTexts("fr").label(ReportLabel.DEVICE_INFO_TITLE)),
+        )
 
-        graph.settings.selectLanguage(AppLanguage.GERMAN)
+        graph.settings.handleEvent(SettingsEvent.LanguageSelected(AppLanguage.GERMAN))
         advanceUntilIdle()
-        assertTrue(graph.info.state.value.reportContent.orEmpty().startsWith(UseCaseTexts("de").label(ReportLabel.DEVICE_INFO_TITLE)))
+        assertTrue(
+            graph.info.state.value.reportContent.orEmpty()
+                .startsWith(UseCaseTexts("de").label(ReportLabel.DEVICE_INFO_TITLE)),
+        )
         coVerify(exactly = 1) { deviceRepository.getDeviceInfo() }
         coVerify(exactly = 1) { rootRepository.checkRoot() }
     }
@@ -146,20 +167,20 @@ class AppPresentationDependenciesTest {
     fun failedVerboseBootstrapDoesNotBlockFeatureInitialization() = runTest(dispatcher) {
         coEvery { settingsRepository.isVerboseLog() } throws IllegalStateException("diagnostics unavailable")
         val graph = resolveGraph()
-        graph.shell.initialize()
+        graph.navigation.handleEvent(AppNavigationEvent.Initialize())
         advanceUntilIdle()
 
         assertFalse(AppLogger.isVerbose())
-        assertTrue(graph.shell.state.value.initialized)
+        assertTrue(graph.navigation.state.value.initialized)
         assertEquals(apps, graph.installedApps.state.value.apps)
-        assertEquals("diagnostics unavailable", graph.settings.state.value.error)
+        assertEquals("diagnostics unavailable", graph.settings.state.value.loadError)
     }
 
     @Test
     fun initialize_populatesTheViewModelsExposedToScreens_onlyOnce() = runTest(dispatcher) {
         val graph = resolveGraph()
 
-        graph.shell.initialize()
+        graph.navigation.handleEvent(AppNavigationEvent.Initialize())
         advanceUntilIdle()
 
         assertEquals(device, graph.info.state.value.info)
@@ -177,11 +198,11 @@ class AppPresentationDependenciesTest {
         assertEquals(setOf("test.app"), graph.permissions.state.value.favorites)
         assertEquals(apps, graph.installedApps.state.value.apps)
         assertEquals(apps, graph.penTesting.state.value.apps)
-        assertTrue(graph.shell.state.value.initialized)
+        assertTrue(graph.navigation.state.value.initialized)
         assertTrue(AppLogger.isVerbose())
-        assertTrue(graph.shell.state.value.showIntro)
+        assertTrue(graph.navigation.state.value.showIntro)
 
-        graph.shell.initialize()
+        graph.navigation.handleEvent(AppNavigationEvent.Initialize())
         advanceUntilIdle()
 
         coVerify(exactly = 1) { deviceRepository.getDeviceInfo() }
@@ -193,13 +214,13 @@ class AppPresentationDependenciesTest {
         coVerify(exactly = 1) { permissionsRepository.listAppPermissions() }
         coVerify(exactly = 2) { installedRepository.listInstalled() }
 
-        graph.shell.confirmHint(disableHints = true, target = Screen.Permissions)
-        graph.shell.dismissIntro()
+        graph.navigation.handleEvent(AppNavigationEvent.HintConfirmed(disableHints = true, target = Screen.Permissions))
+        graph.navigation.handleEvent(AppNavigationEvent.IntroDismissed())
         advanceUntilIdle()
 
         assertFalse(graph.settings.state.value.featureHintsEnabled)
-        assertFalse(graph.shell.state.value.showIntro)
-        assertEquals(Screen.Permissions, graph.shell.state.value.selectedScreen)
+        assertFalse(graph.navigation.state.value.showIntro)
+        assertEquals(Screen.Permissions, graph.navigation.state.value.selectedScreen)
         coVerify(exactly = 1) { settingsRepository.setFeatureHintsEnabled(false) }
         coVerify(exactly = 1) { settingsRepository.setIntroSeen(true) }
     }
@@ -212,18 +233,80 @@ class AppPresentationDependenciesTest {
         viewModels(first).zip(viewModels(second)).forEach { (left, right) ->
             assertNotSame(left, right)
         }
-        first.shell.initialize()
+        first.navigation.handleEvent(AppNavigationEvent.Initialize())
         advanceUntilIdle()
 
         assertEquals(device, first.info.state.value.info)
         assertNull(second.info.state.value.info)
-        assertFalse(second.shell.state.value.initialized)
+        assertFalse(second.navigation.state.value.initialized)
+    }
+
+    @Test
+    fun navigationChrome_preservesSearchTokenAndNormalizesHistory() = runTest(dispatcher) {
+        val graph = resolveGraph()
+        graph.navigation.handleEvent(AppNavigationEvent.Initialize())
+        advanceUntilIdle()
+
+        assertEquals("Home", graph.navigation.state.value.topBar.title)
+        assertEquals(listOf("Home", "Info device", "Impostazioni"), graph.navigation.state.value.bottomBarItems.map { it.label })
+
+        graph.navigation.handleEvent(
+            AppNavigationEvent.ScreenSelected(Screen.Permissions, NavigationSource.Drawer, hintsEnabled = false),
+        )
+        assertEquals(Screen.Permissions, graph.navigation.state.value.selectedScreen)
+        assertEquals(listOf(Screen.Home), graph.navigation.state.value.navigationHistory)
+        assertTrue(graph.navigation.state.value.topBar.showSearch)
+
+        val requestId = graph.navigation.state.value.topBar.searchRequestId
+        graph.navigation.handleEvent(AppNavigationEvent.TopBarSearchRequested())
+        assertFalse(graph.navigation.state.value.topBar.searchVisible)
+        assertEquals(requestId, graph.navigation.state.value.topBar.searchRequestId)
+        graph.navigation.handleEvent(AppNavigationEvent.TopBarSearchRequested())
+        assertTrue(graph.navigation.state.value.topBar.searchVisible)
+        assertEquals(requestId + 1, graph.navigation.state.value.topBar.searchRequestId)
+
+        graph.navigation.handleEvent(AppNavigationEvent.BackRequested())
+        assertEquals(Screen.Home, graph.navigation.state.value.selectedScreen)
+        assertTrue(graph.navigation.state.value.navigationHistory.isEmpty())
+
+        graph.navigation.handleEvent(
+            AppNavigationEvent.ScreenSelected(Screen.Pentest, NavigationSource.Drawer, hintsEnabled = false),
+        )
+        graph.penTesting.handleEvent(PenTestingEvent.StepSelected(PenTestWizardStep.SelectChecks))
+        advanceUntilIdle()
+        assertFalse(graph.navigation.state.value.topBar.showSearch)
+
+        graph.navigation.handleEvent(
+            AppNavigationEvent.ScreenSelected(Screen.Settings, NavigationSource.BottomBar, hintsEnabled = false),
+        )
+        assertTrue(graph.navigation.state.value.navigationHistory.isEmpty())
+        assertTrue(graph.navigation.state.value.bottomBarItems.single { it.screen == Screen.Settings }.selected)
+        assertEquals(requestId + 1, graph.navigation.state.value.topBar.searchRequestId)
+
+        val selectedSettings = graph.navigation.state.value
+        graph.navigation.handleEvent(
+            AppNavigationEvent.ScreenSelected(Screen.Settings, NavigationSource.BottomBar, hintsEnabled = false),
+        )
+        assertEquals(selectedSettings, graph.navigation.state.value)
+
+        graph.navigation.handleEvent(
+            AppNavigationEvent.ScreenSelected(Screen.Permissions, NavigationSource.Drawer, hintsEnabled = false),
+        )
+        graph.navigation.handleEvent(
+            AppNavigationEvent.ScreenSelected(Screen.Root, NavigationSource.Drawer, hintsEnabled = false),
+        )
+        assertEquals(listOf(Screen.Settings, Screen.Permissions), graph.navigation.state.value.navigationHistory)
+
+        graph.navigation.handleEvent(
+            AppNavigationEvent.ScreenSelected(Screen.Root, NavigationSource.Drawer, hintsEnabled = false),
+        )
+        assertEquals(listOf(Screen.Settings, Screen.Permissions), graph.navigation.state.value.navigationHistory)
     }
 
     private fun resolveGraph(): AppPresentationDependencies =
         application.koin.get<AppPresentationDependencies>().also { graphs += it }
 
-    private fun viewModels(graph: AppPresentationDependencies): List<BaseViewModel> = with(graph) {
-        listOf(shell, activity, home, root, info, trick, settings, logs, permissions, installedApps, penTesting)
+    private fun viewModels(graph: AppPresentationDependencies): List<LocalizedBaseViewModel<*, *>> = with(graph) {
+        listOf(navigation, activity, home, root, info, trick, settings, logs, permissions, installedApps, penTesting)
     }
 }

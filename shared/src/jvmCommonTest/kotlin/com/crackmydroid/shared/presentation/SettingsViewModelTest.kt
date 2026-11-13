@@ -1,9 +1,12 @@
 package com.crackmydroid.shared.presentation
 
-import com.crackmydroid.shared.AppLogger
+import com.crackmydroid.architecture.testing.*
+
+
+import com.crackmydroid.architecture.logging.AppLogger
+import com.crackmydroid.shared.domain.model.ExportFormat
 import com.crackmydroid.shared.domain.model.app.AppLanguage
 import com.crackmydroid.shared.domain.model.app.AppTheme
-import com.crackmydroid.shared.domain.model.ExportFormat
 import com.crackmydroid.shared.domain.usecase.settings.GetExportFormatUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetFeatureHintsEnabledUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetHighContrastUseCase
@@ -25,11 +28,15 @@ import com.crackmydroid.shared.domain.usecase.settings.SetSuggestionsEnabledUseC
 import com.crackmydroid.shared.domain.usecase.settings.SetThemeUseCase
 import com.crackmydroid.shared.domain.usecase.settings.SetVerboseLogUseCase
 import com.crackmydroid.shared.presentation.components.SearchHistoryStore
+import com.crackmydroid.shared.ui.settings.SettingsEvent
 import com.crackmydroid.shared.ui.settings.SettingsViewModel
 import io.mockk.coEvery
-import io.mockk.coJustRun
 import io.mockk.coVerify
 import io.mockk.mockk
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -37,29 +44,21 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
-import kotlin.test.Test
-import kotlin.test.assertEquals
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class SettingsViewModelTest {
-    private val dispatcher = StandardTestDispatcher()
-
-    @BeforeTest
-    fun setUp() {
-        Dispatchers.setMain(dispatcher)
+class SettingsViewModelTest : BaseViewModelUnitTest() {
+    override fun setUp() {
+        super.setUp()
         AppLogger.setVerbose(false)
         SearchHistoryStore.clearAll()
         SearchHistoryStore.setEnabled(true)
     }
 
-    @AfterTest
-    fun tearDown() {
+    override fun tearDown() {
         SearchHistoryStore.clearAll()
         SearchHistoryStore.setEnabled(true)
-        Dispatchers.resetMain()
         AppLogger.setVerbose(false)
+        super.tearDown()
     }
 
     @Test
@@ -95,10 +94,10 @@ class SettingsViewModelTest {
             getLargeText = getLargeText,
             getSuggestions = getSuggestions,
             getHints = getHints,
-            getIntroSeen = getIntroSeen
+            getIntroSeen = getIntroSeen,
         )
 
-        viewModel.load()
+        viewModel.handleEvent(SettingsEvent.Load())
         advanceUntilIdle()
 
         assertEquals(false, viewModel.state.value.loading)
@@ -122,11 +121,11 @@ class SettingsViewModelTest {
         coEvery { getTheme() } returns Result.failure(IllegalStateException("settings unavailable"))
         val viewModel = viewModel(getTheme = getTheme)
 
-        viewModel.load()
+        viewModel.handleEvent(SettingsEvent.Load())
         advanceUntilIdle()
 
         assertEquals(false, viewModel.state.value.loading)
-        assertEquals("settings unavailable", viewModel.state.value.error)
+        assertEquals("settings unavailable", viewModel.state.value.loadError)
         viewModel.onCleared()
     }
 
@@ -136,8 +135,8 @@ class SettingsViewModelTest {
         coEvery { setFormat(ExportFormat.JSON) } returns Result.success(Unit)
         val viewModel = viewModel(setFormat = setFormat)
 
-        viewModel.setExportFormat(ExportFormat.TXT)
-        viewModel.setExportFormat(ExportFormat.JSON)
+        viewModel.handleEvent(SettingsEvent.ExportFormatSelected(ExportFormat.TXT))
+        viewModel.handleEvent(SettingsEvent.ExportFormatSelected(ExportFormat.JSON))
         advanceUntilIdle()
 
         assertEquals(ExportFormat.JSON, viewModel.state.value.exportFormat)
@@ -152,7 +151,7 @@ class SettingsViewModelTest {
         coEvery { setLanguage(AppLanguage.SYSTEM) } returns Result.success(Unit)
         val viewModel = viewModel(setLanguage = setLanguage)
 
-        viewModel.selectLanguage(AppLanguage.SYSTEM)
+        viewModel.handleEvent(SettingsEvent.LanguageSelected(AppLanguage.SYSTEM))
         advanceUntilIdle()
 
         assertEquals(AppLanguage.SYSTEM, viewModel.state.value.language)
@@ -166,7 +165,7 @@ class SettingsViewModelTest {
         coEvery { setVerbose(true) } returns Result.failure(IllegalStateException("settings write failed"))
         val viewModel = viewModel(setVerbose = setVerbose)
 
-        viewModel.toggleVerbose(true)
+        viewModel.handleEvent(SettingsEvent.VerboseLoggingChanged(true))
         advanceUntilIdle()
 
         assertEquals(false, viewModel.state.value.verbose)
@@ -182,11 +181,11 @@ class SettingsViewModelTest {
         coEvery { setVerbose(false) } returns Result.failure(IllegalStateException("write failed"))
         val viewModel = viewModel(setVerbose = setVerbose)
 
-        viewModel.toggleVerbose(true)
+        viewModel.handleEvent(SettingsEvent.VerboseLoggingChanged(true))
         assertEquals(false, AppLogger.isVerbose())
         advanceUntilIdle()
         assertEquals(true, AppLogger.isVerbose())
-        viewModel.toggleVerbose(false)
+        viewModel.handleEvent(SettingsEvent.VerboseLoggingChanged(false))
         advanceUntilIdle()
         assertEquals(true, AppLogger.isVerbose())
         assertEquals(true, viewModel.state.value.verbose)
@@ -199,25 +198,64 @@ class SettingsViewModelTest {
         val getVerbose = mockk<GetVerboseLogUseCase>()
         coEvery { getVerbose() } returns Result.failure(IllegalStateException("read failed"))
         val viewModel = viewModel(getVerbose = getVerbose)
-        viewModel.load()
+        viewModel.handleEvent(SettingsEvent.Load())
         advanceUntilIdle()
         assertEquals(false, AppLogger.isVerbose())
-        assertEquals("read failed", viewModel.state.value.error)
+        assertEquals("read failed", viewModel.state.value.loadError)
         assertEquals(false, viewModel.state.value.loading)
         viewModel.onCleared()
     }
 
     private fun viewModel(
-        getLanguage: GetLanguageUseCase = mockk<GetLanguageUseCase>().also { coEvery { it() } returns Result.success(AppLanguage.SYSTEM) },
-        getTheme: GetThemeUseCase = mockk<GetThemeUseCase>().also { coEvery { it() } returns Result.success(AppTheme.SYSTEM) },
-        getVerbose: GetVerboseLogUseCase = mockk<GetVerboseLogUseCase>().also { coEvery { it() } returns Result.success(false) },
-        getFormat: GetExportFormatUseCase = mockk<GetExportFormatUseCase>().also { coEvery { it() } returns Result.success(ExportFormat.TXT) },
-        getHighContrast: GetHighContrastUseCase = mockk<GetHighContrastUseCase>().also { coEvery { it() } returns Result.success(false) },
-        getReduceMotion: GetReduceMotionUseCase = mockk<GetReduceMotionUseCase>().also { coEvery { it() } returns Result.success(false) },
-        getLargeText: GetLargeTextUseCase = mockk<GetLargeTextUseCase>().also { coEvery { it() } returns Result.success(false) },
-        getSuggestions: GetSuggestionsEnabledUseCase = mockk<GetSuggestionsEnabledUseCase>().also { coEvery { it() } returns Result.success(true) },
-        getHints: GetFeatureHintsEnabledUseCase = mockk<GetFeatureHintsEnabledUseCase>().also { coEvery { it() } returns Result.success(true) },
-        getIntroSeen: GetIntroSeenUseCase = mockk<GetIntroSeenUseCase>().also { coEvery { it() } returns Result.success(false) },
+        getLanguage: GetLanguageUseCase = mockk<GetLanguageUseCase>().also {
+            coEvery { it() } returns Result.success(
+                AppLanguage.SYSTEM,
+            )
+        },
+        getTheme: GetThemeUseCase = mockk<GetThemeUseCase>().also {
+            coEvery { it() } returns
+                Result.success(AppTheme.SYSTEM)
+        },
+        getVerbose: GetVerboseLogUseCase = mockk<GetVerboseLogUseCase>().also {
+            coEvery { it() } returns Result.success(
+                false,
+            )
+        },
+        getFormat: GetExportFormatUseCase = mockk<GetExportFormatUseCase>().also {
+            coEvery { it() } returns Result.success(
+                ExportFormat.TXT,
+            )
+        },
+        getHighContrast: GetHighContrastUseCase = mockk<GetHighContrastUseCase>().also {
+            coEvery { it() } returns Result.success(
+                false,
+            )
+        },
+        getReduceMotion: GetReduceMotionUseCase = mockk<GetReduceMotionUseCase>().also {
+            coEvery { it() } returns Result.success(
+                false,
+            )
+        },
+        getLargeText: GetLargeTextUseCase = mockk<GetLargeTextUseCase>().also {
+            coEvery { it() } returns Result.success(
+                false,
+            )
+        },
+        getSuggestions: GetSuggestionsEnabledUseCase = mockk<GetSuggestionsEnabledUseCase>().also {
+            coEvery { it() } returns Result.success(
+                true,
+            )
+        },
+        getHints: GetFeatureHintsEnabledUseCase = mockk<GetFeatureHintsEnabledUseCase>().also {
+            coEvery { it() } returns Result.success(
+                true,
+            )
+        },
+        getIntroSeen: GetIntroSeenUseCase = mockk<GetIntroSeenUseCase>().also {
+            coEvery { it() } returns Result.success(
+                false,
+            )
+        },
         setTheme: SetThemeUseCase = mockk(relaxed = true),
         setVerbose: SetVerboseLogUseCase = mockk(relaxed = true),
         setFormat: SetExportFormatUseCase = mockk(relaxed = true),
@@ -227,11 +265,14 @@ class SettingsViewModelTest {
         setSuggestions: SetSuggestionsEnabledUseCase = mockk(relaxed = true),
         setHints: SetFeatureHintsEnabledUseCase = mockk(relaxed = true),
         setIntro: SetIntroSeenUseCase = mockk(relaxed = true),
-        setLanguage: SetLanguageUseCase = mockk(relaxed = true)
-    ) = SettingsViewModel(
-        getTheme, setTheme, getVerbose, setVerbose, getFormat, setFormat,
-        getHighContrast, setHighContrast, getReduceMotion, setReduceMotion,
-        getLargeText, setLargeText, getSuggestions, setSuggestions,
-        getHints, setHints, getIntroSeen, setIntro, getLanguage, setLanguage
+        setLanguage: SetLanguageUseCase = mockk(relaxed = true),
+    ) = autoClear(
+        SettingsViewModel(
+            getTheme, setTheme, getVerbose, setVerbose, getFormat, setFormat,
+            getHighContrast, setHighContrast, getReduceMotion, setReduceMotion,
+            getLargeText, setLargeText, getSuggestions, setSuggestions,
+            getHints, setHints, getIntroSeen, setIntro, getLanguage, setLanguage,
+            appDispatchers,
+        ),
     )
 }

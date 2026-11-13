@@ -1,12 +1,12 @@
 package com.crackmydroid.shared.data
 
-import com.crackmydroid.shared.domain.model.activity.ActivityEntry
-import com.crackmydroid.shared.domain.model.app.AppPermissionEntry
 import com.crackmydroid.shared.domain.model.DeviceInfo
 import com.crackmydroid.shared.domain.model.InstalledAppEntry
-import com.crackmydroid.shared.domain.model.app.ManifestSecurityReport
 import com.crackmydroid.shared.domain.model.PlayIntegrityResult
 import com.crackmydroid.shared.domain.model.RootStatus
+import com.crackmydroid.shared.domain.model.activity.ActivityEntry
+import com.crackmydroid.shared.domain.model.app.AppPermissionEntry
+import com.crackmydroid.shared.domain.model.app.ManifestSecurityReport
 import com.crackmydroid.shared.domain.model.scansnapshot.SnapshotMetadata
 
 class DesktopScanCache {

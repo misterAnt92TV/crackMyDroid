@@ -17,5 +17,5 @@ data class AppComponent(
     val launchContextHint: String? = null,
     val launchIntentAction: String? = null,
     val launchIntentData: String? = null,
-    val launchIntentMimeType: String? = null
+    val launchIntentMimeType: String? = null,
 )
