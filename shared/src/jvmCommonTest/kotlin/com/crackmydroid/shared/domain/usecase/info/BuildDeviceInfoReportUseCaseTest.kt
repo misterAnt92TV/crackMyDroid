@@ -4,10 +4,10 @@ import com.crackmydroid.shared.domain.model.DeviceInfo
 import com.crackmydroid.shared.domain.model.ReportLabel
 import com.crackmydroid.shared.domain.model.RootStatus
 import com.crackmydroid.shared.domain.usecase.UseCaseTestDispatchers
-import com.crackmydroid.shared.i18n.UseCaseTexts
-import kotlinx.coroutines.test.runTest
+import com.crackmydroid.shared.i18n.usecase.UseCaseTexts
 import kotlin.test.Test
 import kotlin.test.assertTrue
+import kotlinx.coroutines.test.runTest
 
 class BuildDeviceInfoReportUseCaseTest {
     private val dispatchers = UseCaseTestDispatchers()
@@ -28,7 +28,7 @@ class BuildDeviceInfoReportUseCaseTest {
                 appDebuggable = true,
                 imei = "123456789",
                 systemPropSource = "build fingerprint",
-                systemPropDump = "ro.build.version.release=16"
+                systemPropDump = "ro.build.version.release=16",
             )
             val root = RootStatus(isRooted = false, details = "su unavailable")
 

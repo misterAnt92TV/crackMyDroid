@@ -12,5 +12,5 @@ data class DeviceSessionState(
     val dataSource: DeviceSessionSource = DeviceSessionSource.ADB,
     val snapshotStatus: String? = null,
     val snapshotMetadata: SnapshotMetadata? = null,
-    val sessionVersion: Int = 0
+    val sessionVersion: Int = 0,
 )

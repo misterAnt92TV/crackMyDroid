@@ -55,7 +55,7 @@ class LanguageResolverTest {
                 strings.desktopRescan,
                 strings.desktopAdbSettingsDescription,
                 strings.desktopSave,
-                strings.desktopCancel
+                strings.desktopCancel,
             ).forEach { desktopString -> assertTrue(desktopString.isNotBlank()) }
             assertTrue(strings.desktopDataSourceLabel.contains("%s"))
             listOf(
@@ -79,7 +79,7 @@ class LanguageResolverTest {
                 strings.penTestErrorContentDescription,
                 strings.penTestQueuedContentDescription,
                 strings.penTestPendingContentDescription,
-                strings.hideRecentOperationContentDescription
+                strings.hideRecentOperationContentDescription,
             ).forEach { accessibilityString -> assertTrue(accessibilityString.isNotBlank()) }
             assertTrue(strings.removeSearchHistoryContentDescription.contains("%s"))
             assertTrue(strings.penTestProgressSummary.contains("%1${'$'}d"))
@@ -92,6 +92,9 @@ class LanguageResolverTest {
 
         assertEquals("ADB-Gerät auswählen", strings.desktopAdbPickerTitle)
         assertEquals("Datenquelle: Snapshot", strings.desktopDataSourceLabel.format("Snapshot"))
+        assertEquals(strings.desktopAdbPickerTitle, strings.app.desktopAdb.pickerTitle)
+        assertEquals(strings.desktopDetectDevices, strings.app.desktopAdb.detectDevices)
+        assertEquals(strings.desktopDataSourceLabel, strings.app.desktopAdb.dataSourceLabel)
     }
 
     @Test
@@ -106,7 +109,7 @@ class LanguageResolverTest {
             assertTrue(strings.homeOperationHistoryTitleWithCount.format(3).contains("3"))
             assertEquals(
                 "Demo App · com.example.demo",
-                strings.permissionsExpandedAppLabel.format("Demo App", "com.example.demo")
+                strings.permissionsExpandedAppLabel.format("Demo App", "com.example.demo"),
             )
         }
     }
@@ -118,7 +121,7 @@ class LanguageResolverTest {
             "manifest_flags",
             "file_scout",
             "network_monitor",
-            "permission_risk"
+            "permission_risk",
         )
         val italian = stringsFor("it")
         val italianLabels = checkIds.map { italian.pentestChecks.getValue(it).first }
@@ -137,9 +140,62 @@ class LanguageResolverTest {
                 assertNotEquals(
                     italian.clearSearchHistoryContentDescription,
                     strings.clearSearchHistoryContentDescription,
-                    "$languageCode/clearSearchHistoryContentDescription still uses Italian"
+                    "$languageCode/clearSearchHistoryContentDescription still uses Italian",
                 )
             }
+        }
+    }
+
+    @Test
+    fun analyzeApkContentStrings_areLocalizedForEverySupportedLanguage() {
+        listOf("it", "en", "de", "es", "fr").forEach { languageCode ->
+            val strings = stringsFor(languageCode)
+            val screenStrings = ScreenUiStrings(languageCode)
+
+            assertTrue(strings.navAnalyzeApkContent.isNotBlank(), "$languageCode navAnalyzeApkContent is blank")
+            assertTrue(strings.helpAnalyzeApkContent.isNotBlank(), "$languageCode helpAnalyzeApkContent is blank")
+
+            listOf(
+                screenStrings.apkContentStep1Title,
+                screenStrings.apkContentStep1Desc,
+                screenStrings.apkContentStep2Title,
+                screenStrings.apkContentStep2Desc,
+                screenStrings.apkContentStep3Title,
+                screenStrings.apkContentStep3Desc,
+                screenStrings.apkContentSelect,
+                screenStrings.apkContentAnalyzingProgress,
+                screenStrings.apkContentChangeApp,
+                screenStrings.apkContentAnalyze,
+                screenStrings.apkContentAnalyzing,
+                screenStrings.apkContentExportReport,
+                screenStrings.apkContentShareReport,
+                screenStrings.apkContentAnalyzeAnother,
+                screenStrings.apkContentReportTitle,
+                screenStrings.apkContentMetricsTitle,
+                screenStrings.apkContentMetricArchiveSize,
+                screenStrings.apkContentMetricUncompressed,
+                screenStrings.apkContentMetricTotalEntries,
+                screenStrings.apkContentMetricDexFiles,
+                screenStrings.apkContentMetricNativeLibs,
+                screenStrings.apkContentMetricCerts,
+                screenStrings.apkContentChecksumSha256,
+                screenStrings.apkContentNoLibraries,
+                screenStrings.apkContentNoFindings,
+                screenStrings.apkContentDisclaimer,
+                screenStrings.apkContentPlaintextFilterAll,
+                screenStrings.apkContentPlaintextFilterEndpoints,
+                screenStrings.apkContentPlaintextFilterConfig,
+                screenStrings.apkContentPlaintextFilterStrings,
+                screenStrings.apkContentNoPlaintext,
+            ).forEach { value -> assertTrue(value.isNotBlank(), "$languageCode has blank APK content text") }
+
+            assertTrue(screenStrings.apkContentRiskBadge.contains("%s"), languageCode)
+            assertTrue(screenStrings.apkContentLibrariesTitle.contains("%d"), languageCode)
+            assertTrue(screenStrings.apkContentFindingsTitle.contains("%d"), languageCode)
+            assertTrue(screenStrings.apkContentPlaintextTitle.contains("%d"), languageCode)
+            assertTrue(screenStrings.apkContentRemediationPrefix.contains("%s"), languageCode)
+            assertTrue(screenStrings.apkContentExportedTo.contains("%s"), languageCode)
+            assertTrue(screenStrings.apkContentSourceLabel.contains("%s"), languageCode)
         }
     }
 
@@ -154,7 +210,7 @@ class LanguageResolverTest {
                 ui.reportTitle, ui.totals, ui.riskSummary, ui.recommendations,
                 ui.highlights, ui.exportHtml, ui.closeReport, ui.exportedTitle,
                 ui.exportedSummary, ui.appDetail, ui.packageDetail, ui.activitiesDetail,
-                ui.maximumRiskDetail, ui.riskLow, ui.riskMedium, ui.riskHigh, ui.riskCritical
+                ui.maximumRiskDetail, ui.riskLow, ui.riskMedium, ui.riskHigh, ui.riskCritical,
             ).forEach { value -> assertTrue(value.isNotBlank(), "$languageCode has blank Activity UI text") }
             assertTrue(ui.resultsSummary.contains("%d"), languageCode)
             assertTrue(ui.riskSummary.contains("%s"), languageCode)

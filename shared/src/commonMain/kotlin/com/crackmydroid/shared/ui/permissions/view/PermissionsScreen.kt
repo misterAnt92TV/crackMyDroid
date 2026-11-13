@@ -1,9 +1,12 @@
 @file:OptIn(
     ExperimentalFoundationApi::class,
-    ExperimentalComposeUiApi::class
+    ExperimentalComposeUiApi::class,
 )
 
 package com.crackmydroid.shared.ui.permissions.view
+
+import com.crackmydroid.architecture.presentation.model.UiLoadState
+import com.crackmydroid.ui.icons.AppIcons
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
@@ -19,32 +22,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Bluetooth
-import androidx.compose.material.icons.filled.CalendarToday
-import androidx.compose.material.icons.filled.CameraAlt
-import androidx.compose.material.icons.filled.Cloud
-import androidx.compose.material.icons.filled.Contacts
-import androidx.compose.material.icons.filled.Fingerprint
-import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Mic
-import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Phone
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.SdStorage
-import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.filled.Sms
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.filled.StarBorder
-import androidx.compose.material.icons.filled.Stop
-import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -62,55 +42,88 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalClipboardManager
-import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.crackmydroid.shared.ui.permissions.PermissionFindingUi
 import com.crackmydroid.shared.domain.model.PermissionRiskLevel
+import com.crackmydroid.shared.domain.model.app.AppPermissionEntry
 import com.crackmydroid.shared.i18n.LocalStrings
 import com.crackmydroid.shared.i18n.ScreenUiStrings
-import com.crackmydroid.shared.presentation.components.AppAccordion
-import com.crackmydroid.shared.presentation.components.AppButton
-import com.crackmydroid.shared.presentation.components.ButtonVariant
-import com.crackmydroid.shared.presentation.components.ErrorDialogComponent
-import com.crackmydroid.shared.presentation.components.PackageIcon
-import com.crackmydroid.shared.presentation.components.ScrollToTopButton
-import com.crackmydroid.shared.presentation.components.SearchFieldWithHistoryComponent
-import com.crackmydroid.shared.presentation.components.SectionHeader
-import com.crackmydroid.shared.presentation.components.card.AppCard
-import com.crackmydroid.shared.presentation.components.card.ExportDetailsCard
-import com.crackmydroid.shared.presentation.components.text.AppText
+import com.crackmydroid.shared.i18n.format
+import com.crackmydroid.shared.presentation.components.SearchPanelComponent
+import com.crackmydroid.shared.presentation.preview.AppPreviewEnvironment
+import com.crackmydroid.shared.presentation.preview.AppScreenPreviews
+import com.crackmydroid.shared.ui.permissions.PermissionsEvent
+import com.crackmydroid.shared.ui.permissions.PermissionsState
 import com.crackmydroid.shared.ui.permissions.PermissionsViewModel
+import com.crackmydroid.shared.ui.permissions.model.PermissionFindingUi
 import com.crackmydroid.shared.ui.screens.screenContentPadding
+import com.crackmydroid.ui.components.AppAccordion
+import com.crackmydroid.ui.components.AppIcon
+import com.crackmydroid.ui.components.AppListSkeleton
+import com.crackmydroid.ui.components.button.AppButton
+import com.crackmydroid.ui.components.button.ButtonVariant
+import com.crackmydroid.ui.components.dialog.ErrorDialogComponent
+import com.crackmydroid.ui.components.PackageIcon
+import com.crackmydroid.ui.components.button.ScrollToTopButton
+import com.crackmydroid.ui.components.card.AppCard
+import com.crackmydroid.ui.components.card.ExportDetailsCard
+import com.crackmydroid.ui.components.progress.AppProgressBar
+import com.crackmydroid.ui.components.text.AppText
 import kotlinx.coroutines.launch
 
 @Composable
 fun PermissionsScreen(
     viewModel: PermissionsViewModel,
     padding: PaddingValues,
-    headerHelp: String,
-    onHelp: (String) -> Unit,
-    onBack: (() -> Unit)? = null,
-    onMenu: () -> Unit = {}
+    searchRequestId: Long = 0,
+    searchVisible: Boolean = true,
+    onSearchVisibilityChanged: (Boolean) -> Unit = {},
 ) {
     val state by viewModel.state.collectAsState()
+
+    DisposableEffect(viewModel) {
+        onDispose { viewModel.emitEvent(PermissionsEvent.ReportPreviewDismissed()) }
+    }
+    PermissionsScreenContent(
+        state = state,
+        padding = padding,
+        searchRequestId = searchRequestId,
+        searchVisible = searchVisible,
+        onSearchVisibilityChanged = onSearchVisibilityChanged,
+        onRefresh = { viewModel.emitEvent(PermissionsEvent.Refresh()) },
+        onStartAutoRiskScan = { viewModel.emitEvent(PermissionsEvent.AutoRiskScanStarted()) },
+        onCancelAutoRiskScan = { viewModel.emitEvent(PermissionsEvent.AutoRiskScanCancelled()) },
+        onFilterChange = { value, trackUsage ->
+            viewModel.emitEvent(PermissionsEvent.FilterChanged(value, trackUsage))
+        },
+        onToggleShowOnlyRisky = { viewModel.emitEvent(PermissionsEvent.RiskFilterToggled()) },
+        onSetShowOnlyRisky = { viewModel.emitEvent(PermissionsEvent.RiskFilterChanged(it)) },
+        onRequestReportPreview = { viewModel.emitEvent(PermissionsEvent.ReportPreviewRequested(it)) },
+        onToggleFavorite = { viewModel.emitEvent(PermissionsEvent.FavoriteToggled(it)) },
+        onClearError = { viewModel.emitEvent(PermissionsEvent.ErrorDismissed()) },
+    )
+}
+
+@Composable
+private fun PermissionsScreenContent(
+    state: PermissionsState,
+    padding: PaddingValues,
+    searchRequestId: Long,
+    searchVisible: Boolean = true,
+    onSearchVisibilityChanged: (Boolean) -> Unit = {},
+    onRefresh: () -> Unit,
+    onStartAutoRiskScan: () -> Unit,
+    onCancelAutoRiskScan: () -> Unit,
+    onFilterChange: (String, Boolean) -> Unit,
+    onToggleShowOnlyRisky: () -> Unit,
+    onSetShowOnlyRisky: (Boolean) -> Unit,
+    onRequestReportPreview: (String) -> Unit,
+    onToggleFavorite: (String) -> Unit,
+    onClearError: () -> Unit,
+) {
     val strings = LocalStrings.current
     val screenStrings = ScreenUiStrings.from(strings)
 
-    @Suppress("DEPRECATION")
-    val clipboard = LocalClipboardManager.current
-    DisposableEffect(viewModel) {
-        onDispose { viewModel.dismissReportPreview() }
-    }
-    LaunchedEffect(state.reportPreviewPackage, state.reportPreviewContent) {
-        val packageName = state.reportPreviewPackage
-        val content = state.reportPreviewContent
-        if (packageName != null && content != null) {
-            clipboard.setText(AnnotatedString(content))
-            viewModel.shareSingle(packageName, content)
-            viewModel.dismissReportPreview()
-        }
-    }
     val expandedPackages = remember { mutableStateMapOf<String, Boolean>() }
     val favoriteQueries = state.favoriteQueries
     val filteredApps = state.visibleApps
@@ -121,7 +134,11 @@ fun PermissionsScreen(
     val mediumTotal = state.riskReports.sumOf { it.mediumCount }
     val scope = rememberCoroutineScope()
     val listState = rememberLazyListState()
-    var searchToolsExpanded by remember { mutableStateOf(true) }
+    LaunchedEffect(searchRequestId) {
+        if (searchRequestId > 0) {
+            listState.animateScrollToItem(0)
+        }
+    }
     val showScrollTop by remember {
         derivedStateOf { listState.firstVisibleItemIndex > 1 || listState.firstVisibleItemScrollOffset > 240 }
     }
@@ -132,37 +149,19 @@ fun PermissionsScreen(
     }
 
     Box(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier.fillMaxSize(),
     ) {
         LazyColumn(
             state = listState,
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(10.dp),
-            contentPadding = screenContentPadding(padding, horizontal = 16.dp, vertical = 10.dp)
+            contentPadding = screenContentPadding(padding, horizontal = 16.dp, vertical = 10.dp),
         ) {
-            item {
-                SectionHeader(
-                    title = strings.navPermissions,
-                    help = headerHelp,
-                    onHelp = onHelp,
-                    beforeHelpAction = {
-                        IconButton(onClick = viewModel::refresh) {
-                            Icon(
-                                imageVector = Icons.Filled.Refresh,
-                                contentDescription = strings.refreshPermissionsContentDescription,
-                                tint = MaterialTheme.colorScheme.primary
-                            )
-                        }
-                    },
-                    onBack = onBack,
-                    onMenu = onMenu
-                )
-            }
             item {
                 AppText(
                     strings.helpPermissions,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
             item {
@@ -170,36 +169,36 @@ fun PermissionsScreen(
                     AppText(
                         screenStrings.riskScanTitle,
                         style = MaterialTheme.typography.titleSmall,
-                        color = MaterialTheme.colorScheme.onSurface
+                        color = MaterialTheme.colorScheme.onSurface,
                     )
                     AppText(
                         screenStrings.riskScanDescription,
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
-                    Row(
+                    Column(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(top = 8.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         AppButton(
                             text = screenStrings.startScan,
-                            onClick = viewModel::startAutoRiskScan,
+                            onClick = onStartAutoRiskScan,
                             enabled = state.apps.isNotEmpty() && !state.autoScanRunning,
                             variant = ButtonVariant.Tonal,
-                            modifier = Modifier.weight(1f),
-                            fullWidth = false,
-                            leadingIcon = Icons.Filled.Warning
+                            modifier = Modifier.fillMaxWidth(),
+                            fullWidth = true,
+                            leadingIcon = AppIcons.Filled.Warning,
                         )
                         AppButton(
                             text = screenStrings.stopScan,
-                            onClick = viewModel::cancelAutoRiskScan,
+                            onClick = onCancelAutoRiskScan,
                             enabled = state.autoScanRunning,
                             variant = ButtonVariant.Secondary,
-                            modifier = Modifier.weight(1f),
-                            fullWidth = false,
-                            leadingIcon = Icons.Filled.Stop
+                            modifier = Modifier.fillMaxWidth(),
+                            fullWidth = true,
+                            leadingIcon = AppIcons.Filled.Stop,
                         )
                     }
 
@@ -208,35 +207,40 @@ fun PermissionsScreen(
                             screenStrings.scanProgress.format(state.autoScanScannedApps, state.autoScanTotalApps),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.padding(top = 8.dp)
+                            modifier = Modifier.padding(top = 8.dp),
                         )
                         state.autoScanCurrentLabel?.let { label ->
                             AppText(
                                 screenStrings.analysis.format(label),
                                 style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }
-                        LinearProgressIndicator(
-                            progress = { scanProgress.coerceIn(0f, 1f) },
+                        AppProgressBar(
+                            progress = scanProgress.coerceIn(0f, 1f),
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(top = 6.dp)
+                                .padding(top = 6.dp),
                         )
                     }
 
                     if (state.riskReports.isNotEmpty()) {
                         AppText(
-                            screenStrings.riskSummary.format(state.riskReports.size, criticalTotal, highTotal, mediumTotal),
+                            screenStrings.riskSummary.format(
+                                state.riskReports.size,
+                                criticalTotal,
+                                highTotal,
+                                mediumTotal,
+                            ),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.padding(top = 8.dp)
+                            modifier = Modifier.padding(top = 8.dp),
                         )
                     }
                 }
             }
             item {
-                AppAccordion(
+                SearchPanelComponent(
                     title = strings.permissionsSearch,
                     subtitle = screenStrings.searchFilters,
                     meta = buildString {
@@ -246,27 +250,23 @@ fun PermissionsScreen(
                             append(favoriteQueries.size)
                         }
                     }.ifBlank { null },
-                    expanded = searchToolsExpanded,
-                    onToggle = { searchToolsExpanded = !searchToolsExpanded },
-                    modifier = Modifier.fillMaxWidth()
+                    expanded = searchVisible,
+                    onExpandedChange = onSearchVisibilityChanged,
+                    query = state.filter,
+                    onQueryChange = { onFilterChange(it, false) },
+                    onSubmit = { onFilterChange(it, true) },
+                    label = strings.permissionsSearch,
+                    historyKey = "permissions",
+                    focusRequestId = searchRequestId,
+                    showClearAction = true,
+                    onCleared = { onFilterChange("", false) },
+                    modifier = Modifier.fillMaxWidth(),
                 ) {
-                    SearchFieldWithHistoryComponent(
-                        value = state.filter,
-                        onValueChange = { viewModel.setFilter(it) },
-                        onSubmit = { viewModel.setFilter(it, trackUsage = true) },
-                        label = strings.permissionsSearch,
-                        historyKey = "permissions",
-                        modifier = Modifier.fillMaxWidth(),
-                        showClearAction = true,
-                        onCleared = {
-                            viewModel.setFilter("")
-                        }
-                    )
                     state.topQuery?.let { top ->
                         AppText(
                             screenStrings.frequentSearch.format(top),
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.primary
+                            color = MaterialTheme.colorScheme.primary,
                         )
                     }
                     if (favoriteQueries.isNotEmpty()) {
@@ -274,14 +274,14 @@ fun PermissionsScreen(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                             contentPadding = PaddingValues(
-                                vertical = 6.dp
-                            )
+                                vertical = 6.dp,
+                            ),
                         ) {
                             items(favoriteQueries, key = { it }) { fav ->
                                 FilterChip(
                                     selected = true,
-                                    onClick = { viewModel.setFilter(fav, trackUsage = true) },
-                                    label = { AppText(fav) }
+                                    onClick = { onFilterChange(fav, true) },
+                                    label = { AppText(fav) },
                                 )
                             }
                         }
@@ -291,35 +291,35 @@ fun PermissionsScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(top = 6.dp),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
                             FilterChip(
                                 selected = state.showOnlyRisky,
-                                onClick = viewModel::toggleShowOnlyRisky,
-                                label = { AppText(screenStrings.riskOnly) }
+                                onClick = onToggleShowOnlyRisky,
+                                label = { AppText(screenStrings.riskOnly) },
                             )
                             FilterChip(
                                 selected = false,
-                                onClick = { viewModel.setFilter("") },
-                                label = { AppText(screenStrings.resetFilter) }
+                                onClick = { onFilterChange("", false) },
+                                label = { AppText(screenStrings.resetFilter) },
                             )
                         }
                         LazyRow(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(top = 4.dp),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
                             items(state.riskReports.take(8), key = { it.packageName }) { report ->
                                 FilterChip(
                                     selected = false,
                                     onClick = {
-                                        viewModel.setFilter(
+                                        onFilterChange(
                                             report.packageName,
-                                            trackUsage = true
+                                            true,
                                         )
                                     },
-                                    label = { AppText("${report.appLabel} (${report.findings.size})") }
+                                    label = { AppText("${report.appLabel} (${report.findings.size})") },
                                 )
                             }
                         }
@@ -327,12 +327,12 @@ fun PermissionsScreen(
                 }
             }
 
-            if (!state.loading && state.error == null) {
+            if (state.loadState !is UiLoadState.Loading && state.loadError == null && state.error == null) {
                 item {
                     AppText(
                         screenStrings.resultsSummary.format(filteredApps.size, state.apps.size),
                         style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
             }
@@ -345,72 +345,74 @@ fun PermissionsScreen(
                         summary = screenStrings.permissionsExportSummary,
                         details = listOf(
                             screenStrings.permissionsExportDetails,
-                            screenStrings.readableFormat
-                        )
+                            screenStrings.readableFormat,
+                        ),
                     )
                 }
             }
-            if (state.loading) {
+            if (state.loadState is UiLoadState.Loading && state.apps.isEmpty()) {
                 item {
-                    CircularProgressIndicator(modifier = Modifier.padding(top = 8.dp))
+                    AppListSkeleton()
                 }
+            } else if (state.loadState is UiLoadState.Loading) {
+                item { AppProgressBar(modifier = Modifier.fillMaxWidth()) }
             }
 
-            if (!state.loading && filteredApps.isEmpty()) {
+            if (state.loadState !is UiLoadState.Loading && filteredApps.isEmpty()) {
                 item {
                     AppCard(modifier = Modifier.fillMaxWidth()) {
                         val hasFilter = state.filter.isNotBlank() || state.showOnlyRisky
                         AppText(
                             if (hasFilter) screenStrings.noRiskResults else screenStrings.noPermissions,
-                            style = MaterialTheme.typography.bodyMedium
+                            style = MaterialTheme.typography.bodyMedium,
                         )
                         AppText(
                             if (hasFilter) screenStrings.riskFilterHint else screenStrings.refreshPermissionsHint,
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                         Row(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
                             if (state.showOnlyRisky) {
                                 AppButton(
                                     text = screenStrings.allApps,
-                                    onClick = { viewModel.setShowOnlyRisky(false) },
+                                    onClick = { onSetShowOnlyRisky(false) },
                                     variant = ButtonVariant.Secondary,
                                     modifier = Modifier.weight(1f),
-                                    fullWidth = false
+                                    fullWidth = false,
                                 )
                             } else if (state.filter.isNotBlank()) {
                                 AppButton(
                                     text = screenStrings.resetFilter,
-                                    onClick = { viewModel.setFilter("") },
+                                    onClick = { onFilterChange("", false) },
                                     variant = ButtonVariant.Secondary,
                                     modifier = Modifier.weight(1f),
-                                    fullWidth = false
+                                    fullWidth = false,
                                 )
                             }
                             AppButton(
                                 text = screenStrings.refresh,
-                                onClick = viewModel::refresh,
+                                onClick = onRefresh,
                                 variant = ButtonVariant.Tonal,
                                 modifier = Modifier.weight(1f),
-                                fullWidth = false
+                                fullWidth = false,
                             )
                         }
                     }
                 }
             }
 
-            state.error?.let { err ->
+            (state.loadError ?: state.scanError ?: state.exportError ?: state.error)?.let { err ->
                 item {
                     AppText(err, color = MaterialTheme.colorScheme.error)
                 }
             }
-            if (state.reportPreviewLoading) {
-                item { LinearProgressIndicator(modifier = Modifier.fillMaxWidth()) }
+            if (state.reportPreviewLoadState is UiLoadState.Loading) {
+                item { AppProgressBar(modifier = Modifier.fillMaxWidth()) }
             }
-            state.reportPreviewError?.let { error ->
+            state.reportPreviewErrorFromState?.let { error ->
                 item { AppText(error, color = MaterialTheme.colorScheme.error) }
             }
             items(filteredApps, key = { it.packageName }) { app ->
@@ -433,49 +435,66 @@ fun PermissionsScreen(
                     leading = {
                         PackageIcon(
                             packageName = app.packageName,
-                            modifier = Modifier.size(44.dp)
+                            modifier = Modifier.size(44.dp),
                         )
                     },
+                    titleMaxLines = 3,
+                    subtitleMaxLines = 3,
+                    textOverflow = TextOverflow.Clip,
+                    headerVerticalPadding = 10.dp,
+                    headerMinHeight = 88.dp,
+                    actionsBelowHeader = true,
                     actions = {
-                        IconButton(onClick = {
-                            viewModel.requestReportPreview(app.packageName)
-                        }) {
-                            Icon(
-                                imageVector = Icons.Filled.Share,
+                        IconButton(
+                            onClick = {
+                                onRequestReportPreview(app.packageName)
+                            },
+                        ) {
+                            AppIcon(
+                                imageVector = AppIcons.Filled.Share,
                                 contentDescription = strings.sharePermissionsContentDescription,
-                                tint = MaterialTheme.colorScheme.primary
+                                tint = MaterialTheme.colorScheme.primary,
                             )
                         }
-                        IconButton(onClick = { viewModel.toggleFavorite(app.packageName) }) {
-                            Icon(
-                                imageVector = if (isFavorite) Icons.Filled.Star else Icons.Filled.StarBorder,
+                        IconButton(onClick = { onToggleFavorite(app.packageName) }) {
+                            AppIcon(
+                                imageVector = if (isFavorite) AppIcons.Filled.Star else AppIcons.Filled.StarBorder,
                                 contentDescription = strings.favoriteContentDescription,
-                                tint = if (isFavorite) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                                tint = if (isFavorite) {
+                                    MaterialTheme.colorScheme.primary
+                                } else {
+                                    MaterialTheme.colorScheme.onSurfaceVariant
+                                },
                             )
                         }
                     },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 6.dp)
+                        .padding(vertical = 6.dp),
                 ) {
                     AppText(
                         if (expanded) {
                             strings.permissionsExpandedAppLabel.format(
                                 app.appLabel,
-                                app.packageName
+                                app.packageName,
                             )
                         } else {
                             strings.helpPermissions
                         },
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.primary
+                        color = MaterialTheme.colorScheme.primary,
                     )
                     riskReport?.let { report ->
                         AppText(
-                            screenStrings.risksDetected.format(report.findings.size, report.criticalCount, report.highCount, report.mediumCount),
+                            screenStrings.risksDetected.format(
+                                report.findings.size,
+                                report.criticalCount,
+                                report.highCount,
+                                report.mediumCount,
+                            ),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.error,
-                            modifier = Modifier.padding(vertical = 4.dp)
+                            modifier = Modifier.padding(vertical = 4.dp),
                         )
                         state.findingsByPackage[app.packageName].orEmpty().take(6).forEach { finding ->
                             RiskFindingRow(finding = finding)
@@ -484,19 +503,19 @@ fun PermissionsScreen(
                             AppText(
                                 screenStrings.findingAdditional.format(report.findings.size - 6),
                                 style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }
                     }
                     Column(
                         verticalArrangement = Arrangement.spacedBy(
-                            4.dp
-                        )
+                            4.dp,
+                        ),
                     ) {
                         app.permissions.forEach { perm ->
                             PermissionRow(
                                 permission = perm,
-                                finding = permissionFindings[perm]
+                                finding = permissionFindings[perm],
                             )
                         }
                     }
@@ -509,11 +528,47 @@ fun PermissionsScreen(
             onClick = { scope.launch { listState.animateScrollToItem(0) } },
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(12.dp)
+                .padding(12.dp),
         )
     }
 
-    state.error?.let { ErrorDialogComponent(it, viewModel::clearError) }
+    (state.loadError ?: state.scanError ?: state.exportError ?: state.error)?.let { ErrorDialogComponent(it, onClearError) }
+}
+
+@AppScreenPreviews
+@Composable
+private fun PermissionsScreenPreview() {
+    val apps = listOf(
+        AppPermissionEntry(
+            appLabel = "CrackMyDroid Security Analysis Application",
+            packageName = "com.crackmydroid.security.analysis.application",
+            permissions = listOf(
+                "android.permission.CAMERA",
+                "android.permission.ACCESS_FINE_LOCATION",
+                "android.permission.INTERNET",
+            ),
+        ),
+    )
+    AppPreviewEnvironment {
+        PermissionsScreenContent(
+            state = PermissionsState(
+                apps = apps,
+                visibleApps = apps,
+                favoriteQueries = listOf("camera"),
+            ),
+            padding = PaddingValues(),
+            searchRequestId = 0,
+            onRefresh = {},
+            onStartAutoRiskScan = {},
+            onCancelAutoRiskScan = {},
+            onFilterChange = { _, _ -> },
+            onToggleShowOnlyRisky = {},
+            onSetShowOnlyRisky = {},
+            onRequestReportPreview = {},
+            onToggleFavorite = {},
+            onClearError = {},
+        )
+    }
 }
 
 @Composable
@@ -522,53 +577,50 @@ private fun RiskFindingRow(finding: PermissionFindingUi) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 2.dp),
-        verticalArrangement = Arrangement.spacedBy(2.dp)
+        verticalArrangement = Arrangement.spacedBy(2.dp),
     ) {
         AppText(
             "[${finding.levelLabel}] ${finding.title}",
             style = MaterialTheme.typography.bodySmall,
-            color = riskLevelColor(finding.level)
+            color = riskLevelColor(finding.level),
         )
         AppText(
             finding.reason,
             style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
 }
 
 @Composable
-private fun PermissionRow(
-    permission: String,
-    finding: PermissionFindingUi? = null
-) {
+private fun PermissionRow(permission: String, finding: PermissionFindingUi? = null) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 2.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        Icon(
+        AppIcon(
             imageVector = permissionIconFor(permission),
             contentDescription = permission,
             tint = finding?.let { riskLevelColor(it.level) } ?: permissionColor(permission),
-            modifier = Modifier.size(18.dp)
+            modifier = Modifier.size(18.dp),
         )
         Column(
             modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(1.dp)
+            verticalArrangement = Arrangement.spacedBy(1.dp),
         ) {
             AppText(
                 permission,
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             finding?.let {
                 AppText(
                     "${it.levelLabel}: ${it.reason}",
                     style = MaterialTheme.typography.labelSmall,
-                    color = riskLevelColor(it.level)
+                    color = riskLevelColor(it.level),
                 )
             }
         }
@@ -578,20 +630,20 @@ private fun PermissionRow(
 private fun permissionIconFor(permission: String): ImageVector {
     val key = permission.uppercase()
     return when {
-        "CAMERA" in key -> Icons.Filled.CameraAlt
-        "AUDIO" in key || "MIC" in key -> Icons.Filled.Mic
-        "LOCATION" in key -> Icons.Filled.LocationOn
-        "NOTIFICATION" in key -> Icons.Filled.Notifications
-        "BLUETOOTH" in key -> Icons.Filled.Bluetooth
-        "PHONE" in key || "CALL" in key -> Icons.Filled.Phone
-        "CONTACT" in key -> Icons.Filled.Contacts
-        "SMS" in key || "MMS" in key -> Icons.Filled.Sms
-        "WIFI" in key || "NETWORK" in key -> Icons.Filled.Wifi
-        "STORAGE" in key || "READ_MEDIA" in key || "FILES" in key -> Icons.Filled.SdStorage
-        "CALENDAR" in key -> Icons.Filled.CalendarToday
-        "FINGERPRINT" in key || "BIOMETRIC" in key -> Icons.Filled.Fingerprint
-        "INTERNET" in key -> Icons.Filled.Cloud
-        else -> Icons.Filled.Lock
+        "CAMERA" in key -> AppIcons.Filled.CameraAlt
+        "AUDIO" in key || "MIC" in key -> AppIcons.Filled.Mic
+        "LOCATION" in key -> AppIcons.Filled.LocationOn
+        "NOTIFICATION" in key -> AppIcons.Filled.Notifications
+        "BLUETOOTH" in key -> AppIcons.Filled.Bluetooth
+        "PHONE" in key || "CALL" in key -> AppIcons.Filled.Phone
+        "CONTACT" in key -> AppIcons.Filled.Contacts
+        "SMS" in key || "MMS" in key -> AppIcons.Filled.Sms
+        "WIFI" in key || "NETWORK" in key -> AppIcons.Filled.Wifi
+        "STORAGE" in key || "READ_MEDIA" in key || "FILES" in key -> AppIcons.Filled.SdStorage
+        "CALENDAR" in key -> AppIcons.Filled.CalendarToday
+        "FINGERPRINT" in key || "BIOMETRIC" in key -> AppIcons.Filled.Fingerprint
+        "INTERNET" in key -> AppIcons.Filled.Cloud
+        else -> AppIcons.Filled.Lock
     }
 }
 

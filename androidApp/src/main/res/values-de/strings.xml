@@ -1,1 +1,8 @@
-<resources><string name="package_inventory_disclosure_title">Scan installierter Apps</string><string name="package_inventory_disclosure_body">CrackMyDroid liest das Inventar installierter Apps lokal, um APKs, Aktivitäten, Komponenten und Berechtigungen anzuzeigen.</string><string name="package_inventory_disclosure_confirm">Verstanden</string><string name="package_inventory_unavailable_title">Vollständiger Scan nicht verfügbar</string><string name="package_inventory_unavailable_body">Diese Installation hat keine vollständige App-Sichtbarkeit. Der Scan wird nicht gestartet, um unvollständige Ergebnisse zu vermeiden.</string><string name="close">Schließen</string></resources>
+<resources>
+    <string name="package_inventory_disclosure_title">Scan installierter Apps</string>
+    <string name="package_inventory_disclosure_body">CrackMyDroid liest das Inventar installierter Apps lokal, um APKs, Aktivitäten, Komponenten und Berechtigungen anzuzeigen.</string>
+    <string name="package_inventory_disclosure_confirm">Verstanden</string>
+    <string name="package_inventory_unavailable_title">Vollständiger Scan nicht verfügbar</string>
+    <string name="package_inventory_unavailable_body">Diese Installation hat keine vollständige App-Sichtbarkeit. Der Scan wird nicht gestartet, um unvollständige Ergebnisse zu vermeiden.</string>
+    <string name="close">Schließen</string>
+</resources>

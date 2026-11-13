@@ -1,6 +1,3 @@
-import org.gradle.api.attributes.Bundling
-import org.gradle.api.attributes.Category
-import org.gradle.api.attributes.Usage
 import org.jlleitschuh.gradle.ktlint.KtlintExtension
 import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
 import org.jlleitschuh.gradle.ktlint.tasks.BaseKtLintCheckTask
@@ -91,6 +88,8 @@ listOf("ktlintFilesCheck", "ktlintFilesFormat").forEach { taskName ->
 
 dependencies {
     ktlintCli(libs.ktlint.cli)
+    kover(project(":architectureModule"))
+    kover(project(":uiModule"))
     kover(project(":shared"))
     kover(project(":androidApp"))
 }

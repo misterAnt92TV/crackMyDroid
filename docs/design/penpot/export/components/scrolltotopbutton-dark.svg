@@ -1,11 +1,20 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="720" height="280" viewBox="0 0 720 280" role="img" data-source="shared/src/commonMain/kotlin/com/crackmydroid/shared/presentation/components/ScrollToTopButton.kt">
-<title>ScrollToTopButton · dark theme</title>
-<desc>Editable SVG visual reference for ScrollToTopButton, based on shared/src/commonMain/kotlin/com/crackmydroid/shared/presentation/components/ScrollToTopButton.kt.</desc>
-<rect x="0" y="0" width="720" height="280" fill="#101418" rx="0"/>
-<rect x="24" y="24" width="672" height="232" fill="#101418" rx="22" stroke="#3F4652" stroke-width="1"/>
-<circle cx="360" cy="140" r="38" fill="#A8C7FA"/>
-<line x1="360" y1="157" x2="360" y2="122" stroke="#053062" stroke-width="4" stroke-linecap="round"/>
-<line x1="346" y1="136" x2="360" y2="122" stroke="#053062" stroke-width="4" stroke-linecap="round"/>
-<line x1="374" y1="136" x2="360" y2="122" stroke="#053062" stroke-width="4" stroke-linecap="round"/>
-<text x="278" y="216" fill="#C0C7D2" font-family="Inter, Roboto, sans-serif" font-size="14" font-weight="400">Floating action · scroll to top</text>
+<svg data-source="shared/src/commonMain/kotlin/com/crackmydroid/shared/presentation/components/ScrollToTopButton.kt" height="280" role="img" viewBox="0 0 720 280" width="720"
+    xmlns="http://www.w3.org/2000/svg">
+    <title>ScrollToTopButton · dark theme</title>
+    <desc>Editable SVG visual reference for ScrollToTopButton, based on
+        shared/src/commonMain/kotlin/com/crackmydroid/shared/presentation/components/ScrollToTopButton.kt.
+    </desc>
+    <rect fill="#101418" height="280" rx="0" width="720" x="0" y="0" />
+    <rect fill="#101418" height="232" rx="22" stroke="#3F4652" stroke-width="1" width="672" x="24"
+        y="24" />
+    <circle cx="360" cy="140" fill="#A8C7FA" r="38" />
+    <line stroke="#053062" stroke-linecap="round" stroke-width="4" x1="360" x2="360" y1="157"
+        y2="122" />
+    <line stroke="#053062" stroke-linecap="round" stroke-width="4" x1="346" x2="360" y1="136"
+        y2="122" />
+    <line stroke="#053062" stroke-linecap="round" stroke-width="4" x1="374" x2="360" y1="136"
+        y2="122" />
+    <text fill="#C0C7D2" font-family="Inter, Roboto, sans-serif" font-size="14" font-weight="400" x="278"
+        y="216">Floating action · scroll to top
+    </text>
 </svg>

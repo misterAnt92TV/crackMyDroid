@@ -1,32 +1,31 @@
 package com.crackmydroid.shared.data.snapshot
 
 import android.content.Context
-import com.crackmydroid.database.CacheDatabase
-import com.crackmydroid.shared.AppLogger
+import com.crackmydroid.architecture.logging.AppLogger
+import com.crackmydroid.shared.domain.model.PlayIntegrityResult
 import com.crackmydroid.shared.domain.model.scansnapshot.DeviceScanSnapshot
 import com.crackmydroid.shared.domain.model.scansnapshot.DeviceScanSnapshotContract
 import com.crackmydroid.shared.domain.model.scansnapshot.DeviceScanSnapshotJson
-import com.crackmydroid.shared.domain.model.PlayIntegrityResult
 import com.crackmydroid.shared.domain.model.scansnapshot.SnapshotSection
 import com.crackmydroid.shared.domain.repository.ActivityRepository
 import com.crackmydroid.shared.domain.repository.DeviceInfoRepository
 import com.crackmydroid.shared.domain.repository.InstalledAppsRepository
-import com.crackmydroid.shared.domain.repository.log.LogRepository
 import com.crackmydroid.shared.domain.repository.PermissionsRepository
 import com.crackmydroid.shared.domain.repository.RootCheckRepository
-import kotlinx.serialization.encodeToString
+import com.crackmydroid.shared.domain.repository.log.LogRepository
 import java.io.File
 import java.util.concurrent.atomic.AtomicBoolean
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.json.encodeToStream
 
 class AndroidDeviceSnapshotCoordinator(
     private val context: Context,
-    private val db: CacheDatabase,
     private val activityRepository: ActivityRepository,
     private val deviceInfoRepository: DeviceInfoRepository,
     private val rootCheckRepository: RootCheckRepository,
     private val logRepository: LogRepository,
     private val permissionsRepository: PermissionsRepository,
-    private val installedAppsRepository: InstalledAppsRepository
+    private val installedAppsRepository: InstalledAppsRepository,
 ) {
     private val running = AtomicBoolean(false)
 
@@ -44,8 +43,6 @@ class AndroidDeviceSnapshotCoordinator(
     }
 
     private suspend fun writeSnapshot() {
-        clearRepositoryCaches()
-
         val deviceInfoSection = captureSection { deviceInfoRepository.getDeviceInfo() }
         val installedAppsSection = captureSection { installedAppsRepository.listInstalled() }
         val permissionsSection = captureSection { permissionsRepository.listAppPermissions() }
@@ -59,8 +56,8 @@ class AndroidDeviceSnapshotCoordinator(
             data = PlayIntegrityResult(
                 basicIntegrity = null,
                 deviceIntegrity = null,
-                details = "Play Integrity non eseguito automaticamente in background"
-            )
+                details = "Play Integrity non eseguito automaticamente in background",
+            ),
         )
 
         val deviceInfo = deviceInfoSection.data
@@ -77,34 +74,27 @@ class AndroidDeviceSnapshotCoordinator(
             permissions = permissionsSection,
             activities = activitiesSection,
             logs = logsSection,
-            manifestSecurityReports = manifestSecuritySection
+            manifestSecurityReports = manifestSecuritySection,
         )
 
         writeAtomically(snapshot)
         AppLogger.logger.i { "Snapshot Android scritto in ${targetFile().absolutePath}" }
     }
 
-    private fun clearRepositoryCaches() {
-        db.cacheDatabaseQueries.transaction {
-            db.cacheDatabaseQueries.clearActivities()
-            db.cacheDatabaseQueries.clearPermissions()
-            db.cacheDatabaseQueries.clearInstalled()
-            db.cacheDatabaseQueries.clearDeviceInfo()
-        }
+    private suspend inline fun <T> captureSection(crossinline loader: suspend () -> T): SnapshotSection<T> = try {
+        SnapshotSection.ready(loader())
+    } catch (error: Throwable) {
+        SnapshotSection.failed(error.message ?: "Errore sconosciuto")
     }
 
-    private suspend inline fun <T> captureSection(crossinline loader: suspend () -> T): SnapshotSection<T> =
-        try {
-            SnapshotSection.ready(loader())
-        } catch (error: Throwable) {
-            SnapshotSection.failed(error.message ?: "Errore sconosciuto")
-        }
-
+    @OptIn(ExperimentalSerializationApi::class)
     private fun writeAtomically(snapshot: DeviceScanSnapshot) {
         val target = targetFile()
         target.parentFile?.mkdirs()
         val temp = File(target.parentFile, "${target.name}.tmp")
-        temp.writeText(DeviceScanSnapshotJson.format.encodeToString(snapshot))
+        temp.outputStream().buffered().use { outputStream ->
+            DeviceScanSnapshotJson.format.encodeToStream(snapshot, outputStream)
+        }
         if (target.exists() && !target.delete()) {
             error("Impossibile sostituire snapshot esistente")
         }
@@ -116,18 +106,17 @@ class AndroidDeviceSnapshotCoordinator(
 
     private fun targetFile(): File {
         val baseDir = requireNotNull(
-            context.getExternalFilesDir(DeviceScanSnapshotContract.SNAPSHOT_DIRECTORY)
+            context.getExternalFilesDir(DeviceScanSnapshotContract.SNAPSHOT_DIRECTORY),
         ) {
             "Storage esterno app non disponibile"
         }
         return File(baseDir, DeviceScanSnapshotContract.SNAPSHOT_FILE_NAME)
     }
 
-    private fun appVersionName(): String =
-        runCatching {
-            val info = context.packageManager.getPackageInfo(context.packageName, 0)
-            info.versionName ?: "n/d"
-        }.getOrDefault("n/d")
+    private fun appVersionName(): String = runCatching {
+        val info = context.packageManager.getPackageInfo(context.packageName, 0)
+        info.versionName ?: "n/d"
+    }.getOrDefault("n/d")
 
     private companion object {
         const val MAX_LOG_LINES: Int = 1500

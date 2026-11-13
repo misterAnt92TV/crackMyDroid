@@ -1,34 +1,42 @@
 package com.crackmydroid.shared.ui.root
 
+import com.crackmydroid.architecture.coroutines.AppDispatchers
+import com.crackmydroid.architecture.presentation.model.UiLoadState
 import com.crackmydroid.shared.domain.model.root.RootCheckMode
 import com.crackmydroid.shared.domain.usecase.reports.ExportReportUseCase
 import com.crackmydroid.shared.domain.usecase.root.CheckPlayIntegrityUseCase
 import com.crackmydroid.shared.domain.usecase.root.CheckRootUseCase
-import com.crackmydroid.shared.i18n.Strings
-import com.crackmydroid.shared.presentation.BaseViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
+import com.crackmydroid.shared.presentation.LocalizedBaseViewModel
 
 class RootViewModel(
-    private val checkRoot: CheckRootUseCase,
-    private val checkPlayIntegrity: CheckPlayIntegrityUseCase,
-    private val reportExporter: ExportReportUseCase,
-) : BaseViewModel() {
-    private val _state = MutableStateFlow(RootState())
-    val state: StateFlow<RootState> = _state
+    private val checkRootUseCase: CheckRootUseCase,
+    private val checkPlayIntegrityUseCase: CheckPlayIntegrityUseCase,
+    private val reportExporterUseCase: ExportReportUseCase,
+    dispatchers: AppDispatchers,
+) : LocalizedBaseViewModel<RootEvent, RootState>(RootState(), dispatchers) {
+    private companion object {
+        const val CHECK_KEY = "root-check"
+    }
 
-    private fun buildReportContent(strings: Strings): String = buildString {
+    override fun onEvent(event: RootEvent) = when (event) {
+        is RootEvent.Verify -> verify()
+        is RootEvent.VerifyRootAccess -> verifyRootAccess()
+        is RootEvent.PlayIntegrityNonceChanged -> updatePlayIntegrityNonce(event.value)
+        is RootEvent.VerifyPlayIntegrity -> verifyPlayIntegrity()
+        is RootEvent.ShareReport -> shareReport()
+        is RootEvent.ErrorDismissed -> clearError()
+    }
+
+    private fun buildReportContent(): String = buildString {
         appendLine(strings.navRoot)
         appendLine("-----------")
-        _state.value.status?.let { status ->
+        currentState.status?.let { status ->
             appendLine(
                 "${strings.verifyRoot}: ${if (status.isRooted) strings.rootDetected else strings.rootNotDetected}",
             )
-            appendLine("Dettagli root: ${status.details}")
+            appendLine("${strings.rootDetectedDetails}: ${status.details}")
         } ?: appendLine("${strings.verifyRoot}: ${strings.notAvailable}")
-        _state.value.playIntegrity?.let { pi ->
+        currentState.playIntegrity?.let { pi ->
             appendLine()
             appendLine(strings.playIntegrityTitle)
             appendLine("${strings.playIntegrityBasic}: ${pi.basicIntegrity ?: strings.notAvailable}")
@@ -37,68 +45,65 @@ class RootViewModel(
         }
     }
 
-    fun verify() {
-        verify(RootCheckMode.PASSIVE)
-    }
-
-    fun verifyRootAccess() {
+    private fun verifyRootAccess() {
         verify(RootCheckMode.PRIVILEGE_ACCESS)
     }
 
-    private fun verify(mode: RootCheckMode) {
-        scope.launch {
-            _state.update { it.copy(loading = true, error = null) }
-            checkRoot(mode)
-                .onSuccess { status -> _state.update { it.copy(status = status, loading = false) } }
+    private fun verify(mode: RootCheckMode = RootCheckMode.PASSIVE) {
+        launchLatest(CHECK_KEY) {
+            updateState { it.copy(loadState = UiLoadState.Loading) }
+            checkRootUseCase(mode)
+                .onSuccess { status ->
+                    if (isCurrent()) updateState { it.copy(status = status, loadState = UiLoadState.Success) }
+                }
                 .onFailure { err ->
-                    _state.update {
+                    if (!isCurrent()) return@onFailure
+                    updateState {
                         it.copy(
-                            error = err.message,
-                            loading = false,
+                            loadState = UiLoadState.Error(err.message ?: presentationTexts.error),
                         )
                     }
                 }
         }
     }
 
-    fun updatePlayIntegrityNonce(value: String) {
-        _state.update { it.copy(playIntegrityNonce = value) }
+    private fun updatePlayIntegrityNonce(value: String) {
+        updateState { it.copy(playIntegrityNonce = value) }
     }
 
-    fun verifyPlayIntegrity() {
-        val nonce = _state.value.playIntegrityNonce.ifBlank { "sample-nonce" }
-        scope.launch {
-            _state.update { it.copy(loading = true, error = null) }
-            checkPlayIntegrity(nonce)
+    private fun verifyPlayIntegrity() {
+        val nonce = currentState.playIntegrityNonce.ifBlank { "sample-nonce" }
+        launchTask {
+            updateState { it.copy(loadState = UiLoadState.Loading) }
+            checkPlayIntegrityUseCase(nonce)
                 .onSuccess { res ->
-                    _state.update {
+                    updateState {
                         it.copy(
                             playIntegrity = res,
-                            loading = false,
+                            loadState = UiLoadState.Success,
                         )
                     }
                 }
                 .onFailure { err ->
-                    _state.update {
+                    updateState {
                         it.copy(
-                            error = err.message,
-                            loading = false,
+                            loadState = UiLoadState.Error(err.message ?: presentationTexts.error),
                         )
                     }
                 }
         }
     }
 
-    fun shareReport(strings: Strings) {
-        val content = buildReportContent(strings)
-        scope.launch {
-            reportExporter.shareTextReport("root_test_report", "root_test", content)
-                .onSuccess { path -> _state.update { it.copy(reportPath = path, error = null) } }
-                .onFailure { error -> _state.update { it.copy(error = error.message ?: "Errore") } }
+    private fun shareReport() {
+        val content = buildReportContent()
+        launchTask {
+            reportExporterUseCase.shareTextReport("root_test_report", "root_test", content)
+                .onSuccess { path -> updateState { it.copy(reportPath = path, error = null) } }
+                .onFailure { error -> updateState { it.copy(error = error.message ?: presentationTexts.error) } }
         }
     }
 
-    fun clearError() {
-        _state.update { it.copy(error = null) }
+    private fun clearError() {
+        updateState { it.copy(error = null) }
     }
 }

@@ -5,9 +5,9 @@ import com.crackmydroid.shared.domain.repository.IntegrityVerificationRepository
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
-import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlinx.coroutines.test.runTest
 
 class VerifyPlayIntegrityTokenUseCaseTest {
     @Test
@@ -16,7 +16,7 @@ class VerifyPlayIntegrityTokenUseCaseTest {
         val expected = PlayIntegrityResult(
             details = "verified",
             appRecognitionVerdict = "PLAY_RECOGNIZED",
-            appLicensingVerdict = "LICENSED"
+            appLicensingVerdict = "LICENSED",
         )
         coEvery { backend.verify("encrypted-token", "scan-nonce") } returns expected
 

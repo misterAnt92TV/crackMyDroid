@@ -1,14 +1,33 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="720" height="280" viewBox="0 0 720 280" role="img" data-source="shared/src/commonMain/kotlin/com/crackmydroid/shared/presentation/components/AppAccordion.kt">
-<title>AppAccordion · dark theme</title>
-<desc>Editable SVG visual reference for AppAccordion, based on shared/src/commonMain/kotlin/com/crackmydroid/shared/presentation/components/AppAccordion.kt.</desc>
-<rect x="0" y="0" width="720" height="280" fill="#101418" rx="0"/>
-<rect x="24" y="24" width="672" height="232" fill="#101418" rx="22" stroke="#3F4652" stroke-width="1"/>
-<rect x="48" y="48" width="624" height="184" fill="#101418" rx="16" stroke="#3F4652" stroke-width="1"/>
-<circle cx="90" cy="88" r="22" fill="#174EA6"/><text x="82" y="96" fill="#A8C7FA" font-family="Inter, Roboto, sans-serif" font-size="22" font-weight="700">A</text>
-<text x="126" y="91" fill="#E3E8F0" font-family="Inter, Roboto, sans-serif" font-size="19" font-weight="600">com.example.security</text>
-<text x="126" y="119" fill="#C0C7D2" font-family="Inter, Roboto, sans-serif" font-size="15" font-weight="400">com.example.security.app</text>
-<text x="126" y="148" fill="#A8C7FA" font-family="Inter, Roboto, sans-serif" font-size="14" font-weight="500">3 results</text>
-<text x="630" y="98" fill="#A8C7FA" font-family="Inter, Roboto, sans-serif" font-size="25" font-weight="600">⌃</text>
-<line x1="68" y1="164" x2="652" y2="164" stroke="#3F4652" stroke-width="2" stroke-linecap="round"/>
-<text x="76" y="195" fill="#E3E8F0" font-family="Inter, Roboto, sans-serif" font-size="15" font-weight="400">No unexpected backup or debug permissions.</text>
+<svg data-source="shared/src/commonMain/kotlin/com/crackmydroid/shared/presentation/components/AppAccordion.kt" height="280" role="img" viewBox="0 0 720 280" width="720"
+    xmlns="http://www.w3.org/2000/svg">
+    <title>AppAccordion · dark theme</title>
+    <desc>Editable SVG visual reference for AppAccordion, based on
+        shared/src/commonMain/kotlin/com/crackmydroid/shared/presentation/components/AppAccordion.kt.
+    </desc>
+    <rect fill="#101418" height="280" rx="0" width="720" x="0" y="0" />
+    <rect fill="#101418" height="232" rx="22" stroke="#3F4652" stroke-width="1" width="672" x="24"
+        y="24" />
+    <rect fill="#101418" height="184" rx="16" stroke="#3F4652" stroke-width="1" width="624" x="48"
+        y="48" />
+    <circle cx="90" cy="88" fill="#174EA6" r="22" />
+    <text fill="#A8C7FA" font-family="Inter, Roboto, sans-serif" font-size="22" font-weight="700" x="82"
+        y="96">A
+    </text>
+    <text fill="#E3E8F0" font-family="Inter, Roboto, sans-serif" font-size="19" font-weight="600" x="126"
+        y="91">com.example.security
+    </text>
+    <text fill="#C0C7D2" font-family="Inter, Roboto, sans-serif" font-size="15" font-weight="400" x="126"
+        y="119">com.example.security.app
+    </text>
+    <text fill="#A8C7FA" font-family="Inter, Roboto, sans-serif" font-size="14" font-weight="500" x="126"
+        y="148">3 results
+    </text>
+    <text fill="#A8C7FA" font-family="Inter, Roboto, sans-serif" font-size="25" font-weight="600" x="630"
+        y="98">⌃
+    </text>
+    <line stroke="#3F4652" stroke-linecap="round" stroke-width="2" x1="68" x2="652" y1="164"
+        y2="164" />
+    <text fill="#E3E8F0" font-family="Inter, Roboto, sans-serif" font-size="15" font-weight="400" x="76"
+        y="195">No unexpected backup or debug permissions.
+    </text>
 </svg>

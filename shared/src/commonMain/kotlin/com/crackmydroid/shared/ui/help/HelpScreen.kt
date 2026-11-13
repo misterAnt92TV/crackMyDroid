@@ -12,9 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
@@ -29,36 +26,25 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.crackmydroid.shared.i18n.LocalStrings
 import com.crackmydroid.shared.i18n.Strings
-import com.crackmydroid.shared.presentation.components.ScrollToTopButton
-import com.crackmydroid.shared.presentation.components.SectionHeader
-import com.crackmydroid.shared.presentation.components.card.AppCard
-import com.crackmydroid.shared.presentation.components.text.AppText
 import com.crackmydroid.shared.presentation.navigation.Screen
 import com.crackmydroid.shared.ui.screens.screenContentPadding
+import com.crackmydroid.ui.components.AppIcon
+import com.crackmydroid.ui.components.button.ScrollToTopButton
+import com.crackmydroid.ui.components.card.AppCard
+import com.crackmydroid.ui.components.text.AppText
+import com.crackmydroid.ui.icons.AppIcons
 import kotlinx.coroutines.launch
 
 @Composable
-fun HelpScreen(
-    padding: PaddingValues,
-    onHelp: (String) -> Unit,
-    onMenu: () -> Unit = {},
-    onNavigate: (Screen) -> Unit
-) {
+fun HelpScreen(padding: PaddingValues, onNavigate: (Screen) -> Unit) {
     HelpContent(
         padding = padding,
-        onHelp = onHelp,
-        onMenu = onMenu,
-        onNavigate = onNavigate
+        onNavigate = onNavigate,
     )
 }
 
 @Composable
-internal fun HelpContent(
-    padding: PaddingValues,
-    onHelp: (String) -> Unit,
-    onMenu: () -> Unit = {},
-    onNavigate: (Screen) -> Unit
-) {
+internal fun HelpContent(padding: PaddingValues, onNavigate: (Screen) -> Unit) {
     val strings = LocalStrings.current
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
@@ -71,21 +57,13 @@ internal fun HelpContent(
             state = listState,
             modifier = Modifier.fillMaxSize(),
             contentPadding = screenContentPadding(padding),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            item {
-                SectionHeader(
-                    title = strings.navHelp,
-                    help = strings.helpOverview,
-                    onHelp = onHelp,
-                    onMenu = onMenu
-                )
-            }
             item {
                 AppText(
                     text = strings.helpOverview,
                     style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(horizontal = 4.dp, vertical = 4.dp)
+                    modifier = Modifier.padding(horizontal = 4.dp, vertical = 4.dp),
                 )
             }
             items(helpScreens) { screen ->
@@ -93,7 +71,7 @@ internal fun HelpContent(
                     title = screen.title(strings),
                     summary = sectionSummary(strings, screen),
                     icon = screen.icon,
-                    onClick = { onNavigate(screen) }
+                    onClick = { onNavigate(screen) },
                 )
             }
         }
@@ -103,7 +81,7 @@ internal fun HelpContent(
             onClick = { scope.launch { listState.animateScrollToItem(0) } },
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(12.dp)
+                .padding(12.dp),
         )
     }
 }
@@ -115,41 +93,41 @@ private fun HelpNavigationItem(title: String, summary: String, icon: ImageVector
             .fillMaxWidth()
             .heightIn(min = 72.dp),
         onClick = onClick,
-        contentPadding = PaddingValues(16.dp)
+        contentPadding = PaddingValues(16.dp),
     ) {
         Row(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalAlignment = Alignment.Top
+            verticalAlignment = Alignment.Top,
         ) {
-            Icon(
+            AppIcon(
                 imageVector = icon,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(top = 2.dp)
+                modifier = Modifier.padding(top = 2.dp),
             )
             Column(
                 modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(6.dp)
+                verticalArrangement = Arrangement.spacedBy(6.dp),
             ) {
                 AppText(
                     text = title,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = MaterialTheme.colorScheme.onSurface,
                 )
                 AppText(
                     text = summary,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 3,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
                 )
             }
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+            AppIcon(
+                imageVector = AppIcons.AutoMirrored.Filled.ArrowForward,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(top = 2.dp)
+                modifier = Modifier.padding(top = 2.dp),
             )
         }
     }
@@ -159,19 +137,21 @@ private val helpScreens = listOf(
     Screen.Home,
     Screen.InstalledApps,
     Screen.Pentest,
+    Screen.AnalyzeApkContent,
     Screen.Permissions,
     Screen.Activities,
     Screen.Root,
     Screen.Trick,
     Screen.Log,
     Screen.Info,
-    Screen.Settings
+    Screen.Settings,
 )
 
 private fun sectionSummary(strings: Strings, screen: Screen): String = when (screen) {
     Screen.Home -> strings.helpHome
     Screen.InstalledApps -> strings.helpApk
     Screen.Pentest -> strings.helpPentest
+    Screen.AnalyzeApkContent -> strings.helpAnalyzeApkContent
     Screen.Permissions -> strings.helpPermissions
     Screen.Activities -> strings.helpActivities
     Screen.Root -> strings.helpRoot

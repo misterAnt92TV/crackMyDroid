@@ -8,7 +8,7 @@ import kotlinx.coroutines.CancellationException
 
 class IntegrityVerificationRepositoryAndroid(
     private val context: Context,
-    private val backendClient: IntegrityBackendClient
+    private val backendClient: IntegrityBackendClient,
 ) : IntegrityVerificationRepository {
     override suspend fun verify(integrityToken: String, requestBinding: String): PlayIntegrityResult {
         val endpoint = backendEndpoint() ?: return unavailable("Backend di verifica non configurato")
@@ -17,7 +17,7 @@ class IntegrityVerificationRepositoryAndroid(
                 endpoint = endpoint,
                 integrityToken = integrityToken,
                 requestBinding = requestBinding,
-                userAgent = userAgent()
+                userAgent = userAgent(),
             )
         } catch (cancellation: CancellationException) {
             throw cancellation
@@ -29,7 +29,7 @@ class IntegrityVerificationRepositoryAndroid(
     private fun backendEndpoint(): String? = runCatching {
         val info = context.packageManager.getApplicationInfo(
             context.packageName,
-            PackageManager.GET_META_DATA
+            PackageManager.GET_META_DATA,
         )
         info.metaData?.getString(BACKEND_ENDPOINT_KEY)?.trim()?.takeIf { it.startsWith("https://") }
     }.getOrNull()

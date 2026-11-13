@@ -1,13 +1,30 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="720" height="280" viewBox="0 0 720 280" role="img" data-source="shared/src/commonMain/kotlin/com/crackmydroid/shared/presentation/components/card/ExportDetailsCard.kt">
-<title>ExportDetailsCard · dark theme</title>
-<desc>Editable SVG visual reference for ExportDetailsCard, based on shared/src/commonMain/kotlin/com/crackmydroid/shared/presentation/components/card/ExportDetailsCard.kt.</desc>
-<rect x="0" y="0" width="720" height="280" fill="#101418" rx="0"/>
-<rect x="24" y="24" width="672" height="232" fill="#101418" rx="22" stroke="#3F4652" stroke-width="1"/>
-<rect x="48" y="46" width="624" height="190" fill="#101418" rx="18" stroke="#3F4652" stroke-width="1"/>
-<text x="72" y="81" fill="#E3E8F0" font-family="Inter, Roboto, sans-serif" font-size="19" font-weight="600">Export details</text>
-<text x="72" y="111" fill="#C0C7D2" font-family="Inter, Roboto, sans-serif" font-size="14" font-weight="400">PenTest report generated successfully</text>
-<text x="72" y="145" fill="#E3E8F0" font-family="Inter, Roboto, sans-serif" font-size="14" font-weight="400">File  crackmydroid-report.txt</text>
-<text x="72" y="171" fill="#A8C7FA" font-family="Inter, Roboto, sans-serif" font-size="14" font-weight="500">Format  TXT</text>
-<text x="72" y="198" fill="#C0C7D2" font-family="Inter, Roboto, sans-serif" font-size="13" font-weight="400">Path  /storage/emulated/0/Download</text>
-<text x="72" y="221" fill="#C0C7D2" font-family="Inter, Roboto, sans-serif" font-size="13" font-weight="400">12 checks run  ·  2 warnings</text>
+<svg data-source="shared/src/commonMain/kotlin/com/crackmydroid/shared/presentation/components/card/ExportDetailsCard.kt" height="280" role="img" viewBox="0 0 720 280" width="720"
+    xmlns="http://www.w3.org/2000/svg">
+    <title>ExportDetailsCard · dark theme</title>
+    <desc>Editable SVG visual reference for ExportDetailsCard, based on
+        shared/src/commonMain/kotlin/com/crackmydroid/shared/presentation/components/card/ExportDetailsCard.kt.
+    </desc>
+    <rect fill="#101418" height="280" rx="0" width="720" x="0" y="0" />
+    <rect fill="#101418" height="232" rx="22" stroke="#3F4652" stroke-width="1" width="672" x="24"
+        y="24" />
+    <rect fill="#101418" height="190" rx="18" stroke="#3F4652" stroke-width="1" width="624" x="48"
+        y="46" />
+    <text fill="#E3E8F0" font-family="Inter, Roboto, sans-serif" font-size="19" font-weight="600" x="72"
+        y="81">Export details
+    </text>
+    <text fill="#C0C7D2" font-family="Inter, Roboto, sans-serif" font-size="14" font-weight="400" x="72"
+        y="111">PenTest report generated successfully
+    </text>
+    <text fill="#E3E8F0" font-family="Inter, Roboto, sans-serif" font-size="14" font-weight="400" x="72"
+        y="145">File crackmydroid-report.txt
+    </text>
+    <text fill="#A8C7FA" font-family="Inter, Roboto, sans-serif" font-size="14" font-weight="500" x="72"
+        y="171">Format TXT
+    </text>
+    <text fill="#C0C7D2" font-family="Inter, Roboto, sans-serif" font-size="13" font-weight="400" x="72"
+        y="198">Path /storage/emulated/0/Download
+    </text>
+    <text fill="#C0C7D2" font-family="Inter, Roboto, sans-serif" font-size="13" font-weight="400" x="72"
+        y="221">12 checks run · 2 warnings
+    </text>
 </svg>

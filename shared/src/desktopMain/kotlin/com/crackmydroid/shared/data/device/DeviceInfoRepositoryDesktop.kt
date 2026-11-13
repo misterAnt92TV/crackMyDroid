@@ -13,8 +13,9 @@ import kotlinx.coroutines.withContext
 class DeviceInfoRepositoryDesktop(
     adbBridge: AdbBridge,
     sessionController: DeviceSessionController,
-    private val cache: DesktopScanCache
-) : DesktopAdbRepositorySupport(adbBridge, sessionController), DeviceInfoRepository {
+    private val cache: DesktopScanCache,
+) : DesktopAdbRepositorySupport(adbBridge, sessionController),
+    DeviceInfoRepository {
     override suspend fun getDeviceInfo(): DeviceInfo = withContext(Dispatchers.Default) {
         cache.deviceInfo?.let { return@withContext it }
 
@@ -59,7 +60,7 @@ class DeviceInfoRepositoryDesktop(
             imei = null,
             serial = device.serial,
             systemPropSource = "adb:getprop",
-            systemPropDump = propsText
+            systemPropDump = propsText,
         )
         cache.deviceInfo = info
         info

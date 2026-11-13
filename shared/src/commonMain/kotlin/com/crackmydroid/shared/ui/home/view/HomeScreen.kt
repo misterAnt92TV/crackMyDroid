@@ -24,35 +24,29 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.crackmydroid.shared.i18n.LocalStrings
-import com.crackmydroid.shared.presentation.components.AppAccordion
-import com.crackmydroid.shared.presentation.components.PackageIcon
-import com.crackmydroid.shared.presentation.components.ScrollToTopButton
-import com.crackmydroid.shared.presentation.components.SectionHeader
-import com.crackmydroid.shared.presentation.components.card.AppCard
-import com.crackmydroid.shared.presentation.components.text.AppText
+import com.crackmydroid.shared.i18n.format
+import com.crackmydroid.shared.ui.home.HomeEvent
 import com.crackmydroid.shared.ui.home.HomeUiState
 import com.crackmydroid.shared.ui.home.HomeViewModel
 import com.crackmydroid.shared.ui.home.model.HomeUiStateMapper
 import com.crackmydroid.shared.ui.screens.screenContentPadding
+import com.crackmydroid.ui.components.AppAccordion
+import com.crackmydroid.ui.components.PackageIcon
+import com.crackmydroid.ui.components.button.ScrollToTopButton
+import com.crackmydroid.ui.components.card.AppCard
+import com.crackmydroid.ui.components.text.AppText
+import com.crackmydroid.ui.theme.CrackMyDroidTheme
 import kotlinx.coroutines.launch
 
 @Composable
-fun HomeScreen(
-    viewModel: HomeViewModel,
-    padding: PaddingValues,
-    headerHelp: String,
-    onHelp: (String) -> Unit,
-    onMenu: () -> Unit = {},
-    languageCode: String = "en"
-) {
+fun HomeScreen(viewModel: HomeViewModel, padding: PaddingValues, languageCode: String = "en") {
     val state = viewModel.state.collectAsState()
     val strings = LocalStrings.current
     val uiState = remember(state.value, strings, languageCode) {
@@ -61,11 +55,8 @@ fun HomeScreen(
     HomeContent(
         state = uiState,
         padding = padding,
-        headerHelp = headerHelp,
-        onHelp = onHelp,
-        onMenu = onMenu,
-        onHideRecent = viewModel::hideFromRecent,
-        onRemove = viewModel::remove
+        onHideRecent = { viewModel.emitEvent(HomeEvent.HideFromRecent(it)) },
+        onRemove = { viewModel.emitEvent(HomeEvent.Remove(it)) },
     )
 }
 
@@ -73,15 +64,12 @@ fun HomeScreen(
 internal fun HomeContent(
     state: HomeUiState,
     padding: PaddingValues,
-    headerHelp: String,
-    onHelp: (String) -> Unit,
-    onMenu: () -> Unit = {},
     onHideRecent: (String) -> Unit = {},
     onRemove: (String) -> Unit = {},
-    initiallyExpandedHistory: Boolean = false
+    initiallyExpandedHistory: Boolean = false,
 ) {
     val strings = LocalStrings.current
-    val historyExpanded = remember { mutableStateOf(initiallyExpandedHistory) }
+    val historyExpanded = rememberSaveable { mutableStateOf(initiallyExpandedHistory) }
     val uniqueHistory = state.operationHistory
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
@@ -94,57 +82,47 @@ internal fun HomeContent(
             state = listState,
             modifier = Modifier.fillMaxSize(),
             contentPadding = screenContentPadding(padding),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(CrackMyDroidTheme.spacing.itemSpacing),
         ) {
             item {
-                SectionHeader(
-                    title = strings.navHome,
-                    help = headerHelp,
-                    onHelp = onHelp,
-                    onMenu = onMenu
-                )
-            }
-            item {
-                AppCard(modifier = Modifier.fillMaxWidth()) {
+                AppCard(
+                    modifier = Modifier.fillMaxWidth(),
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    borderColor = MaterialTheme.colorScheme.primaryContainer,
+                ) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(14.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Box(
                             modifier = Modifier
                                 .size(68.dp)
                                 .clip(CircleShape)
-                                .background(
-                                    brush = Brush.linearGradient(
-                                        listOf(
-                                            MaterialTheme.colorScheme.primaryContainer,
-                                            MaterialTheme.colorScheme.secondaryContainer
-                                        )
-                                    )
-                                ),
-                            contentAlignment = Alignment.Center
+                                .background(CrackMyDroidTheme.statusColors.successContainer),
+                            contentAlignment = Alignment.Center,
                         ) {
                             PackageIcon(
                                 packageName = "com.crackmydroid.android",
                                 size = 42.dp,
-                                backgroundColor = Color.Transparent,
-                                contentPadding = 0.dp
+                                backgroundColor = CrackMyDroidTheme.statusColors.successContainer,
+                                contentPadding = 0.dp,
                             )
                         }
                         Column(
                             modifier = Modifier.weight(1f),
-                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                            verticalArrangement = Arrangement.spacedBy(4.dp),
                         ) {
                             AppText(
                                 "CrackMyDroid",
                                 style = MaterialTheme.typography.titleLarge,
-                                fontWeight = FontWeight.SemiBold
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer,
                             )
                             AppText(
                                 strings.homeDescription,
                                 style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                color = MaterialTheme.colorScheme.onPrimaryContainer,
                             )
                         }
                     }
@@ -155,7 +133,7 @@ internal fun HomeContent(
                     strings.homeLatestOperations,
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.padding(top = 12.dp, bottom = 4.dp),
-                    fontWeight = FontWeight.SemiBold
+                    fontWeight = FontWeight.SemiBold,
                 )
             }
             if (uniqueHistory.isEmpty()) {
@@ -164,7 +142,7 @@ internal fun HomeContent(
                         AppText(
                             strings.homeLatestOperationsEmpty,
                             style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
                 }
@@ -173,7 +151,7 @@ internal fun HomeContent(
                     LastOperationItemComponent(
                         item = entry,
                         onAction = onHideRecent,
-                        actionContentDescription = strings.hideRecentOperationContentDescription
+                        actionContentDescription = strings.hideRecentOperationContentDescription,
                     )
                 }
             }
@@ -181,31 +159,34 @@ internal fun HomeContent(
                 AppText(
                     strings.homePurposeTitle,
                     style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier.padding(top = 12.dp)
+                    modifier = Modifier.padding(top = 12.dp),
                 )
             }
             item {
                 AppText(
                     strings.homePurposeBody,
                     style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(top = 8.dp)
+                    modifier = Modifier.padding(top = 8.dp),
                 )
             }
             item {
                 AppText(
                     strings.faqTitle,
                     style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(top = 12.dp)
+                    modifier = Modifier.padding(top = 12.dp),
                 )
             }
-            items(strings.faqItems) { faq ->
+            items(
+                items = strings.faqItems,
+                key = { (question, _) -> question },
+            ) { faq ->
                 val (q, a) = faq
-                val expanded = remember { mutableStateOf(false) }
+                val expanded = rememberSaveable(q) { mutableStateOf(false) }
                 AppAccordion(
                     title = q,
                     expanded = expanded.value,
                     onToggle = { expanded.value = !expanded.value },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
                 ) {
                     AppText(a, style = MaterialTheme.typography.bodySmall)
                 }
@@ -222,7 +203,7 @@ internal fun HomeContent(
                     },
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.padding(top = 12.dp, bottom = 4.dp),
-                    fontWeight = FontWeight.SemiBold
+                    fontWeight = FontWeight.SemiBold,
                 )
             }
             item {
@@ -231,13 +212,13 @@ internal fun HomeContent(
                     accessibilityLabel = strings.homeOperationHistory,
                     expanded = historyExpanded.value,
                     onToggle = { historyExpanded.value = !historyExpanded.value },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
                 ) {
                     if (uniqueHistory.isEmpty()) {
                         AppText(
                             strings.homeLatestOperationsEmpty,
                             style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     } else {
                         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -245,7 +226,7 @@ internal fun HomeContent(
                                 LastOperationItemComponent(
                                     item = entry,
                                     onAction = onRemove,
-                                    actionContentDescription = strings.removeOperationContentDescription
+                                    actionContentDescription = strings.removeOperationContentDescription,
                                 )
                             }
                         }
@@ -259,7 +240,7 @@ internal fun HomeContent(
             onClick = { scope.launch { listState.animateScrollToItem(0) } },
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(12.dp)
+                .padding(12.dp),
         )
     }
 }

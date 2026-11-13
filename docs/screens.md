@@ -6,9 +6,11 @@
 > *Nota: le schermate seguenti sono mockup ASCII illustrativi della UI Compose Multiplatform,
 > non screenshot né specifiche eseguibili. Valori e layout possono differire dal device reale.*
 >
-> Per azioni disponibili, prerequisiti e limiti consultare la [guida funzionale IT/EN](functional-guide.md)
+> Per azioni disponibili, prerequisiti e limiti consultare
+> la [guida funzionale IT/EN](functional-guide.md)
 > e il [flowchart Draw.io IT/EN](functional-flows.drawio).
-> For available actions, prerequisites and limitations, see the [English functional guide](functional-guide.md#english)
+> For available actions, prerequisites and limitations, see
+> the [English functional guide](functional-guide.md#english)
 > and the [IT/EN Draw.io flowchart](functional-flows.drawio).
 
 ---
@@ -200,8 +202,10 @@ Panoramica completa dell'hardware e software del device, con ogni riga copiabile
 
 ## 4. Root / Play Integrity
 
-La verifica passiva mostra indicatori; la prova di accesso privilegiato è un'azione esplicita separata.
-La richiesta Play Integrity attuale restituisce dettagli del token o un errore, non verdetti verificati:
+La verifica passiva mostra indicatori; la prova di accesso privilegiato è un'azione esplicita
+separata.
+La richiesta Play Integrity attuale restituisce dettagli del token o un errore, non verdetti
+verificati:
 non è implementata la verifica lato server.
 Passive checks show indicators; privileged-access probing is a separate explicit action.
 The current Play Integrity request returns token details or an error, not server-verified verdicts.

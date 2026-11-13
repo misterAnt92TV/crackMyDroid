@@ -16,6 +16,10 @@ class ScreenUiStringsTest {
             assertTrue(strings.confirmCommand.isNotBlank())
             assertTrue(strings.riskScanTitle.isNotBlank())
             assertTrue(strings.logTrimmed.isNotBlank())
+            assertTrue(strings.exitConfirmTitle.isNotBlank())
+            assertTrue(strings.exitConfirmMessage.isNotBlank())
+            assertTrue(strings.exitConfirmButton.isNotBlank())
+            assertTrue(strings.exitCancelButton.isNotBlank())
         }
     }
 
@@ -28,7 +32,7 @@ class ScreenUiStringsTest {
         assertEquals("Exit code: 1", strings.exitCode.format(1))
         assertNotEquals(
             strings.searchFilters,
-            ScreenUiStrings.from(stringsFor("en")).searchFilters
+            ScreenUiStrings.from(stringsFor("en")).searchFilters,
         )
     }
 }

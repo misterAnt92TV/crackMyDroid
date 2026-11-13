@@ -1,12 +1,12 @@
 package com.crackmydroid.shared.domain.model.scansnapshot
 
-import com.crackmydroid.shared.domain.model.activity.ActivityEntry
-import com.crackmydroid.shared.domain.model.app.AppPermissionEntry
 import com.crackmydroid.shared.domain.model.DeviceInfo
 import com.crackmydroid.shared.domain.model.InstalledAppEntry
-import com.crackmydroid.shared.domain.model.app.ManifestSecurityReport
 import com.crackmydroid.shared.domain.model.PlayIntegrityResult
 import com.crackmydroid.shared.domain.model.RootStatus
+import com.crackmydroid.shared.domain.model.activity.ActivityEntry
+import com.crackmydroid.shared.domain.model.app.AppPermissionEntry
+import com.crackmydroid.shared.domain.model.app.ManifestSecurityReport
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -27,8 +27,8 @@ data class DeviceScanSnapshot(
     val activities: SnapshotSection<List<ActivityEntry>>,
     val logs: SnapshotSection<List<String>>,
     val manifestSecurityReports: SnapshotSection<List<ManifestSecurityReport>> = SnapshotSection.skipped(
-        "Manifest security reports not generated"
-    )
+        "Manifest security reports not generated",
+    ),
 ) {
     companion object {
         const val SCHEMA_VERSION: Int = 3
@@ -43,7 +43,7 @@ data class SnapshotMetadata(
     val sourceAppPackage: String,
     val sourceAppVersion: String,
     val deviceSerial: String? = null,
-    val deviceModel: String? = null
+    val deviceModel: String? = null,
 )
 
 @Serializable
@@ -55,18 +55,13 @@ enum class SnapshotSectionState {
     FAILED,
 
     @SerialName("skipped")
-    SKIPPED
+    SKIPPED,
 }
 
 @Serializable
-data class SnapshotSection<T>(
-    val state: SnapshotSectionState,
-    val data: T? = null,
-    val error: String? = null
-) {
+data class SnapshotSection<T>(val state: SnapshotSectionState, val data: T? = null, val error: String? = null) {
     companion object {
-        fun <T> ready(data: T): SnapshotSection<T> =
-            SnapshotSection(state = SnapshotSectionState.READY, data = data)
+        fun <T> ready(data: T): SnapshotSection<T> = SnapshotSection(state = SnapshotSectionState.READY, data = data)
 
         fun <T> failed(error: String): SnapshotSection<T> =
             SnapshotSection(state = SnapshotSectionState.FAILED, error = error)

@@ -1,32 +1,42 @@
 package com.crackmydroid.shared.di
 
 import co.touchlab.kermit.Logger
-import com.crackmydroid.shared.AppLogger
-import com.crackmydroid.shared.domain.usecase.root.CheckPlayIntegrityUseCase
-import com.crackmydroid.shared.domain.usecase.root.VerifyPlayIntegrityTokenUseCase
-import com.crackmydroid.shared.domain.usecase.root.CheckRootUseCase
-import com.crackmydroid.shared.domain.usecase.trick.ExecuteShellCommandUseCase
-import com.crackmydroid.shared.domain.usecase.installedapps.ExportApkUseCase
-import com.crackmydroid.shared.domain.usecase.log.ExportLogsUseCase
+import com.crackmydroid.architecture.coroutines.AppDispatchers
+import com.crackmydroid.architecture.coroutines.DefaultAppDispatchers
+import com.crackmydroid.architecture.logging.AppLogger
 import com.crackmydroid.shared.domain.usecase.activities.GetActivitiesUseCase
+import com.crackmydroid.shared.domain.usecase.apkcontent.AnalyzeApkContentUseCase
+import com.crackmydroid.shared.domain.usecase.apkcontent.OpenAnalyzedApkArchiveUseCase
+import com.crackmydroid.shared.domain.usecase.activities.LaunchActivityUseCase
+import com.crackmydroid.shared.domain.usecase.info.BuildDeviceInfoReportUseCase
+import com.crackmydroid.shared.domain.usecase.info.GetDeviceInfoUseCase
+import com.crackmydroid.shared.domain.usecase.installedapps.ExportApkUseCase
+import com.crackmydroid.shared.domain.usecase.installedapps.ListInstalledAppsUseCase
+import com.crackmydroid.shared.domain.usecase.installedapps.ShareApkUseCase
+import com.crackmydroid.shared.domain.usecase.log.ExportLogsUseCase
+import com.crackmydroid.shared.domain.usecase.log.GetLogsUseCase
+import com.crackmydroid.shared.domain.usecase.pentest.RunPenTestChecksUseCase
+import com.crackmydroid.shared.domain.usecase.permissions.AnalyzePermissionRisksUseCase
+import com.crackmydroid.shared.domain.usecase.permissions.BuildPermissionsReportUseCase
+import com.crackmydroid.shared.domain.usecase.permissions.ListPermissionsUseCase
+import com.crackmydroid.shared.domain.usecase.reports.ExportReportUseCase
+import com.crackmydroid.shared.domain.usecase.root.CheckPlayIntegrityUseCase
+import com.crackmydroid.shared.domain.usecase.root.CheckRootUseCase
+import com.crackmydroid.shared.domain.usecase.root.VerifyPlayIntegrityTokenUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetActivityFavoritesUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetActivityPackageFavoritesUseCase
-import com.crackmydroid.shared.domain.usecase.info.GetDeviceInfoUseCase
-import com.crackmydroid.shared.domain.usecase.info.BuildDeviceInfoReportUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetExportFormatUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetFeatureHintsEnabledUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetHighContrastUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetInstalledAppFavoritesUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetIntroSeenUseCase
-import com.crackmydroid.shared.domain.usecase.log.GetLogsUseCase
+import com.crackmydroid.shared.domain.usecase.settings.GetLanguageUseCase
+import com.crackmydroid.shared.domain.usecase.settings.GetLargeTextUseCase
+import com.crackmydroid.shared.domain.usecase.settings.GetPermissionFavoritesUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetReduceMotionUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetSuggestionsEnabledUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetThemeUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetVerboseLogUseCase
-import com.crackmydroid.shared.domain.usecase.activities.LaunchActivityUseCase
-import com.crackmydroid.shared.domain.usecase.installedapps.ListInstalledAppsUseCase
-import com.crackmydroid.shared.domain.usecase.permissions.ListPermissionsUseCase
-import com.crackmydroid.shared.domain.usecase.trick.ListShellCommandsUseCase
 import com.crackmydroid.shared.domain.usecase.settings.SetActivityFavoritesUseCase
 import com.crackmydroid.shared.domain.usecase.settings.SetActivityPackageFavoritesUseCase
 import com.crackmydroid.shared.domain.usecase.settings.SetExportFormatUseCase
@@ -41,21 +51,14 @@ import com.crackmydroid.shared.domain.usecase.settings.SetReduceMotionUseCase
 import com.crackmydroid.shared.domain.usecase.settings.SetSuggestionsEnabledUseCase
 import com.crackmydroid.shared.domain.usecase.settings.SetThemeUseCase
 import com.crackmydroid.shared.domain.usecase.settings.SetVerboseLogUseCase
-import com.crackmydroid.shared.domain.usecase.installedapps.ShareApkUseCase
-import com.crackmydroid.shared.domain.usecase.pentest.RunPenTestChecksUseCase
-import com.crackmydroid.shared.domain.usecase.permissions.AnalyzePermissionRisksUseCase
-import com.crackmydroid.shared.domain.usecase.permissions.BuildPermissionsReportUseCase
-import com.crackmydroid.shared.domain.usecase.reports.ExportReportUseCase
-import com.crackmydroid.shared.domain.usecase.settings.GetLanguageUseCase
-import com.crackmydroid.shared.domain.usecase.settings.GetLargeTextUseCase
-import com.crackmydroid.shared.domain.usecase.settings.GetPermissionFavoritesUseCase
-import com.crackmydroid.shared.util.AppDispatchers
-import com.crackmydroid.shared.util.DefaultAppDispatchers
-import com.crackmydroid.shared.ui.activities.ActivityListViewModel
-import com.crackmydroid.shared.ui.info.InfoViewModel
+import com.crackmydroid.shared.domain.usecase.trick.ExecuteShellCommandUseCase
+import com.crackmydroid.shared.domain.usecase.trick.ListShellCommandsUseCase
 import com.crackmydroid.shared.ui.AppPresentationDependencies
-import com.crackmydroid.shared.ui.appshell.AppShellViewModel
+import com.crackmydroid.shared.ui.activities.ActivityListViewModel
+import com.crackmydroid.shared.ui.apkcontent.AnalyzeApkContentViewModel
+import com.crackmydroid.shared.ui.navigation.AppNavigationViewModel
 import com.crackmydroid.shared.ui.home.HomeViewModel
+import com.crackmydroid.shared.ui.info.InfoViewModel
 import com.crackmydroid.shared.ui.installedapps.InstalledAppsViewModel
 import com.crackmydroid.shared.ui.logs.LogViewModel
 import com.crackmydroid.shared.ui.pentest.PenTestingViewModel
@@ -123,15 +126,19 @@ fun commonModule() = module {
     factory { RunPenTestChecksUseCase(get(), dispatchers = get(), logger = get()) }
     factory { ExportReportUseCase(get(), get(), logger = get()) }
     factory { ListInstalledAppsUseCase(get(), logger = get()) }
+    factory { AnalyzeApkContentUseCase(get(), logger = get()) }
+    factory { OpenAnalyzedApkArchiveUseCase(get(), logger = get()) }
     factory { ExportApkUseCase(get(), logger = get()) }
     factory { ShareApkUseCase(get(), logger = get()) }
 }
 
 fun presentationModule() = module {
-    factory { ActivityListViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get()) }
-    factory { HomeViewModel(get()) }
+    factory { ActivityListViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
+    factory { HomeViewModel(get(), get()) }
     factory {
         val activity = get<ActivityListViewModel>()
+        val home = get<HomeViewModel>()
+        val root = get<RootViewModel>()
         val info = get<InfoViewModel>()
         val trick = get<TrickViewModel>()
         val settings = get<SettingsViewModel>()
@@ -139,11 +146,14 @@ fun presentationModule() = module {
         val permissions = get<PermissionsViewModel>()
         val installedApps = get<InstalledAppsViewModel>()
         val penTesting = get<PenTestingViewModel>()
+        val apkContent = get<AnalyzeApkContentViewModel>()
         AppPresentationDependencies(
-            shell = AppShellViewModel(
-                getIntroSeen = get(),
-                setIntroSeen = get(),
+            navigation = AppNavigationViewModel(
+                getIntroSeenUseCase = get(),
+                setIntroSeenUseCase = get(),
                 activity = activity,
+                home = home,
+                root = root,
                 info = info,
                 trick = trick,
                 settings = settings,
@@ -151,23 +161,26 @@ fun presentationModule() = module {
                 permissions = permissions,
                 installedApps = installedApps,
                 penTesting = penTesting,
-                getVerbose = get()
+                apkContent = apkContent,
+                getVerboseLogUseCase = get(),
+                dispatchers = get(),
             ),
             activity = activity,
-            home = get(),
-            root = get(),
+            home = home,
+            root = root,
             info = info,
             trick = trick,
             settings = settings,
             logs = logs,
             permissions = permissions,
             installedApps = installedApps,
-            penTesting = penTesting
+            penTesting = penTesting,
+            apkContent = apkContent,
         )
     }
-    factory { RootViewModel(get(), get(), get()) }
-    factory { InfoViewModel(get(), get(), get(), get()) }
-    factory { TrickViewModel(get(), get()) }
+    factory { RootViewModel(get(), get(), get(), get()) }
+    factory { InfoViewModel(get(), get(), get(), get(), get()) }
+    factory { TrickViewModel(get(), get(), get()) }
     factory {
         SettingsViewModel(
             get(), get(), // theme
@@ -178,12 +191,14 @@ fun presentationModule() = module {
             get(), get(), // large text
             get(), get(), // suggestions enabled
             get(), get(), // feature hints enabled
-            get(), get()  // intro seen
-            , get(), get() // language
+            get(), get(), // intro seen
+            get(), get(), // language
+            get(), // dispatchers
         )
     }
     factory { LogViewModel(get(), get(), get()) }
     factory { PermissionsViewModel(get(), get(), get(), get(), get(), get(), get()) }
-    factory { InstalledAppsViewModel(get(), get(), get(), get(), get(), get(), get()) }
-    factory { PenTestingViewModel(get(), get(), get(), get(), get(), get()) }
+    factory { InstalledAppsViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
+    factory { PenTestingViewModel(get(), get(), get(), get(), get(), get(), get()) }
+    factory { AnalyzeApkContentViewModel(get(), get(), get(), get(), get()) }
 }

@@ -1,17 +1,17 @@
 package com.crackmydroid.shared.data.device
 
 import com.crackmydroid.shared.data.DesktopScanCache
-import com.crackmydroid.shared.domain.model.app.AppLanguage
-import com.crackmydroid.shared.domain.model.app.AppTheme
 import com.crackmydroid.shared.domain.model.ConnectedDevice
 import com.crackmydroid.shared.domain.model.ExportFormat
+import com.crackmydroid.shared.domain.model.app.AppLanguage
+import com.crackmydroid.shared.domain.model.app.AppTheme
 import com.crackmydroid.shared.domain.repository.AdbBridge
 import com.crackmydroid.shared.domain.repository.SettingsRepository
-import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import kotlinx.coroutines.test.runTest
 
 class DeviceSessionControllerDesktopTest {
     @Test
@@ -21,15 +21,15 @@ class DeviceSessionControllerDesktopTest {
                 com.crackmydroid.shared.domain.model.InstalledAppEntry(
                     "Pkg",
                     "pkg",
-                    "/tmp/pkg.apk"
-                )
+                    "/tmp/pkg.apk",
+                ),
             )
         }
         val settings = FakeSettingsRepository()
         val bridge = FakeAdbBridge(
             devices = listOf(
-                ConnectedDevice(serial = "SERIAL1", state = "device", model = "Pixel 8")
-            )
+                ConnectedDevice(serial = "SERIAL1", state = "device", model = "Pixel 8"),
+            ),
         )
         val controller = DeviceSessionControllerDesktop(bridge, settings, cache)
 
@@ -48,8 +48,8 @@ class DeviceSessionControllerDesktopTest {
         val settings = FakeSettingsRepository()
         val bridge = FakeAdbBridge(
             devices = listOf(
-                ConnectedDevice(serial = "SERIAL2", state = "device", model = "Galaxy")
-            )
+                ConnectedDevice(serial = "SERIAL2", state = "device", model = "Galaxy"),
+            ),
         )
         val controller = DeviceSessionControllerDesktop(bridge, settings, cache)
 
@@ -64,34 +64,28 @@ class DeviceSessionControllerDesktopTest {
     }
 }
 
-private class FakeAdbBridge(
-    val devices: List<ConnectedDevice>
-) : AdbBridge {
+private class FakeAdbBridge(val devices: List<ConnectedDevice>) : AdbBridge {
     override suspend fun resolveBinary(configuredPath: String?): Result<String> =
         Result.success(configuredPath ?: "/usr/bin/adb")
 
-    override suspend fun listDevices(configuredPath: String?): Result<List<ConnectedDevice>> =
-        Result.success(devices)
+    override suspend fun listDevices(configuredPath: String?): Result<List<ConnectedDevice>> = Result.success(devices)
 
     override suspend fun shell(
         serial: String,
         command: String,
         configuredPath: String?,
-        asRoot: Boolean
+        asRoot: Boolean,
     ): Result<String> = Result.success("")
 
     override suspend fun pull(
         serial: String,
         remotePath: String,
         localPath: String,
-        configuredPath: String?
+        configuredPath: String?,
     ): Result<String> = Result.success(localPath)
 
-    override suspend fun logcat(
-        serial: String,
-        configuredPath: String?,
-        lines: Int
-    ): Result<List<String>> = Result.success(emptyList())
+    override suspend fun logcat(serial: String, configuredPath: String?, lines: Int): Result<List<String>> =
+        Result.success(emptyList())
 }
 
 private class FakeSettingsRepository : SettingsRepository {

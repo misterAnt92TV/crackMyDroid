@@ -1,16 +1,16 @@
 package com.crackmydroid.shared.data
 
-import com.crackmydroid.shared.domain.model.activity.ActivityEntry
-import com.crackmydroid.shared.domain.model.app.AppComponent
-import com.crackmydroid.shared.domain.model.app.AppLanguage
-import com.crackmydroid.shared.domain.model.app.AppTheme
 import com.crackmydroid.shared.domain.model.DeviceInfo
 import com.crackmydroid.shared.domain.model.ExportFormat
 import com.crackmydroid.shared.domain.model.InstalledAppEntry
-import com.crackmydroid.shared.domain.model.app.ManifestSecurityReport
 import com.crackmydroid.shared.domain.model.RootStatus
-import com.crackmydroid.shared.domain.model.root.RootCheckMode
+import com.crackmydroid.shared.domain.model.activity.ActivityEntry
+import com.crackmydroid.shared.domain.model.app.AppComponent
+import com.crackmydroid.shared.domain.model.app.AppLanguage
 import com.crackmydroid.shared.domain.model.app.AppPermissionEntry
+import com.crackmydroid.shared.domain.model.app.AppTheme
+import com.crackmydroid.shared.domain.model.app.ManifestSecurityReport
+import com.crackmydroid.shared.domain.model.root.RootCheckMode
 import com.crackmydroid.shared.domain.model.shell.ShellCommand
 import com.crackmydroid.shared.domain.model.shell.ShellCommandResult
 import com.crackmydroid.shared.domain.repository.ActivityRepository
@@ -18,16 +18,15 @@ import com.crackmydroid.shared.domain.repository.CacheMaintenance
 import com.crackmydroid.shared.domain.repository.DeviceInfoRepository
 import com.crackmydroid.shared.domain.repository.InstalledAppsRepository
 import com.crackmydroid.shared.domain.repository.IntegrityVerificationRepository
-import com.crackmydroid.shared.domain.repository.log.LogRepository
 import com.crackmydroid.shared.domain.repository.PermissionsRepository
 import com.crackmydroid.shared.domain.repository.RootCheckRepository
 import com.crackmydroid.shared.domain.repository.SettingsRepository
 import com.crackmydroid.shared.domain.repository.ShellCommandRepository
+import com.crackmydroid.shared.domain.repository.log.LogRepository
 
 class ActivityRepositoryIos : ActivityRepository {
     override suspend fun getActivities(): List<ActivityEntry> = emptyList()
-    override suspend fun getActivitiesPaginated(offset: Int, limit: Int): List<ActivityEntry> =
-        emptyList()
+    override suspend fun getActivitiesPaginated(offset: Int, limit: Int): List<ActivityEntry> = emptyList()
 
     override suspend fun getComponents(): List<AppComponent> = emptyList()
     override suspend fun getComponentsCached(): List<AppComponent> = emptyList()
@@ -35,9 +34,8 @@ class ActivityRepositoryIos : ActivityRepository {
         entry: ActivityEntry,
         action: String?,
         dataUri: String?,
-        mimeType: String?
-    ): Result<Unit> =
-        Result.failure(UnsupportedOperationException("Non supportato su iOS"))
+        mimeType: String?,
+    ): Result<Unit> = Result.failure(UnsupportedOperationException("Non supportato su iOS"))
 }
 
 class RootCheckRepositoryIos : RootCheckRepository {
@@ -46,14 +44,14 @@ class RootCheckRepositoryIos : RootCheckRepository {
         com.crackmydroid.shared.domain.model.PlayIntegrityResult(
             basicIntegrity = null,
             deviceIntegrity = null,
-            details = "Play Integrity non supportato su iOS"
+            details = "Play Integrity non supportato su iOS",
         )
 }
 
 class IntegrityVerificationRepositoryIos : IntegrityVerificationRepository {
     override suspend fun verify(integrityToken: String, requestBinding: String) =
         com.crackmydroid.shared.domain.model.PlayIntegrityResult(
-            details = "Play Integrity non supportato su iOS"
+            details = "Play Integrity non supportato su iOS",
         )
 }
 
@@ -83,7 +81,7 @@ class DeviceInfoRepositoryIos : DeviceInfoRepository {
         developerOptions = false,
         appDebuggable = false,
         imei = null,
-        serial = null
+        serial = null,
     )
 }
 
@@ -175,19 +173,14 @@ class LogRepositoryIos : LogRepository {
 }
 
 class PermissionsRepositoryIos : PermissionsRepository {
-    override suspend fun listAppPermissions(): List<AppPermissionEntry> =
-        emptyList()
+    override suspend fun listAppPermissions(): List<AppPermissionEntry> = emptyList()
 
-    override suspend fun listAppPermissionsPaginated(
-        offset: Int,
-        limit: Int
-    ): List<AppPermissionEntry> = emptyList()
+    override suspend fun listAppPermissionsPaginated(offset: Int, limit: Int): List<AppPermissionEntry> = emptyList()
 }
 
 class InstalledAppsRepositoryIos : InstalledAppsRepository {
     override suspend fun listInstalled(): List<InstalledAppEntry> = emptyList()
-    override suspend fun listInstalledPaginated(offset: Int, limit: Int): List<InstalledAppEntry> =
-        emptyList()
+    override suspend fun listInstalledPaginated(offset: Int, limit: Int): List<InstalledAppEntry> = emptyList()
 
     override suspend fun analyzeManifestSecurity(): List<ManifestSecurityReport> = emptyList()
     override suspend fun analyzeManifestSecurityCached(): List<ManifestSecurityReport> = emptyList()
@@ -205,4 +198,3 @@ class CacheMaintenanceRepositoryIos : CacheMaintenance {
     override suspend fun invalidateInstalledAppsCache() {}
     override suspend fun invalidateManifestSecurityCache() {}
 }
-

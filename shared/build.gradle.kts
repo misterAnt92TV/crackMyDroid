@@ -26,6 +26,8 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
+            api(project(":architectureModule"))
+            implementation(project(":uiModule"))
             implementation(libs.compose.runtime)
             implementation(libs.compose.foundation)
             implementation(libs.compose.material3)
@@ -46,11 +48,13 @@ kotlin {
         commonTest.dependencies {
             implementation(kotlin("test"))
             implementation(libs.coroutines.test)
+            implementation(libs.turbine)
             implementation(libs.ktor.client.mock)
         }
         val jvmCommonTest by creating {
             dependsOn(commonTest.get())
             dependencies {
+                implementation(project(":architectureTestSupport"))
                 implementation(libs.mockk)
                 implementation(libs.sqldelight.sqlite)
             }

@@ -8,6 +8,7 @@ import com.crackmydroid.shared.domain.model.PermissionRiskFinding
 import com.crackmydroid.shared.domain.model.PermissionRiskLevel
 import com.crackmydroid.shared.domain.model.ReportLabel
 import com.crackmydroid.shared.domain.model.activity.ActivityIntentRiskLevel
+import com.crackmydroid.shared.i18n.usecase.UseCaseTexts
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -26,7 +27,7 @@ class UseCaseTextsTest {
                     key = "android.permission.CAMERA",
                     kind = kind,
                     level = PermissionRiskLevel.High,
-                    isPattern = kind.name.endsWith("_PATTERN")
+                    isPattern = kind.name.endsWith("_PATTERN"),
                 )
                 assertFalse(texts.permissionTitle(finding).isBlank(), "$language $kind title")
                 assertFalse(texts.permissionReason(finding).isBlank(), "$language $kind reason")
@@ -53,7 +54,7 @@ class UseCaseTextsTest {
         assertEquals("en", UseCaseTexts("pt-BR").languageCode)
         assertEquals(
             UseCaseTexts("en").permissionReason(finding(PermissionFindingKind.SENSITIVE_DATA_ACCESS)),
-            UseCaseTexts("pt").permissionReason(finding(PermissionFindingKind.SENSITIVE_DATA_ACCESS))
+            UseCaseTexts("pt").permissionReason(finding(PermissionFindingKind.SENSITIVE_DATA_ACCESS)),
         )
     }
 
@@ -64,7 +65,7 @@ class UseCaseTextsTest {
             assertFalse(
                 english == UseCaseTexts(language)
                     .permissionReason(finding(PermissionFindingKind.SENSITIVE_DATA_ACCESS)),
-                "$language must use a real translation"
+                "$language must use a real translation",
             )
         }
     }
@@ -79,22 +80,22 @@ class UseCaseTextsTest {
                 PermissionRiskFinding(
                     key = permission,
                     kind = PermissionFindingKind.OVERLAY_ACCESS,
-                    level = PermissionRiskLevel.Critical
-                )
-            )
+                    level = PermissionRiskLevel.Critical,
+                ),
+            ),
         )
         val manifest = texts.penTest(
             PenTestMessage.ManifestSurface(
                 permissions = listOf(permission),
-                activities = listOf(PenTestActivityRisk("CheckoutActivity", ActivityIntentRiskLevel.High))
-            )
+                activities = listOf(PenTestActivityRisk("CheckoutActivity", ActivityIntentRiskLevel.High)),
+            ),
         )
         assertTrue(manifest.contains(permission))
         assertTrue(manifest.contains("CheckoutActivity"))
         assertTrue(manifest.contains(texts.activityRiskLevel(ActivityIntentRiskLevel.High)))
 
         assertTrue(
-            texts.penTest(PenTestMessage.NetworkSurface(listOf("READ_SMS"))).contains("INTERNET + READ_SMS")
+            texts.penTest(PenTestMessage.NetworkSurface(listOf("READ_SMS"))).contains("INTERNET + READ_SMS"),
         )
     }
 
@@ -107,7 +108,7 @@ class UseCaseTextsTest {
         assertEquals("Oui", UseCaseTexts("fr").boolean(true))
         languages.forEach { language ->
             val summary = UseCaseTexts(language).penTest(
-                PenTestMessage.PermissionRiskSummary(9, 1, 2, 3)
+                PenTestMessage.PermissionRiskSummary(9, 1, 2, 3),
             )
             assertTrue(summary.contains("9"))
             assertTrue(summary.contains("1"))
@@ -119,7 +120,7 @@ class UseCaseTextsTest {
     private fun finding(kind: PermissionFindingKind) = PermissionRiskFinding(
         key = "android.permission.CAMERA",
         kind = kind,
-        level = PermissionRiskLevel.High
+        level = PermissionRiskLevel.High,
     )
 
     private fun allPenTestMessages(): List<PenTestMessage> = listOf(
@@ -128,7 +129,7 @@ class UseCaseTextsTest {
         PenTestMessage.MissingPermissionData(PenTestSurface.NETWORK),
         PenTestMessage.ManifestSurface(
             permissions = listOf("SYSTEM_ALERT_WINDOW"),
-            activities = listOf(PenTestActivityRisk("MainActivity", ActivityIntentRiskLevel.Critical))
+            activities = listOf(PenTestActivityRisk("MainActivity", ActivityIntentRiskLevel.Critical)),
         ),
         PenTestMessage.RootUnavailable,
         PenTestMessage.FileExposure(listOf("MANAGE_EXTERNAL_STORAGE")),
@@ -137,7 +138,7 @@ class UseCaseTextsTest {
         PenTestMessage.InstallPackagesDependencyReview,
         PenTestMessage.SecurityAnomaly(5, 1, 0, 0),
         PenTestMessage.CriticalActivityEntryPoints(
-            listOf(PenTestActivityRisk("MainActivity", ActivityIntentRiskLevel.Critical))
-        )
+            listOf(PenTestActivityRisk("MainActivity", ActivityIntentRiskLevel.Critical)),
+        ),
     )
 }

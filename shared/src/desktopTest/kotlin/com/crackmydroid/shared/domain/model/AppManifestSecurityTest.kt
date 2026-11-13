@@ -16,7 +16,7 @@ class AppManifestSecurityTest {
             appLabel = "TestApp",
             packageName = "com.test",
             debuggable = true,
-            allowBackup = false
+            allowBackup = false,
         )
 
         val report = ManifestSecurityAnalyzer.analyze(info)
@@ -32,7 +32,7 @@ class AppManifestSecurityTest {
             packageName = "com.test",
             debuggable = false,
             allowBackup = true,
-            hasCustomBackupAgent = false
+            hasCustomBackupAgent = false,
         )
 
         val report = ManifestSecurityAnalyzer.analyze(info)
@@ -53,9 +53,9 @@ class AppManifestSecurityTest {
                     type = AppComponentType.PROVIDER,
                     name = "com.test.MyProvider",
                     exported = true,
-                    permission = null
-                )
-            )
+                    permission = null,
+                ),
+            ),
         )
 
         val report = ManifestSecurityAnalyzer.analyze(info)
@@ -76,9 +76,9 @@ class AppManifestSecurityTest {
                     type = AppComponentType.SERVICE,
                     name = "com.test.MyService",
                     exported = true,
-                    permission = "android.permission.INTERNET"
-                )
-            )
+                    permission = "android.permission.INTERNET",
+                ),
+            ),
         )
 
         val report = ManifestSecurityAnalyzer.analyze(info)
@@ -103,7 +103,7 @@ class AppManifestSecurityTest {
             allowBackup = true,
             hasCustomBackupAgent = false,
             usesCleartextTraffic = true,
-            debugCertSigned = true
+            debugCertSigned = true,
         )
 
         val report = ManifestSecurityAnalyzer.analyze(info)

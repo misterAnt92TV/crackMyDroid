@@ -1,5 +1,4 @@
 package com.crackmydroid.shared.ui.settings.view
-
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,16 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Accessibility
-import androidx.compose.material.icons.filled.BugReport
-import androidx.compose.material.icons.filled.ColorLens
-import androidx.compose.material.icons.filled.Description
-import androidx.compose.material.icons.filled.History
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Link
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.runtime.Composable
@@ -42,63 +31,46 @@ import com.crackmydroid.shared.domain.model.app.AppLanguage
 import com.crackmydroid.shared.domain.model.app.AppTheme
 import com.crackmydroid.shared.i18n.LocalStrings
 import com.crackmydroid.shared.i18n.ScreenUiStrings
-import com.crackmydroid.shared.presentation.components.AppButton
-import com.crackmydroid.shared.presentation.components.ButtonVariant
-import com.crackmydroid.shared.presentation.components.ErrorDialogComponent
-import com.crackmydroid.shared.presentation.components.LocalAccessibilityPrefs
-import com.crackmydroid.shared.presentation.components.ScrollToTopButton
-import com.crackmydroid.shared.presentation.components.SectionHeader
-import com.crackmydroid.shared.presentation.components.card.CardBlock
-import com.crackmydroid.shared.presentation.components.text.AppText
-import com.crackmydroid.shared.ui.settings.model.SettingsActions
-import com.crackmydroid.shared.ui.settings.model.SettingsAppInfo
+import com.crackmydroid.shared.i18n.format
+import com.crackmydroid.shared.ui.settings.SettingsEvent
 import com.crackmydroid.shared.ui.settings.SettingsState
 import com.crackmydroid.shared.ui.settings.SettingsViewModel
-import com.crackmydroid.shared.util.appPackageName
-import com.crackmydroid.shared.util.appRequestedPermissions
-import com.crackmydroid.shared.util.appSdkInfo
-import com.crackmydroid.shared.util.appVersionName
+import com.crackmydroid.shared.ui.settings.model.SettingsActions
+import com.crackmydroid.shared.ui.settings.model.SettingsAppInfo
+import com.crackmydroid.ui.components.LocalAccessibilityPrefs
+import com.crackmydroid.ui.components.button.AppButton
+import com.crackmydroid.ui.components.button.ButtonVariant
+import com.crackmydroid.ui.components.button.ScrollToTopButton
+import com.crackmydroid.ui.components.card.CardBlock
+import com.crackmydroid.ui.components.dialog.ErrorDialogComponent
+import com.crackmydroid.ui.components.text.AppText
+import com.crackmydroid.ui.icons.AppIcons
+import com.crackmydroid.ui.theme.CrackMyDroidTheme
 import kotlinx.coroutines.launch
 
 @Composable
-fun SettingsScreen(
-    viewModel: SettingsViewModel,
-    padding: PaddingValues,
-    headerHelp: String,
-    onHelp: (String) -> Unit,
-    onMenu: () -> Unit = {}
-) {
+fun SettingsScreen(viewModel: SettingsViewModel, padding: PaddingValues, appInfo: SettingsAppInfo) {
     val state by viewModel.state.collectAsState()
     val uriHandler = LocalUriHandler.current
-    val sdkInfo = appSdkInfo()
     SettingsContent(
         state = state,
         padding = padding,
-        headerHelp = headerHelp,
-        appInfo = SettingsAppInfo(
-            versionName = appVersionName(),
-            packageName = appPackageName(),
-            minSdk = sdkInfo?.minSdk,
-            targetSdk = sdkInfo?.targetSdk,
-            requestedPermissions = appRequestedPermissions()
-        ),
+        appInfo = appInfo,
         actions = SettingsActions(
-            onSelectTheme = viewModel::selectTheme,
-            onSelectLanguage = viewModel::selectLanguage,
-            onSetSuggestionsEnabled = viewModel::setSuggestionsEnabled,
-            onClearSuggestions = viewModel::clearSuggestions,
-            onSetFeatureHintsEnabled = viewModel::setFeatureHintsEnabled,
-            onSetShowIntroOnLaunch = viewModel::setShowIntroOnLaunch,
-            onToggleVerbose = viewModel::toggleVerbose,
-            onSetExportFormat = viewModel::setExportFormat,
-            onSetHighContrast = viewModel::setHighContrast,
-            onSetReduceMotion = viewModel::setReduceMotion,
-            onSetLargeText = viewModel::setLargeText,
+            onSelectTheme = { viewModel.emitEvent(SettingsEvent.ThemeSelected(it)) },
+            onSelectLanguage = { viewModel.emitEvent(SettingsEvent.LanguageSelected(it)) },
+            onSetSuggestionsEnabled = { viewModel.emitEvent(SettingsEvent.SuggestionsEnabledChanged(it)) },
+            onClearSuggestions = { viewModel.emitEvent(SettingsEvent.SuggestionsCleared()) },
+            onSetFeatureHintsEnabled = { viewModel.emitEvent(SettingsEvent.FeatureHintsEnabledChanged(it)) },
+            onSetShowIntroOnLaunch = { viewModel.emitEvent(SettingsEvent.IntroOnLaunchChanged(it)) },
+            onToggleVerbose = { viewModel.emitEvent(SettingsEvent.VerboseLoggingChanged(it)) },
+            onSetExportFormat = { viewModel.emitEvent(SettingsEvent.ExportFormatSelected(it)) },
+            onSetHighContrast = { viewModel.emitEvent(SettingsEvent.HighContrastChanged(it)) },
+            onSetReduceMotion = { viewModel.emitEvent(SettingsEvent.ReduceMotionChanged(it)) },
+            onSetLargeText = { viewModel.emitEvent(SettingsEvent.LargeTextChanged(it)) },
             onOpenUri = uriHandler::openUri,
-            onHelp = onHelp,
-            onMenu = onMenu,
-            onClearError = viewModel::clearError
-        )
+            onClearError = { viewModel.emitEvent(SettingsEvent.ErrorDismissed()) },
+        ),
     )
 }
 
@@ -106,9 +78,8 @@ fun SettingsScreen(
 internal fun SettingsContent(
     state: SettingsState,
     padding: PaddingValues,
-    headerHelp: String,
     appInfo: SettingsAppInfo,
-    actions: SettingsActions
+    actions: SettingsActions,
 ) {
     val strings = LocalStrings.current
     val screenStrings = ScreenUiStrings.from(strings)
@@ -120,42 +91,39 @@ internal fun SettingsContent(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(padding)
+            .padding(padding),
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .align(Alignment.TopCenter)
                 .widthIn(max = 840.dp)
-                .padding(16.dp)
+                .padding(
+                    horizontal = CrackMyDroidTheme.spacing.screenHorizontal,
+                    vertical = CrackMyDroidTheme.spacing.screenVertical,
+                )
                 .verticalScroll(scrollState),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(CrackMyDroidTheme.spacing.itemSpacing),
         ) {
-            SectionHeader(
-                title = strings.navSettings,
-                help = headerHelp,
-                onHelp = actions.onHelp,
-                onMenu = actions.onMenu
-            )
-            CardBlock(strings.themeTitle, leadingIcon = Icons.Filled.ColorLens) {
+            CardBlock(strings.themeTitle, leadingIcon = AppIcons.Filled.ColorLens) {
                 ThemeRow(strings.light, AppTheme.LIGHT, state.theme) {
                     actions.onSelectTheme(
-                        AppTheme.LIGHT
+                        AppTheme.LIGHT,
                     )
                 }
                 ThemeRow(
                     strings.dark,
                     AppTheme.DARK,
-                    state.theme
+                    state.theme,
                 ) { actions.onSelectTheme(AppTheme.DARK) }
                 ThemeRow(strings.system, AppTheme.SYSTEM, state.theme) {
                     actions.onSelectTheme(
-                        AppTheme.SYSTEM
+                        AppTheme.SYSTEM,
                     )
                 }
             }
 
-            CardBlock(strings.languageTitle, leadingIcon = Icons.Filled.Settings) {
+            CardBlock(strings.languageTitle, leadingIcon = AppIcons.Filled.Settings) {
                 AppText(strings.languageDescription, style = MaterialTheme.typography.bodySmall)
                 AppLanguage.entries.forEach { language ->
                     val label = when (language) {
@@ -170,113 +138,114 @@ internal fun SettingsContent(
                         text = if (state.language == language) screenStrings.selected.format(label) else label,
                         onClick = { actions.onSelectLanguage(language) },
                         modifier = Modifier.padding(vertical = 4.dp),
-                        variant = ButtonVariant.Tonal
+                        variant = if (state.language == language) ButtonVariant.Primary else ButtonVariant.Secondary,
+                        fullWidth = false,
                     )
                 }
             }
 
-            CardBlock(strings.settingsSearchSuggestionsTitle, leadingIcon = Icons.Filled.History) {
+            CardBlock(strings.settingsSearchSuggestionsTitle, leadingIcon = AppIcons.Filled.History) {
                 SwitchRow(
                     label = strings.settingsSearchSuggestionsEnabled,
                     checked = state.suggestionsEnabled,
-                    onCheckedChange = actions.onSetSuggestionsEnabled
+                    onCheckedChange = actions.onSetSuggestionsEnabled,
                 )
                 AppText(
                     strings.settingsSearchSuggestionsDescription,
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 AppButton(
                     text = strings.settingsClearSuggestions,
                     onClick = actions.onClearSuggestions,
                     variant = ButtonVariant.Tonal,
                     modifier = Modifier.padding(top = 8.dp),
-                    leadingIcon = Icons.Filled.History
+                    leadingIcon = AppIcons.Filled.History,
                 )
             }
 
-            CardBlock(strings.settingsSectionHintsTitle, leadingIcon = Icons.Filled.Settings) {
+            CardBlock(strings.settingsSectionHintsTitle, leadingIcon = AppIcons.Filled.Settings) {
                 SwitchRow(
                     label = strings.settingsSectionHintsEnabled,
                     checked = state.featureHintsEnabled,
-                    onCheckedChange = actions.onSetFeatureHintsEnabled
+                    onCheckedChange = actions.onSetFeatureHintsEnabled,
                 )
                 AppText(
                     strings.settingsSectionHintsDescription,
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
 
-            CardBlock(strings.settingsOnboardingTitle, leadingIcon = Icons.Filled.Info) {
+            CardBlock(strings.settingsOnboardingTitle, leadingIcon = AppIcons.Filled.Info) {
                 SwitchRow(
                     label = strings.settingsShowIntroOnLaunch,
                     checked = state.showIntroOnLaunch,
-                    onCheckedChange = actions.onSetShowIntroOnLaunch
+                    onCheckedChange = actions.onSetShowIntroOnLaunch,
                 )
                 AppText(
                     strings.settingsOnboardingDescription,
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
 
-            CardBlock(strings.verboseTitle, leadingIcon = Icons.Filled.BugReport) {
+            CardBlock(strings.verboseTitle, leadingIcon = AppIcons.Filled.BugReport) {
                 SwitchRow(
                     label = strings.verboseTitle,
                     checked = state.verbose,
-                    onCheckedChange = actions.onToggleVerbose
+                    onCheckedChange = actions.onToggleVerbose,
                 )
                 AppText(
                     strings.verboseSubtitle,
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
 
-            CardBlock(strings.settingsExportFormatTitle, leadingIcon = Icons.Filled.Description) {
+            CardBlock(strings.settingsExportFormatTitle, leadingIcon = AppIcons.Filled.Description) {
                 ExportFormatRow(
                     label = strings.settingsExportText,
-                    selected = state.exportFormat == ExportFormat.TXT
+                    selected = state.exportFormat == ExportFormat.TXT,
                 ) { actions.onSetExportFormat(ExportFormat.TXT) }
                 ExportFormatRow(
                     label = strings.settingsExportJson,
-                    selected = state.exportFormat == ExportFormat.JSON
+                    selected = state.exportFormat == ExportFormat.JSON,
                 ) { actions.onSetExportFormat(ExportFormat.JSON) }
                 ExportFormatRow(
                     label = strings.settingsExportPdf,
-                    selected = state.exportFormat == ExportFormat.PDF
+                    selected = state.exportFormat == ExportFormat.PDF,
                 ) { actions.onSetExportFormat(ExportFormat.PDF) }
                 AppText(
                     strings.settingsExportDescription,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(top = 6.dp)
+                    modifier = Modifier.padding(top = 6.dp),
                 )
             }
 
-            CardBlock(strings.accessibilityTitle, leadingIcon = Icons.Filled.Accessibility) {
+            CardBlock(strings.accessibilityTitle, leadingIcon = AppIcons.Filled.Accessibility) {
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     AppText(strings.accessibilityDesc, style = MaterialTheme.typography.bodySmall)
                     SwitchRow(
                         label = strings.accessibilityContrast,
                         checked = state.highContrast,
-                        onCheckedChange = actions.onSetHighContrast
+                        onCheckedChange = actions.onSetHighContrast,
                     )
                     SwitchRow(
                         label = strings.accessibilityReduceMotion,
                         checked = state.reduceMotion,
-                        onCheckedChange = actions.onSetReduceMotion
+                        onCheckedChange = actions.onSetReduceMotion,
                     )
                     SwitchRow(
                         label = strings.accessibilityLargeText,
                         checked = state.largeText,
-                        onCheckedChange = actions.onSetLargeText
+                        onCheckedChange = actions.onSetLargeText,
                     )
                 }
             }
 
-            CardBlock(strings.thirdPartyTitle, leadingIcon = Icons.Filled.Link) {
+            CardBlock(strings.thirdPartyTitle, leadingIcon = AppIcons.Filled.Link) {
                 AppText(strings.thirdPartyIntro, style = MaterialTheme.typography.bodySmall)
                 state.thirdPartyLibraries.forEach { library ->
                     AppText(
@@ -285,28 +254,28 @@ internal fun SettingsContent(
                         color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier
                             .padding(vertical = 2.dp)
-                            .clickable { actions.onOpenUri(library.url) }
+                            .clickable { actions.onOpenUri(library.url) },
                     )
                 }
             }
 
             DisclaimerBox()
 
-            CardBlock(strings.settingsAppInfoTitle, leadingIcon = Icons.Filled.Info) {
+            CardBlock(strings.settingsAppInfoTitle, leadingIcon = AppIcons.Filled.Info) {
                 AppText(
                     "${strings.settingsAppVersion}: ${appInfo.versionName}",
-                    style = MaterialTheme.typography.titleMedium
+                    style = MaterialTheme.typography.titleMedium,
                 )
                 AppText(
                     "${strings.settingsAppPackage}: ${appInfo.packageName}",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 if (appInfo.minSdk != null || appInfo.targetSdk != null) {
                     AppText(
-                    "${strings.settingsAppSdk}: ${appInfo.minSdk ?: screenStrings.missingValue} / ${appInfo.targetSdk ?: screenStrings.missingValue}",
+                        "${strings.settingsAppSdk}: ${appInfo.minSdk ?: screenStrings.missingValue} / ${appInfo.targetSdk ?: screenStrings.missingValue}",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
                 val perms = appInfo.requestedPermissions
@@ -314,27 +283,26 @@ internal fun SettingsContent(
                     AppText(
                         "${strings.settingsRequestedPermissions}:",
                         style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.SemiBold
+                        fontWeight = FontWeight.SemiBold,
                     )
                     perms.forEach { perm ->
                         AppText(
                             screenStrings.bullet.format(perm),
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
                 } else {
                     AppText(
                         strings.settingsNoRequestedPermissions,
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
                 Spacer(modifier = Modifier.height(8.dp))
             }
 
-
-            state.error?.let { err ->
+            (state.loadError ?: state.error)?.let { err ->
                 AppText(err, color = MaterialTheme.colorScheme.error)
             }
         }
@@ -344,11 +312,11 @@ internal fun SettingsContent(
             onClick = { scope.launch { scrollState.animateScrollTo(0) } },
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(12.dp)
+                .padding(12.dp),
         )
     }
 
-    state.error?.let { ErrorDialogComponent(it, actions.onClearError) }
+    (state.loadError ?: state.error)?.let { ErrorDialogComponent(it, actions.onClearError) }
 }
 
 @Composable
@@ -358,7 +326,7 @@ private fun ThemeRow(label: String, theme: AppTheme, current: AppTheme, onClick:
         text = if (current == theme) screenStrings.selected.format(label) else label,
         onClick = onClick,
         modifier = Modifier.padding(vertical = 4.dp),
-        variant = ButtonVariant.Tonal
+        variant = ButtonVariant.Tonal,
     )
 }
 
@@ -369,24 +337,19 @@ private fun ExportFormatRow(label: String, selected: Boolean, onClick: () -> Uni
         text = if (selected) screenStrings.selected.format(label) else label,
         onClick = onClick,
         modifier = Modifier.padding(vertical = 4.dp),
-        variant = ButtonVariant.Tonal
+        variant = ButtonVariant.Tonal,
     )
 }
 
 @Composable
-private fun SwitchRow(
-    label: String,
-    checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit,
-    subtitle: String? = null
-) {
+private fun SwitchRow(label: String, checked: Boolean, onCheckedChange: (Boolean) -> Unit, subtitle: String? = null) {
     val accessibilityPrefs = LocalAccessibilityPrefs.current
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 6.dp),
         verticalAlignment = if (accessibilityPrefs.largeText) Alignment.Top else Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Column(modifier = Modifier.weight(1f)) {
             AppText(label, style = MaterialTheme.typography.bodyLarge)
@@ -394,7 +357,7 @@ private fun SwitchRow(
                 AppText(
                     it,
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
         }
@@ -405,10 +368,10 @@ private fun SwitchRow(
 @Composable
 private fun DisclaimerBox() {
     val strings = LocalStrings.current
-    CardBlock(strings.disclaimerTitle, leadingIcon = Icons.Filled.Warning) {
+    CardBlock(strings.disclaimerTitle, leadingIcon = AppIcons.Filled.Warning) {
         AppText(
             strings.disclaimerBody,
-            style = MaterialTheme.typography.bodySmall
+            style = MaterialTheme.typography.bodySmall,
         )
     }
 }
