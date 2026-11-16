@@ -21,8 +21,8 @@ android {
         applicationId = "com.crackmydroid.android"
         minSdk = androidMinSdk.get()
         targetSdk = androidTargetSdk.get()
-        versionCode = 4
-        versionName = "1.4"
+        versionCode = 5
+        versionName = "1.5"
         manifestPlaceholders["integrityVerificationEndpoint"] = ""
     }
 
