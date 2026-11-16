@@ -3,6 +3,8 @@ package com.crackmydroid.shared.data.settings
 import com.crackmydroid.shared.data.settings.SettingsPreferenceKeys.ACTIVITY_FAVORITES
 import com.crackmydroid.shared.data.settings.SettingsPreferenceKeys.ACTIVITY_PACKAGE_FAVORITES
 import com.crackmydroid.shared.data.settings.SettingsPreferenceKeys.ADB_PATH
+import com.crackmydroid.shared.data.settings.SettingsPreferenceKeys.APP_FAVORITES
+import com.crackmydroid.shared.data.settings.SettingsPreferenceKeys.APP_FAVORITES_MIGRATED
 import com.crackmydroid.shared.data.settings.SettingsPreferenceKeys.EXPORT_FORMAT
 import com.crackmydroid.shared.data.settings.SettingsPreferenceKeys.FEATURE_HINTS_ENABLED
 import com.crackmydroid.shared.data.settings.SettingsPreferenceKeys.HIGH_CONTRAST
@@ -101,11 +103,15 @@ class SettingsRepositoryDesktop : SettingsRepository {
     override suspend fun getActivityPackageFavorites() = getSet(ACTIVITY_PACKAGE_FAVORITES)
     override suspend fun setActivityPackageFavorites(values: Set<String>) = setSet(ACTIVITY_PACKAGE_FAVORITES, values)
 
-    override suspend fun getInstalledAppFavorites() = getSet(INSTALLED_APP_FAVORITES)
-    override suspend fun setInstalledAppFavorites(values: Set<String>) = setSet(INSTALLED_APP_FAVORITES, values)
-
-    override suspend fun getPermissionFavorites() = getSet(PERMISSION_FAVORITES)
-    override suspend fun setPermissionFavorites(values: Set<String>) = setSet(PERMISSION_FAVORITES, values)
+    override suspend fun getAppFavorites(): Set<String> = synchronized(prefs) {
+        if (prefs.getBoolean(APP_FAVORITES_MIGRATED, false)) getSet(APP_FAVORITES) else {
+            (getSet(INSTALLED_APP_FAVORITES) + getSet(PERMISSION_FAVORITES)).also {
+                setSet(APP_FAVORITES, it)
+                prefs.putBoolean(APP_FAVORITES_MIGRATED, true)
+            }
+        }
+    }
+    override suspend fun setAppFavorites(values: Set<String>) = setSet(APP_FAVORITES, values)
 
     private fun String.toAppTheme(): AppTheme = runCatching { AppTheme.valueOf(this) }.getOrDefault(AppTheme.SYSTEM)
 

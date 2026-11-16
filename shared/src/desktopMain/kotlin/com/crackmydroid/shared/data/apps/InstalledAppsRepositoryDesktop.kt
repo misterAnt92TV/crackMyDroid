@@ -55,6 +55,16 @@ class InstalledAppsRepositoryDesktop(
         }
     }
 
+    override suspend fun analyzePackageManifestSecurity(packageName: String): Result<ManifestSecurityReport> =
+        withContext(Dispatchers.IO) {
+            runCatching {
+                val dump = packageManager.readPackageDump(packageName)
+                require(dump.isNotBlank()) { "Package dump vuoto per $packageName" }
+                val security = AdbParsers.parseManifestSecurity(packageName, packageName, dump)
+                ManifestSecurityAnalyzer.analyze(security)
+            }
+        }
+
     override suspend fun exportApk(packageName: String): Result<String> = withContext(Dispatchers.IO) {
         runCatching {
             val device = selectedDevice()

@@ -3,7 +3,6 @@ package com.crackmydroid.shared.ui.navigation
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.crackmydroid.shared.i18n.Strings
 import com.crackmydroid.shared.presentation.navigation.Screen
-import com.crackmydroid.shared.presentation.navigation.bottomScreens
 import com.crackmydroid.shared.ui.pentest.model.PenTestWizardStep
 import com.crackmydroid.ui.components.navigation.AppTopBarNavigationAction
 
@@ -17,7 +16,9 @@ data class TopBarUiState(
     val searchVisible: Boolean = true,
 )
 
-data class BottomBarItemUiState(val screen: Screen, val label: String, val icon: ImageVector, val selected: Boolean)
+data class DrawerItemUiState(val screen: Screen, val label: String, val icon: ImageVector, val selected: Boolean)
+
+data class DrawerSectionUiState(val title: String?, val items: List<DrawerItemUiState>)
 
 internal object NavigationChromeMapper {
     fun topBar(
@@ -38,15 +39,27 @@ internal object NavigationChromeMapper {
         searchVisible = searchVisible,
     )
 
-    fun bottomItems(selectedScreen: Screen, strings: Strings): List<BottomBarItemUiState> =
-        bottomScreens.map { screen ->
-            BottomBarItemUiState(
-                screen = screen,
-                label = screen.title(strings),
-                icon = screen.icon,
-                selected = screen == selectedScreen,
-            )
-        }
+    fun drawerSections(selectedScreen: Screen, strings: Strings): List<DrawerSectionUiState> = listOf(
+        drawerSection(null, listOf(Screen.Dashboard), selectedScreen, strings),
+        drawerSection(strings.navSectionAnalyzeApps, listOf(Screen.InstalledApps, Screen.AnalyzeApkContent, Screen.Permissions, Screen.Activities), selectedScreen, strings),
+        drawerSection(strings.navSectionDeviceSecurity, listOf(Screen.Pentest, Screen.Root, Screen.Info), selectedScreen, strings),
+        drawerSection(strings.navSectionTools, listOf(Screen.Trick, Screen.Log), selectedScreen, strings),
+        drawerSection(strings.navSectionActivity, listOf(Screen.History), selectedScreen, strings),
+        drawerSection(strings.navSectionSupport, listOf(Screen.Help), selectedScreen, strings),
+        drawerSection(null, listOf(Screen.Settings), selectedScreen, strings),
+    )
+
+    private fun drawerSection(
+        title: String?,
+        screens: List<Screen>,
+        selectedScreen: Screen,
+        strings: Strings,
+    ) = DrawerSectionUiState(
+        title = title,
+        items = screens.map { screen ->
+            DrawerItemUiState(screen, screen.title(strings), screen.icon, screen == selectedScreen)
+        },
+    )
 
     private fun Screen.supportsSearch(penTestStep: PenTestWizardStep, apkContentStep: Int): Boolean = when (this) {
         Screen.Activities,
@@ -63,7 +76,7 @@ internal object NavigationChromeMapper {
     }
 
     private fun Screen.helpMessage(strings: Strings): String = when (this) {
-        Screen.Home -> strings.helpHome
+        Screen.Dashboard -> strings.helpHome
         Screen.Activities -> strings.helpActivities
         Screen.Root -> strings.helpRoot
         Screen.Info -> strings.helpInfo
@@ -75,5 +88,6 @@ internal object NavigationChromeMapper {
         Screen.Pentest -> strings.helpPentest
         Screen.AnalyzeApkContent -> strings.helpAnalyzeApkContent
         Screen.Help -> strings.helpOverview
+        Screen.History -> strings.navHistory
     }
 }

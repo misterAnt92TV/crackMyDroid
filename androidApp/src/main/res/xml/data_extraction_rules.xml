@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<data-extraction-rules>
+    <cloud-backup>
+        <!-- Exclude internal cache databases, device scan snapshots, and operational logs from cloud backup -->
+        <exclude path="databases/CacheDatabase.db" />
+        <exclude path="databases/CacheDatabase.db-shm" />
+        <exclude path="databases/CacheDatabase.db-wal" />
+        <exclude path="external-files/scan_snapshots" />
+    </cloud-backup>
+    <device-to-device-transfer>
+        <!-- Exclude temporary cache data and snapshot archives during device migration -->
+        <exclude path="databases/CacheDatabase.db" />
+        <exclude path="databases/CacheDatabase.db-shm" />
+        <exclude path="databases/CacheDatabase.db-wal" />
+        <exclude path="external-files/scan_snapshots" />
+    </device-to-device-transfer>
+</data-extraction-rules>

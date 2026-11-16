@@ -21,9 +21,11 @@ android {
         applicationId = "com.crackmydroid.android"
         minSdk = androidMinSdk.get()
         targetSdk = androidTargetSdk.get()
-        versionCode = 5
-        versionName = "1.5"
+        versionCode = 6
+        versionName = "1.6"
         manifestPlaceholders["integrityVerificationEndpoint"] = ""
+        manifestPlaceholders["securityAdvisoryEndpoint"] =
+            providers.gradleProperty("securityAdvisoryEndpoint").orElse("").get()
     }
 
     buildTypes {

@@ -100,6 +100,7 @@ private class FakeSettingsRepository : SettingsRepository {
     private var largeText = false
     private var suggestions = true
     private var featureHints = true
+    private var appFavorites = emptySet<String>()
 
     override suspend fun getTheme(): AppTheme = theme
     override suspend fun setTheme(theme: AppTheme) {
@@ -164,4 +165,8 @@ private class FakeSettingsRepository : SettingsRepository {
     override suspend fun setInstalledAppFavorites(values: Set<String>) = Unit
     override suspend fun getPermissionFavorites(): Set<String> = emptySet()
     override suspend fun setPermissionFavorites(values: Set<String>) = Unit
+    override suspend fun getAppFavorites(): Set<String> = appFavorites
+    override suspend fun setAppFavorites(values: Set<String>) {
+        appFavorites = values
+    }
 }

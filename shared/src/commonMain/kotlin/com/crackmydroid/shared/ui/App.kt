@@ -15,6 +15,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -67,12 +69,12 @@ import com.crackmydroid.shared.i18n.resolveLanguageCode
 import com.crackmydroid.shared.i18n.stringsFor
 import com.crackmydroid.shared.i18n.toUiStrings
 import com.crackmydroid.shared.presentation.navigation.Screen
-import com.crackmydroid.shared.presentation.navigation.drawerScreens
 import com.crackmydroid.shared.ui.activities.view.ActivityListScreen
 import com.crackmydroid.shared.ui.apkcontent.view.AnalyzeApkContentScreen
 import com.crackmydroid.shared.ui.navigation.AppNavigationEvent
 import com.crackmydroid.shared.ui.help.HelpScreen
-import com.crackmydroid.shared.ui.home.view.HomeScreen
+import com.crackmydroid.shared.ui.dashboard.view.DashboardScreen
+import com.crackmydroid.shared.ui.history.view.HistoryScreen
 import com.crackmydroid.shared.ui.info.view.InfoScreen
 import com.crackmydroid.shared.ui.installedapps.view.InstalledAppsScreen
 import com.crackmydroid.shared.ui.logs.view.LogScreen
@@ -94,8 +96,6 @@ import com.crackmydroid.ui.components.LocalAccessibilityPrefs
 import com.crackmydroid.ui.components.PackageIcon
 import com.crackmydroid.ui.components.effectiveReduceMotion
 import com.crackmydroid.ui.components.text.AppText
-import com.crackmydroid.ui.components.navigation.AppBottomBar
-import com.crackmydroid.ui.components.navigation.AppBottomBarItem
 import com.crackmydroid.ui.components.navigation.AppTopBar
 import com.crackmydroid.ui.components.navigation.AppTopBarNavigationAction
 import com.crackmydroid.ui.strings.LocalUiStrings
@@ -159,7 +159,7 @@ fun CrackMyDroidApp(
                 scope.launch { drawerState.close() }
             }
 
-            navigationState.selectedScreen != Screen.Home || navigationState.navigationHistory.isNotEmpty() -> {
+            navigationState.selectedScreen != Screen.Dashboard || navigationState.navigationHistory.isNotEmpty() -> {
                 navigationVm.emitEvent(AppNavigationEvent.BackRequested())
             }
 
@@ -223,11 +223,13 @@ fun CrackMyDroidApp(
                 val isWideScreen = maxWidth >= 720.dp
                 ModalNavigationDrawer(
                     drawerState = drawerState,
+                    gesturesEnabled = !isWideScreen,
                     drawerContent = {
                         ModalDrawerSheet {
                             Column(
                                 modifier = Modifier
                                     .fillMaxSize()
+                                    .verticalScroll(rememberScrollState())
                                     .padding(horizontal = 12.dp, vertical = 16.dp),
                                 verticalArrangement = Arrangement.spacedBy(10.dp),
                             ) {
@@ -257,21 +259,27 @@ fun CrackMyDroidApp(
                                 }
                                 HorizontalDivider()
                                 Column(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .weight(1f),
+                                    modifier = Modifier.fillMaxWidth(),
                                     verticalArrangement = Arrangement.spacedBy(2.dp),
                                 ) {
-                                    drawerScreens.forEach { screen ->
-                                        NavigationDrawerItem(
-                                            icon = { AppIcon(screen.icon, contentDescription = null) },
-                                            label = { AppText(screen.title(strings)) },
-                                            selected = navigationState.selectedScreen == screen,
-                                            onClick = { navigateFromDrawer(screen) },
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .padding(vertical = 2.dp),
-                                        )
+                                    navigationState.drawerSections.forEach { section ->
+                                        section.title?.let { title ->
+                                            AppText(
+                                                text = title,
+                                                style = MaterialTheme.typography.labelLarge,
+                                                color = MaterialTheme.colorScheme.primary,
+                                                modifier = Modifier.padding(top = 8.dp, start = 12.dp),
+                                            )
+                                        }
+                                        section.items.forEach { item ->
+                                            NavigationDrawerItem(
+                                                icon = { AppIcon(item.icon, contentDescription = null) },
+                                                label = { AppText(item.label) },
+                                                selected = item.selected,
+                                                onClick = { navigateFromDrawer(item.screen) },
+                                                modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp),
+                                            )
+                                        }
                                     }
                                 }
                                 HorizontalDivider()
@@ -288,61 +296,34 @@ fun CrackMyDroidApp(
                 ) {
                     Row(modifier = Modifier.fillMaxSize()) {
                         if (isWideScreen) {
-                            NavigationRail(
-                                modifier = Modifier.fillMaxHeight(),
-                                header = {
-                                    IconButton(
-                                        onClick = {
-                                            scope.launch {
-                                                if (drawerState.isOpen) drawerState.close() else drawerState.open()
-                                            }
-                                        },
-                                    ) {
-                                    AppIcon(AppIcons.Filled.Menu, contentDescription = "Menu")
-                                    }
-                                },
-                            ) {
-                                val itemIconSize = 22.dp
-                                val railScreens = listOf(
-                                    Screen.Home,
-                                    Screen.InstalledApps,
-                                    Screen.Pentest,
-                                    Screen.AnalyzeApkContent,
-                                    Screen.Permissions,
-                                    Screen.Activities,
-                                    Screen.Root,
-                                    Screen.Info,
-                                    Screen.Settings,
-                                )
-                                Spacer(Modifier.height(8.dp))
-                                railScreens.forEach { screen ->
-                                    NavigationRailItem(
-                                        selected = navigationState.selectedScreen == screen,
-                                        onClick = {
-                                            navigationVm.emitEvent(
-                                                AppNavigationEvent.ScreenSelected(
-                                                    screen,
-                                                    com.crackmydroid.shared.ui.navigation.NavigationSource.Rail,
-                                                    false,
-                                                ),
-                                            )
-                                        },
-                                        icon = {
-                                            AppIcon(
-                                                screen.icon,
-                                                contentDescription = screen.title(strings),
-                                                modifier = Modifier.size(itemIconSize),
-                                            )
-                                        },
-                                        label = {
+                            ModalDrawerSheet(modifier = Modifier.fillMaxHeight()) {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .verticalScroll(rememberScrollState())
+                                        .padding(horizontal = 12.dp, vertical = 16.dp),
+                                    verticalArrangement = Arrangement.spacedBy(2.dp),
+                                ) {
+                                    AppText("CrackMyDroid", style = MaterialTheme.typography.titleLarge)
+                                    navigationState.drawerSections.forEach { section ->
+                                        section.title?.let { title ->
                                             AppText(
-                                                screen.title(strings),
-                                                maxLines = 1,
-                                                overflow = TextOverflow.Ellipsis,
+                                                title,
+                                                style = MaterialTheme.typography.labelLarge,
+                                                color = MaterialTheme.colorScheme.primary,
+                                                modifier = Modifier.padding(top = 10.dp, start = 12.dp),
                                             )
-                                        },
-                                        alwaysShowLabel = false,
-                                    )
+                                        }
+                                        section.items.forEach { item ->
+                                            NavigationDrawerItem(
+                                                icon = { AppIcon(item.icon, contentDescription = null) },
+                                                label = { AppText(item.label) },
+                                                selected = item.selected,
+                                                onClick = { navigateFromDrawer(item.screen) },
+                                                modifier = Modifier.fillMaxWidth(),
+                                            )
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -355,7 +336,7 @@ fun CrackMyDroidApp(
                                     navigationAction = navigationState.topBar.navigationAction,
                                     onNavigationClick = {
                                         when (navigationState.topBar.navigationAction) {
-                                            AppTopBarNavigationAction.Menu -> scope.launch { drawerState.open() }
+                                            AppTopBarNavigationAction.Menu -> if (!isWideScreen) scope.launch { drawerState.open() }
                                             AppTopBarNavigationAction.Back -> navigationVm.emitEvent(AppNavigationEvent.BackRequested())
                                             AppTopBarNavigationAction.None -> Unit
                                         }
@@ -365,37 +346,6 @@ fun CrackMyDroidApp(
                                     showHelp = navigationState.topBar.showHelp,
                                     onHelpClick = { navigationVm.emitEvent(AppNavigationEvent.TopBarHelpRequested()) },
                                 )
-                            },
-                            bottomBar = {
-                                if (!isWideScreen) {
-                                    val bottomBarItems = remember(navigationState.bottomBarItems) {
-                                        navigationState.bottomBarItems.map { item ->
-                                            AppBottomBarItem(
-                                                id = item.screen.id,
-                                                label = item.label,
-                                                icon = item.icon,
-                                                selected = item.selected,
-                                            )
-                                        }
-                                    }
-                                    AppBottomBar(
-                                        items = bottomBarItems,
-                                        onItemClick = { id ->
-                                            navigationState.bottomBarItems
-                                                .firstOrNull { it.screen.id == id }
-                                                ?.screen
-                                                ?.let { screen ->
-                                                    navigationVm.emitEvent(
-                                                        AppNavigationEvent.ScreenSelected(
-                                                            screen,
-                                                            com.crackmydroid.shared.ui.navigation.NavigationSource.BottomBar,
-                                                            false,
-                                                        ),
-                                                    )
-                                                }
-                                        },
-                                    )
-                                }
                             },
                         ) { padding ->
                         val focusManager = LocalFocusManager.current
@@ -423,11 +373,20 @@ fun CrackMyDroidApp(
                                 ) { targetScreen ->
                                     screenStateHolder.SaveableStateProvider(targetScreen.id) {
                                         when (targetScreen) {
-                                    Screen.Home -> HomeScreen(
-                                        viewModel = homeVm,
+                                    Screen.Dashboard -> DashboardScreen(
                                         padding = adjustedPadding,
-                                        languageCode = languageCode,
+                                        onNavigate = { target ->
+                                            navigationVm.emitEvent(
+                                                AppNavigationEvent.ScreenSelected(
+                                                    target,
+                                                    com.crackmydroid.shared.ui.navigation.NavigationSource.InContent,
+                                                    settingsState.value.featureHintsEnabled,
+                                                ),
+                                            )
+                                        },
                                     )
+
+                                    Screen.History -> HistoryScreen(homeVm, adjustedPadding, languageCode)
 
                                     Screen.Activities -> ActivityListScreen(
                                         viewModel = activityVm,

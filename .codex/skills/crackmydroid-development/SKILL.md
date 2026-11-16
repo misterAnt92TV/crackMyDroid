@@ -242,6 +242,21 @@ orchestration. Keep only strictly visual calculations in composables.
 - Preview the normal state and each user-visible empty or error state. Keep preview functions
   separate from production screen logic when that improves readability.
 
+### Android DEX safety for catalogs and generated initializers
+
+`Strings` and other eagerly initialized locale catalogs are compiled into static initializers and
+are especially sensitive to Android D8/R8 register limits. Do not keep growing a large data-class
+constructor with every new screen or feature string. Group cohesive additions behind a small nested
+value object (for example `NavigationStrings`) and expose compatibility getters from the parent
+catalog when existing call sites should remain unchanged.
+
+When changing a large catalog, generated mapper, DI graph, or any static initializer, validate the
+Android artifact rather than relying only on a JVM/Desktop compile. Run the narrowest applicable
+Android packaging task (normally `./gradlew :androidApp:assembleDebug`) and treat D8/R8 failures,
+`VerifyError`, verifier register errors, and `<clinit>` failures as release-blocking. If the failure
+mentions `StringsCatalogsKt` or another `*Kt.<clinit>`, inspect constructor arity and static object
+initialization before changing runtime navigation or Koin code.
+
 ## Unit tests are part of every feature
 
 Every new feature or behavior change must create or update the tests that protect it in the same

@@ -5,6 +5,7 @@ import com.crackmydroid.shared.data.activity.ActivityRepositoryDesktop
 import com.crackmydroid.shared.data.adb.ProcessAdbBridge
 import com.crackmydroid.shared.data.apps.InstalledAppsRepositoryDesktop
 import com.crackmydroid.shared.data.apkcontent.ApkContentRepositoryDesktop
+import com.crackmydroid.shared.data.apkcontent.ApkLibraryMetadataRepositoryDesktop
 import com.crackmydroid.shared.data.cache.CacheMaintenanceRepositoryDesktop
 import com.crackmydroid.shared.data.device.DeviceInfoRepositoryDesktop
 import com.crackmydroid.shared.data.device.DeviceSessionControllerDesktop
@@ -20,6 +21,9 @@ import com.crackmydroid.shared.data.shell.ShellCommandRepositoryDesktop
 import com.crackmydroid.shared.data.snapshot.RemoteDeviceSnapshotImporter
 import com.crackmydroid.shared.domain.repository.ActivityRepository
 import com.crackmydroid.shared.domain.repository.ApkContentRepository
+import com.crackmydroid.shared.domain.repository.ApkLibraryMetadataRepository
+import com.crackmydroid.shared.data.securityadvisory.SecurityAdvisoryEndpointProvider
+import com.crackmydroid.shared.data.securityadvisory.SecurityAdvisoryEndpointProviderDesktop
 import com.crackmydroid.shared.domain.repository.AdbBridge
 import com.crackmydroid.shared.domain.repository.CacheMaintenance
 import com.crackmydroid.shared.domain.repository.DeviceInfoRepository
@@ -59,6 +63,8 @@ actual fun platformModule(): Module = module {
     single<PermissionsRepository> { PermissionsRepositoryDesktop(get(), get(), get(), get()) }
     single<InstalledAppsRepository> { InstalledAppsRepositoryDesktop(get(), get(), get(), get()) }
     single<ApkContentRepository> { ApkContentRepositoryDesktop(get(), get(), get()) }
+    single<ApkLibraryMetadataRepository> { ApkLibraryMetadataRepositoryDesktop(get(), get(), get()) }
+    single<SecurityAdvisoryEndpointProvider> { SecurityAdvisoryEndpointProviderDesktop() }
     single<ReportFileRepository> { ReportFileRepositoryDesktop() }
     single<OperationLogPersistence> { OperationLogPersistenceDesktop() }
     single<OperationLogRepository> { DefaultOperationLogRepository(get()) }

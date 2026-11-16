@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -27,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -37,6 +39,14 @@ import com.crackmydroid.shared.domain.model.apkcontent.ApkContentAnalysis
 import com.crackmydroid.shared.domain.model.apkcontent.ApkContentFinding
 import com.crackmydroid.shared.domain.model.apkcontent.ApkFindingSeverity
 import com.crackmydroid.shared.domain.model.apkcontent.ApkLibrary
+import com.crackmydroid.shared.domain.model.apkcontent.ApkLibraryAdvisory
+import com.crackmydroid.shared.domain.model.apkcontent.ApkLibraryVulnerabilityReport
+import com.crackmydroid.shared.domain.model.apkcontent.ApkLibraryVulnerabilityResult
+import com.crackmydroid.shared.domain.model.apkcontent.ApkMavenLibrary
+import com.crackmydroid.shared.domain.model.apkcontent.AdvisoryLookupAvailability
+import com.crackmydroid.shared.domain.model.apkcontent.AdvisoryLookupFailureKind
+import com.crackmydroid.shared.domain.model.apkcontent.AdvisorySeverity
+import com.crackmydroid.shared.domain.model.apkcontent.MavenLibrarySource
 import com.crackmydroid.shared.domain.model.apkcontent.ApkPlainTextCategory
 import com.crackmydroid.shared.domain.model.apkcontent.ApkPlainTextItem
 import com.crackmydroid.shared.domain.model.apkcontent.ApkPlaintextContent
@@ -100,6 +110,7 @@ private fun AnalyzeApkContentContent(
 ) {
     val strings = LocalStrings.current
     val screenStrings = ScreenUiStrings.from(strings)
+    val uriHandler = LocalUriHandler.current
     val listState = rememberLazyListState()
     val spacing = CrackMyDroidTheme.spacing
     val archiveButtonFocusRequester = remember { FocusRequester() }
@@ -176,6 +187,8 @@ private fun AnalyzeApkContentContent(
                     ) { index ->
                         AppItemCard(
                             app = state.filteredApps[index],
+                            isFavorite = state.filteredApps[index].packageName in state.favorites,
+                            onToggleFavorite = { onEvent(AnalyzeApkContentEvent.FavoriteToggled(it)) },
                             screenStrings = screenStrings,
                             onSelect = { onEvent(AnalyzeApkContentEvent.PackageSelected(it)) },
                         )
@@ -208,6 +221,11 @@ private fun AnalyzeApkContentContent(
                             onOpenAnalyzedArchive = { onEvent(AnalyzeApkContentEvent.ArchiveOpenRequested()) },
                             archiveNavigationState = state.archiveNavigationState,
                             archiveButtonFocusRequester = archiveButtonFocusRequester,
+                            mavenLibraries = state.mavenLibraries,
+                            advisoryState = state.advisoryState,
+                            advisoryReport = state.advisoryReport,
+                            onVulnerabilityLookup = { onEvent(AnalyzeApkContentEvent.VulnerabilityLookupRequested()) },
+                            onOpenAdvisory = uriHandler::openUri,
                             onReset = { onEvent(AnalyzeApkContentEvent.Reset()) },
                         )
                     }
@@ -255,7 +273,13 @@ private fun StepHeaderCard(step: Int, screenStrings: ScreenUiStrings) {
 }
 
 @Composable
-private fun AppItemCard(app: InstalledAppEntry, screenStrings: ScreenUiStrings, onSelect: (String) -> Unit) {
+private fun AppItemCard(
+    app: InstalledAppEntry,
+    isFavorite: Boolean,
+    onToggleFavorite: (String) -> Unit,
+    screenStrings: ScreenUiStrings,
+    onSelect: (String) -> Unit,
+) {
     AppCard(
         modifier = Modifier.fillMaxWidth(),
         onClick = { onSelect(app.packageName) },
@@ -272,6 +296,13 @@ private fun AppItemCard(app: InstalledAppEntry, screenStrings: ScreenUiStrings, 
                 contentPadding = 4.dp,
                 contentDescription = null,
             )
+            IconButton(onClick = { onToggleFavorite(app.packageName) }) {
+                AppIcon(
+                    imageVector = if (isFavorite) AppIcons.Filled.Star else AppIcons.Filled.StarBorder,
+                    contentDescription = LocalStrings.current.favoriteContentDescription,
+                    tint = if (isFavorite) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
             Column(modifier = Modifier.weight(1f)) {
                 AppText(
                     text = app.appLabel,
@@ -379,6 +410,11 @@ private fun AnalysisReportCard(
     onOpenAnalyzedArchive: () -> Unit,
     archiveNavigationState: UiLoadState,
     archiveButtonFocusRequester: FocusRequester,
+    mavenLibraries: List<ApkMavenLibrary>,
+    advisoryState: UiLoadState,
+    advisoryReport: ApkLibraryVulnerabilityReport?,
+    onVulnerabilityLookup: () -> Unit,
+    onOpenAdvisory: (String) -> Unit,
     onReset: () -> Unit,
 ) {
     val spacing = CrackMyDroidTheme.spacing
@@ -392,6 +428,17 @@ private fun AnalysisReportCard(
         ReportMetricsGrid(metadata = analysis.metadata, screenStrings = screenStrings)
 
         ReportLibrariesCard(libraries = analysis.libraries, screenStrings = screenStrings)
+
+        if (mavenLibraries.isNotEmpty()) {
+            LibraryAdvisoriesCard(
+                libraries = mavenLibraries,
+                lookupState = advisoryState,
+                report = advisoryReport,
+                screenStrings = screenStrings,
+                onLookup = onVulnerabilityLookup,
+                onOpenAdvisory = onOpenAdvisory,
+            )
+        }
 
         ReportFindingsCard(findings = analysis.findings, screenStrings = screenStrings)
 
@@ -699,6 +746,201 @@ private fun ReportLibrariesCard(libraries: List<ApkLibrary>, screenStrings: Scre
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun LibraryAdvisoriesCard(
+    libraries: List<ApkMavenLibrary>,
+    lookupState: UiLoadState,
+    report: ApkLibraryVulnerabilityReport?,
+    screenStrings: ScreenUiStrings,
+    onLookup: () -> Unit,
+    onOpenAdvisory: (String) -> Unit,
+) {
+    val spacing = CrackMyDroidTheme.spacing
+    val isLoading = lookupState is UiLoadState.Loading
+    AppCard(modifier = Modifier.fillMaxWidth()) {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(spacing.small),
+        ) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(spacing.small),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                AppIcon(
+                    imageVector = AppIcons.Filled.Security,
+                    contentDescription = null,
+                    modifier = Modifier.size(20.dp),
+                    tint = MaterialTheme.colorScheme.primary,
+                )
+                AppText(
+                    text = screenStrings.apkContentAdvisoriesTitle.format(libraries.size),
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold,
+                )
+            }
+            AppText(
+                text = screenStrings.apkContentAdvisoriesPrivacy,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            if (isLoading) {
+                AppProgressBar(modifier = Modifier.fillMaxWidth(), variant = ProgressBarVariant.Primary)
+                AppText(
+                    text = screenStrings.apkContentCheckingVulnerabilities,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+            } else if (report == null) {
+                AppButton(
+                    text = screenStrings.apkContentCheckVulnerabilities,
+                    onClick = onLookup,
+                    variant = ButtonVariant.Tonal,
+                    fullWidth = true,
+                    leadingIcon = AppIcons.Filled.Security,
+                )
+            } else {
+                AdvisoryReportContent(report, libraries, screenStrings, onOpenAdvisory)
+            }
+        }
+    }
+}
+
+@Composable
+private fun AdvisoryReportContent(
+    report: ApkLibraryVulnerabilityReport,
+    libraries: List<ApkMavenLibrary>,
+    screenStrings: ScreenUiStrings,
+    onOpenAdvisory: (String) -> Unit,
+) {
+    when {
+        report.availability == AdvisoryLookupAvailability.NotConfigured -> AppText(
+            text = screenStrings.apkContentAdvisoryNotConfigured,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+
+        report.failure != null -> AppText(
+            text = screenStrings.apkContentAdvisoryUnavailable,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.error,
+        )
+
+        else -> Column(verticalArrangement = Arrangement.spacedBy(CrackMyDroidTheme.spacing.small)) {
+            report.results.forEach { result ->
+                val library = libraries.firstOrNull { it.packageUrl == result.packageUrl }
+                AdvisoryLibrarySection(
+                    title = library?.displayName ?: result.packageUrl,
+                    version = result.version,
+                    source = library?.source,
+                    advisories = result.advisories,
+                    screenStrings = screenStrings,
+                    onOpenAdvisory = onOpenAdvisory,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun AdvisoryLibrarySection(
+    title: String,
+    version: String,
+    source: MavenLibrarySource?,
+    advisories: List<ApkLibraryAdvisory>,
+    screenStrings: ScreenUiStrings,
+    onOpenAdvisory: (String) -> Unit,
+) {
+    var expanded by remember(title, version, advisories) { mutableStateOf(false) }
+    val sourceLabel = when (source) {
+        MavenLibrarySource.PomProperties -> screenStrings.apkContentMetadataPom
+        MavenLibrarySource.VersionMetadata -> screenStrings.apkContentMetadataVersion
+        null -> null
+    }
+    AppAccordion(
+        title = title,
+        subtitle = version,
+        meta = if (advisories.isEmpty()) "0" else screenStrings.apkContentAdvisoriesFound.format(advisories.size),
+        expanded = expanded,
+        onToggle = { expanded = !expanded },
+        accessibilityLabel = "$title $version",
+        titleMaxLines = 3,
+        subtitleMaxLines = 2,
+        textOverflow = TextOverflow.Clip,
+    ) {
+        Column(verticalArrangement = Arrangement.spacedBy(CrackMyDroidTheme.spacing.small)) {
+            sourceLabel?.let {
+                AppText(
+                    text = screenStrings.apkContentLibraryMetadataSource.format(it),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            if (advisories.isEmpty()) {
+                AppText(
+                    text = screenStrings.apkContentNoAdvisories,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            } else {
+                advisories.forEach { advisory ->
+                    AdvisoryItem(advisory, screenStrings, onOpenAdvisory)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun AdvisoryItem(
+    advisory: ApkLibraryAdvisory,
+    screenStrings: ScreenUiStrings,
+    onOpenAdvisory: (String) -> Unit,
+) {
+    val spacing = CrackMyDroidTheme.spacing
+    val severityColor = when (advisory.severity) {
+        AdvisorySeverity.Critical, AdvisorySeverity.High -> MaterialTheme.colorScheme.error
+        AdvisorySeverity.Medium -> MaterialTheme.colorScheme.tertiary
+        AdvisorySeverity.Low, AdvisorySeverity.Unknown -> MaterialTheme.colorScheme.primary
+    }
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(spacing.extraSmall))
+            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .padding(spacing.small),
+    ) {
+        Column(verticalArrangement = Arrangement.spacedBy(spacing.extraSmall)) {
+            AppText(
+                text = "${advisory.source.name.uppercase()} · ${advisory.advisoryId} · ${advisory.severity.name.uppercase()}",
+                style = MaterialTheme.typography.labelSmall,
+                color = severityColor,
+                fontWeight = FontWeight.Bold,
+            )
+            AppText(text = advisory.summary, style = MaterialTheme.typography.bodySmall)
+            advisory.affectedVersions?.let {
+                AppText(
+                    text = screenStrings.apkContentAffectedVersions.format(it),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            advisory.fixedVersion?.let {
+                AppText(
+                    text = screenStrings.apkContentFixedVersion.format(it),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            AppButton(
+                text = screenStrings.apkContentOpenAdvisory,
+                onClick = { onOpenAdvisory(advisory.url) },
+                variant = ButtonVariant.Secondary,
+                fullWidth = false,
+            )
         }
     }
 }
@@ -1035,7 +1277,99 @@ private fun AppItemCardPreview() = ComponentPreviewContainer {
             packageName = "com.example.application",
             sourcePath = "/data/app/com.example.application/base.apk",
         ),
+        isFavorite = false,
+        onToggleFavorite = {},
         screenStrings = ScreenUiStrings("en"),
         onSelect = {},
     )
 }
+
+@AppComponentPreviews
+@Composable
+private fun LibraryAdvisoriesCardPreview() = ComponentPreviewContainer {
+    LibraryAdvisoriesCard(
+        libraries = listOf(
+            ApkMavenLibrary(
+                displayName = "androidx.window:window",
+                packageUrl = "pkg:maven/androidx.window/window@1.5.0",
+                version = "1.5.0",
+                source = MavenLibrarySource.VersionMetadata,
+            ),
+        ),
+        lookupState = UiLoadState.Idle,
+        report = null,
+        screenStrings = ScreenUiStrings("en"),
+        onLookup = {},
+        onOpenAdvisory = {},
+    )
+}
+
+@AppComponentPreviews
+@Composable
+private fun LibraryAdvisoriesNotConfiguredPreview() = ComponentPreviewContainer {
+    LibraryAdvisoriesCard(
+        libraries = previewAdvisoryLibraries(),
+        lookupState = UiLoadState.Success,
+        report = ApkLibraryVulnerabilityReport(AdvisoryLookupAvailability.NotConfigured),
+        screenStrings = ScreenUiStrings("en"),
+        onLookup = {},
+        onOpenAdvisory = {},
+    )
+}
+
+@AppComponentPreviews
+@Composable
+private fun LibraryAdvisoriesUnavailablePreview() = ComponentPreviewContainer {
+    LibraryAdvisoriesCard(
+        libraries = previewAdvisoryLibraries(),
+        lookupState = UiLoadState.Success,
+        report = ApkLibraryVulnerabilityReport(
+            availability = AdvisoryLookupAvailability.Available,
+            failure = AdvisoryLookupFailureKind.Network,
+        ),
+        screenStrings = ScreenUiStrings("en"),
+        onLookup = {},
+        onOpenAdvisory = {},
+    )
+}
+
+@AppComponentPreviews
+@Composable
+private fun LibraryAdvisoriesFoundPreview() = ComponentPreviewContainer {
+    val library = previewAdvisoryLibraries().single()
+    LibraryAdvisoriesCard(
+        libraries = listOf(library),
+        lookupState = UiLoadState.Success,
+        report = ApkLibraryVulnerabilityReport(
+            availability = AdvisoryLookupAvailability.Available,
+            results = listOf(
+                ApkLibraryVulnerabilityResult(
+                    packageUrl = library.packageUrl,
+                    version = library.version,
+                    advisories = listOf(
+                        ApkLibraryAdvisory(
+                            source = com.crackmydroid.shared.domain.model.apkcontent.AdvisorySource.Osv,
+                            advisoryId = "GHSA-example",
+                            severity = AdvisorySeverity.High,
+                            summary = "Example dependency vulnerability",
+                            fixedVersion = "1.5.1",
+                            url = "https://osv.dev/",
+                        ),
+                    ),
+                ),
+            ),
+        ),
+        screenStrings = ScreenUiStrings("en"),
+        onLookup = {},
+        onOpenAdvisory = {},
+    )
+}
+
+private fun previewAdvisoryLibraries() = listOf(
+    ApkMavenLibrary(
+        displayName = "androidx.window:window",
+        packageUrl = "pkg:maven/androidx.window/window@1.5.0",
+        version = "1.5.0",
+        source = MavenLibrarySource.VersionMetadata,
+    ),
+)

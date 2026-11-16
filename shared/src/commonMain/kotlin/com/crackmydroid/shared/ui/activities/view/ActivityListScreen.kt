@@ -178,7 +178,7 @@ private fun ActivityListContent(
             state = listState,
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(10.dp),
-            contentPadding = screenContentPadding(padding, horizontal = 16.dp, vertical = 10.dp),
+            contentPadding = screenContentPadding(padding),
         ) {
             item {
                 SearchPanelComponent(
@@ -378,9 +378,7 @@ private fun ActivityListContent(
                             )
                         }
                     },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 6.dp),
+                    modifier = Modifier.fillMaxWidth(),
                 ) {
                     group.activities.forEach { activity ->
                         val favKey = activity.favoriteKey()

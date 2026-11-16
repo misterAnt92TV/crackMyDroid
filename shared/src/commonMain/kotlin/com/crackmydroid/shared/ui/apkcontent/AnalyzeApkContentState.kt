@@ -4,22 +4,28 @@ import com.crackmydroid.architecture.presentation.model.UiLoadState
 import com.crackmydroid.architecture.presentation.model.UiState
 import com.crackmydroid.shared.domain.model.InstalledAppEntry
 import com.crackmydroid.shared.domain.model.apkcontent.ApkContentAnalysis
+import com.crackmydroid.shared.domain.model.apkcontent.ApkLibraryVulnerabilityReport
+import com.crackmydroid.shared.domain.model.apkcontent.ApkMavenLibrary
 
 data class AnalyzeApkContentState(
     val apps: List<InstalledAppEntry> = emptyList(),
     val query: String = "",
+    val favorites: Set<String> = emptySet(),
     val selectedPackage: String? = null,
     val loadState: UiLoadState = UiLoadState.Idle,
     val analysisState: UiLoadState = UiLoadState.Idle,
     val archiveNavigationState: UiLoadState = UiLoadState.Idle,
     val analysis: ApkContentAnalysis? = null,
+    val mavenLibraries: List<ApkMavenLibrary> = emptyList(),
+    val advisoryState: UiLoadState = UiLoadState.Idle,
+    val advisoryReport: ApkLibraryVulnerabilityReport? = null,
     val error: String? = null,
     val exportPath: String? = null,
 ) : UiState {
     val filteredApps get() = apps.filter {
         query.isBlank() || it.appLabel.contains(query, true) ||
             it.packageName.contains(query, true)
-    }
+    }.sortedWith(compareBy<InstalledAppEntry> { it.packageName !in favorites }.thenBy { it.appLabel.lowercase() })
     val selectedApp get() = apps.firstOrNull { it.packageName == selectedPackage }
     val step get() = if (analysis != null) {
         3

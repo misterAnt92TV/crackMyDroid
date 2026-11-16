@@ -29,6 +29,7 @@ data class AppSpacing(
     // Semantic layout and component spacing tokens
     val screenHorizontal: Dp = 16.dp,
     val screenVertical: Dp = 16.dp,
+    val screenBottomPadding: Dp = 24.dp,
     val screenHorizontalWide: Dp = 24.dp,
     val itemSpacing: Dp = 12.dp,
     val rowSpacing: Dp = 8.dp,
@@ -42,6 +43,24 @@ val LocalAppSpacing = staticCompositionLocalOf { AppSpacing() }
 
 /**
  * Calculates uniform screen content padding combining system insets and app design spacing.
+ * Ensures an appropriate bottom padding clearance above the Android system navigation bar.
+ */
+@Composable
+fun appScreenContentPadding(
+    systemPadding: PaddingValues = PaddingValues(0.dp),
+    horizontal: Dp = CrackMyDroidTheme.spacing.screenHorizontal,
+    top: Dp = CrackMyDroidTheme.spacing.screenVertical,
+    bottom: Dp = CrackMyDroidTheme.spacing.screenBottomPadding,
+): PaddingValues = calculateScreenContentPadding(
+    systemPadding = systemPadding,
+    horizontal = horizontal,
+    top = top,
+    bottom = bottom,
+    layoutDirection = LocalLayoutDirection.current,
+)
+
+/**
+ * Overload maintaining backwards compatibility for symmetric vertical padding.
  */
 @Composable
 fun appScreenContentPadding(
@@ -51,7 +70,8 @@ fun appScreenContentPadding(
 ): PaddingValues = calculateScreenContentPadding(
     systemPadding = systemPadding,
     horizontal = horizontal,
-    vertical = vertical,
+    top = vertical,
+    bottom = vertical,
     layoutDirection = LocalLayoutDirection.current,
 )
 
@@ -61,11 +81,28 @@ fun appScreenContentPadding(
 fun calculateScreenContentPadding(
     systemPadding: PaddingValues,
     horizontal: Dp,
-    vertical: Dp,
+    top: Dp,
+    bottom: Dp,
     layoutDirection: androidx.compose.ui.unit.LayoutDirection,
 ): PaddingValues = PaddingValues(
     start = systemPadding.calculateStartPadding(layoutDirection) + horizontal,
-    top = systemPadding.calculateTopPadding() + vertical,
+    top = systemPadding.calculateTopPadding() + top,
     end = systemPadding.calculateEndPadding(layoutDirection) + horizontal,
-    bottom = systemPadding.calculateBottomPadding() + vertical,
+    bottom = systemPadding.calculateBottomPadding() + bottom,
+)
+
+/**
+ * Pure calculation helper for screen content padding with symmetric vertical padding.
+ */
+fun calculateScreenContentPadding(
+    systemPadding: PaddingValues,
+    horizontal: Dp,
+    vertical: Dp,
+    layoutDirection: androidx.compose.ui.unit.LayoutDirection,
+): PaddingValues = calculateScreenContentPadding(
+    systemPadding = systemPadding,
+    horizontal = horizontal,
+    top = vertical,
+    bottom = vertical,
+    layoutDirection = layoutDirection,
 )

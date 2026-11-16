@@ -58,6 +58,7 @@ class HomeViewModelTest : BaseViewModelUnitTest() {
             val current = awaitItem()
             assertEquals(5, current.recentOperations.size)
             assertEquals(entries.take(5), current.recentOperations)
+            assertEquals(entries, current.operationHistory)
         }
     }
 

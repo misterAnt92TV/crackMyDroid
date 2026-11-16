@@ -149,6 +149,7 @@ class InstalledAppsRepositoryAndroid(private val context: Context, private val d
         val pm = context.packageManager
         val packages = pm.getInstalledPackages(
             PackageManager.GET_PERMISSIONS or
+                PackageManager.GET_ACTIVITIES or
                 PackageManager.GET_SERVICES or
                 PackageManager.GET_RECEIVERS or
                 PackageManager.GET_PROVIDERS,
@@ -161,8 +162,22 @@ class InstalledAppsRepositoryAndroid(private val context: Context, private val d
             val allowBackup =
                 pkg.applicationInfo?.flags?.and(ApplicationInfo.FLAG_ALLOW_BACKUP) != 0
             val testOnly = pkg.applicationInfo?.flags?.and(ApplicationInfo.FLAG_TEST_ONLY) != 0
+            val usesCleartextTraffic =
+                pkg.applicationInfo?.flags?.and(ApplicationInfo.FLAG_USES_CLEARTEXT_TRAFFIC) != 0
+            val hasCustomBackupAgent =
+                !pkg.applicationInfo?.backupAgentName.isNullOrBlank()
 
             val components = mutableListOf<ExposedComponentInfo>()
+            pkg.activities?.forEach { activity ->
+                if (activity.exported) {
+                    components += ExposedComponentInfo(
+                        type = AppComponentType.ACTIVITY,
+                        name = activity.name,
+                        exported = true,
+                        permission = activity.permission,
+                    )
+                }
+            }
             pkg.services?.forEach { service ->
                 if (service.exported) {
                     components += ExposedComponentInfo(
@@ -194,14 +209,35 @@ class InstalledAppsRepositoryAndroid(private val context: Context, private val d
                 }
             }
 
+            val debugCertSigned = if (debuggable) {
+                runCatching {
+                    val certFactory = java.security.cert.CertificateFactory.getInstance("X.509")
+                    val signatures = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
+                        pm.getPackageInfo(pkg.packageName, PackageManager.GET_SIGNING_CERTIFICATES).signingInfo?.apkContentsSigners
+                    } else {
+                        @Suppress("DEPRECATION")
+                        pm.getPackageInfo(pkg.packageName, PackageManager.GET_SIGNATURES).signatures
+                    }
+                    signatures?.any { sig ->
+                        val x509 = certFactory.generateCertificate(java.io.ByteArrayInputStream(sig.toByteArray())) as? java.security.cert.X509Certificate
+                        x509?.subjectX500Principal?.name?.contains("Android Debug", ignoreCase = true) == true
+                    } == true
+                }.getOrDefault(false)
+            } else {
+                false
+            }
+
             val info = AppManifestSecurity(
                 appLabel = label,
                 packageName = pkg.packageName,
                 debuggable = debuggable,
                 allowBackup = allowBackup,
+                hasCustomBackupAgent = hasCustomBackupAgent,
+                usesCleartextTraffic = usesCleartextTraffic,
                 testOnly = testOnly,
                 targetSdkVersion = pkg.applicationInfo?.targetSdkVersion,
                 minSdkVersion = pkg.applicationInfo?.minSdkVersion,
+                debugCertSigned = debugCertSigned,
                 exposedComponents = components,
             )
             ManifestSecurityAnalyzer.analyze(info)
@@ -218,6 +254,106 @@ class InstalledAppsRepositoryAndroid(private val context: Context, private val d
             analyzeManifestSecurity()
         }
     }
+
+    override suspend fun analyzePackageManifestSecurity(packageName: String): Result<ManifestSecurityReport> =
+        withContext(Dispatchers.IO) {
+            runCatching {
+                val pm = context.packageManager
+                val pkg = pm.getPackageInfo(
+                    packageName,
+                    PackageManager.GET_PERMISSIONS or
+                        PackageManager.GET_ACTIVITIES or
+                        PackageManager.GET_SERVICES or
+                        PackageManager.GET_RECEIVERS or
+                        PackageManager.GET_PROVIDERS,
+                )
+                val label = pkg.applicationInfo?.loadLabel(pm)?.toString() ?: pkg.packageName
+                val debuggable =
+                    pkg.applicationInfo?.flags?.and(ApplicationInfo.FLAG_DEBUGGABLE) != 0
+                val allowBackup =
+                    pkg.applicationInfo?.flags?.and(ApplicationInfo.FLAG_ALLOW_BACKUP) != 0
+                val testOnly = pkg.applicationInfo?.flags?.and(ApplicationInfo.FLAG_TEST_ONLY) != 0
+                val usesCleartextTraffic =
+                    pkg.applicationInfo?.flags?.and(ApplicationInfo.FLAG_USES_CLEARTEXT_TRAFFIC) != 0
+                val hasCustomBackupAgent =
+                    !pkg.applicationInfo?.backupAgentName.isNullOrBlank()
+
+                val components = mutableListOf<ExposedComponentInfo>()
+                pkg.activities?.forEach { activity ->
+                    if (activity.exported) {
+                        components += ExposedComponentInfo(
+                            type = AppComponentType.ACTIVITY,
+                            name = activity.name,
+                            exported = true,
+                            permission = activity.permission,
+                        )
+                    }
+                }
+                pkg.services?.forEach { service ->
+                    if (service.exported) {
+                        components += ExposedComponentInfo(
+                            type = AppComponentType.SERVICE,
+                            name = service.name,
+                            exported = true,
+                            permission = service.permission,
+                        )
+                    }
+                }
+                pkg.receivers?.forEach { receiver ->
+                    if (receiver.exported) {
+                        components += ExposedComponentInfo(
+                            type = AppComponentType.RECEIVER,
+                            name = receiver.name,
+                            exported = true,
+                            permission = receiver.permission,
+                        )
+                    }
+                }
+                pkg.providers?.forEach { provider ->
+                    if (provider.exported) {
+                        components += ExposedComponentInfo(
+                            type = AppComponentType.PROVIDER,
+                            name = provider.name,
+                            exported = true,
+                            permission = provider.readPermission ?: provider.writePermission,
+                        )
+                    }
+                }
+
+                val debugCertSigned = if (debuggable) {
+                    runCatching {
+                        val certFactory = java.security.cert.CertificateFactory.getInstance("X.509")
+                        val signatures = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
+                            pm.getPackageInfo(pkg.packageName, PackageManager.GET_SIGNING_CERTIFICATES).signingInfo?.apkContentsSigners
+                        } else {
+                            @Suppress("DEPRECATION")
+                            pm.getPackageInfo(pkg.packageName, PackageManager.GET_SIGNATURES).signatures
+                        }
+                        signatures?.any { sig ->
+                            val x509 = certFactory.generateCertificate(java.io.ByteArrayInputStream(sig.toByteArray())) as? java.security.cert.X509Certificate
+                            x509?.subjectX500Principal?.name?.contains("Android Debug", ignoreCase = true) == true
+                        } == true
+                    }.getOrDefault(false)
+                } else {
+                    false
+                }
+
+                val info = AppManifestSecurity(
+                    appLabel = label,
+                    packageName = pkg.packageName,
+                    debuggable = debuggable,
+                    allowBackup = allowBackup,
+                    hasCustomBackupAgent = hasCustomBackupAgent,
+                    usesCleartextTraffic = usesCleartextTraffic,
+                    testOnly = testOnly,
+                    targetSdkVersion = pkg.applicationInfo?.targetSdkVersion,
+                    minSdkVersion = pkg.applicationInfo?.minSdkVersion,
+                    debugCertSigned = debugCertSigned,
+                    exposedComponents = components,
+                )
+                ManifestSecurityAnalyzer.analyze(info)
+            }
+        }
 
     override suspend fun exportApk(packageName: String): Result<String> = withContext(Dispatchers.IO) {
         runCatching {

@@ -27,6 +27,7 @@ class HomeViewModel(private val operationLogs: OperationLogRepository, dispatche
                             .filterNot(OperationEntry::hiddenFromRecent)
                             .distinctBy { entry -> entry.description to entry.success }
                             .take(MAX_RECENT_OPERATIONS),
+                        operationHistory = entries,
                     )
                 }
             }
