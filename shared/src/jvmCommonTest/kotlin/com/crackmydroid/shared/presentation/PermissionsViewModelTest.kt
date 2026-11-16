@@ -13,8 +13,8 @@ import com.crackmydroid.shared.domain.usecase.permissions.BuildPermissionsReport
 import com.crackmydroid.shared.domain.usecase.permissions.ListPermissionsUseCase
 import com.crackmydroid.shared.domain.usecase.reports.ExportReportUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetExportFormatUseCase
-import com.crackmydroid.shared.domain.usecase.settings.GetPermissionFavoritesUseCase
-import com.crackmydroid.shared.domain.usecase.settings.SetPermissionFavoritesUseCase
+import com.crackmydroid.shared.domain.usecase.settings.GetAppFavoritesUseCase
+import com.crackmydroid.shared.domain.usecase.settings.SetAppFavoritesUseCase
 import com.crackmydroid.shared.i18n.usecase.UseCaseTexts
 import com.crackmydroid.shared.ui.permissions.PermissionsEvent
 import com.crackmydroid.shared.ui.permissions.PermissionsViewModel
@@ -47,8 +47,8 @@ import kotlinx.coroutines.withContext
 class PermissionsViewModelTest : BaseViewModelUnitTest() {
     private fun reportExporter() = ExportReportUseCase(mockk<ReportFileRepository>(relaxed = true))
 
-    private fun emptyFavorites(): GetPermissionFavoritesUseCase {
-        val getFavorites = mockk<GetPermissionFavoritesUseCase>()
+    private fun emptyFavorites(): GetAppFavoritesUseCase {
+        val getFavorites = mockk<GetAppFavoritesUseCase>()
         coEvery { getFavorites() } returns Result.success(emptySet())
         return getFavorites
     }
@@ -147,8 +147,8 @@ class PermissionsViewModelTest : BaseViewModelUnitTest() {
     @Test
     fun refreshLoadsFavoritesAndTogglePersistsThem() = runTest(dispatcher) {
         val listPermissions = mockk<ListPermissionsUseCase>()
-        val getFavorites = mockk<GetPermissionFavoritesUseCase>()
-        val setFavorites = mockk<SetPermissionFavoritesUseCase>()
+        val getFavorites = mockk<GetAppFavoritesUseCase>()
+        val setFavorites = mockk<SetAppFavoritesUseCase>()
         coEvery { listPermissions() } returns Result.success(emptyList())
         coEvery { getFavorites() } returns Result.success(setOf("pkg.favorite"))
         coEvery { setFavorites(any()) } returns Result.success(Unit)

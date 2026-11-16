@@ -12,6 +12,7 @@ import com.crackmydroid.shared.domain.model.apkcontent.ApkMavenLibrary
 import com.crackmydroid.shared.domain.model.apkcontent.ApkMavenLibraryDiscovery
 import com.crackmydroid.shared.domain.model.apkcontent.ApkLibraryVulnerabilityReport
 import com.crackmydroid.shared.domain.model.apkcontent.AdvisoryLookupAvailability
+import com.crackmydroid.shared.domain.model.apkcontent.AdvisoryLookupFailureKind
 import com.crackmydroid.shared.domain.model.apkcontent.MavenLibrarySource
 import com.crackmydroid.shared.domain.repository.ApkContentRepository
 import com.crackmydroid.shared.domain.repository.ApkLibraryMetadataRepository
@@ -232,6 +233,82 @@ class AnalyzeApkContentViewModelTest : BaseViewModelUnitTest() {
 
         assertEquals(UiLoadState.Success, vm.state.value.advisoryState)
         assertEquals(AdvisoryLookupAvailability.Available, vm.state.value.advisoryReport?.availability)
+    }
+
+    @Test
+    fun `not configured lookup remains a successful offline analysis state`() = runViewModelTest {
+        coEvery { appsRepo.listInstalled() } returns sampleApps
+        coEvery { apkContentRepo.analyze("com.example.vulnerable") } returns Result.success(sampleAnalysis)
+        coEvery { metadataRepo.discoverMavenLibraries("com.example.vulnerable") } returns Result.success(
+            ApkMavenLibraryDiscovery(
+                "com.example.vulnerable",
+                listOf(ApkMavenLibrary("androidx.window:window", "pkg:maven/androidx.window/window@1.5.0", "1.5.0")),
+            ),
+        )
+        coEvery { advisoryRepo.lookup(any()) } returns ApkLibraryVulnerabilityReport(AdvisoryLookupAvailability.NotConfigured)
+
+        val vm = createViewModel()
+        vm.emitEventAndAwaitIdle(AnalyzeApkContentEvent.Refresh())
+        vm.emitEventAndAwaitIdle(AnalyzeApkContentEvent.PackageSelected("com.example.vulnerable"))
+        vm.emitEventAndAwaitIdle(AnalyzeApkContentEvent.AnalysisRequested())
+        vm.emitEventAndAwaitIdle(AnalyzeApkContentEvent.VulnerabilityLookupRequested())
+
+        assertEquals(UiLoadState.Success, vm.state.value.analysisState)
+        assertEquals(UiLoadState.Success, vm.state.value.advisoryState)
+        assertEquals(AdvisoryLookupAvailability.NotConfigured, vm.state.value.advisoryReport?.availability)
+    }
+
+    @Test
+    fun `lookup failure is shown without clearing the offline analysis`() = runViewModelTest {
+        coEvery { appsRepo.listInstalled() } returns sampleApps
+        coEvery { apkContentRepo.analyze("com.example.vulnerable") } returns Result.success(sampleAnalysis)
+        coEvery { metadataRepo.discoverMavenLibraries("com.example.vulnerable") } returns Result.success(
+            ApkMavenLibraryDiscovery(
+                "com.example.vulnerable",
+                listOf(ApkMavenLibrary("androidx.window:window", "pkg:maven/androidx.window/window@1.5.0", "1.5.0")),
+            ),
+        )
+        coEvery { advisoryRepo.lookup(any()) } returns ApkLibraryVulnerabilityReport(
+            availability = AdvisoryLookupAvailability.Available,
+            failure = AdvisoryLookupFailureKind.RateLimited,
+        )
+
+        val vm = createViewModel()
+        vm.emitEventAndAwaitIdle(AnalyzeApkContentEvent.Refresh())
+        vm.emitEventAndAwaitIdle(AnalyzeApkContentEvent.PackageSelected("com.example.vulnerable"))
+        vm.emitEventAndAwaitIdle(AnalyzeApkContentEvent.AnalysisRequested())
+        vm.emitEventAndAwaitIdle(AnalyzeApkContentEvent.VulnerabilityLookupRequested())
+
+        assertEquals(UiLoadState.Success, vm.state.value.analysisState)
+        assertEquals(UiLoadState.Success, vm.state.value.advisoryState)
+        assertEquals(AdvisoryLookupFailureKind.RateLimited, vm.state.value.advisoryReport?.failure)
+        assertEquals(sampleAnalysis, vm.state.value.analysis)
+    }
+
+    @Test
+    fun `changing app clears previous advisory report and reset returns advisory state to idle`() = runViewModelTest {
+        coEvery { appsRepo.listInstalled() } returns sampleApps
+        coEvery { apkContentRepo.analyze("com.example.vulnerable") } returns Result.success(sampleAnalysis)
+        coEvery { metadataRepo.discoverMavenLibraries("com.example.vulnerable") } returns Result.success(
+            ApkMavenLibraryDiscovery(
+                "com.example.vulnerable",
+                listOf(ApkMavenLibrary("androidx.window:window", "pkg:maven/androidx.window/window@1.5.0", "1.5.0")),
+            ),
+        )
+        coEvery { advisoryRepo.lookup(any()) } returns ApkLibraryVulnerabilityReport(AdvisoryLookupAvailability.NotConfigured)
+
+        val vm = createViewModel()
+        vm.emitEventAndAwaitIdle(AnalyzeApkContentEvent.Refresh())
+        vm.emitEventAndAwaitIdle(AnalyzeApkContentEvent.PackageSelected("com.example.vulnerable"))
+        vm.emitEventAndAwaitIdle(AnalyzeApkContentEvent.AnalysisRequested())
+        vm.emitEventAndAwaitIdle(AnalyzeApkContentEvent.VulnerabilityLookupRequested())
+        vm.emitEventAndAwaitIdle(AnalyzeApkContentEvent.PackageSelected("com.example.calculator"))
+
+        assertEquals(UiLoadState.Idle, vm.state.value.advisoryState)
+        assertNull(vm.state.value.advisoryReport)
+        vm.emitEventAndAwaitIdle(AnalyzeApkContentEvent.Reset())
+        assertEquals(UiLoadState.Idle, vm.state.value.advisoryState)
+        assertNull(vm.state.value.advisoryReport)
     }
 
     @Test

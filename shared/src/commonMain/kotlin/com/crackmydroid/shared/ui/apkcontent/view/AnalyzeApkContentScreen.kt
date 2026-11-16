@@ -41,8 +41,10 @@ import com.crackmydroid.shared.domain.model.apkcontent.ApkFindingSeverity
 import com.crackmydroid.shared.domain.model.apkcontent.ApkLibrary
 import com.crackmydroid.shared.domain.model.apkcontent.ApkLibraryAdvisory
 import com.crackmydroid.shared.domain.model.apkcontent.ApkLibraryVulnerabilityReport
+import com.crackmydroid.shared.domain.model.apkcontent.ApkLibraryVulnerabilityResult
 import com.crackmydroid.shared.domain.model.apkcontent.ApkMavenLibrary
 import com.crackmydroid.shared.domain.model.apkcontent.AdvisoryLookupAvailability
+import com.crackmydroid.shared.domain.model.apkcontent.AdvisoryLookupFailureKind
 import com.crackmydroid.shared.domain.model.apkcontent.AdvisorySeverity
 import com.crackmydroid.shared.domain.model.apkcontent.MavenLibrarySource
 import com.crackmydroid.shared.domain.model.apkcontent.ApkPlainTextCategory
@@ -1301,3 +1303,73 @@ private fun LibraryAdvisoriesCardPreview() = ComponentPreviewContainer {
         onOpenAdvisory = {},
     )
 }
+
+@AppComponentPreviews
+@Composable
+private fun LibraryAdvisoriesNotConfiguredPreview() = ComponentPreviewContainer {
+    LibraryAdvisoriesCard(
+        libraries = previewAdvisoryLibraries(),
+        lookupState = UiLoadState.Success,
+        report = ApkLibraryVulnerabilityReport(AdvisoryLookupAvailability.NotConfigured),
+        screenStrings = ScreenUiStrings("en"),
+        onLookup = {},
+        onOpenAdvisory = {},
+    )
+}
+
+@AppComponentPreviews
+@Composable
+private fun LibraryAdvisoriesUnavailablePreview() = ComponentPreviewContainer {
+    LibraryAdvisoriesCard(
+        libraries = previewAdvisoryLibraries(),
+        lookupState = UiLoadState.Success,
+        report = ApkLibraryVulnerabilityReport(
+            availability = AdvisoryLookupAvailability.Available,
+            failure = AdvisoryLookupFailureKind.Network,
+        ),
+        screenStrings = ScreenUiStrings("en"),
+        onLookup = {},
+        onOpenAdvisory = {},
+    )
+}
+
+@AppComponentPreviews
+@Composable
+private fun LibraryAdvisoriesFoundPreview() = ComponentPreviewContainer {
+    val library = previewAdvisoryLibraries().single()
+    LibraryAdvisoriesCard(
+        libraries = listOf(library),
+        lookupState = UiLoadState.Success,
+        report = ApkLibraryVulnerabilityReport(
+            availability = AdvisoryLookupAvailability.Available,
+            results = listOf(
+                ApkLibraryVulnerabilityResult(
+                    packageUrl = library.packageUrl,
+                    version = library.version,
+                    advisories = listOf(
+                        ApkLibraryAdvisory(
+                            source = com.crackmydroid.shared.domain.model.apkcontent.AdvisorySource.Osv,
+                            advisoryId = "GHSA-example",
+                            severity = AdvisorySeverity.High,
+                            summary = "Example dependency vulnerability",
+                            fixedVersion = "1.5.1",
+                            url = "https://osv.dev/",
+                        ),
+                    ),
+                ),
+            ),
+        ),
+        screenStrings = ScreenUiStrings("en"),
+        onLookup = {},
+        onOpenAdvisory = {},
+    )
+}
+
+private fun previewAdvisoryLibraries() = listOf(
+    ApkMavenLibrary(
+        displayName = "androidx.window:window",
+        packageUrl = "pkg:maven/androidx.window/window@1.5.0",
+        version = "1.5.0",
+        source = MavenLibrarySource.VersionMetadata,
+    ),
+)

@@ -1,8 +1,7 @@
 # API per sicurezza APK e librerie Android
 
-Questo documento raccoglie le opzioni per estendere in futuro **Analyze APK Content** con verifiche
-online di vulnerabilità e sicurezza. Non modifica l'attuale analisi: la modalità predefinita resta
-interamente offline.
+**Analyze APK Content** esegue l'analisi locale offline e offre una verifica OSV opzionale delle
+librerie per cui è possibile ricostruire coordinate Maven e versione in modo deterministico.
 
 ## API consigliate
 
@@ -35,16 +34,18 @@ Play Integrity è pensata per proteggere l'app proprietaria e richiede configura
 backend. Può offrire segnali di integrità del dispositivo e Play Protect, ma non è un catalogo di
 vulnerabilità per librerie Android.
 
-## Architettura proposta
+## Configurazione e flusso
 
-1. Conservare l'inventario e l'analisi euristica offline come comportamento predefinito.
-2. Esporre una verifica online opzionale, chiarendo dati inviati, sorgente consultata e limiti.
-3. Inviare al backend solo coordinate Maven/PURL e versione delle librerie identificate; non inviare
-   l'APK, le sue entry, certificati o contenuti.
-4. Il backend applica autenticazione, rate limit, cache e normalizzazione delle risposte OSV/GitHub;
-   l'app riceve un modello di advisory già filtrato e localizzabile.
-5. Mostrare ogni risultato con fonte, identificativo, severità, evidenza della versione rilevata e
-   remediation consigliata.
+Configura l'URL HTTPS del backend advisory dall'esterno dell'app:
+
+- Android: proprietà Gradle `securityAdvisoryEndpoint`, passata come `-PsecurityAdvisoryEndpoint=https://host/percorso`.
+- Desktop JVM: proprietà di sistema `crackmydroid.securityAdvisoryEndpoint`, passata come `-Dcrackmydroid.securityAdvisoryEndpoint=https://host/percorso`.
+
+Se l'endpoint manca o non è HTTPS, l'app mostra il servizio come non configurato; l'analisi APK
+offline resta disponibile. La richiesta parte solo quando l'utente preme **Verifica vulnerabilità
+online**. Invia esclusivamente PURL Maven e versione delle librerie verificate. Package name
+dell'app analizzata, APK, hash, entry, certificati e contenuti non vengono inviati. Il backend
+normalizza le risposte OSV e l'app mostra fonte, ID, severità, sommario, versione corretta e link.
 
 ## Limiti e privacy
 
@@ -52,5 +53,6 @@ vulnerabilità per librerie Android.
   bisogna associare CVE soltanto per nome, perché produrrebbe falsi positivi.
 - La verifica con servizi antimalware come VirusTotal richiede consenso separato: hash, package name
   e soprattutto file APK possono rappresentare dati sensibili o identificativi.
-- Nessun APK deve essere caricato o conservato dal flusso di verifica advisory proposto.
+- Nessun APK, hash, package name dell'app, entry, certificato o contenuto viene trasmesso dal flusso
+  advisory.
 - Il risultato resta un indicatore tecnico: non certifica l'assenza di malware o vulnerabilità.
