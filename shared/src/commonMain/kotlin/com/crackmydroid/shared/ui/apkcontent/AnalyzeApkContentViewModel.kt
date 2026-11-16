@@ -3,16 +3,21 @@ package com.crackmydroid.shared.ui.apkcontent
 import com.crackmydroid.architecture.coroutines.AppDispatchers
 import com.crackmydroid.architecture.presentation.model.UiLoadState
 import com.crackmydroid.shared.domain.usecase.apkcontent.AnalyzeApkContentUseCase
+import com.crackmydroid.shared.domain.usecase.apkcontent.DiscoverApkMavenLibrariesUseCase
+import com.crackmydroid.shared.domain.usecase.apkcontent.LookupApkLibraryVulnerabilitiesUseCase
 import com.crackmydroid.shared.domain.usecase.apkcontent.OpenAnalyzedApkArchiveUseCase
 import com.crackmydroid.shared.domain.usecase.installedapps.ListInstalledAppsUseCase
 import com.crackmydroid.shared.domain.usecase.reports.ExportReportUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetAppFavoritesUseCase
 import com.crackmydroid.shared.domain.usecase.settings.SetAppFavoritesUseCase
+import com.crackmydroid.shared.domain.model.apkcontent.VulnerabilityLookupLibrary
 import com.crackmydroid.shared.presentation.LocalizedBaseViewModel
 
 class AnalyzeApkContentViewModel(
     private val listApps: ListInstalledAppsUseCase,
     private val analyzeApk: AnalyzeApkContentUseCase,
+    private val discoverMavenLibraries: DiscoverApkMavenLibrariesUseCase,
+    private val lookupLibraryVulnerabilities: LookupApkLibraryVulnerabilitiesUseCase,
     private val openArchive: OpenAnalyzedApkArchiveUseCase,
     private val reportExporter: ExportReportUseCase,
     private val getAppFavorites: GetAppFavoritesUseCase,
@@ -28,14 +33,31 @@ class AnalyzeApkContentViewModel(
             is AnalyzeApkContentEvent.FavoriteToggled -> toggleFavorite(event.packageName)
 
             is AnalyzeApkContentEvent.PackageSelected -> updateState {
-                it.copy(selectedPackage = event.packageName, analysis = null, error = null)
+                it.copy(
+                    selectedPackage = event.packageName,
+                    analysis = null,
+                    mavenLibraries = emptyList(),
+                    advisoryState = UiLoadState.Idle,
+                    advisoryReport = null,
+                    error = null,
+                )
             }
 
             is AnalyzeApkContentEvent.ClearSelection -> updateState {
-                it.copy(selectedPackage = null, analysis = null, analysisState = UiLoadState.Idle, error = null)
+                it.copy(
+                    selectedPackage = null,
+                    analysis = null,
+                    analysisState = UiLoadState.Idle,
+                    mavenLibraries = emptyList(),
+                    advisoryState = UiLoadState.Idle,
+                    advisoryReport = null,
+                    error = null,
+                )
             }
 
             is AnalyzeApkContentEvent.AnalysisRequested -> analyze()
+
+            is AnalyzeApkContentEvent.VulnerabilityLookupRequested -> lookupVulnerabilities()
 
             is AnalyzeApkContentEvent.ArchiveOpenRequested -> prepareAndOpenArchive()
 
@@ -50,6 +72,9 @@ class AnalyzeApkContentViewModel(
                     selectedPackage = null,
                     analysis = null,
                     analysisState = UiLoadState.Idle,
+                    mavenLibraries = emptyList(),
+                    advisoryState = UiLoadState.Idle,
+                    advisoryReport = null,
                     error = null,
                     exportPath = null,
                     query = "",
@@ -75,9 +100,21 @@ class AnalyzeApkContentViewModel(
     private fun analyze() {
         val packageName = currentState.selectedPackage ?: return
         launchLatest("apk-content-analysis") {
-            updateState { it.copy(analysisState = UiLoadState.Loading, error = null, analysis = null) }
+            updateState {
+                it.copy(
+                    analysisState = UiLoadState.Loading,
+                    error = null,
+                    analysis = null,
+                    mavenLibraries = emptyList(),
+                    advisoryState = UiLoadState.Idle,
+                    advisoryReport = null,
+                )
+            }
             analyzeApk(packageName).onSuccess { result ->
                 updateState { it.copy(analysisState = UiLoadState.Success, analysis = result) }
+                discoverMavenLibraries(packageName).onSuccess { discovery ->
+                    updateState { it.copy(mavenLibraries = discovery.libraries) }
+                }
             }
                 .onFailure { error ->
                     updateState {
@@ -87,6 +124,28 @@ class AnalyzeApkContentViewModel(
                         )
                     }
                 }
+        }
+    }
+
+    private fun lookupVulnerabilities() {
+        val libraries = currentState.mavenLibraries
+        if (libraries.isEmpty() || currentState.advisoryState is UiLoadState.Loading) return
+        launchLatest("apk-content-advisory-lookup") {
+            updateState { it.copy(advisoryState = UiLoadState.Loading, advisoryReport = null, error = null) }
+            lookupLibraryVulnerabilities(
+                libraries.map { library ->
+                    VulnerabilityLookupLibrary(library.displayName, library.packageUrl, library.version)
+                },
+            ).onSuccess { report ->
+                updateState { it.copy(advisoryState = UiLoadState.Success, advisoryReport = report) }
+            }.onFailure { error ->
+                updateState {
+                    it.copy(
+                        advisoryState = UiLoadState.Error(error.message ?: strings.commandError),
+                        error = error.message ?: strings.commandError,
+                    )
+                }
+            }
         }
     }
     private fun export(share: Boolean) {
@@ -100,6 +159,20 @@ class AnalyzeApkContentViewModel(
                 appendLine("Highest severity: ${analysis.highestSeverity}")
                 appendLine("Libraries:")
                 analysis.libraries.forEach { appendLine("- ${it.name}: ${it.evidence}") }
+                if (currentState.mavenLibraries.isNotEmpty()) {
+                    appendLine("Verifiable Maven libraries:")
+                    currentState.mavenLibraries.forEach {
+                        appendLine("- ${it.displayName}:${it.version} (${it.source})")
+                    }
+                }
+                currentState.advisoryReport?.let { report ->
+                    appendLine("Security advisories (${report.availability}):")
+                    report.results.forEach { result ->
+                        result.advisories.forEach { advisory ->
+                            appendLine("- ${result.packageUrl}@${result.version}: ${advisory.advisoryId} [${advisory.severity}] ${advisory.summary}")
+                        }
+                    }
+                }
                 appendLine("Findings:")
                 analysis.findings.forEach {
                     appendLine("- [${it.severity}] ${it.category}: ${it.evidence} — ${it.remediation}")

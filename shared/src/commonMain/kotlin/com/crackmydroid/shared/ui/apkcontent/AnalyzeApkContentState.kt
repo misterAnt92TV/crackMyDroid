@@ -4,6 +4,8 @@ import com.crackmydroid.architecture.presentation.model.UiLoadState
 import com.crackmydroid.architecture.presentation.model.UiState
 import com.crackmydroid.shared.domain.model.InstalledAppEntry
 import com.crackmydroid.shared.domain.model.apkcontent.ApkContentAnalysis
+import com.crackmydroid.shared.domain.model.apkcontent.ApkLibraryVulnerabilityReport
+import com.crackmydroid.shared.domain.model.apkcontent.ApkMavenLibrary
 
 data class AnalyzeApkContentState(
     val apps: List<InstalledAppEntry> = emptyList(),
@@ -14,6 +16,9 @@ data class AnalyzeApkContentState(
     val analysisState: UiLoadState = UiLoadState.Idle,
     val archiveNavigationState: UiLoadState = UiLoadState.Idle,
     val analysis: ApkContentAnalysis? = null,
+    val mavenLibraries: List<ApkMavenLibrary> = emptyList(),
+    val advisoryState: UiLoadState = UiLoadState.Idle,
+    val advisoryReport: ApkLibraryVulnerabilityReport? = null,
     val error: String? = null,
     val exportPath: String? = null,
 ) : UiState {

@@ -24,6 +24,8 @@ android {
         versionCode = 6
         versionName = "1.6"
         manifestPlaceholders["integrityVerificationEndpoint"] = ""
+        manifestPlaceholders["securityAdvisoryEndpoint"] =
+            providers.gradleProperty("securityAdvisoryEndpoint").orElse("").get()
     }
 
     buildTypes {

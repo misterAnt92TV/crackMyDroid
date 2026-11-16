@@ -6,6 +6,8 @@ import com.crackmydroid.architecture.coroutines.DefaultAppDispatchers
 import com.crackmydroid.architecture.logging.AppLogger
 import com.crackmydroid.shared.domain.usecase.activities.GetActivitiesUseCase
 import com.crackmydroid.shared.domain.usecase.apkcontent.AnalyzeApkContentUseCase
+import com.crackmydroid.shared.domain.usecase.apkcontent.DiscoverApkMavenLibrariesUseCase
+import com.crackmydroid.shared.domain.usecase.apkcontent.LookupApkLibraryVulnerabilitiesUseCase
 import com.crackmydroid.shared.domain.usecase.apkcontent.OpenAnalyzedApkArchiveUseCase
 import com.crackmydroid.shared.domain.usecase.activities.LaunchActivityUseCase
 import com.crackmydroid.shared.domain.usecase.info.BuildDeviceInfoReportUseCase
@@ -68,6 +70,9 @@ import org.koin.core.context.startKoin
 import org.koin.core.module.Module
 import org.koin.dsl.KoinAppDeclaration
 import org.koin.dsl.module
+import com.crackmydroid.shared.data.securityadvisory.SecurityAdvisoryBackendClient
+import com.crackmydroid.shared.data.securityadvisory.SecurityAdvisoryRepositoryBackend
+import com.crackmydroid.shared.domain.repository.SecurityAdvisoryRepository
 
 expect fun platformModule(): Module
 
@@ -123,7 +128,11 @@ fun commonModule() = module {
     factory { ExportReportUseCase(get(), get(), logger = get()) }
     factory { ListInstalledAppsUseCase(get(), logger = get()) }
     factory { AnalyzeApkContentUseCase(get(), logger = get()) }
+    factory { DiscoverApkMavenLibrariesUseCase(get(), logger = get()) }
+    factory { LookupApkLibraryVulnerabilitiesUseCase(get(), logger = get()) }
     factory { OpenAnalyzedApkArchiveUseCase(get(), logger = get()) }
+    single { SecurityAdvisoryBackendClient(get()) }
+    single<SecurityAdvisoryRepository> { SecurityAdvisoryRepositoryBackend(get(), get()) }
     factory { ExportApkUseCase(get(), logger = get()) }
     factory { ShareApkUseCase(get(), logger = get()) }
 }
@@ -196,5 +205,5 @@ fun presentationModule() = module {
     factory { PermissionsViewModel(get(), get(), get(), get(), get(), get(), get()) }
     factory { InstalledAppsViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
     factory { PenTestingViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get()) }
-    factory { AnalyzeApkContentViewModel(get(), get(), get(), get(), get(), get(), get()) }
+    factory { AnalyzeApkContentViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get()) }
 }

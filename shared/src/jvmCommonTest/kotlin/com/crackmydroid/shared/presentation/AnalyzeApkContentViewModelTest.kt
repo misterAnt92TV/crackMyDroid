@@ -8,13 +8,25 @@ import com.crackmydroid.shared.domain.model.apkcontent.ApkContentAnalysis
 import com.crackmydroid.shared.domain.model.apkcontent.ApkContentFinding
 import com.crackmydroid.shared.domain.model.apkcontent.ApkFindingSeverity
 import com.crackmydroid.shared.domain.model.apkcontent.ApkLibrary
+import com.crackmydroid.shared.domain.model.apkcontent.ApkMavenLibrary
+import com.crackmydroid.shared.domain.model.apkcontent.ApkMavenLibraryDiscovery
+import com.crackmydroid.shared.domain.model.apkcontent.ApkLibraryVulnerabilityReport
+import com.crackmydroid.shared.domain.model.apkcontent.AdvisoryLookupAvailability
+import com.crackmydroid.shared.domain.model.apkcontent.MavenLibrarySource
 import com.crackmydroid.shared.domain.repository.ApkContentRepository
+import com.crackmydroid.shared.domain.repository.ApkLibraryMetadataRepository
 import com.crackmydroid.shared.domain.repository.InstalledAppsRepository
 import com.crackmydroid.shared.domain.repository.ReportFileRepository
+import com.crackmydroid.shared.domain.repository.SecurityAdvisoryRepository
+import com.crackmydroid.shared.domain.repository.SettingsRepository
 import com.crackmydroid.shared.domain.usecase.apkcontent.AnalyzeApkContentUseCase
+import com.crackmydroid.shared.domain.usecase.apkcontent.DiscoverApkMavenLibrariesUseCase
+import com.crackmydroid.shared.domain.usecase.apkcontent.LookupApkLibraryVulnerabilitiesUseCase
 import com.crackmydroid.shared.domain.usecase.apkcontent.OpenAnalyzedApkArchiveUseCase
 import com.crackmydroid.shared.domain.usecase.installedapps.ListInstalledAppsUseCase
 import com.crackmydroid.shared.domain.usecase.reports.ExportReportUseCase
+import com.crackmydroid.shared.domain.usecase.settings.GetAppFavoritesUseCase
+import com.crackmydroid.shared.domain.usecase.settings.SetAppFavoritesUseCase
 import com.crackmydroid.shared.ui.apkcontent.AnalyzeApkContentEvent
 import com.crackmydroid.shared.ui.apkcontent.AnalyzeApkContentViewModel
 import io.mockk.coEvery
@@ -33,11 +45,18 @@ class AnalyzeApkContentViewModelTest : BaseViewModelUnitTest() {
     private val appsRepo = mockk<InstalledAppsRepository>()
     private val apkContentRepo = mockk<ApkContentRepository>()
     private val reportFileRepo = mockk<ReportFileRepository>()
+    private val metadataRepo = mockk<ApkLibraryMetadataRepository>()
+    private val advisoryRepo = mockk<SecurityAdvisoryRepository>()
+    private val settingsRepo = mockk<SettingsRepository>()
 
     private val listAppsUseCase = ListInstalledAppsUseCase(appsRepo)
     private val analyzeApkUseCase = AnalyzeApkContentUseCase(apkContentRepo)
     private val openArchiveUseCase = OpenAnalyzedApkArchiveUseCase(apkContentRepo)
     private val exportReportUseCase = ExportReportUseCase(reportFileRepo)
+    private val discoverMavenLibrariesUseCase = DiscoverApkMavenLibrariesUseCase(metadataRepo)
+    private val lookupVulnerabilitiesUseCase = LookupApkLibraryVulnerabilitiesUseCase(advisoryRepo)
+    private val getAppFavoritesUseCase = GetAppFavoritesUseCase(settingsRepo)
+    private val setAppFavoritesUseCase = SetAppFavoritesUseCase(settingsRepo)
 
     @BeforeTest
     override fun setUp() {
@@ -53,8 +72,12 @@ class AnalyzeApkContentViewModelTest : BaseViewModelUnitTest() {
         AnalyzeApkContentViewModel(
             listApps = listAppsUseCase,
             analyzeApk = analyzeApkUseCase,
+            discoverMavenLibraries = discoverMavenLibrariesUseCase,
+            lookupLibraryVulnerabilities = lookupVulnerabilitiesUseCase,
             openArchive = openArchiveUseCase,
             reportExporter = exportReportUseCase,
+            getAppFavorites = getAppFavoritesUseCase,
+            setAppFavorites = setAppFavoritesUseCase,
             dispatchers = appDispatchers,
         ),
     )
@@ -154,6 +177,19 @@ class AnalyzeApkContentViewModelTest : BaseViewModelUnitTest() {
     fun `analysis requested runs analysis and transitions to step 3`() = runViewModelTest {
         coEvery { appsRepo.listInstalled() } returns sampleApps
         coEvery { apkContentRepo.analyze("com.example.vulnerable") } returns Result.success(sampleAnalysis)
+        coEvery { metadataRepo.discoverMavenLibraries("com.example.vulnerable") } returns Result.success(
+            ApkMavenLibraryDiscovery(
+                "com.example.vulnerable",
+                listOf(
+                    ApkMavenLibrary(
+                        "androidx.window:window",
+                        "pkg:maven/androidx.window/window@1.5.0",
+                        "1.5.0",
+                        MavenLibrarySource.VersionMetadata,
+                    ),
+                ),
+            ),
+        )
 
         val vm = createViewModel()
         vm.emitEventAndAwaitIdle(AnalyzeApkContentEvent.Refresh())
@@ -166,6 +202,36 @@ class AnalyzeApkContentViewModelTest : BaseViewModelUnitTest() {
         assertEquals(UiLoadState.Success, state.analysisState)
         assertEquals(sampleAnalysis, state.analysis)
         assertEquals(ApkFindingSeverity.High, state.analysis?.highestSeverity)
+        assertEquals(1, state.mavenLibraries.size)
+    }
+
+    @Test
+    fun `vulnerability lookup runs only for discovered Maven libraries`() = runViewModelTest {
+        coEvery { appsRepo.listInstalled() } returns sampleApps
+        coEvery { apkContentRepo.analyze("com.example.vulnerable") } returns Result.success(sampleAnalysis)
+        coEvery { metadataRepo.discoverMavenLibraries("com.example.vulnerable") } returns Result.success(
+            ApkMavenLibraryDiscovery(
+                "com.example.vulnerable",
+                listOf(
+                    ApkMavenLibrary(
+                        "androidx.window:window",
+                        "pkg:maven/androidx.window/window@1.5.0",
+                        "1.5.0",
+                        MavenLibrarySource.VersionMetadata,
+                    ),
+                ),
+            ),
+        )
+        coEvery { advisoryRepo.lookup(any()) } returns ApkLibraryVulnerabilityReport(AdvisoryLookupAvailability.Available)
+
+        val vm = createViewModel()
+        vm.emitEventAndAwaitIdle(AnalyzeApkContentEvent.Refresh())
+        vm.emitEventAndAwaitIdle(AnalyzeApkContentEvent.PackageSelected("com.example.vulnerable"))
+        vm.emitEventAndAwaitIdle(AnalyzeApkContentEvent.AnalysisRequested())
+        vm.emitEventAndAwaitIdle(AnalyzeApkContentEvent.VulnerabilityLookupRequested())
+
+        assertEquals(UiLoadState.Success, vm.state.value.advisoryState)
+        assertEquals(AdvisoryLookupAvailability.Available, vm.state.value.advisoryReport?.availability)
     }
 
     @Test
