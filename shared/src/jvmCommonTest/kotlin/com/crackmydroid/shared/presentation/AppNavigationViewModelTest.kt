@@ -129,7 +129,7 @@ class AppNavigationViewModelTest : BaseViewModelUnitTest() {
         )
 
         assertEquals(Screen.Info, state.selectedScreen)
-        assertEquals(listOf(Screen.Home), state.navigationHistory)
+        assertEquals(listOf(Screen.Dashboard), state.navigationHistory)
         assertNull(state.pendingHintScreen)
     }
 
@@ -145,7 +145,7 @@ class AppNavigationViewModelTest : BaseViewModelUnitTest() {
             ),
         )
 
-        assertEquals(Screen.Home, state.selectedScreen)
+        assertEquals(Screen.Dashboard, state.selectedScreen)
         assertEquals(Screen.Permissions, state.pendingHintScreen)
         assertEquals(NavigationSource.Drawer, state.pendingNavigationSource)
     }
@@ -186,7 +186,7 @@ class AppNavigationViewModelTest : BaseViewModelUnitTest() {
 
         val state = vm.emitEventAndAwaitIdle(AppNavigationEvent.HintDismissed())
 
-        assertEquals(Screen.Home, state.selectedScreen)
+        assertEquals(Screen.Dashboard, state.selectedScreen)
         assertNull(state.pendingHintScreen)
         assertNull(state.pendingNavigationSource)
     }
@@ -199,10 +199,10 @@ class AppNavigationViewModelTest : BaseViewModelUnitTest() {
 
         val step1 = vm.emitEventAndAwaitIdle(AppNavigationEvent.BackRequested())
         assertEquals(Screen.Info, step1.selectedScreen)
-        assertEquals(listOf(Screen.Home), step1.navigationHistory)
+        assertEquals(listOf(Screen.Dashboard), step1.navigationHistory)
 
         val step2 = vm.emitEventAndAwaitIdle(AppNavigationEvent.BackRequested())
-        assertEquals(Screen.Home, step2.selectedScreen)
+        assertEquals(Screen.Dashboard, step2.selectedScreen)
         assertEquals(emptyList(), step2.navigationHistory)
     }
 

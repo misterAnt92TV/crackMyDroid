@@ -6,18 +6,18 @@ import com.crackmydroid.shared.presentation.navigation.Screen
 import com.crackmydroid.shared.ui.pentest.model.PenTestWizardStep
 
 data class AppNavigationState(
-    val selectedScreen: Screen = Screen.Home,
+    val selectedScreen: Screen = Screen.Dashboard,
     val navigationHistory: List<Screen> = emptyList(),
     val topBar: TopBarUiState = NavigationChromeMapper.topBar(
-        screen = Screen.Home,
+        screen = Screen.Dashboard,
         canNavigateBack = false,
         strings = stringsFor("en"),
         penTestStep = PenTestWizardStep.SelectApp,
         searchRequestId = 0,
     ),
     val searchVisibilityByScreen: Map<Screen, Boolean> = emptyMap(),
-    val bottomBarItems: List<BottomBarItemUiState> = NavigationChromeMapper.bottomItems(
-        selectedScreen = Screen.Home,
+    val drawerSections: List<DrawerSectionUiState> = NavigationChromeMapper.drawerSections(
+        selectedScreen = Screen.Dashboard,
         strings = stringsFor("en"),
     ),
     val showIntro: Boolean = true,

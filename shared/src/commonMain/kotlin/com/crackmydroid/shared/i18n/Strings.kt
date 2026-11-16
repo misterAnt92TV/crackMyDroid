@@ -4,6 +4,29 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import com.crackmydroid.shared.i18n.pentest.PenTestUiStrings
 import com.crackmydroid.shared.i18n.pentest.penTestUiStringsForLanguage
 
+/**
+ * Keeps the catalog constructor below the Android DEX verifier register limit.
+ * The catalog is initialized statically for every supported locale.
+ */
+data class NavigationStrings(
+    val dashboard: String,
+    val history: String,
+    val sectionAnalyzeApps: String,
+    val sectionDeviceSecurity: String,
+    val sectionTools: String,
+    val sectionActivity: String,
+    val sectionSupport: String,
+    val heroEyebrow: String,
+    val heroTitle: String,
+    val heroDescription: String,
+    val installedAppsDescription: String,
+    val analyzeApkDescription: String,
+    val permissionsDescription: String,
+    val penTestDescription: String,
+    val gettingStartedTitle: String,
+    val gettingStartedSteps: List<String>,
+)
+
 data class Strings(
     val navActivities: String,
     val navRoot: String,
@@ -11,11 +34,11 @@ data class Strings(
     val navTrick: String,
     val navSettings: String,
     val navLog: String,
-    val navHome: String,
     val navPermissions: String,
     val navMore: String,
     val navHelp: String,
     val navPentest: String,
+    val navigation: NavigationStrings,
     val filterActivities: String,
     val searchLog: String,
     val refreshLog: String,
@@ -250,6 +273,23 @@ data class Strings(
     val appSubtitle: String = "Android security analysis and testing toolkit",
     val appVersionLabel: String = "Version %s",
 ) {
+    val navDashboard: String get() = navigation.dashboard
+    val navHistory: String get() = navigation.history
+    val navSectionAnalyzeApps: String get() = navigation.sectionAnalyzeApps
+    val navSectionDeviceSecurity: String get() = navigation.sectionDeviceSecurity
+    val navSectionTools: String get() = navigation.sectionTools
+    val navSectionActivity: String get() = navigation.sectionActivity
+    val navSectionSupport: String get() = navigation.sectionSupport
+    val dashboardHeroEyebrow: String get() = navigation.heroEyebrow
+    val dashboardHeroTitle: String get() = navigation.heroTitle
+    val dashboardHeroDescription: String get() = navigation.heroDescription
+    val dashboardInstalledAppsDescription: String get() = navigation.installedAppsDescription
+    val dashboardAnalyzeApkDescription: String get() = navigation.analyzeApkDescription
+    val dashboardPermissionsDescription: String get() = navigation.permissionsDescription
+    val dashboardPenTestDescription: String get() = navigation.penTestDescription
+    val dashboardGettingStartedTitle: String get() = navigation.gettingStartedTitle
+    val dashboardGettingStartedSteps: List<String> get() = navigation.gettingStartedSteps
+
     val navAnalyzeApkContent: String
         get() = ScreenUiStrings(activityUi.languageCode).navAnalyzeApkContent
 

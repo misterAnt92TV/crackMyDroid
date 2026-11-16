@@ -134,7 +134,8 @@ private fun HelpNavigationItem(title: String, summary: String, icon: ImageVector
 }
 
 private val helpScreens = listOf(
-    Screen.Home,
+    Screen.Dashboard,
+    Screen.History,
     Screen.InstalledApps,
     Screen.Pentest,
     Screen.AnalyzeApkContent,
@@ -148,7 +149,8 @@ private val helpScreens = listOf(
 )
 
 private fun sectionSummary(strings: Strings, screen: Screen): String = when (screen) {
-    Screen.Home -> strings.helpHome
+    Screen.Dashboard -> strings.helpHome
+    Screen.History -> strings.navHistory
     Screen.InstalledApps -> strings.helpApk
     Screen.Pentest -> strings.helpPentest
     Screen.AnalyzeApkContent -> strings.helpAnalyzeApkContent

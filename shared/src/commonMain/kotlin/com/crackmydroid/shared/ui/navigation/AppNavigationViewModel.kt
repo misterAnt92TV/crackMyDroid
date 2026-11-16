@@ -149,7 +149,6 @@ class AppNavigationViewModel(
     private fun navigateTo(screen: Screen, origin: NavigationSource) {
         val state = currentState
         val history = when {
-            origin == NavigationSource.BottomBar -> emptyList()
             state.navigationHistory.lastOrNull() == state.selectedScreen -> state.navigationHistory
             else -> state.navigationHistory + state.selectedScreen
         }
@@ -173,7 +172,7 @@ class AppNavigationViewModel(
                 )
             }
 
-            state.selectedScreen != Screen.Home -> navigateTo(Screen.Home, NavigationSource.BottomBar)
+            state.selectedScreen != Screen.Dashboard -> navigateTo(Screen.Dashboard, NavigationSource.Drawer)
 
             else -> Unit
         }
@@ -250,7 +249,7 @@ class AppNavigationViewModel(
             searchRequestId = state.topBar.searchRequestId,
             searchVisible = state.searchVisibilityByScreen[selectedScreen] ?: true,
         ),
-        bottomBarItems = NavigationChromeMapper.bottomItems(selectedScreen, strings),
+        drawerSections = NavigationChromeMapper.drawerSections(selectedScreen, strings),
     )
 
     private fun dismissHint() = updateState { it.copy(pendingHintScreen = null, pendingNavigationSource = null) }

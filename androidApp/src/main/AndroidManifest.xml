@@ -23,6 +23,8 @@
     <application
         android:name=".CrackMyDroidApp"
         android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
         android:label="CrackMyDroid"
         android:roundIcon="@mipmap/ic_launcher_round"
@@ -32,6 +34,10 @@
         <meta-data
             android:name="com.crackmydroid.INTEGRITY_VERIFICATION_ENDPOINT"
             android:value="${integrityVerificationEndpoint}" />
+        <!-- Public endpoint only. Advisory provider credentials remain on the backend. -->
+        <meta-data
+            android:name="com.crackmydroid.SECURITY_ADVISORY_ENDPOINT"
+            android:value="${securityAdvisoryEndpoint}" />
         <activity
             android:name=".MainActivity"
             android:exported="true"

@@ -9,6 +9,8 @@ import androidx.datastore.preferences.preferencesDataStore
 import com.crackmydroid.shared.data.settings.SettingsPreferenceKeys.ACTIVITY_FAVORITES
 import com.crackmydroid.shared.data.settings.SettingsPreferenceKeys.ACTIVITY_PACKAGE_FAVORITES
 import com.crackmydroid.shared.data.settings.SettingsPreferenceKeys.ADB_PATH
+import com.crackmydroid.shared.data.settings.SettingsPreferenceKeys.APP_FAVORITES
+import com.crackmydroid.shared.data.settings.SettingsPreferenceKeys.APP_FAVORITES_MIGRATED
 import com.crackmydroid.shared.data.settings.SettingsPreferenceKeys.EXPORT_FORMAT
 import com.crackmydroid.shared.data.settings.SettingsPreferenceKeys.FEATURE_HINTS_ENABLED
 import com.crackmydroid.shared.data.settings.SettingsPreferenceKeys.HIGH_CONTRAST
@@ -46,6 +48,8 @@ class SettingsRepositoryAndroid(private val context: Context) : SettingsReposito
     private val activityPackageFavoritesKey = stringSetPreferencesKey(ACTIVITY_PACKAGE_FAVORITES)
     private val installedAppFavoritesKey = stringSetPreferencesKey(INSTALLED_APP_FAVORITES)
     private val permissionFavoritesKey = stringSetPreferencesKey(PERMISSION_FAVORITES)
+    private val appFavoritesKey = stringSetPreferencesKey(APP_FAVORITES)
+    private val appFavoritesMigratedKey = booleanPreferencesKey(APP_FAVORITES_MIGRATED)
 
     override suspend fun getTheme(): AppTheme {
         val prefs = context.settingsDataStore.data.first()
@@ -179,17 +183,22 @@ class SettingsRepositoryAndroid(private val context: Context) : SettingsReposito
         context.settingsDataStore.edit { it[activityPackageFavoritesKey] = values }
     }
 
-    override suspend fun getInstalledAppFavorites() =
-        context.settingsDataStore.data.first()[installedAppFavoritesKey].orEmpty()
-
-    override suspend fun setInstalledAppFavorites(values: Set<String>) {
-        context.settingsDataStore.edit { it[installedAppFavoritesKey] = values }
+    override suspend fun getAppFavorites(): Set<String> {
+        var favorites = emptySet<String>()
+        context.settingsDataStore.edit { prefs ->
+            favorites = if (prefs[appFavoritesMigratedKey] == true) {
+                prefs[appFavoritesKey].orEmpty()
+            } else {
+                (prefs[installedAppFavoritesKey].orEmpty() + prefs[permissionFavoritesKey].orEmpty()).also {
+                    prefs[appFavoritesKey] = it
+                    prefs[appFavoritesMigratedKey] = true
+                }
+            }
+        }
+        return favorites
     }
 
-    override suspend fun getPermissionFavorites() =
-        context.settingsDataStore.data.first()[permissionFavoritesKey].orEmpty()
-
-    override suspend fun setPermissionFavorites(values: Set<String>) {
-        context.settingsDataStore.edit { it[permissionFavoritesKey] = values }
+    override suspend fun setAppFavorites(values: Set<String>) {
+        context.settingsDataStore.edit { it[appFavoritesKey] = values }
     }
 }

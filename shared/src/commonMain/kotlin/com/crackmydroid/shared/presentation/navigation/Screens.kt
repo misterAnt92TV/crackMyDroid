@@ -1,11 +1,10 @@
 package com.crackmydroid.shared.presentation.navigation
-
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.crackmydroid.shared.i18n.Strings
 import com.crackmydroid.ui.icons.AppIcons
 
 sealed class Screen(val id: String, val title: (Strings) -> String, val icon: ImageVector) {
-    object Home : Screen("home", { it.navHome }, AppIcons.Rounded.Home)
+    object Dashboard : Screen("dashboard", { it.navDashboard }, AppIcons.Rounded.Home)
     object Activities : Screen("activities", { it.navActivities }, AppIcons.AutoMirrored.Rounded.List)
     object Root : Screen("root", { it.navRoot }, AppIcons.Rounded.VerifiedUser)
     object Info : Screen("info", { it.navInfo }, AppIcons.Rounded.Info)
@@ -17,22 +16,5 @@ sealed class Screen(val id: String, val title: (Strings) -> String, val icon: Im
     object Pentest : Screen("pentest", { it.navPentest }, AppIcons.Rounded.Security)
     object AnalyzeApkContent : Screen("analyze_apk_content", { it.navAnalyzeApkContent }, AppIcons.Rounded.Analyze)
     object Help : Screen("help", { it.navHelp }, AppIcons.AutoMirrored.Rounded.HelpOutline)
+    object History : Screen("history", { it.navHistory }, AppIcons.Filled.History)
 }
-
-val bottomScreens = listOf(
-    Screen.Home,
-    Screen.Info,
-    Screen.Settings,
-)
-
-val drawerScreens = listOf(
-    Screen.InstalledApps,
-    Screen.Pentest,
-    Screen.AnalyzeApkContent,
-    Screen.Permissions,
-    Screen.Activities,
-    Screen.Root,
-    Screen.Trick,
-    Screen.Log,
-    Screen.Help,
-)

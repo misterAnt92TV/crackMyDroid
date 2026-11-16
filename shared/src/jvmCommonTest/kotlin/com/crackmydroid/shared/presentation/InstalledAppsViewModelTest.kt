@@ -12,8 +12,8 @@ import com.crackmydroid.shared.domain.usecase.installedapps.ListInstalledAppsUse
 import com.crackmydroid.shared.domain.usecase.installedapps.ShareApkUseCase
 import com.crackmydroid.shared.domain.usecase.reports.ExportReportUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetExportFormatUseCase
-import com.crackmydroid.shared.domain.usecase.settings.GetInstalledAppFavoritesUseCase
-import com.crackmydroid.shared.domain.usecase.settings.SetInstalledAppFavoritesUseCase
+import com.crackmydroid.shared.domain.usecase.settings.GetAppFavoritesUseCase
+import com.crackmydroid.shared.domain.usecase.settings.SetAppFavoritesUseCase
 import com.crackmydroid.shared.ui.installedapps.InstalledAppsEvent
 import com.crackmydroid.shared.ui.installedapps.InstalledAppsViewModel
 import com.crackmydroid.shared.ui.installedapps.view.formatApkSize
@@ -53,13 +53,13 @@ class InstalledAppsViewModelTest : BaseViewModelUnitTest() {
             shareApkUseCase = share,
             reportExporterUseCase = reportExporter,
             getFavoritesUseCase = emptyFavorites(),
-            setFavoritesUseCase = mockk<SetInstalledAppFavoritesUseCase>(relaxed = true),
+            setFavoritesUseCase = mockk<SetAppFavoritesUseCase>(relaxed = true),
             dispatchers = appDispatchers,
         ),
     )
 
-    private fun emptyFavorites(): GetInstalledAppFavoritesUseCase {
-        val getFavorites = mockk<GetInstalledAppFavoritesUseCase>()
+    private fun emptyFavorites(): GetAppFavoritesUseCase {
+        val getFavorites = mockk<GetAppFavoritesUseCase>()
         coEvery { getFavorites() } returns Result.success(emptySet())
         return getFavorites
     }

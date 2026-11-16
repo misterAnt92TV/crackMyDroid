@@ -4,6 +4,7 @@ import com.crackmydroid.database.CacheDatabase
 import com.crackmydroid.shared.data.activity.ActivityRepositoryAndroid
 import com.crackmydroid.shared.data.apps.InstalledAppsRepositoryAndroid
 import com.crackmydroid.shared.data.apkcontent.ApkContentRepositoryAndroid
+import com.crackmydroid.shared.data.apkcontent.ApkLibraryMetadataRepositoryAndroid
 import com.crackmydroid.shared.data.cache.CacheMaintenanceRepositoryAndroid
 import com.crackmydroid.shared.data.db.DatabaseDriverFactory
 import com.crackmydroid.shared.data.device.DeviceInfoRepositoryAndroid
@@ -19,6 +20,9 @@ import com.crackmydroid.shared.data.shell.ShellCommandRepositoryAndroid
 import com.crackmydroid.shared.data.snapshot.AndroidDeviceSnapshotCoordinator
 import com.crackmydroid.shared.domain.repository.ActivityRepository
 import com.crackmydroid.shared.domain.repository.ApkContentRepository
+import com.crackmydroid.shared.domain.repository.ApkLibraryMetadataRepository
+import com.crackmydroid.shared.data.securityadvisory.SecurityAdvisoryEndpointProvider
+import com.crackmydroid.shared.data.securityadvisory.SecurityAdvisoryEndpointProviderAndroid
 import com.crackmydroid.shared.domain.repository.CacheMaintenance
 import com.crackmydroid.shared.domain.repository.DeviceInfoRepository
 import com.crackmydroid.shared.domain.repository.InstalledAppsRepository
@@ -54,6 +58,8 @@ actual fun platformModule(): Module = module {
     single<PermissionsRepository> { PermissionsRepositoryAndroid(androidContext(), get()) }
     single<InstalledAppsRepository> { InstalledAppsRepositoryAndroid(androidContext(), get()) }
     single<ApkContentRepository> { ApkContentRepositoryAndroid(androidContext()) }
+    single<ApkLibraryMetadataRepository> { ApkLibraryMetadataRepositoryAndroid(androidContext()) }
+    single<SecurityAdvisoryEndpointProvider> { SecurityAdvisoryEndpointProviderAndroid(androidContext()) }
     single<ReportFileRepository> { ReportFileRepositoryAndroid() }
     single<OperationLogPersistence> { OperationLogPersistenceAndroid(androidContext()) }
     single<OperationLogRepository> { DefaultOperationLogRepository(get()) }

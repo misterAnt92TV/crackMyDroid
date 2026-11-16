@@ -135,7 +135,7 @@ private fun InstalledAppsScreenContent(
             state = listState,
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(10.dp),
-            contentPadding = screenContentPadding(padding, horizontal = 16.dp, vertical = 10.dp),
+            contentPadding = screenContentPadding(padding),
         ) {
             item {
                 AppText(

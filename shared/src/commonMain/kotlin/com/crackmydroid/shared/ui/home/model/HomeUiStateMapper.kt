@@ -10,12 +10,15 @@ import com.crackmydroid.shared.ui.home.model.LastOperationItem
 
 class HomeUiStateMapper {
     fun map(state: HomeState, strings: Strings, languageCode: String): HomeUiState {
-        val operations = state.recentOperations.map { entry ->
+        val recentOperations = state.recentOperations.map { entry ->
+            entry.toLastOperationItem(strings, languageCode)
+        }
+        val operationHistory = state.operationHistory.ifEmpty { state.recentOperations }.map { entry ->
             entry.toLastOperationItem(strings, languageCode)
         }
         return HomeUiState(
-            latestOperations = operations,
-            operationHistory = operations,
+            latestOperations = recentOperations,
+            operationHistory = operationHistory,
         )
     }
 

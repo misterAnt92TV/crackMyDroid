@@ -719,6 +719,48 @@ class ScreenUiStrings(private val language: String) {
             "No se detectaron librerías de terceros conocidas.",
             "Aucune bibliothèque tierce connue détectée.",
         )
+    val apkContentAdvisoriesTitle
+        get() = text(
+            "Verifica vulnerabilità librerie (%d)",
+            "Library vulnerability check (%d)",
+            "Schwachstellenprüfung für Bibliotheken (%d)",
+            "Comprobación de vulnerabilidades de bibliotecas (%d)",
+            "Vérification des vulnérabilités des bibliothèques (%d)",
+        )
+    val apkContentAdvisoriesPrivacy
+        get() = text(
+            "La verifica online invia solo coordinate Maven e versioni, mai l'APK o il suo contenuto.",
+            "The online check sends only Maven coordinates and versions, never the APK or its contents.",
+            "Die Online-Prüfung sendet nur Maven-Koordinaten und Versionen, niemals die APK oder ihren Inhalt.",
+            "La comprobación en línea envía solo coordenadas Maven y versiones, nunca el APK ni su contenido.",
+            "La vérification en ligne envoie uniquement les coordonnées Maven et les versions, jamais l’APK ou son contenu.",
+        )
+    val apkContentCheckVulnerabilities
+        get() = text("Verifica vulnerabilità online", "Check vulnerabilities online", "Schwachstellen online prüfen", "Comprobar vulnerabilidades en línea", "Vérifier les vulnérabilités en ligne")
+    val apkContentCheckingVulnerabilities
+        get() = text("Verifica vulnerabilità in corso…", "Checking vulnerabilities…", "Schwachstellen werden geprüft…", "Comprobando vulnerabilidades…", "Vérification des vulnérabilités…")
+    val apkContentAdvisoryNotConfigured
+        get() = text("Il servizio di verifica non è configurato.", "The verification service is not configured.", "Der Prüfdienst ist nicht konfiguriert.", "El servicio de comprobación no está configurado.", "Le service de vérification n’est pas configuré.")
+    val apkContentAdvisoryUnavailable
+        get() = text("La verifica non è disponibile al momento.", "The verification is currently unavailable.", "Die Prüfung ist derzeit nicht verfügbar.", "La comprobación no está disponible ahora.", "La vérification est actuellement indisponible.")
+    val apkContentNoAdvisories
+        get() = text("Nessuna vulnerabilità nota per questa versione.", "No known vulnerabilities for this version.", "Keine bekannten Schwachstellen für diese Version.", "No hay vulnerabilidades conocidas para esta versión.", "Aucune vulnérabilité connue pour cette version.")
+    val apkContentAdvisoriesFound
+        get() = text("%d advisory", "%d advisories", "%d Hinweise", "%d avisos", "%d avis")
+    val apkContentLibraryMetadataSource
+        get() = text("Origine metadati: %s", "Metadata source: %s", "Metadatenquelle: %s", "Origen de metadatos: %s", "Source des métadonnées : %s")
+    val apkContentMetadataPom
+        get() = text("proprietà Maven", "Maven properties", "Maven-Eigenschaften", "propiedades Maven", "propriétés Maven")
+    val apkContentMetadataVersion
+        get() = text("file di versione APK", "APK version file", "APK-Versionsdatei", "archivo de versión APK", "fichier de version APK")
+    val apkContentAdvisoryDetails
+        get() = text("Dettagli advisory", "Advisory details", "Hinweisdetails", "Detalles del aviso", "Détails de l’avis")
+    val apkContentAffectedVersions
+        get() = text("Versioni interessate: %s", "Affected versions: %s", "Betroffene Versionen: %s", "Versiones afectadas: %s", "Versions concernées : %s")
+    val apkContentFixedVersion
+        get() = text("Versione corretta: %s", "Fixed version: %s", "Korrigierte Version: %s", "Versión corregida: %s", "Version corrigée : %s")
+    val apkContentOpenAdvisory
+        get() = text("Apri advisory", "Open advisory", "Hinweis öffnen", "Abrir aviso", "Ouvrir l’avis")
     val apkContentFindingsTitle
         get() = text(
             "Riscontri di sicurezza e integrità (%d)",
