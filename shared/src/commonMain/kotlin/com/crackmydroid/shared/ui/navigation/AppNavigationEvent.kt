@@ -20,4 +20,4 @@ sealed class AppNavigationEvent : UiEvent() {
     class IntroDismissed : AppNavigationEvent()
 }
 
-enum class NavigationSource { Drawer, Rail, BottomBar, InContent }
+enum class NavigationSource { Drawer, InContent }

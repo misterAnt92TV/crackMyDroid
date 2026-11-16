@@ -247,14 +247,15 @@ class AppPresentationDependenciesTest {
         graph.navigation.handleEvent(AppNavigationEvent.Initialize())
         advanceUntilIdle()
 
-        assertEquals("Home", graph.navigation.state.value.topBar.title)
-        assertEquals(listOf("Home", "Info device", "Impostazioni"), graph.navigation.state.value.bottomBarItems.map { it.label })
+        assertEquals("Dashboard", graph.navigation.state.value.topBar.title)
+        assertEquals(Screen.Dashboard, graph.navigation.state.value.selectedScreen)
+        assertEquals("History", graph.navigation.state.value.drawerSections.single { it.title == "Activity" }.items.single().label)
 
         graph.navigation.handleEvent(
             AppNavigationEvent.ScreenSelected(Screen.Permissions, NavigationSource.Drawer, hintsEnabled = false),
         )
         assertEquals(Screen.Permissions, graph.navigation.state.value.selectedScreen)
-        assertEquals(listOf(Screen.Home), graph.navigation.state.value.navigationHistory)
+        assertEquals(listOf(Screen.Dashboard), graph.navigation.state.value.navigationHistory)
         assertTrue(graph.navigation.state.value.topBar.showSearch)
 
         val requestId = graph.navigation.state.value.topBar.searchRequestId
@@ -266,8 +267,8 @@ class AppPresentationDependenciesTest {
         assertEquals(requestId + 1, graph.navigation.state.value.topBar.searchRequestId)
 
         graph.navigation.handleEvent(AppNavigationEvent.BackRequested())
-        assertEquals(Screen.Home, graph.navigation.state.value.selectedScreen)
-        assertTrue(graph.navigation.state.value.navigationHistory.isEmpty())
+        assertEquals(Screen.Dashboard, graph.navigation.state.value.selectedScreen)
+        assertEquals(listOf(Screen.Dashboard, Screen.Pentest), graph.navigation.state.value.navigationHistory)
 
         graph.navigation.handleEvent(
             AppNavigationEvent.ScreenSelected(Screen.Pentest, NavigationSource.Drawer, hintsEnabled = false),
@@ -277,15 +278,15 @@ class AppPresentationDependenciesTest {
         assertFalse(graph.navigation.state.value.topBar.showSearch)
 
         graph.navigation.handleEvent(
-            AppNavigationEvent.ScreenSelected(Screen.Settings, NavigationSource.BottomBar, hintsEnabled = false),
+            AppNavigationEvent.ScreenSelected(Screen.Settings, NavigationSource.Drawer, hintsEnabled = false),
         )
         assertTrue(graph.navigation.state.value.navigationHistory.isEmpty())
-        assertTrue(graph.navigation.state.value.bottomBarItems.single { it.screen == Screen.Settings }.selected)
+        assertTrue(graph.navigation.state.value.drawerSections.flatMap { it.items }.single { it.screen == Screen.Settings }.selected)
         assertEquals(requestId + 1, graph.navigation.state.value.topBar.searchRequestId)
 
         val selectedSettings = graph.navigation.state.value
         graph.navigation.handleEvent(
-            AppNavigationEvent.ScreenSelected(Screen.Settings, NavigationSource.BottomBar, hintsEnabled = false),
+            AppNavigationEvent.ScreenSelected(Screen.Settings, NavigationSource.Drawer, hintsEnabled = false),
         )
         assertEquals(selectedSettings, graph.navigation.state.value)
 
@@ -295,7 +296,10 @@ class AppPresentationDependenciesTest {
         graph.navigation.handleEvent(
             AppNavigationEvent.ScreenSelected(Screen.Root, NavigationSource.Drawer, hintsEnabled = false),
         )
-        assertEquals(listOf(Screen.Settings, Screen.Permissions), graph.navigation.state.value.navigationHistory)
+        assertEquals(
+            listOf(Screen.Dashboard, Screen.Pentest, Screen.Settings, Screen.Permissions),
+            graph.navigation.state.value.navigationHistory,
+        )
 
         graph.navigation.handleEvent(
             AppNavigationEvent.ScreenSelected(Screen.Root, NavigationSource.Drawer, hintsEnabled = false),
