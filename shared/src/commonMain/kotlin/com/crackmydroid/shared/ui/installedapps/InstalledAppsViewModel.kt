@@ -8,8 +8,8 @@ import com.crackmydroid.shared.domain.usecase.installedapps.ExportApkUseCase
 import com.crackmydroid.shared.domain.usecase.installedapps.ListInstalledAppsUseCase
 import com.crackmydroid.shared.domain.usecase.installedapps.ShareApkUseCase
 import com.crackmydroid.shared.domain.usecase.reports.ExportReportUseCase
-import com.crackmydroid.shared.domain.usecase.settings.GetInstalledAppFavoritesUseCase
-import com.crackmydroid.shared.domain.usecase.settings.SetInstalledAppFavoritesUseCase
+import com.crackmydroid.shared.domain.usecase.settings.GetAppFavoritesUseCase
+import com.crackmydroid.shared.domain.usecase.settings.SetAppFavoritesUseCase
 import com.crackmydroid.shared.i18n.ScreenUiStrings
 import com.crackmydroid.shared.i18n.format
 import com.crackmydroid.shared.presentation.LocalizedBaseViewModel
@@ -25,8 +25,8 @@ class InstalledAppsViewModel(
     private val exportApkUseCase: ExportApkUseCase,
     private val shareApkUseCase: ShareApkUseCase,
     private val reportExporterUseCase: ExportReportUseCase,
-    private val getFavoritesUseCase: GetInstalledAppFavoritesUseCase,
-    private val setFavoritesUseCase: SetInstalledAppFavoritesUseCase,
+    private val getFavoritesUseCase: GetAppFavoritesUseCase,
+    private val setFavoritesUseCase: SetAppFavoritesUseCase,
     private val operationLogs: OperationLogRepository = NoOpOperationLogRepository,
     dispatchers: AppDispatchers,
 ) : LocalizedBaseViewModel<InstalledAppsEvent, InstalledAppsState>(InstalledAppsState(), dispatchers) {

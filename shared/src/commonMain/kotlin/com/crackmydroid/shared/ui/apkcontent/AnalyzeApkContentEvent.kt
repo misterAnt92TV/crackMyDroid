@@ -5,6 +5,7 @@ import com.crackmydroid.architecture.presentation.model.UiEvent
 sealed class AnalyzeApkContentEvent : UiEvent() {
     class Refresh : AnalyzeApkContentEvent()
     class QueryChanged(val query: String) : AnalyzeApkContentEvent()
+    class FavoriteToggled(val packageName: String) : AnalyzeApkContentEvent()
     class PackageSelected(val packageName: String) : AnalyzeApkContentEvent()
     class ClearSelection : AnalyzeApkContentEvent()
     class AnalysisRequested : AnalyzeApkContentEvent()

@@ -28,11 +28,9 @@ import com.crackmydroid.shared.domain.usecase.settings.GetActivityPackageFavorit
 import com.crackmydroid.shared.domain.usecase.settings.GetExportFormatUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetFeatureHintsEnabledUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetHighContrastUseCase
-import com.crackmydroid.shared.domain.usecase.settings.GetInstalledAppFavoritesUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetIntroSeenUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetLanguageUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetLargeTextUseCase
-import com.crackmydroid.shared.domain.usecase.settings.GetPermissionFavoritesUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetReduceMotionUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetSuggestionsEnabledUseCase
 import com.crackmydroid.shared.domain.usecase.settings.GetThemeUseCase
@@ -42,11 +40,11 @@ import com.crackmydroid.shared.domain.usecase.settings.SetActivityPackageFavorit
 import com.crackmydroid.shared.domain.usecase.settings.SetExportFormatUseCase
 import com.crackmydroid.shared.domain.usecase.settings.SetFeatureHintsEnabledUseCase
 import com.crackmydroid.shared.domain.usecase.settings.SetHighContrastUseCase
-import com.crackmydroid.shared.domain.usecase.settings.SetInstalledAppFavoritesUseCase
 import com.crackmydroid.shared.domain.usecase.settings.SetIntroSeenUseCase
 import com.crackmydroid.shared.domain.usecase.settings.SetLanguageUseCase
 import com.crackmydroid.shared.domain.usecase.settings.SetLargeTextUseCase
-import com.crackmydroid.shared.domain.usecase.settings.SetPermissionFavoritesUseCase
+import com.crackmydroid.shared.domain.usecase.settings.GetAppFavoritesUseCase
+import com.crackmydroid.shared.domain.usecase.settings.SetAppFavoritesUseCase
 import com.crackmydroid.shared.domain.usecase.settings.SetReduceMotionUseCase
 import com.crackmydroid.shared.domain.usecase.settings.SetSuggestionsEnabledUseCase
 import com.crackmydroid.shared.domain.usecase.settings.SetThemeUseCase
@@ -87,10 +85,8 @@ fun commonModule() = module {
     factory { SetActivityFavoritesUseCase(get(), logger = get()) }
     factory { GetActivityPackageFavoritesUseCase(get(), logger = get()) }
     factory { SetActivityPackageFavoritesUseCase(get(), logger = get()) }
-    factory { GetInstalledAppFavoritesUseCase(get(), logger = get()) }
-    factory { SetInstalledAppFavoritesUseCase(get(), logger = get()) }
-    factory { GetPermissionFavoritesUseCase(get(), logger = get()) }
-    factory { SetPermissionFavoritesUseCase(get(), logger = get()) }
+    factory { GetAppFavoritesUseCase(get(), logger = get()) }
+    factory { SetAppFavoritesUseCase(get(), logger = get()) }
     factory { GetActivitiesUseCase(get(), logger = get()) }
     factory { LaunchActivityUseCase(get(), logger = get()) }
     factory { CheckRootUseCase(get(), logger = get()) }
@@ -199,6 +195,6 @@ fun presentationModule() = module {
     factory { LogViewModel(get(), get(), get()) }
     factory { PermissionsViewModel(get(), get(), get(), get(), get(), get(), get()) }
     factory { InstalledAppsViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
-    factory { PenTestingViewModel(get(), get(), get(), get(), get(), get(), get()) }
-    factory { AnalyzeApkContentViewModel(get(), get(), get(), get(), get()) }
+    factory { PenTestingViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get()) }
+    factory { AnalyzeApkContentViewModel(get(), get(), get(), get(), get(), get(), get()) }
 }

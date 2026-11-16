@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -176,6 +177,8 @@ private fun AnalyzeApkContentContent(
                     ) { index ->
                         AppItemCard(
                             app = state.filteredApps[index],
+                            isFavorite = state.filteredApps[index].packageName in state.favorites,
+                            onToggleFavorite = { onEvent(AnalyzeApkContentEvent.FavoriteToggled(it)) },
                             screenStrings = screenStrings,
                             onSelect = { onEvent(AnalyzeApkContentEvent.PackageSelected(it)) },
                         )
@@ -255,7 +258,13 @@ private fun StepHeaderCard(step: Int, screenStrings: ScreenUiStrings) {
 }
 
 @Composable
-private fun AppItemCard(app: InstalledAppEntry, screenStrings: ScreenUiStrings, onSelect: (String) -> Unit) {
+private fun AppItemCard(
+    app: InstalledAppEntry,
+    isFavorite: Boolean,
+    onToggleFavorite: (String) -> Unit,
+    screenStrings: ScreenUiStrings,
+    onSelect: (String) -> Unit,
+) {
     AppCard(
         modifier = Modifier.fillMaxWidth(),
         onClick = { onSelect(app.packageName) },
@@ -272,6 +281,13 @@ private fun AppItemCard(app: InstalledAppEntry, screenStrings: ScreenUiStrings, 
                 contentPadding = 4.dp,
                 contentDescription = null,
             )
+            IconButton(onClick = { onToggleFavorite(app.packageName) }) {
+                AppIcon(
+                    imageVector = if (isFavorite) AppIcons.Filled.Star else AppIcons.Filled.StarBorder,
+                    contentDescription = LocalStrings.current.favoriteContentDescription,
+                    tint = if (isFavorite) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
             Column(modifier = Modifier.weight(1f)) {
                 AppText(
                     text = app.appLabel,
@@ -1035,6 +1051,8 @@ private fun AppItemCardPreview() = ComponentPreviewContainer {
             packageName = "com.example.application",
             sourcePath = "/data/app/com.example.application/base.apk",
         ),
+        isFavorite = false,
+        onToggleFavorite = {},
         screenStrings = ScreenUiStrings("en"),
         onSelect = {},
     )

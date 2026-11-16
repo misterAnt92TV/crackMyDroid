@@ -8,6 +8,7 @@ import com.crackmydroid.shared.domain.model.apkcontent.ApkContentAnalysis
 data class AnalyzeApkContentState(
     val apps: List<InstalledAppEntry> = emptyList(),
     val query: String = "",
+    val favorites: Set<String> = emptySet(),
     val selectedPackage: String? = null,
     val loadState: UiLoadState = UiLoadState.Idle,
     val analysisState: UiLoadState = UiLoadState.Idle,
@@ -19,7 +20,7 @@ data class AnalyzeApkContentState(
     val filteredApps get() = apps.filter {
         query.isBlank() || it.appLabel.contains(query, true) ||
             it.packageName.contains(query, true)
-    }
+    }.sortedWith(compareBy<InstalledAppEntry> { it.packageName !in favorites }.thenBy { it.appLabel.lowercase() })
     val selectedApp get() = apps.firstOrNull { it.packageName == selectedPackage }
     val step get() = if (analysis != null) {
         3

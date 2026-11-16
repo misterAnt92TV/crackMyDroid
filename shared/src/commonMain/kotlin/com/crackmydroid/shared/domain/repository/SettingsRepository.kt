@@ -31,8 +31,10 @@ interface SettingsRepository {
     suspend fun setActivityFavorites(values: Set<String>)
     suspend fun getActivityPackageFavorites(): Set<String>
     suspend fun setActivityPackageFavorites(values: Set<String>)
-    suspend fun getInstalledAppFavorites(): Set<String>
-    suspend fun setInstalledAppFavorites(values: Set<String>)
-    suspend fun getPermissionFavorites(): Set<String>
-    suspend fun setPermissionFavorites(values: Set<String>)
+    suspend fun getAppFavorites(): Set<String>
+    suspend fun setAppFavorites(values: Set<String>)
+    @Deprecated("Use getAppFavorites") suspend fun getInstalledAppFavorites(): Set<String> = getAppFavorites()
+    @Deprecated("Use setAppFavorites") suspend fun setInstalledAppFavorites(values: Set<String>) = setAppFavorites(values)
+    @Deprecated("Use getAppFavorites") suspend fun getPermissionFavorites(): Set<String> = getAppFavorites()
+    @Deprecated("Use setAppFavorites") suspend fun setPermissionFavorites(values: Set<String>) = setAppFavorites(values)
 }

@@ -8,8 +8,8 @@ import com.crackmydroid.shared.domain.usecase.permissions.AnalyzePermissionRisks
 import com.crackmydroid.shared.domain.usecase.permissions.BuildPermissionsReportUseCase
 import com.crackmydroid.shared.domain.usecase.permissions.ListPermissionsUseCase
 import com.crackmydroid.shared.domain.usecase.reports.ExportReportUseCase
-import com.crackmydroid.shared.domain.usecase.settings.GetPermissionFavoritesUseCase
-import com.crackmydroid.shared.domain.usecase.settings.SetPermissionFavoritesUseCase
+import com.crackmydroid.shared.domain.usecase.settings.GetAppFavoritesUseCase
+import com.crackmydroid.shared.domain.usecase.settings.SetAppFavoritesUseCase
 import com.crackmydroid.shared.presentation.LocalizedBaseViewModel
 import com.crackmydroid.shared.ui.permissions.model.toUi
 import com.crackmydroid.shared.util.runSuspendCatching
@@ -21,8 +21,8 @@ class PermissionsViewModel(
     private val analyzePermissionRisksUseCase: AnalyzePermissionRisksUseCase,
     private val buildPermissionsReportUseCase: BuildPermissionsReportUseCase,
     private val reportExporterUseCase: ExportReportUseCase,
-    private val getFavoritesUseCase: GetPermissionFavoritesUseCase,
-    private val setFavoritesUseCase: SetPermissionFavoritesUseCase,
+    private val getFavoritesUseCase: GetAppFavoritesUseCase,
+    private val setFavoritesUseCase: SetAppFavoritesUseCase,
     dispatchers: AppDispatchers,
 ) : LocalizedBaseViewModel<PermissionsEvent, PermissionsState>(PermissionsState(), dispatchers) {
     private companion object {

@@ -17,4 +17,6 @@ object SettingsPreferenceKeys {
     const val ACTIVITY_PACKAGE_FAVORITES = "activity_package_favorites"
     const val INSTALLED_APP_FAVORITES = "installed_app_favorites"
     const val PERMISSION_FAVORITES = "permission_favorites"
+    const val APP_FAVORITES = "app_favorites"
+    const val APP_FAVORITES_MIGRATED = "app_favorites_migrated"
 }

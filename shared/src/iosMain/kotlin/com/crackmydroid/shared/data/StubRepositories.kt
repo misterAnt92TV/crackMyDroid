@@ -162,10 +162,8 @@ class SettingsRepositoryIos : SettingsRepository {
     override suspend fun setActivityFavorites(values: Set<String>) {}
     override suspend fun getActivityPackageFavorites(): Set<String> = emptySet()
     override suspend fun setActivityPackageFavorites(values: Set<String>) {}
-    override suspend fun getInstalledAppFavorites(): Set<String> = emptySet()
-    override suspend fun setInstalledAppFavorites(values: Set<String>) {}
-    override suspend fun getPermissionFavorites(): Set<String> = emptySet()
-    override suspend fun setPermissionFavorites(values: Set<String>) {}
+    override suspend fun getAppFavorites(): Set<String> = emptySet()
+    override suspend fun setAppFavorites(values: Set<String>) {}
 }
 
 class LogRepositoryIos : LogRepository {

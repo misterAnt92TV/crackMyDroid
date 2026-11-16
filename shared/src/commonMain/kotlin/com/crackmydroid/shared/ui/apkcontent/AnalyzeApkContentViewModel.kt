@@ -6,6 +6,8 @@ import com.crackmydroid.shared.domain.usecase.apkcontent.AnalyzeApkContentUseCas
 import com.crackmydroid.shared.domain.usecase.apkcontent.OpenAnalyzedApkArchiveUseCase
 import com.crackmydroid.shared.domain.usecase.installedapps.ListInstalledAppsUseCase
 import com.crackmydroid.shared.domain.usecase.reports.ExportReportUseCase
+import com.crackmydroid.shared.domain.usecase.settings.GetAppFavoritesUseCase
+import com.crackmydroid.shared.domain.usecase.settings.SetAppFavoritesUseCase
 import com.crackmydroid.shared.presentation.LocalizedBaseViewModel
 
 class AnalyzeApkContentViewModel(
@@ -13,6 +15,8 @@ class AnalyzeApkContentViewModel(
     private val analyzeApk: AnalyzeApkContentUseCase,
     private val openArchive: OpenAnalyzedApkArchiveUseCase,
     private val reportExporter: ExportReportUseCase,
+    private val getAppFavorites: GetAppFavoritesUseCase,
+    private val setAppFavorites: SetAppFavoritesUseCase,
     dispatchers: AppDispatchers,
 ) : LocalizedBaseViewModel<AnalyzeApkContentEvent, AnalyzeApkContentState>(AnalyzeApkContentState(), dispatchers) {
     override fun onEvent(event: AnalyzeApkContentEvent) {
@@ -20,6 +24,8 @@ class AnalyzeApkContentViewModel(
             is AnalyzeApkContentEvent.Refresh -> refresh()
 
             is AnalyzeApkContentEvent.QueryChanged -> updateState { it.copy(query = event.query) }
+
+            is AnalyzeApkContentEvent.FavoriteToggled -> toggleFavorite(event.packageName)
 
             is AnalyzeApkContentEvent.PackageSelected -> updateState {
                 it.copy(selectedPackage = event.packageName, analysis = null, error = null)
@@ -52,6 +58,7 @@ class AnalyzeApkContentViewModel(
         }
     }
     private fun refresh() = launchLatest("apk-content-load") {
+        getAppFavorites().onSuccess { favorites -> updateState { it.copy(favorites = favorites) } }
         updateState { it.copy(loadState = UiLoadState.Loading) }
         listApps().onSuccess { apps -> updateState { it.copy(apps = apps, loadState = UiLoadState.Success) } }
             .onFailure { error ->
@@ -59,6 +66,11 @@ class AnalyzeApkContentViewModel(
                     it.copy(loadState = UiLoadState.Error(error.message ?: strings.commandError), error = error.message)
                 }
             }
+    }
+    private fun toggleFavorite(packageName: String) {
+        val favorites = currentState.favorites.let { if (packageName in it) it - packageName else it + packageName }
+        updateState { it.copy(favorites = favorites) }
+        launchTask { setAppFavorites(favorites).onFailure { error -> updateState { it.copy(error = error.message) } } }
     }
     private fun analyze() {
         val packageName = currentState.selectedPackage ?: return
