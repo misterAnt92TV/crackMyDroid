@@ -12,6 +12,7 @@ import com.crackmydroid.shared.domain.usecase.apkcontent.OpenAnalyzedApkArchiveU
 import com.crackmydroid.shared.domain.usecase.activities.LaunchActivityUseCase
 import com.crackmydroid.shared.domain.usecase.info.BuildDeviceInfoReportUseCase
 import com.crackmydroid.shared.domain.usecase.info.GetDeviceInfoUseCase
+import com.crackmydroid.shared.domain.usecase.installedapps.AnalyzeAppSecurityUseCase
 import com.crackmydroid.shared.domain.usecase.installedapps.ExportApkUseCase
 import com.crackmydroid.shared.domain.usecase.installedapps.ListInstalledAppsUseCase
 import com.crackmydroid.shared.domain.usecase.installedapps.ShareApkUseCase
@@ -127,6 +128,7 @@ fun commonModule() = module {
     factory { RunPenTestChecksUseCase(get(), dispatchers = get(), logger = get()) }
     factory { ExportReportUseCase(get(), get(), logger = get()) }
     factory { ListInstalledAppsUseCase(get(), logger = get()) }
+    factory { AnalyzeAppSecurityUseCase(get(), logger = get()) }
     factory { AnalyzeApkContentUseCase(get(), logger = get()) }
     factory { DiscoverApkMavenLibrariesUseCase(get(), logger = get()) }
     factory { LookupApkLibraryVulnerabilitiesUseCase(get(), logger = get()) }

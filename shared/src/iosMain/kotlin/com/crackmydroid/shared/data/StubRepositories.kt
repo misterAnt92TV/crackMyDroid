@@ -182,6 +182,8 @@ class InstalledAppsRepositoryIos : InstalledAppsRepository {
 
     override suspend fun analyzeManifestSecurity(): List<ManifestSecurityReport> = emptyList()
     override suspend fun analyzeManifestSecurityCached(): List<ManifestSecurityReport> = emptyList()
+    override suspend fun analyzePackageManifestSecurity(packageName: String): Result<ManifestSecurityReport> =
+        Result.failure(UnsupportedOperationException("Non supportato su iOS"))
     override suspend fun exportApk(packageName: String): Result<String> =
         Result.failure(UnsupportedOperationException("Non supportato su iOS"))
 

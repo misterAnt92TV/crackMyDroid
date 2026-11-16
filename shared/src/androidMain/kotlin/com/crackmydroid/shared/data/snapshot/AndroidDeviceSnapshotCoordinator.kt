@@ -50,7 +50,11 @@ class AndroidDeviceSnapshotCoordinator(
         val manifestSecuritySection =
             captureSection { installedAppsRepository.analyzeManifestSecurity() }
         val rootStatusSection = captureSection { rootCheckRepository.checkRoot() }
-        val logsSection = captureSection { logRepository.fetchLog().takeLast(MAX_LOG_LINES) }
+        val logsSection = captureSection {
+            logRepository.fetchLog()
+                .takeLast(MAX_LOG_LINES)
+                .map { sanitizeLogLine(it) }
+        }
         val playIntegritySection = SnapshotSection.skipped(
             error = "Play Integrity non eseguito automaticamente in background",
             data = PlayIntegrityResult(
@@ -122,3 +126,12 @@ class AndroidDeviceSnapshotCoordinator(
         const val MAX_LOG_LINES: Int = 1500
     }
 }
+
+internal fun sanitizeLogLine(line: String): String {
+    val withoutBearer = BEARER_REGEX.replace(line, "$1[REDACTED]")
+    return SECRET_KV_REGEX.replace(withoutBearer, "$1=[REDACTED]")
+}
+
+private val BEARER_REGEX = Regex("""(?i)\b(bearer\s+)[A-Za-z0-9\-._~+/]+=*""")
+private val SECRET_KV_REGEX = Regex("""(?i)\b(api_?key|secret|password|access_?token|auth_?token|token)\s*[:=]\s*([^\s"';,]+)""")
+
